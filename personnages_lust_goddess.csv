@@ -1,4 +1,4 @@
-Personnage;Rareté;Type;Puissance;PA;PV;Action;Role;Niveau;Rang;Selection;Faction
+Personnage;Rareté;Type;Puissance;PA;PV;TypeAttaque;Role;Niveau;Rang;Selection;Faction
 REGINA;SSR;Mercenaire;3320;140;509;Mêlée;Sentinelle;14;2;Oui;Syndicat
 RAVENNA;SSR;Mercenaire;3160;140;471;Mêlée;Sentinelle;18;3;Oui;Hommes libres
 BELLE;SSR;Mercenaire;3090;143;330;Distance;Sentinelle;8;3;Oui;Syndicat

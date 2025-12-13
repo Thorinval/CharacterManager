@@ -3,39 +3,93 @@
 @inject NavigationManager Navigation
 @using CharacterManager.Models
 @using CharacterManager.Services
+@rendermode InteractiveServer
 
 <PageTitle>Inventaire</PageTitle>
 
-<h1>Inventaire</h1>
+<h1>Inventaire des Personnages</h1>
 
-<button class="btn btn-primary mb-3" @onclick="ShowAddModal">Ajouter un Personnage</button>
-
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Nom</th>
-            <th>Rarete</th>
-            <th>Niveau</th>
-            <th>Type</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var personnage in personnages)
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="input-group">
+            <select class="form-select" @bind="filterProperty" @bind:event="onchange">
+                <option value="Nom">Nom</option>
+                <option value="Rarete">Rareté</option>
+                <option value="Type">Type</option>
+                <option value="Role">Rôle</option>
+                <option value="Faction">Faction</option>
+                <option value="TypeAttaque">Type d'attaque</option>
+            </select>
+            <input type="text" class="form-control" placeholder="Rechercher..." @bind="searchTerm" @oninput="HandleSearchInput" />
+            <button class="btn btn-outline-secondary" type="button" @onclick="ClearSearch" title="Effacer la recherche">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    </div>
+    <div class="col-md-6 text-end">
+        @if (selectedPersonnages.Any())
         {
-            <tr @onclick="() => ViewPersonnage(personnage.Id)" style="cursor: pointer;">
-                <td>@personnage.Nom</td>
-                <td>@personnage.Rarete</td>
-                <td>@personnage.Niveau</td>
-                <td>@personnage.Type</td>
-                <td @onclick:stopPropagation="true">
-                    <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)">Éditer</button>
-                    <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)">Supprimer</button>
-                </td>
-            </tr>
+            <button class="btn btn-warning me-2" @onclick="ShowBulkEditModal">
+                Modifier sélection (@selectedPersonnages.Count)
+            </button>
         }
-    </tbody>
-</table>
+        <button class="btn btn-primary" @onclick="() => { isEditing = false; currentPersonnage = new Personnage(); showModal = true; }">
+            Ajouter Personnage
+        </button>
+    </div>
+</div>
+
+<p>Nombre de personnages: @personnagesFiltres.Count</p>
+
+@if (personnagesFiltres.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>
+                    <input type="checkbox" checked="@selectAllChecked" @onchange="SelectAll" />
+                </th>
+                <th @onclick="SortByNom" style="cursor: pointer;">
+                    Nom
+                </th>
+                <th @onclick="SortByRarete" style="cursor: pointer;">
+                    Rareté
+                </th>
+                <th @onclick="SortByNiveau" style="cursor: pointer;">
+                    Niveau
+                </th>
+                <th>Rang</th>
+                <th @onclick="SortByType" style="cursor: pointer;">
+                    Type
+                </th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var personnage in personnagesFiltres)
+            {
+                <tr @onclick="() => ViewPersonnage(personnage.Id)" style="cursor: pointer;">
+                    <td @onclick:stopPropagation="true">
+                        <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)" @onchange="() => ToggleSelection(personnage.Id)" />
+                    </td>
+                    <td>@personnage.Nom</td>
+                    <td>@personnage.Rarete</td>
+                    <td>@personnage.Niveau</td>
+                    <td>@GetRankStars(personnage.Rang)</td>
+                    <td>@personnage.Type</td>
+                    <td @onclick:stopPropagation="true">
+                        <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)">Éditer</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)">Supprimer</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Aucun personnage trouvé.</p>
+}
 
 @if (showModal)
 {
@@ -71,6 +125,15 @@
                             {
                                 <option value="@type">@type</option>
                             }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="action" class="form-label">Type d'attaque</label>
+                        <select class="form-control" id="action" @bind="currentPersonnage.TypeAttaque">
+                            <option value="">Sélectionner un type d'attaque</option>
+                            <option value="Mêlée">Mêlée</option>
+                            <option value="Distance">Distance</option>
+                            <option value="Androïde">Androïde</option>
                         </select>
                     </div>
                 </div>
@@ -141,9 +204,29 @@
 
 @code {
     private List<Personnage> personnages = new();
+    private List<Personnage> personnagesFiltres = new();
     private bool showModal = false;
     private bool isEditing = false;
     private Personnage currentPersonnage = new();
+    
+    // Tri
+    private string sortColumn = "Nom";
+    private bool sortAscending = true;
+    
+    // Sélection multiple
+    private HashSet<int> selectedPersonnages = new();
+    private bool showBulkEditModal = false;
+    private string bulkEditProperty = "";
+    private string bulkEditValue = "";
+    private bool selectAllChecked
+    {
+        get => selectedPersonnages.Count == personnagesFiltres.Count && personnagesFiltres.Count > 0;
+        set => SelectAll();
+    }
+    
+    // Filtre
+    private string searchTerm = "";
+    private string filterProperty = "Nom";
 
     protected override void OnInitialized()
     {
@@ -153,6 +236,173 @@
     private void LoadPersonnages()
     {
         personnages = PersonnageService.GetAll().ToList();
+        ApplyFiltersAndSorting();
+    }
+
+    private void ApplyFiltersAndSorting()
+    {
+        // Appliquer le filtre
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            personnagesFiltres = new List<Personnage>(personnages);
+        }
+        else
+        {
+            personnagesFiltres = personnages.Where(p => 
+                filterProperty switch
+                {
+                    "Nom" => p.Nom.Contains(searchTerm, StringComparison.OrdinalIgnoreCase),
+                    "Rarete" => p.Rarete.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase),
+                    "Type" => p.Type.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase),
+                    "Role" => p.Role.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase),
+                    "Faction" => p.Faction.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase),
+                    "TypeAttaque" => p.TypeAttaque.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase),
+                    _ => p.Nom.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                }).ToList();
+        }
+
+        // Appliquer le tri
+        personnagesFiltres = sortColumn switch
+        {
+            "Nom" => sortAscending 
+                ? personnagesFiltres.OrderBy(p => p.Nom).ToList() 
+                : personnagesFiltres.OrderByDescending(p => p.Nom).ToList(),
+            "Rarete" => sortAscending 
+                ? personnagesFiltres.OrderBy(p => p.Rarete).ToList() 
+                : personnagesFiltres.OrderByDescending(p => p.Rarete).ToList(),
+            "Niveau" => sortAscending 
+                ? personnagesFiltres.OrderBy(p => p.Niveau).ToList() 
+                : personnagesFiltres.OrderByDescending(p => p.Niveau).ToList(),
+            "Type" => sortAscending 
+                ? personnagesFiltres.OrderBy(p => p.Type).ToList() 
+                : personnagesFiltres.OrderByDescending(p => p.Type).ToList(),
+            _ => personnagesFiltres
+        };
+    }
+
+    private void SortBy(string column)
+    {
+        if (sortColumn == column)
+        {
+            sortAscending = !sortAscending;
+        }
+        else
+        {
+            sortColumn = column;
+            sortAscending = true;
+        }
+        ApplyFiltersAndSorting();
+    }
+
+    private void HandleSearchInput(ChangeEventArgs e)
+    {
+        OnSearchChanged(e.Value?.ToString() ?? "");
+    }
+
+    private void OnSearchChanged(string value)
+    {
+        searchTerm = value;
+        // Ne filtrer que si au moins 2 caractères sont saisis
+        if (searchTerm.Length >= 2 || string.IsNullOrWhiteSpace(searchTerm))
+        {
+            ApplyFiltersAndSorting();
+        }
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = "";
+        ApplyFiltersAndSorting();
+    }
+
+    private MarkupString GetRankStars(int rank)
+    {
+        var stars = "";
+        for (int i = 1; i <= 7; i++)
+        {
+            if (i <= rank)
+            {
+                stars += "<span style='color: #FFD700;'>★</span>";
+            }
+            else
+            {
+                stars += "<span style='color: #CCCCCC;'>☆</span>";
+            }
+        }
+        return new MarkupString(stars);
+    }
+
+    private void OnFilterPropertyChanged(string value)
+    {
+        filterProperty = value;
+        ApplyFiltersAndSorting();
+    }
+
+    private void ToggleSelection(int id)
+    {
+        if (selectedPersonnages.Contains(id))
+        {
+            selectedPersonnages.Remove(id);
+        }
+        else
+        {
+            selectedPersonnages.Add(id);
+        }
+    }
+
+    private void SelectAll()
+    {
+        if (selectedPersonnages.Count == personnagesFiltres.Count)
+        {
+            selectedPersonnages.Clear();
+        }
+        else
+        {
+            selectedPersonnages = new HashSet<int>(personnagesFiltres.Select(p => p.Id));
+        }
+    }
+
+    private void ShowBulkEditModal()
+    {
+        if (selectedPersonnages.Any())
+        {
+            showBulkEditModal = true;
+        }
+    }
+
+    private void ApplyBulkEdit()
+    {
+        if (string.IsNullOrEmpty(bulkEditProperty) || selectedPersonnages.Count == 0)
+            return;
+
+        foreach (var id in selectedPersonnages)
+        {
+            var personnage = personnages.FirstOrDefault(p => p.Id == id);
+            if (personnage != null)
+            {
+                switch (bulkEditProperty)
+                {
+                    case "Niveau":
+                        if (int.TryParse(bulkEditValue, out int niveau))
+                            personnage.Niveau = niveau;
+                        break;
+                    case "TypeAttaque":
+                        if (Enum.TryParse<CharacterManager.Models.TypeAttaque>(bulkEditValue, out var typeAttaqueValue))
+                            personnage.TypeAttaque = typeAttaqueValue;
+                        break;
+                    case "Localisation":
+                        personnage.Localisation = bulkEditValue;
+                        break;
+                }
+                PersonnageService.Update(personnage);
+            }
+        }
+
+        LoadPersonnages();
+        selectedPersonnages.Clear();
+        showBulkEditModal = false;
+        bulkEditProperty = "";
+        bulkEditValue = "";
     }
 
     private void ShowAddModal()
@@ -160,6 +410,7 @@
         currentPersonnage = new Personnage();
         isEditing = false;
         showModal = true;
+        StateHasChanged();
     }
 
     private void EditPersonnage(Personnage personnage)
@@ -170,10 +421,26 @@
             Nom = personnage.Nom,
             Rarete = personnage.Rarete,
             Niveau = personnage.Niveau,
-            Type = personnage.Type
+            Type = personnage.Type,
+            Rang = personnage.Rang,
+            Puissance = personnage.Puissance,
+            PA = personnage.PA,
+            PAMax = personnage.PAMax,
+            PV = personnage.PV,
+            PVMax = personnage.PVMax,
+            Sante = personnage.Sante,
+            SanteMax = personnage.SanteMax,
+            Role = personnage.Role,
+            Faction = personnage.Faction,
+            ImageUrl = personnage.ImageUrl,
+            Description = personnage.Description,
+            Localisation = personnage.Localisation,
+            Selectionne = personnage.Selectionne,
+            TypeAttaque = personnage.TypeAttaque
         };
         isEditing = true;
         showModal = true;
+        StateHasChanged();
     }
 
     private void DeletePersonnage(int id)
@@ -200,10 +467,56 @@
     {
         showModal = false;
         currentPersonnage = new Personnage();
+        StateHasChanged();
     }
+
+    private void SortByNom() => SortBy("Nom");
+    private void SortByRarete() => SortBy("Rarete");
+    private void SortByNiveau() => SortBy("Niveau");
+    private void SortByType() => SortBy("Type");
 
     private void ViewPersonnage(int id)
     {
         Navigation.NavigateTo($"/detail-personnage/{id}");
     }
+}
+
+@if (showBulkEditModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modifier @selectedPersonnages.Count personnages</h5>
+                    <button type="button" class="btn-close" @onclick="() => showBulkEditModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Propriété à modifier</label>
+                        <select class="form-select" @bind="bulkEditProperty">
+                            <option value="">Sélectionner une propriété</option>
+                            <option value="Niveau">Niveau</option>
+                            <option value="TypeAttaque">Type d'attaque</option>
+                            <option value="Localisation">Localisation</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nouvelle valeur</label>
+                        @if (bulkEditProperty == "Niveau")
+                        {
+                            <input type="number" class="form-control" @bind="bulkEditValue" placeholder="Entrez le niveau" />
+                        }
+                        else
+                        {
+                            <input type="text" class="form-control" @bind="bulkEditValue" placeholder="Entrez la valeur" />
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => showBulkEditModal = false">Annuler</button>
+                    <button type="button" class="btn btn-primary" @onclick="ApplyBulkEdit" disabled="@(string.IsNullOrEmpty(bulkEditProperty) || string.IsNullOrEmpty(bulkEditValue))">Appliquer</button>
+                </div>
+            </div>
+        </div>
+    </div>
 }

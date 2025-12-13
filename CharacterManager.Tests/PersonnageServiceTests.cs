@@ -51,7 +51,7 @@ public class PersonnageServiceTests : IDisposable
             Description = "Ancienne description",
             Localisation = "Ancienne localisation",
             Selectionne = false,
-            Action = Action.Mêlée
+            TypeAttaque = TypeAttaque.Mêlée
         };
 
         _context.Personnages.Add(existingPersonnage);
@@ -79,7 +79,7 @@ public class PersonnageServiceTests : IDisposable
             Description = "Nouvelle description",
             Localisation = "Nouvelle localisation",
             Selectionne = true,
-            Action = Action.Distance
+            TypeAttaque = TypeAttaque.Distance
         };
 
         // Act

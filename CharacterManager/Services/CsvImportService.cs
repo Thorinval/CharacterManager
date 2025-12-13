@@ -90,7 +90,7 @@ public class CsvImportService(PersonnageService personnageService)
             existing.Role = nouveauPersonnage.Role;
             existing.Faction = nouveauPersonnage.Faction;
             existing.Selectionne = nouveauPersonnage.Selectionne;
-            existing.Action = nouveauPersonnage.Action;
+            existing.TypeAttaque = nouveauPersonnage.TypeAttaque;
 
             _personnageService.Update(existing);
         }
@@ -219,20 +219,20 @@ public class CsvImportService(PersonnageService personnageService)
             personnage.Selectionne = selectionStr == "oui" || selectionStr == "yes";
         }
 
-        // Action (Mêlée, Distance, Androïde)
-        if (mapping.TryGetValue("Action", out int actionIndex) && actionIndex < values.Count)
+        // TypeAttaque (Mêlée, Distance, Androïde)
+        if (mapping.TryGetValue("TypeAttaque", out int actionIndex) && actionIndex < values.Count)
         {
             var actionStr = values[actionIndex].Trim();
-            if (Enum.TryParse<Models.Action>(actionStr, true, out var action))
-                personnage.Action = action;
+            if (Enum.TryParse<Models.TypeAttaque>(actionStr, true, out var typeAttaque))
+                personnage.TypeAttaque = typeAttaque;
             else if (actionStr.Contains("Mêlée", StringComparison.OrdinalIgnoreCase))
-                personnage.Action = Models.Action.Mêlée;
+                personnage.TypeAttaque = Models.TypeAttaque.Mêlée;
             else if (actionStr.Contains("Distance", StringComparison.OrdinalIgnoreCase))
-                personnage.Action = Models.Action.Distance;
+                personnage.TypeAttaque = Models.TypeAttaque.Distance;
             else if (actionStr.Contains("Androïde", StringComparison.OrdinalIgnoreCase))
-                personnage.Action = Models.Action.Androïde;
+                personnage.TypeAttaque = Models.TypeAttaque.Androïde;
             else
-                personnage.Action = Models.Action.Mêlée; // Default
+                personnage.TypeAttaque = Models.TypeAttaque.Mêlée; // Default
         }
 
         personnage.ImageUrl = $"https://via.placeholder.com/150?text={Uri.EscapeDataString(personnage.Nom)}";

@@ -49,7 +49,7 @@ public class PersonnageService(ApplicationDbContext context)
             existing.Description = personnage.Description;
             existing.Localisation = personnage.Localisation;
             existing.Selectionne = personnage.Selectionne;
-            existing.Action = personnage.Action;
+            existing.TypeAttaque = personnage.TypeAttaque;
 
             _context.SaveChanges();
         }

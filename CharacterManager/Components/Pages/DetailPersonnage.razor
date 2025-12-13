@@ -3,6 +3,7 @@
 @inject NavigationManager Navigation
 @using CharacterManager.Models
 @using CharacterManager.Services
+@rendermode InteractiveServer
 
 <PageTitle>@(currentPerso?.Nom ?? "Détail Personnage")</PageTitle>
 
@@ -38,7 +39,7 @@
                         <div class="faction-role mt-3">
                             <div class="badge bg-primary">@currentPerso.Faction</div>
                             <div class="badge bg-info">@currentPerso.Role</div>
-                            <div class="badge bg-warning text-dark">@currentPerso.Action</div>
+                            <div class="badge bg-warning text-dark">@currentPerso.TypeAttaque</div>
                         </div>
 
                         <div class="stats-grid mt-4">

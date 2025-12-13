@@ -20,4 +20,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <Target Name="KillCharacterManagerProcess" BeforeTargets="Build">
+    <Exec Command="taskkill /F /IM CharacterManager.exe /T 2&gt;nul || echo No running process found" ContinueOnError="true" />
+  </Target>
+
 </Project>

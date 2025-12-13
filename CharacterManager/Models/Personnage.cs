@@ -31,7 +31,7 @@ public enum Faction
     HommesLibres
 }
 
-public enum Action
+public enum TypeAttaque
 {
     Mêlée, 
     Distance, 
@@ -72,6 +72,6 @@ public class Personnage
     public int SanteMax { get; set; }
     public string Localisation { get; set; } = string.Empty;
 
-    // Type d'action
-    public Action Action { get; set; }
+    // Type d'attaque
+    public TypeAttaque TypeAttaque { get; set; }
 }
