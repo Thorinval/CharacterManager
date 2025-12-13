@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace CharacterManager.Models;
 
-public enum Rareté
+public enum Rarete
 {
     R,
     SR,
@@ -42,7 +42,7 @@ public class Personnage
 {
     public int Id { get; set; }
     public string Nom { get; set; } = string.Empty;
-    public Rareté Rarete { get; set; }
+    public Rarete Rarete { get; set; }
     public int Niveau { get; set; }
     public TypePersonnage Type { get; set; }
     public int Rang { get; set; }

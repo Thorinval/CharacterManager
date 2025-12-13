@@ -1,6 +1,7 @@
 @page "/inventaire"
 @inject PersonnageService PersonnageService
 @inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
 @using CharacterManager.Models
 @using CharacterManager.Services
 @rendermode InteractiveServer
@@ -35,6 +36,9 @@
         }
         <button class="btn btn-primary" @onclick="() => { isEditing = false; currentPersonnage = new Personnage(); showModal = true; }">
             Ajouter Personnage
+        </button>
+        <button class="btn btn-danger ms-2" @onclick="DeleteSelectedPersonnages" disabled="@(!selectedPersonnages.Any())" title="Supprimer les personnages sélectionnés">
+            <i class="bi bi-trash-fill"></i> Supprimer sélection (@selectedPersonnages.Count)
         </button>
     </div>
 </div>
@@ -108,7 +112,7 @@ else
                     <div class="mb-3">
                         <label for="rarete" class="form-label">Rarete</label>
                         <select class="form-control" id="rarete" @bind="currentPersonnage.Rarete">
-                            @foreach (var rarete in Enum.GetValues(typeof(Rareté)))
+                            @foreach (var rarete in Enum.GetValues(typeof(Rarete)))
                             {
                                 <option value="@rarete">@rarete</option>
                             }
@@ -474,6 +478,23 @@ else
     private void SortByRarete() => SortBy("Rarete");
     private void SortByNiveau() => SortBy("Niveau");
     private void SortByType() => SortBy("Type");
+
+    private async Task DeleteSelectedPersonnages()
+    {
+        if (selectedPersonnages.Any())
+        {
+            var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Êtes-vous sûr de vouloir supprimer {selectedPersonnages.Count} personnage(s) sélectionné(s) ? Cette action est irréversible.");
+            if (confirmed)
+            {
+                foreach (var id in selectedPersonnages)
+                {
+                    PersonnageService.Delete(id);
+                }
+                LoadPersonnages();
+                selectedPersonnages.Clear();
+            }
+        }
+    }
 
     private void ViewPersonnage(int id)
     {

@@ -1,7 +1,4 @@
-using CharacterManager.Data;
 using CharacterManager.Models;
-using System.Globalization;
-using System.Text.RegularExpressions;
 
 namespace CharacterManager.Services;
 
@@ -114,13 +111,17 @@ public class CsvImportService(PersonnageService personnageService)
             return null;
 
         // Rareté
-        if (mapping.TryGetValue("Rareté", out int rareteIndex) && rareteIndex < values.Count)
+        if (mapping.TryGetValue("Rarete", out int rareteIndex) && rareteIndex < values.Count)
         {
-            var raretéStr = values[rareteIndex].Trim();
-            if (Enum.TryParse<Rareté>(raretéStr, true, out var rarete))
-                personnage.Rarete = rarete;
+            var rareteStr = values[rareteIndex].Trim();
+            if (rareteStr.Equals("SSR", StringComparison.OrdinalIgnoreCase))
+                personnage.Rarete = Rarete.SSR;
+            else if (rareteStr.Equals("SR", StringComparison.OrdinalIgnoreCase))
+                personnage.Rarete = Rarete.SR;
+            else if (rareteStr.Equals("R", StringComparison.OrdinalIgnoreCase))
+                personnage.Rarete = Rarete.R;
             else
-                personnage.Rarete = Rareté.R; // Default
+                personnage.Rarete = Rarete.R; // Default
         }
 
         // Type
@@ -253,7 +254,7 @@ public class CsvImportService(PersonnageService personnageService)
             if (header.Contains("personnage") || header.Contains("nom"))
                 mapping["Personnage"] = i;
             else if (header.Contains("rareté") || header.Contains("rarete"))
-                mapping["Rareté"] = i;
+                mapping["Rarete"] = i;
             else if (header.Contains("type"))
                 mapping["Type"] = i;
             else if (header.Contains("puissance"))
@@ -274,8 +275,8 @@ public class CsvImportService(PersonnageService personnageService)
                 mapping["Faction"] = i;
             else if (header.Contains("selection") || header.Contains("selectionne"))
                 mapping["Selection"] = i;
-            else if (header.Contains("action"))
-                mapping["Action"] = i;
+            else if (header.Contains("typeattaque"))
+                mapping["TypeAttaque"] = i;
         }
 
         return mapping;
