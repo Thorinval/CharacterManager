@@ -22,7 +22,25 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
+    try
+    {
+        // Get pending migrations
+        var pendingMigrations = db.Database.GetPendingMigrations();
+        if (pendingMigrations.Any())
+        {
+            // Apply pending migrations
+            db.Database.Migrate();
+        }
+        else
+        {
+            // Ensure database and tables exist
+            db.Database.EnsureCreated();
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Migration error: {ex.Message}");
+    }
 }
 
 // Configure the HTTP request pipeline.

@@ -14,7 +14,7 @@
     <thead>
         <tr>
             <th>Nom</th>
-            <th>Rareté</th>
+            <th>Rarete</th>
             <th>Niveau</th>
             <th>Type</th>
             <th>Actions</th>
@@ -25,7 +25,7 @@
         {
             <tr @onclick="() => ViewPersonnage(personnage.Id)" style="cursor: pointer;">
                 <td>@personnage.Nom</td>
-                <td>@personnage.Rareté</td>
+                <td>@personnage.Rarete</td>
                 <td>@personnage.Niveau</td>
                 <td>@personnage.Type</td>
                 <td @onclick:stopPropagation="true">
@@ -52,8 +52,8 @@
                         <input type="text" class="form-control" id="nom" @bind="currentPersonnage.Nom" />
                     </div>
                     <div class="mb-3">
-                        <label for="rarete" class="form-label">Rareté</label>
-                        <select class="form-control" id="rarete" @bind="currentPersonnage.Rareté">
+                        <label for="rarete" class="form-label">Rarete</label>
+                        <select class="form-control" id="rarete" @bind="currentPersonnage.Rarete">
                             @foreach (var rarete in Enum.GetValues(typeof(Rareté)))
                             {
                                 <option value="@rarete">@rarete</option>
@@ -168,7 +168,7 @@
         {
             Id = personnage.Id,
             Nom = personnage.Nom,
-            Rareté = personnage.Rareté,
+            Rarete = personnage.Rarete,
             Niveau = personnage.Niveau,
             Type = personnage.Type
         };

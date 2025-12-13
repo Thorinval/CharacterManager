@@ -39,7 +39,7 @@ public class PersonnageService
         if (existing != null)
         {
             existing.Nom = personnage.Nom;
-            existing.Rareté = personnage.Rareté;
+            existing.Rarete = personnage.Rarete;
             existing.Niveau = personnage.Niveau;
             existing.Type = personnage.Type;
             existing.Rang = personnage.Rang;
@@ -55,7 +55,7 @@ public class PersonnageService
             existing.ImageUrl = personnage.ImageUrl;
             existing.Description = personnage.Description;
             existing.Localisation = personnage.Localisation;
-            existing.Selectionné = personnage.Selectionné;
+            existing.Selectionne = personnage.Selectionne;
 
             _context.SaveChanges();
         }

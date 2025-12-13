@@ -35,12 +35,12 @@ public class Personnage
 {
     public int Id { get; set; }
     public string Nom { get; set; } = string.Empty;
-    public Rareté Rareté { get; set; }
+    public Rareté Rarete { get; set; }
     public int Niveau { get; set; }
     public TypePersonnage Type { get; set; }
     public int Rang { get; set; }
     public int Puissance { get; set; }  
-    public bool Selectionné { get; set; }
+    public bool Selectionne { get; set; }
 
     // points d'attaque
     public int PA { get; set; }
