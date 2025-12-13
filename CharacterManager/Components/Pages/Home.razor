@@ -1,7 +1,108 @@
 ﻿@page "/"
+@inject AppVersionService VersionService
+@using CharacterManager.Services
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="welcome-card">
+                <h1>Character Manager</h1>
+                <p class="lead">Bienvenue sur votre gestionnaire de personnages</p>
+                
+                <hr />
+                
+                <div class="features-section">
+                    <h3>Fonctionnalités principales :</h3>
+                    <ul class="features-list">
+                        <li><strong>Inventaire :</strong> Gérez tous vos personnages en un seul endroit</li>
+                        <li><strong>Ajouter/Éditer :</strong> Créez et modifiez vos personnages facilement</li>
+                        <li><strong>Détails :</strong> Consultez les informations complètes de chaque personnage</li>
+                        <li><strong>Persistance :</strong> Vos données sont sauvegardées en base de données</li>
+                    </ul>
+                </div>
 
-Welcome to your new app.
+                <hr />
+
+                <div class="version-info">
+                    <small class="text-muted">Version: @VersionService.GetInformationalVersion()</small>
+                </div>
+
+                <div class="mt-4">
+                    <a href="/inventaire" class="btn btn-primary btn-lg">Accéder à l'Inventaire</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .welcome-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .welcome-card h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    .welcome-card .lead {
+        font-size: 1.3rem;
+        opacity: 0.95;
+    }
+
+    .features-section {
+        margin: 20px 0;
+    }
+
+    .features-section h3 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+
+    .features-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .features-list li {
+        padding: 10px 0;
+        padding-left: 30px;
+        position: relative;
+        font-size: 1.1rem;
+    }
+
+    .features-list li:before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        font-weight: bold;
+        font-size: 1.3rem;
+    }
+
+    .version-info {
+        margin-top: 20px;
+        text-align: right;
+        opacity: 0.8;
+    }
+
+    .btn-primary {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-color: white;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+</style>

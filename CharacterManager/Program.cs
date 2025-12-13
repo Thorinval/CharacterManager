@@ -14,6 +14,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite("Data Source=charactermanager.db"));
 
 builder.Services.AddScoped<PersonnageService>();
+builder.Services.AddSingleton<AppVersionService>();
 
 var app = builder.Build();
 
