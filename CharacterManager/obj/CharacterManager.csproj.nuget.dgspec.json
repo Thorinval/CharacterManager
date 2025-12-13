@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "d:\\Devs\\CharacterManager\\CharacterManager\\CharacterManager.csproj": {}
+    "D:\\Devs\\CharacterManager\\CharacterManager\\CharacterManager.csproj": {}
   },
   "projects": {
-    "d:\\Devs\\CharacterManager\\CharacterManager\\CharacterManager.csproj": {
+    "D:\\Devs\\CharacterManager\\CharacterManager\\CharacterManager.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\Devs\\CharacterManager\\CharacterManager\\CharacterManager.csproj",
+        "projectUniqueName": "D:\\Devs\\CharacterManager\\CharacterManager\\CharacterManager.csproj",
         "projectName": "CharacterManager",
-        "projectPath": "d:\\Devs\\CharacterManager\\CharacterManager\\CharacterManager.csproj",
+        "projectPath": "D:\\Devs\\CharacterManager\\CharacterManager\\CharacterManager.csproj",
         "packagesPath": "C:\\Users\\pasca\\.nuget\\packages\\",
-        "outputPath": "d:\\Devs\\CharacterManager\\CharacterManager\\obj\\",
+        "outputPath": "D:\\Devs\\CharacterManager\\CharacterManager\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\pasca\\AppData\\Roaming\\NuGet\\NuGet.Config"

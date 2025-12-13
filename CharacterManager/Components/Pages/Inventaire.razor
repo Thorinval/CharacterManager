@@ -13,9 +13,9 @@
     <thead>
         <tr>
             <th>Nom</th>
-            <th>Classe</th>
+            <th>Rareté</th>
             <th>Niveau</th>
-            <th>Race</th>
+            <th>Type</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -24,9 +24,9 @@
         {
             <tr>
                 <td>@personnage.Nom</td>
-                <td>@personnage.Classe</td>
+                <td>@personnage.Rareté</td>
                 <td>@personnage.Niveau</td>
-                <td>@personnage.Race</td>
+                <td>@personnage.Type</td>
                 <td>
                     <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)">Éditer</button>
                     <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)">Supprimer</button>
@@ -51,16 +51,26 @@
                         <input type="text" class="form-control" id="nom" @bind="currentPersonnage.Nom" />
                     </div>
                     <div class="mb-3">
-                        <label for="classe" class="form-label">Classe</label>
-                        <input type="text" class="form-control" id="classe" @bind="currentPersonnage.Classe" />
+                        <label for="rarete" class="form-label">Rareté</label>
+                        <select class="form-control" id="rarete" @bind="currentPersonnage.Rareté">
+                            @foreach (var rarete in Enum.GetValues(typeof(Rareté)))
+                            {
+                                <option value="@rarete">@rarete</option>
+                            }
+                        </select>
                     </div>
                     <div class="mb-3">
                         <label for="niveau" class="form-label">Niveau</label>
                         <input type="number" class="form-control" id="niveau" @bind="currentPersonnage.Niveau" />
                     </div>
                     <div class="mb-3">
-                        <label for="race" class="form-label">Race</label>
-                        <input type="text" class="form-control" id="race" @bind="currentPersonnage.Race" />
+                        <label for="type" class="form-label">Type</label>
+                        <select class="form-control" id="type" @bind="currentPersonnage.Type">
+                            @foreach (var type in Enum.GetValues(typeof(TypePersonnage)))
+                            {
+                                <option value="@type">@type</option>
+                            }
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -101,9 +111,9 @@
         {
             Id = personnage.Id,
             Nom = personnage.Nom,
-            Classe = personnage.Classe,
+            Rareté = personnage.Rareté,
             Niveau = personnage.Niveau,
-            Race = personnage.Race
+            Type = personnage.Type
         };
         isEditing = true;
         showModal = true;

@@ -23,9 +23,9 @@ public class PersonnageService
         if (existing != null)
         {
             existing.Nom = personnage.Nom;
-            existing.Classe = personnage.Classe;
+            existing.Rareté = personnage.Rareté;
             existing.Niveau = personnage.Niveau;
-            existing.Race = personnage.Race;
+            existing.Type = personnage.Type;
         }
     }
 
