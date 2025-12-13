@@ -62,7 +62,9 @@
                 <th @onclick="SortByNiveau" style="cursor: pointer;">
                     Niveau
                 </th>
-                <th>Rang</th>
+                <th @onclick="SortByRang" style="cursor: pointer;">
+                    Rang
+                </th>
                 <th @onclick="SortByType" style="cursor: pointer;">
                     Type
                 </th>
@@ -280,6 +282,9 @@ else
             "Type" => sortAscending 
                 ? personnagesFiltres.OrderBy(p => p.Type).ToList() 
                 : personnagesFiltres.OrderByDescending(p => p.Type).ToList(),
+            "Rang" => sortAscending 
+                ? personnagesFiltres.OrderBy(p => p.Rang).ToList()
+                : personnagesFiltres.OrderByDescending(p => p.Rang).ToList(),
             _ => personnagesFiltres
         };
     }
@@ -478,6 +483,8 @@ else
     private void SortByRarete() => SortBy("Rarete");
     private void SortByNiveau() => SortBy("Niveau");
     private void SortByType() => SortBy("Type");
+
+    private void SortByRang() => SortBy("Rang");
 
     private async Task DeleteSelectedPersonnages()
     {
