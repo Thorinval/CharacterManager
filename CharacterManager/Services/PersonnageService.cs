@@ -26,6 +26,12 @@ public class PersonnageService
             existing.Rareté = personnage.Rareté;
             existing.Niveau = personnage.Niveau;
             existing.Type = personnage.Type;
+            existing.PA = personnage.PA;
+            existing.PAMax = personnage.PAMax;
+            existing.PV = personnage.PV;
+            existing.PVMax = personnage.PVMax;
+            existing.Sante = personnage.Sante;
+            existing.SanteMax = personnage.SanteMax;
         }
     }
 

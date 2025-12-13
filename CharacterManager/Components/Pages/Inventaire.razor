@@ -1,5 +1,6 @@
 @page "/inventaire"
 @inject PersonnageService PersonnageService
+@inject NavigationManager Navigation
 @using CharacterManager.Models
 @using CharacterManager.Services
 
@@ -22,12 +23,12 @@
     <tbody>
         @foreach (var personnage in personnages)
         {
-            <tr>
+            <tr @onclick="() => ViewPersonnage(personnage.Id)" style="cursor: pointer;">
                 <td>@personnage.Nom</td>
                 <td>@personnage.Rareté</td>
                 <td>@personnage.Niveau</td>
                 <td>@personnage.Type</td>
-                <td>
+                <td @onclick:stopPropagation="true">
                     <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)">Éditer</button>
                     <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)">Supprimer</button>
                 </td>
@@ -143,5 +144,10 @@
     {
         showModal = false;
         currentPersonnage = new Personnage();
+    }
+
+    private void ViewPersonnage(int id)
+    {
+        Navigation.NavigateTo($"/detail-personnage/{id}");
     }
 }

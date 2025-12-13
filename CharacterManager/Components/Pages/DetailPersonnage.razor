@@ -1,0 +1,292 @@
+@page "/detail-personnage/{id:int}"
+@inject PersonnageService PersonnageService
+@inject NavigationManager Navigation
+@using CharacterManager.Models
+@using CharacterManager.Services
+
+<PageTitle>@(currentPerso?.Nom ?? "Détail Personnage")</PageTitle>
+
+@if (currentPerso != null)
+{
+    <div class="personnage-detail-container">
+        <div class="personnage-header">
+            <button class="btn btn-secondary mb-3" @onclick="GoBack">← Retour</button>
+        </div>
+
+        <div class="row">
+            <!-- Colonne gauche : Image et infos de base -->
+            <div class="col-md-6">
+                <div class="personnage-card">
+                    @if (!string.IsNullOrEmpty(currentPerso.ImageUrl))
+                    {
+                        <img src="@currentPerso.ImageUrl" alt="@currentPerso.Nom" class="personnage-image" />
+                    }
+                    else
+                    {
+                        <div class="personnage-image-placeholder">Pas d'image</div>
+                    }
+
+                    <div class="personnage-info">
+                        <h1>@currentPerso.Nom</h1>
+                        <div class="rarete-stars">
+                            @for (int i = 0; i < (int)currentPerso.Rareté + 1; i++)
+                            {
+                                <span class="star">★</span>
+                            }
+                        </div>
+
+                        <div class="faction-role mt-3">
+                            <div class="badge bg-primary">@currentPerso.Faction</div>
+                            <div class="badge bg-info">@currentPerso.Role</div>
+                        </div>
+
+                        <div class="stats-grid mt-4">
+                            <div class="stat-item">
+                                <span class="stat-label">Niveau</span>
+                                <span class="stat-value">@currentPerso.Niveau</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Rang</span>
+                                <span class="stat-value">@currentPerso.Rang</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Puissance</span>
+                                <span class="stat-value">@currentPerso.Puissance</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne droite : Stats détaillées et capacités -->
+            <div class="col-md-6">
+                <div class="stats-card">
+                    <h3>Statistiques</h3>
+                    
+                    <div class="stat-bar mt-3">
+                        <div class="stat-bar-label">PV (Points de Vie)</div>
+                        <div class="progress" style="height: 25px;">
+                            @{
+                                int pvPercent = currentPerso.PVMax > 0 ? (currentPerso.PV * 100 / currentPerso.PVMax) : 0;
+                            }
+                            <div class="progress-bar bg-success" style="width: @(pvPercent)%">
+                                @currentPerso.PV / @currentPerso.PVMax
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-bar mt-3">
+                        <div class="stat-bar-label">PA (Attaque)</div>
+                        <div class="progress" style="height: 25px;">
+                            @{
+                                int paPercent = currentPerso.PAMax > 0 ? (currentPerso.PA * 100 / currentPerso.PAMax) : 0;
+                            }
+                            <div class="progress-bar bg-warning" style="width: @(paPercent)%">
+                                @currentPerso.PA @if (currentPerso.PAMax > 0) { <span>/ @currentPerso.PAMax</span> }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-bar mt-3">
+                        <div class="stat-bar-label">Santé</div>
+                        <div class="progress" style="height: 25px;">
+                            @{
+                                int santePercent = currentPerso.SanteMax > 0 ? (currentPerso.Sante * 100 / currentPerso.SanteMax) : 0;
+                            }
+                            <div class="progress-bar bg-info" style="width: @(santePercent)%">
+                                @currentPerso.Sante @if (currentPerso.SanteMax > 0) { <span>/ @currentPerso.SanteMax</span> }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (currentPerso.Capacites.Any())
+                {
+                    <div class="capacites-card mt-4">
+                        <h3>Capacités</h3>
+                        @foreach (var capacite in currentPerso.Capacites)
+                        {
+                            <div class="capacite-item mt-3">
+                                <div class="capacite-header">
+                                    @if (!string.IsNullOrEmpty(capacite.Icon))
+                                    {
+                                        <span class="capacite-icon">@capacite.Icon</span>
+                                    }
+                                    <span class="capacite-nom">@capacite.Nom</span>
+                                </div>
+                                <p class="capacite-description">@capacite.Description</p>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <div class="actions-card mt-4">
+                    <button class="btn btn-primary btn-lg w-100" @onclick="GoBack">Retour</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-danger">Personnage non trouvé</div>
+}
+
+<style>
+    .personnage-detail-container {
+        padding: 20px;
+    }
+
+    .personnage-card {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .personnage-image, .personnage-image-placeholder {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .personnage-image-placeholder {
+        background: #7f8c8d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+    }
+
+    .personnage-info {
+        padding: 20px;
+        color: white;
+    }
+
+    .personnage-info h1 {
+        color: #f39c12;
+        margin-bottom: 10px;
+    }
+
+    .rarete-stars {
+        font-size: 24px;
+        color: #f1c40f;
+        margin-bottom: 15px;
+    }
+
+    .star {
+        margin-right: 5px;
+    }
+
+    .faction-role {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .stat-item {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 10px;
+        border-radius: 5px;
+        text-align: center;
+    }
+
+    .stat-label {
+        display: block;
+        font-size: 12px;
+        color: #bdc3c7;
+        text-transform: uppercase;
+    }
+
+    .stat-value {
+        display: block;
+        font-size: 24px;
+        font-weight: bold;
+        color: #f39c12;
+    }
+
+    .stats-card, .capacites-card, .actions-card {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        padding: 20px;
+        border-radius: 10px;
+        color: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .stats-card h3, .capacites-card h3 {
+        color: #f39c12;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #f39c12;
+        padding-bottom: 10px;
+    }
+
+    .stat-bar-label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .capacite-item {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 15px;
+        border-left: 3px solid #f39c12;
+        border-radius: 5px;
+    }
+
+    .capacite-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .capacite-icon {
+        font-size: 20px;
+    }
+
+    .capacite-nom {
+        font-weight: bold;
+        color: #f39c12;
+    }
+
+    .capacite-description {
+        font-size: 14px;
+        color: #bdc3c7;
+        margin: 0;
+    }
+
+    .actions-card {
+        text-align: center;
+    }
+
+    .btn-lg {
+        padding: 15px;
+        font-size: 18px;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Personnage? currentPerso;
+
+    protected override void OnInitialized()
+    {
+        currentPerso = PersonnageService.GetById(Id);
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/inventaire");
+    }
+}
