@@ -1,0 +1,195 @@
+@page "/import-csv"
+@using CharacterManager.Services
+@using System.IO
+@inject CsvImportService CsvImportService
+@inject NavigationManager NavigationManager
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Importer des personnages (CSV)</h5>
+                </div>
+                <div class="card-body">
+                    @if (importComplete)
+                    {
+                        <div class="alert @(importResult?.IsSuccess == true ? "alert-success" : "alert-danger")" role="alert">
+                            @if (importResult?.IsSuccess == true)
+                            {
+                                <h4 class="alert-heading">Import réussi! ✓</h4>
+                                <p>@importResult.SuccessCount personnage(s) importé(s) ou mis à jour.</p>
+                                @if (importResult.Errors.Count > 0)
+                                {
+                                    <hr>
+                                    <p><strong>Avertissements:</strong></p>
+                                    <ul>
+                                        @foreach (var error in importResult.Errors)
+                                        {
+                                            <li>@error</li>
+                                        }
+                                    </ul>
+                                }
+                            }
+                            else
+                            {
+                                <h4 class="alert-heading">Erreur lors de l'import ✗</h4>
+                                <p>@importResult?.Error</p>
+                            }
+                        </div>
+
+                        <button class="btn btn-primary" @onclick="Reset">Nouvel import</button>
+                        <a href="/inventaire" class="btn btn-secondary">Retour à l'inventaire</a>
+                    }
+                    else
+                    {
+                        <form @onsubmit="HandleImport">
+                            <div class="mb-3">
+                                <label for="csvFile" class="form-label">Sélectionner un fichier CSV</label>
+                                <InputFile 
+                                    class="form-control" 
+                                    id="csvFile" 
+                                    accept=".csv" 
+                                    OnChange="@OnFileSelected"
+                                    disabled="@isImporting" />
+                                <small class="text-muted">
+                                    Format attendu: Personnage;Rareté;Type;Puissance;PA;PV;Action;Role;Niveau;Rang;Selection;Faction
+                                </small>
+                            </div>
+
+                            <div class="mb-3">
+                                <p class="text-info">
+                                    <strong>Information:</strong>
+                                </p>
+                                <ul>
+                                    <li>Les personnages existants seront mis à jour</li>
+                                    <li>Les nouveaux personnages seront créés</li>
+                                    <li>La colonne "Personnage" est utilisée comme identifiant unique</li>
+                                    <li>Les séparateurs: point-virgule (;)</li>
+                                </ul>
+                            </div>
+
+                            @if (selectedFileName != null)
+                            {
+                                <div class="alert alert-info">
+                                    Fichier sélectionné: <strong>@selectedFileName</strong>
+                                </div>
+                            }
+
+                            <button type="submit" class="btn btn-success" disabled="@(selectedFile == null || isImporting)">
+                                @if (isImporting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    <span>Importation en cours...</span>
+                                }
+                                else
+                                {
+                                    <span>Importer</span>
+                                }
+                            </button>
+                        </form>
+
+                        <hr class="my-4" />
+
+                        <div class="alert alert-warning">
+                            <h5>Colonne "Action" spéciale</h5>
+                            <p>La colonne "Action" du CSV n'est pas utilisée dans l'import. Elle peut contenir des informations sur le type d'attaque (Melee/Distance/Commandant/Androïde).</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-header">
+                    <h5 class="mb-0">Format CSV</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Colonnes requises:</strong></p>
+                    <ul style="font-size: 0.9rem;">
+                        <li>Personnage (nom unique)</li>
+                        <li>Rareté (R, SR, SSR)</li>
+                        <li>Type (Mercenaire, Commandant, Androïde)</li>
+                        <li>Puissance</li>
+                        <li>PA (Points d'attaque)</li>
+                        <li>PV (Points de vie)</li>
+                        <li>Role</li>
+                        <li>Niveau</li>
+                        <li>Rang</li>
+                        <li>Selection (Oui/Non)</li>
+                        <li>Faction</li>
+                    </ul>
+
+                    <p class="mt-3"><strong>Factions:</strong></p>
+                    <ul style="font-size: 0.9rem;">
+                        <li>Syndicat</li>
+                        <li>Pacificateurs</li>
+                        <li>Hommes libres</li>
+                    </ul>
+
+                    <p class="mt-3"><strong>Rôles:</strong></p>
+                    <ul style="font-size: 0.9rem;">
+                        <li>Sentinelle</li>
+                        <li>Combattante</li>
+                        <li>Androïde</li>
+                        <li>Commandant</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private IBrowserFile? selectedFile;
+    private string? selectedFileName;
+    private bool isImporting = false;
+    private bool importComplete = false;
+    private ImportResult? importResult;
+
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        selectedFileName = e.File.Name;
+    }
+
+    private async Task HandleImport()
+    {
+        if (selectedFile == null)
+            return;
+
+        isImporting = true;
+
+        try
+        {
+            using (var stream = selectedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024)) // 10MB max
+            {
+                importResult = await CsvImportService.ImportCsvAsync(stream);
+                importComplete = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            importResult = new ImportResult 
+            { 
+                IsSuccess = false, 
+                Error = $"Erreur: {ex.Message}" 
+            };
+            importComplete = true;
+        }
+        finally
+        {
+            isImporting = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void Reset()
+    {
+        selectedFile = null;
+        selectedFileName = null;
+        importComplete = false;
+        importResult = null;
+    }
+}
