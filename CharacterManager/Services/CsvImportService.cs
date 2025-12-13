@@ -223,16 +223,16 @@ public class CsvImportService(PersonnageService personnageService)
         if (mapping.TryGetValue("Action", out int actionIndex) && actionIndex < values.Count)
         {
             var actionStr = values[actionIndex].Trim();
-            if (Enum.TryParse<Action>(actionStr, true, out var action))
+            if (Enum.TryParse<Models.Action>(actionStr, true, out var action))
                 personnage.Action = action;
             else if (actionStr.Contains("Mêlée", StringComparison.OrdinalIgnoreCase))
-                personnage.Action = Action.Mêlée;
+                personnage.Action = Models.Action.Mêlée;
             else if (actionStr.Contains("Distance", StringComparison.OrdinalIgnoreCase))
-                personnage.Action = Action.Distance;
+                personnage.Action = Models.Action.Distance;
             else if (actionStr.Contains("Androïde", StringComparison.OrdinalIgnoreCase))
-                personnage.Action = Action.Androïde;
+                personnage.Action = Models.Action.Androïde;
             else
-                personnage.Action = Action.Mêlée; // Default
+                personnage.Action = Models.Action.Mêlée; // Default
         }
 
         personnage.ImageUrl = $"https://via.placeholder.com/150?text={Uri.EscapeDataString(personnage.Nom)}";

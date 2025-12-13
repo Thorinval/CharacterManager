@@ -148,7 +148,7 @@
     private bool importComplete = false;
     private ImportResult? importResult;
 
-    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    private void OnFileSelected(InputFileChangeEventArgs e)
     {
         selectedFile = e.File;
         selectedFileName = e.File.Name;
