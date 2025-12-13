@@ -1,0 +1,137 @@
+@page "/inventaire"
+@inject PersonnageService PersonnageService
+@using CharacterManager.Models
+@using CharacterManager.Services
+
+<PageTitle>Inventaire</PageTitle>
+
+<h1>Inventaire</h1>
+
+<button class="btn btn-primary mb-3" @onclick="ShowAddModal">Ajouter un Personnage</button>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Classe</th>
+            <th>Niveau</th>
+            <th>Race</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var personnage in personnages)
+        {
+            <tr>
+                <td>@personnage.Nom</td>
+                <td>@personnage.Classe</td>
+                <td>@personnage.Niveau</td>
+                <td>@personnage.Race</td>
+                <td>
+                    <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)">Éditer</button>
+                    <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)">Supprimer</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (showModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEditing ? "Éditer Personnage" : "Ajouter Personnage")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nom" class="form-label">Nom</label>
+                        <input type="text" class="form-control" id="nom" @bind="currentPersonnage.Nom" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="classe" class="form-label">Classe</label>
+                        <input type="text" class="form-control" id="classe" @bind="currentPersonnage.Classe" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="niveau" class="form-label">Niveau</label>
+                        <input type="number" class="form-control" id="niveau" @bind="currentPersonnage.Niveau" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="race" class="form-label">Race</label>
+                        <input type="text" class="form-control" id="race" @bind="currentPersonnage.Race" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Annuler</button>
+                    <button type="button" class="btn btn-primary" @onclick="SavePersonnage">@(isEditing ? "Sauvegarder" : "Ajouter")</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Personnage> personnages = new();
+    private bool showModal = false;
+    private bool isEditing = false;
+    private Personnage currentPersonnage = new();
+
+    protected override void OnInitialized()
+    {
+        LoadPersonnages();
+    }
+
+    private void LoadPersonnages()
+    {
+        personnages = PersonnageService.GetAll().ToList();
+    }
+
+    private void ShowAddModal()
+    {
+        currentPersonnage = new Personnage();
+        isEditing = false;
+        showModal = true;
+    }
+
+    private void EditPersonnage(Personnage personnage)
+    {
+        currentPersonnage = new Personnage
+        {
+            Id = personnage.Id,
+            Nom = personnage.Nom,
+            Classe = personnage.Classe,
+            Niveau = personnage.Niveau,
+            Race = personnage.Race
+        };
+        isEditing = true;
+        showModal = true;
+    }
+
+    private void DeletePersonnage(int id)
+    {
+        PersonnageService.Delete(id);
+        LoadPersonnages();
+    }
+
+    private void SavePersonnage()
+    {
+        if (isEditing)
+        {
+            PersonnageService.Update(currentPersonnage);
+        }
+        else
+        {
+            PersonnageService.Add(currentPersonnage);
+        }
+        LoadPersonnages();
+        CloseModal();
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        currentPersonnage = new Personnage();
+    }
+}
