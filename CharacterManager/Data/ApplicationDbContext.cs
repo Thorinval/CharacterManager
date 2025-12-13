@@ -3,12 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CharacterManager.Data;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-    {
-    }
-
     public DbSet<Personnage> Personnages { get; set; }
     public DbSet<Capacite> Capacites { get; set; }
 

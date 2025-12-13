@@ -5,14 +5,9 @@ using System.Text.RegularExpressions;
 
 namespace CharacterManager.Services;
 
-public class CsvImportService
+public class CsvImportService(PersonnageService personnageService)
 {
-    private readonly PersonnageService _personnageService;
-
-    public CsvImportService(PersonnageService personnageService)
-    {
-        _personnageService = personnageService;
-    }
+    private readonly PersonnageService _personnageService = personnageService;
 
     public async Task<ImportResult> ImportCsvAsync(Stream csvStream)
     {
@@ -23,7 +18,7 @@ public class CsvImportService
         {
             using (var reader = new StreamReader(csvStream))
             {
-                string line;
+                string? line;
                 while ((line = await reader.ReadLineAsync()) != null)
                 {
                     lines.Add(line);
@@ -95,6 +90,7 @@ public class CsvImportService
             existing.Role = nouveauPersonnage.Role;
             existing.Faction = nouveauPersonnage.Faction;
             existing.Selectionne = nouveauPersonnage.Selectionne;
+            existing.Action = nouveauPersonnage.Action;
 
             _personnageService.Update(existing);
         }
@@ -105,22 +101,22 @@ public class CsvImportService
         }
     }
 
-    private Personnage? ParsePersonnage(List<string> values, Dictionary<string, int> mapping)
+    private static Personnage? ParsePersonnage(List<string> values, Dictionary<string, int> mapping)
     {
         var personnage = new Personnage();
 
         // Nom (required)
-        if (!mapping.ContainsKey("Personnage") || mapping["Personnage"] >= values.Count)
+        if (!mapping.TryGetValue("Personnage", out int nomIndex) || nomIndex >= values.Count)
             return null;
 
-        personnage.Nom = values[mapping["Personnage"]].Trim();
+        personnage.Nom = values[nomIndex].Trim();
         if (string.IsNullOrEmpty(personnage.Nom))
             return null;
 
         // Rareté
-        if (mapping.ContainsKey("Rareté") && mapping["Rareté"] < values.Count)
+        if (mapping.TryGetValue("Rareté", out int rareteIndex) && rareteIndex < values.Count)
         {
-            var raretéStr = values[mapping["Rareté"]].Trim();
+            var raretéStr = values[rareteIndex].Trim();
             if (Enum.TryParse<Rareté>(raretéStr, true, out var rarete))
                 personnage.Rarete = rarete;
             else
@@ -128,9 +124,9 @@ public class CsvImportService
         }
 
         // Type
-        if (mapping.ContainsKey("Type") && mapping["Type"] < values.Count)
+        if (mapping.TryGetValue("Type", out int typeIndex) && typeIndex < values.Count)
         {
-            var typeStr = values[mapping["Type"]].Trim();
+            var typeStr = values[typeIndex].Trim();
             if (typeStr.Contains("Mercenaire", StringComparison.OrdinalIgnoreCase))
                 personnage.Type = TypePersonnage.Mercenaire;
             else if (typeStr.Contains("Commandant", StringComparison.OrdinalIgnoreCase))
@@ -143,54 +139,54 @@ public class CsvImportService
         }
 
         // Puissance
-        if (mapping.ContainsKey("Puissance") && mapping["Puissance"] < values.Count)
+        if (mapping.TryGetValue("Puissance", out int puissanceIndex) && puissanceIndex < values.Count)
         {
-            if (int.TryParse(values[mapping["Puissance"]].Trim(), out var puissance))
+            if (int.TryParse(values[puissanceIndex].Trim(), out var puissance))
                 personnage.Puissance = puissance;
         }
 
         // PA
-        if (mapping.ContainsKey("PA") && mapping["PA"] < values.Count)
+        if (mapping.TryGetValue("PA", out int paIndex) && paIndex < values.Count)
         {
-            if (int.TryParse(values[mapping["PA"]].Trim(), out var pa))
+            if (int.TryParse(values[paIndex].Trim(), out var pa))
                 personnage.PA = pa;
         }
         personnage.PAMax = Math.Max(personnage.PA, 10);
 
         // PV
-        if (mapping.ContainsKey("PV") && mapping["PV"] < values.Count)
+        if (mapping.TryGetValue("PV", out int pvIndex) && pvIndex < values.Count)
         {
-            if (int.TryParse(values[mapping["PV"]].Trim(), out var pv))
+            if (int.TryParse(values[pvIndex].Trim(), out var pv))
                 personnage.PV = pv;
         }
         personnage.PVMax = Math.Max(personnage.PV, 10);
 
         // Santé (si disponible)
-        if (mapping.ContainsKey("Sante") && mapping["Sante"] < values.Count)
+        if (mapping.TryGetValue("Sante", out int santeIndex) && santeIndex < values.Count)
         {
-            if (int.TryParse(values[mapping["Sante"]].Trim(), out var sante))
+            if (int.TryParse(values[santeIndex].Trim(), out var sante))
                 personnage.Sante = sante;
         }
         personnage.SanteMax = Math.Max(personnage.Sante, 10);
 
         // Niveau
-        if (mapping.ContainsKey("Niveau") && mapping["Niveau"] < values.Count)
+        if (mapping.TryGetValue("Niveau", out int niveauIndex) && niveauIndex < values.Count)
         {
-            if (int.TryParse(values[mapping["Niveau"]].Trim(), out var niveau))
+            if (int.TryParse(values[niveauIndex].Trim(), out var niveau))
                 personnage.Niveau = niveau;
         }
 
         // Rang
-        if (mapping.ContainsKey("Rang") && mapping["Rang"] < values.Count)
+        if (mapping.TryGetValue("Rang", out int rangIndex) && rangIndex < values.Count)
         {
-            if (int.TryParse(values[mapping["Rang"]].Trim(), out var rang))
+            if (int.TryParse(values[rangIndex].Trim(), out var rang))
                 personnage.Rang = rang;
         }
 
         // Role
-        if (mapping.ContainsKey("Role") && mapping["Role"] < values.Count)
+        if (mapping.TryGetValue("Role", out int roleIndex) && roleIndex < values.Count)
         {
-            var roleStr = values[mapping["Role"]].Trim();
+            var roleStr = values[roleIndex].Trim();
             if (Enum.TryParse<Role>(roleStr, true, out var role))
                 personnage.Role = role;
             else
@@ -198,9 +194,9 @@ public class CsvImportService
         }
 
         // Faction
-        if (mapping.ContainsKey("Faction") && mapping["Faction"] < values.Count)
+        if (mapping.TryGetValue("Faction", out int factionIndex) && factionIndex < values.Count)
         {
-            var factionStr = values[mapping["Faction"]].Trim();
+            var factionStr = values[factionIndex].Trim();
             if (Enum.TryParse<Faction>(factionStr, true, out var faction))
                 personnage.Faction = faction;
             else if (factionStr.Contains("Syndicat", StringComparison.OrdinalIgnoreCase))
@@ -217,13 +213,28 @@ public class CsvImportService
         }
 
         // Sélection (Oui/Non)
-        if (mapping.ContainsKey("Selection") && mapping["Selection"] < values.Count)
+        if (mapping.TryGetValue("Selection", out int selectionIndex) && selectionIndex < values.Count)
         {
-            var selectionStr = values[mapping["Selection"]].Trim().ToLower();
+            var selectionStr = values[selectionIndex].Trim().ToLower();
             personnage.Selectionne = selectionStr == "oui" || selectionStr == "yes";
         }
 
-        // Default values for optional fields
+        // Action (Mêlée, Distance, Androïde)
+        if (mapping.TryGetValue("Action", out int actionIndex) && actionIndex < values.Count)
+        {
+            var actionStr = values[actionIndex].Trim();
+            if (Enum.TryParse<Action>(actionStr, true, out var action))
+                personnage.Action = action;
+            else if (actionStr.Contains("Mêlée", StringComparison.OrdinalIgnoreCase))
+                personnage.Action = Action.Mêlée;
+            else if (actionStr.Contains("Distance", StringComparison.OrdinalIgnoreCase))
+                personnage.Action = Action.Distance;
+            else if (actionStr.Contains("Androïde", StringComparison.OrdinalIgnoreCase))
+                personnage.Action = Action.Androïde;
+            else
+                personnage.Action = Action.Mêlée; // Default
+        }
+
         personnage.ImageUrl = $"https://via.placeholder.com/150?text={Uri.EscapeDataString(personnage.Nom)}";
         personnage.Description = $"Personnage {personnage.Nom} importé";
         personnage.Localisation = "Non assignée";
@@ -231,7 +242,7 @@ public class CsvImportService
         return personnage;
     }
 
-    private Dictionary<string, int> MapColumns(List<string> headers)
+    private static Dictionary<string, int> MapColumns(List<string> headers)
     {
         var mapping = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
@@ -263,12 +274,14 @@ public class CsvImportService
                 mapping["Faction"] = i;
             else if (header.Contains("selection") || header.Contains("selectionne"))
                 mapping["Selection"] = i;
+            else if (header.Contains("action"))
+                mapping["Action"] = i;
         }
 
         return mapping;
     }
 
-    private List<string> ParseCsvLine(string? line)
+    private static List<string> ParseCsvLine(string? line)
     {
         var values = new List<string>();
         if (line == null) return values;

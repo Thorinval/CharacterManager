@@ -1,3 +1,5 @@
+# Tests E2E Setup
+
 ## Guide d'utilisation des tests E2E avec Selenium
 
 Les tests E2E ont été implémentés avec succès pour CharacterManager!
@@ -48,12 +50,14 @@ dotnet test --filter "HomePage_ShouldLoadSuccessfully"
 ### Tests disponibles
 
 **HomePageTests** (4 tests)
+
 - ✓ Charge de la page
 - ✓ Affichage du contenu de bienvenue
 - ✓ Existence de la navigation
 - ✓ Affichage des infos de version
 
 **InventairePageTests** (7 tests)
+
 - ✓ Charge de la page inventaire
 - ✓ Affichage du tableau
 - ✓ Bouton "Ajouter" présent
@@ -63,6 +67,7 @@ dotnet test --filter "HomePage_ShouldLoadSuccessfully"
 - ✓ Navigation vers les détails
 
 **NavigationTests** (5 tests)
+
 - ✓ Lien d'accueil existe
 - ✓ Lien inventaire existe
 - ✓ Navigation vers l'accueil

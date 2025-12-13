@@ -50,7 +50,8 @@ public class PersonnageServiceTests : IDisposable
             ImageUrl = "old-url.jpg",
             Description = "Ancienne description",
             Localisation = "Ancienne localisation",
-            Selectionne = false
+            Selectionne = false,
+            Action = Action.Mêlée
         };
 
         _context.Personnages.Add(existingPersonnage);
@@ -77,7 +78,8 @@ public class PersonnageServiceTests : IDisposable
             ImageUrl = "new-url.jpg",
             Description = "Nouvelle description",
             Localisation = "Nouvelle localisation",
-            Selectionne = true
+            Selectionne = true,
+            Action = Action.Distance
         };
 
         // Act

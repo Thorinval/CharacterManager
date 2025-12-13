@@ -4,20 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CharacterManager.Services;
 
-public class PersonnageService
+public class PersonnageService(ApplicationDbContext context)
 {
-    private readonly ApplicationDbContext _context;
-
-    public PersonnageService(ApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly ApplicationDbContext _context = context;
 
     public IEnumerable<Personnage> GetAll()
     {
-        return _context.Personnages
-            .Include(p => p.Capacites)
-            .ToList();
+        return [.. _context.Personnages.Include(p => p.Capacites)];
     }
 
     public Personnage? GetById(int id)
@@ -56,6 +49,7 @@ public class PersonnageService
             existing.Description = personnage.Description;
             existing.Localisation = personnage.Localisation;
             existing.Selectionne = personnage.Selectionne;
+            existing.Action = personnage.Action;
 
             _context.SaveChanges();
         }

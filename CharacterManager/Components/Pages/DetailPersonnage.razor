@@ -38,6 +38,10 @@
                         <div class="faction-role mt-3">
                             <div class="badge bg-primary">@currentPerso.Faction</div>
                             <div class="badge bg-info">@currentPerso.Role</div>
+                            @if (!string.IsNullOrEmpty(currentPerso.Action))
+                            {
+                                <div class="badge bg-warning text-dark">@currentPerso.Action</div>
+                            }
                         </div>
 
                         <div class="stats-grid mt-4">

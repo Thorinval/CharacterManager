@@ -31,6 +31,13 @@ public enum Faction
     HommesLibres
 }
 
+public enum Action
+{
+    Mêlée, 
+    Distance, 
+    Androïde,
+}
+
 public class Personnage
 {
     public int Id { get; set; }
@@ -64,4 +71,7 @@ public class Personnage
     public int Sante { get; set; }
     public int SanteMax { get; set; }
     public string Localisation { get; set; } = string.Empty;
+
+    // Type d'action
+    public Action Action { get; set; }
 }
