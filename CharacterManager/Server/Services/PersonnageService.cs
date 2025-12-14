@@ -1,18 +1,57 @@
 using CharacterManager.Server.Data;
 using CharacterManager.Server.Models;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
-using SQLitePCL;
 
 namespace CharacterManager.Server.Services;
 
-public class PersonnageService(ApplicationDbContext context)
+public class PersonnageService
 {
-    private readonly ApplicationDbContext _context = context;
+    private readonly ApplicationDbContext _context;
+    private readonly PersonnageImageConfigService _imageConfigService;
+
+    public PersonnageService(ApplicationDbContext context, PersonnageImageConfigService imageConfigService)
+    {
+        _context = context;
+        _imageConfigService = imageConfigService;
+    }
+
+    private bool IsAdultModeEnabled()
+    {
+        var settings = _context.AppSettings.FirstOrDefault();
+        return settings?.IsAdultModeEnabled ?? true;
+    }
+
+    private string ApplyAdultModeFilter(string imagePath)
+    {
+        if (string.IsNullOrEmpty(imagePath))
+            return imagePath;
+
+        var isAdultMode = IsAdultModeEnabled();
+        return _imageConfigService.GetDisplayPath(imagePath, isAdultMode);
+    }
+
+    private void ApplyAdultModeToPersonnage(Personnage personnage)
+    {
+        if (personnage == null) return;
+
+        personnage.ImageUrlDetail = ApplyAdultModeFilter(personnage.ImageUrlDetail);
+        personnage.ImageUrlPreview = ApplyAdultModeFilter(personnage.ImageUrlPreview);
+        personnage.ImageUrlSelected = ApplyAdultModeFilter(personnage.ImageUrlSelected);
+    }
+
+    private void ApplyAdultModeToPersonnages(IEnumerable<Personnage> personnages)
+    {
+        foreach (var personnage in personnages)
+        {
+            ApplyAdultModeToPersonnage(personnage);
+        }
+    }
 
     public IEnumerable<Personnage> GetAll()
     {
-        return [.. _context.Personnages.Include(p => p.Capacites)];
+        var personnages = _context.Personnages.Include(p => p.Capacites).ToList();
+        ApplyAdultModeToPersonnages(personnages);
+        return personnages;
     }
 
     public int GetPuissanceEscouade()
@@ -31,36 +70,48 @@ public class PersonnageService(ApplicationDbContext context)
 
     public IEnumerable<Personnage> GetTopMercenaires(int count = 8)
     {
-        return _context.Personnages
+        var personnages = _context.Personnages
             .Include(p => p.Capacites)
             .Where(p => p.Type == TypePersonnage.Mercenaire)
             .OrderByDescending(p => p.Puissance)
-            .Take(count);
+            .Take(count)
+            .ToList();
+        ApplyAdultModeToPersonnages(personnages);
+        return personnages;
     }
 
     public Personnage? GetTopCommandant()
     {
-        return _context.Personnages
+        var personnage = _context.Personnages
             .Include(p => p.Capacites)
             .Where(p => p.Type == TypePersonnage.Commandant)
             .OrderByDescending(p => p.Puissance)
             .FirstOrDefault();
+        if (personnage != null)
+            ApplyAdultModeToPersonnage(personnage);
+        return personnage;
     }
 
     public IEnumerable<Personnage> GetTopAndroides(int count = 3)
     {
-        return _context.Personnages
+        var personnages = _context.Personnages
             .Include(p => p.Capacites)
             .Where(p => p.Type == TypePersonnage.Androïde)
             .OrderByDescending(p => p.Puissance)
-            .Take(count);
+            .Take(count)
+            .ToList();
+        ApplyAdultModeToPersonnages(personnages);
+        return personnages;
     }
 
     public IEnumerable<Personnage> GetEscouade()
     {
-        return _context.Personnages
+        var personnages = _context.Personnages
             .Include(p => p.Capacites)
-            .Where(p => p.Selectionne);
+            .Where(p => p.Selectionne)
+            .ToList();
+        ApplyAdultModeToPersonnages(personnages);
+        return personnages;
     }
     public IEnumerable<Personnage> GetMercenaires(bool selectionneOnly = false)
     {
@@ -73,7 +124,9 @@ public class PersonnageService(ApplicationDbContext context)
             query = query.Where(p => p.Selectionne);
         }
 
-        return query;
+        var personnages = query.ToList();
+        ApplyAdultModeToPersonnages(personnages);
+        return personnages;
     }
     public IEnumerable<Personnage> GetCommandants(bool selectionneOnly = false)
     {
@@ -86,7 +139,9 @@ public class PersonnageService(ApplicationDbContext context)
             query = query.Where(p => p.Selectionne);
         }
 
-        return query;
+        var personnages = query.ToList();
+        ApplyAdultModeToPersonnages(personnages);
+        return personnages;
     }
     public IEnumerable<Personnage> GetAndroides(bool selectionneOnly = false)
     {
@@ -99,14 +154,19 @@ public class PersonnageService(ApplicationDbContext context)
             query = query.Where(p => p.Selectionne);
         }
 
-        return query;
+        var personnages = query.ToList();
+        ApplyAdultModeToPersonnages(personnages);
+        return personnages;
     }
 
     public Personnage? GetById(int id)
     {
-        return _context.Personnages
+        var personnage = _context.Personnages
             .Include(p => p.Capacites)
             .FirstOrDefault(p => p.Id == id);
+        if (personnage != null)
+            ApplyAdultModeToPersonnage(personnage);
+        return personnage;
     }
 
     public void Add(Personnage personnage)

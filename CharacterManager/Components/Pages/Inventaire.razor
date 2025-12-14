@@ -96,7 +96,7 @@
                             <div class="personnage-card-grid-compact" 
                                  @ondragstart="@(e => HandleDragStart(e, personnage))"
                                  draggable="true">
-                                <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-compact" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
+                                <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-compact" onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
                                 <div class="card-overlay-compact">
                                     <span class="card-name-compact">@personnage.Nom</span>
                                     <span class="card-puissance-compact">@personnage.Puissance</span>
@@ -186,7 +186,7 @@ else
                     <div class="card-checkbox-grid" @onclick:stopPropagation="true">
                         <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)" @onchange="() => ToggleSelection(personnage.Id)" />
                     </div>
-                    <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-grid" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
+                    <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-grid" onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
                     <div class="personnage-card-content">
                         <div class="personnage-name">@personnage.Nom</div>
                         <div class="personnage-attribute-compact">Type: @personnage.Type</div>
@@ -211,7 +211,7 @@ else
                     <div class="card-checkbox" @onclick:stopPropagation="true">
                         <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)" @onchange="() => ToggleSelection(personnage.Id)" />
                     </div>
-                    <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-list" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
+                    <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-list" onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
                     <div class="personnage-info-list">
                         <span class="personnage-name" style="font-weight: 700;">@personnage.Nom</span>
                         <span class="list-separator">|</span>

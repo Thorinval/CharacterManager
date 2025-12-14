@@ -44,11 +44,11 @@
                         <div class="personnage-image-wrapper">
                             @if (!string.IsNullOrEmpty(currentPerso.ImageUrlDetail))
                             {
-                                <img src="@currentPerso.ImageUrlDetail" alt="@currentPerso.Nom" class="personnage-image @animationClass" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
+                                <img src="@currentPerso.ImageUrlDetail" alt="@currentPerso.Nom" class="personnage-image @animationClass" onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
                             }
                             else
                             {
-                                <img src="/images/personnages/default.png" alt="@currentPerso.Nom" class="personnage-image @animationClass" />
+                                <img src="/images/personnages/default_portrait.png" alt="@currentPerso.Nom" class="personnage-image @animationClass" />
                             }
                         </div>
 
