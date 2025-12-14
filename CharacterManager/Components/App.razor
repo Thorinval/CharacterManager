@@ -16,6 +16,16 @@
 <body>
     <Routes />
     <script src="_framework/blazor.web.js"></script>
+    <script>
+        window.downloadFile = function(fileName, base64String) {
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = 'data:text/csv;base64,' + base64String;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
 </body>
 
 </html>

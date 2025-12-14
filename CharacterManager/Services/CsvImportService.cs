@@ -1,12 +1,16 @@
 using CharacterManager.Models;
+using CharacterManager.Data;
+using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace CharacterManager.Services;
 
-public class CsvImportService(PersonnageService personnageService)
+public class CsvImportService(PersonnageService personnageService, ApplicationDbContext context)
 {
     private readonly PersonnageService _personnageService = personnageService;
+    private readonly ApplicationDbContext _context = context;
 
-    public async Task<ImportResult> ImportCsvAsync(Stream csvStream)
+    public async Task<ImportResult> ImportCsvAsync(Stream csvStream, string fileName = "")
     {
         var result = new ImportResult();
         var lines = new List<string>();
@@ -57,6 +61,12 @@ public class CsvImportService(PersonnageService personnageService)
             }
 
             result.IsSuccess = true;
+            
+            // Enregistrer le nom du fichier importé
+            if (!string.IsNullOrEmpty(fileName))
+            {
+                await SaveLastImportedFileName(fileName);
+            }
         }
         catch (Exception ex)
         {
@@ -301,6 +311,62 @@ public class CsvImportService(PersonnageService personnageService)
 
         values.Add(currentValue.ToString());
         return values;
+    }
+
+    public async Task<string?> GetLastImportedFileName()
+    {
+        var settings = await _context.AppSettings.FirstOrDefaultAsync();
+        return settings?.LastImportedFileName;
+    }
+
+    private async Task SaveLastImportedFileName(string fileName)
+    {
+        var settings = await _context.AppSettings.FirstOrDefaultAsync();
+        if (settings == null)
+        {
+            settings = new AppSettings();
+            _context.AppSettings.Add(settings);
+        }
+        
+        settings.LastImportedFileName = fileName;
+        settings.LastImportedDate = DateTime.Now;
+        await _context.SaveChangesAsync();
+    }
+
+    public Task<byte[]> ExportToCsvAsync(IEnumerable<Personnage> personnages)
+    {
+        var sb = new StringBuilder();
+        
+        // Header
+        sb.AppendLine("Personnage;Rareté;Type;Puissance;PA;PV;Action;Role;Niveau;Rang;Selection;Faction");
+        
+        // Data rows
+        foreach (var p in personnages)
+        {
+            sb.Append($"{EscapeCsvValue(p.Nom)};");
+            sb.Append($"{p.Rarete};");
+            sb.Append($"{p.Type};");
+            sb.Append($"{p.Puissance};");
+            sb.Append($"{p.PA};");
+            sb.Append($"{p.PV};");
+            sb.Append($"{p.TypeAttaque};");
+            sb.Append($"{p.Role};");
+            sb.Append($"{p.Niveau};");
+            sb.Append($"{p.Rang};");
+            sb.Append($"{(p.Selectionne ? "Oui" : "Non")};");
+            sb.AppendLine($"{p.Faction}");
+        }
+        
+        return Task.FromResult(Encoding.UTF8.GetBytes(sb.ToString()));
+    }
+
+    private string EscapeCsvValue(string value)
+    {
+        if (value.Contains(';') || value.Contains('"') || value.Contains('\n'))
+        {
+            return $"\"{value.Replace("\"", "\"\"")}\"";
+        }
+        return value;
     }
 }
 

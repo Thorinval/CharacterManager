@@ -33,100 +33,192 @@ else
         </div>
     </div>
 
-<h2>Puissance de l'escouade : @puissanceEscouade</h2>
+<div class="puissance-display-container">
+    <h2>Puissance de l'escouade</h2>
+    <div class="puissance-value-display">
+        <img src="/images/puissance.png" alt="Puissance" class="puissance-image" onerror="this.style.display='none';" />
+        <span class="puissance-number">@puissanceEscouade</span>
+    </div>
+</div>
 <h2>Puissance max : @puissanceMax</h2>
 <br />
 
 
     <h2>Commandant</h2>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Image</th>
-                <th>Nom</th>
-                <th>Rareté</th>
-                <th>Type</th>
-                <th>Puissance</th>
-                <th>Niveau</th>
-                <th>Rang</th>
-                <th>Faction</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var perso in commandants)
-            {
-                <tr>
-                    <td><img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="table-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" /></td>
-                    <td>@perso.Nom</td>
-                    <td>@perso.Rarete</td>
-                    <td>@perso.Type</td>
-                    <td>@perso.Puissance</td>
-                    <td>@perso.Niveau</td>
-                    <td>@perso.Rang</td>
-                    <td>@perso.Faction</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="personnages-list">
+        @foreach (var perso in commandants)
+        {
+            <div class="personnage-card">
+                <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
+                <div class="personnage-card-info">
+                    <div class="personnage-name">@perso.Nom</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Rareté:</span> @perso.Rarete</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Puissance:</span> @perso.Puissance</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Niveau:</span> @perso.Niveau</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Rang:</span> @GetRankStars(perso.Rang)</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Faction:</span> @perso.Faction</div>
+                </div>
+            </div>
+        }
+    </div>
     <br />
     <h2>Mercenaires (@mercenaires.Count)</h2>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th></th>
-                <th>Nom</th>
-                <th>Rareté</th>
-                <th>Type</th>
-                <th>Puissance</th>
-                <th>Niveau</th>
-                <th>Rang</th>
-                <th>Faction</th>
-            </tr>
-        </thead>        
-        <tbody>
-            @foreach (var perso in mercenaires)
-            {
-                <tr>
-                    <td><img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="table-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" /></td>
-                    <td>@perso.Nom</td>
-                    <td>@perso.Rarete</td>
-                    <td>@perso.Type</td>
-                    <td>@perso.Puissance</td>
-                    <td>@perso.Niveau</td>
-                    <td>@perso.Rang</td>
-                    <td>@perso.Faction</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="personnages-list">
+        @foreach (var perso in mercenaires)
+        {
+            <div class="personnage-card">
+                <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
+                <div class="personnage-card-info">
+                    <div class="personnage-name">@perso.Nom</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Rareté:</span> @perso.Rarete</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Puissance:</span> @perso.Puissance</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Niveau:</span> @perso.Niveau</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Rang:</span> @GetRankStars(perso.Rang)</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Faction:</span> @perso.Faction</div>
+                </div>
+            </div>
+        }
+    </div>
     <br />
     <h2>Androïdes</h2>
-    <table class="table table-striped"> 
-        <thead>
-            <tr>
-                <th></th>
-                <th>Nom</th>
-                <th>Rareté</th>
-                <th>Type</th>
-                <th>Puissance</th>
-                <th>Niveau</th>
-            </tr>
-        </thead>
-        <tbody> 
-            @foreach (var perso in androides)
-            {
-                <tr>
-                    <td><img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="table-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" /></td>
-                    <td>@perso.Nom</td>
-                    <td>@perso.Rarete</td>
-                    <td>@perso.Type</td>
-                    <td>@perso.Puissance</td>
-                    <td>@perso.Niveau</td>
-                </tr>
-            }  
-        </tbody>
-    </table>
+    <div class="personnages-list">
+        @foreach (var perso in androides)
+        {
+            <div class="personnage-card">
+                <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
+                <div class="personnage-card-info">
+                    <div class="personnage-name">@perso.Nom</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Rareté:</span> @perso.Rarete</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Puissance:</span> @perso.Puissance</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Niveau:</span> @perso.Niveau</div>
+                </div>
+            </div>
+        }
+    </div>
 }
+
+<style>
+    .personnages-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .personnage-card {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 1.5rem;
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 1px solid #dee2e6;
+    }
+
+    .personnage-card-image {
+        width: 80px;
+        height: 106px;
+        object-fit: cover;
+        border-radius: 4px;
+        flex-shrink: 0;
+    }
+
+    .personnage-card-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        flex: 1;
+        justify-content: center;
+    }
+
+    .personnage-name {
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #333;
+        margin-bottom: 0.2rem;
+    }
+
+    .personnage-attribute {
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    .attribute-label {
+        font-weight: 600;
+        color: #666;
+    }
+
+    .escouade-preview {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .escouade-images {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .escouade-member-preview {
+        text-align: center;
+        background: white;
+        padding: 0.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .escouade-image {
+        width: 120px;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 4px;
+        display: block;
+    }
+
+    .escouade-member-name {
+        font-weight: bold;
+        margin-top: 0.25rem;
+        font-size: 0.9rem;
+    }
+
+    .escouade-member-power {
+        color: #666;
+        font-size: 0.85rem;
+    }
+
+    .puissance-display-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .puissance-value-display {
+        position: relative;
+        display: inline-block;
+    }
+
+    .puissance-image {
+        max-width: 200px;
+        height: auto;
+    }
+
+    .puissance-number {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #FFD700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+</style>
+
 @if (showModal)
 {
     <div class="modal-overlay" @onclick:stopPropagation="true">
@@ -234,53 +326,6 @@ else
             justify-content: flex-end;
             gap: 0.5rem;
         }
-
-        .escouade-preview {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-        }
-
-        .escouade-images {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .escouade-member-preview {
-            text-align: center;
-            background: white;
-            padding: 0.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .escouade-image {
-            width: 120px;
-            height: 160px;
-            object-fit: cover;
-            border-radius: 4px;
-            display: block;
-        }
-
-        .escouade-member-name {
-            font-weight: bold;
-            margin-top: 0.25rem;
-            font-size: 0.9rem;
-        }
-
-        .escouade-member-power {
-            color: #666;
-            font-size: 0.85rem;
-        }
-
-        .table-image {
-            width: 50px;
-            height: 66px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
     </style>
 }
 
@@ -314,6 +359,22 @@ else
         puissanceMax = PersonnageService.GetPuissanceMaxEscouade();
     }
     
+    private MarkupString GetRankStars(int rank)
+    {
+        var stars = "";
+        for (int i = 1; i <= 7; i++)
+        {
+            if (i <= rank)
+            {
+                stars += "<span style='color: #FFD700;'>★</span>";
+            }
+            else
+            {
+                stars += "<span style='color: #CCCCCC;'>☆</span>";
+            }
+        }
+        return new MarkupString(stars);
+    }
 
         private void CloseModal()
     {

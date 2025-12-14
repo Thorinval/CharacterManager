@@ -2,6 +2,7 @@
 @inject PersonnageService PersonnageService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
+@inject CsvImportService CsvImportService
 @using CharacterManager.Models
 @using CharacterManager.Services
 @rendermode InteractiveServer
@@ -28,6 +29,9 @@
         }
         <button class="btn btn-primary" @onclick="() => { isEditing = false; currentPersonnage = new Personnage(); showModal = true; }">
             Ajouter Personnage
+        </button>
+        <button class="btn btn-success ms-2" @onclick="ExportToCsv" title="Exporter l'inventaire en CSV">
+            <i class="bi bi-download"></i> Exporter CSV
         </button>
         <button class="btn btn-danger ms-2" @onclick="DeleteSelectedPersonnages" disabled="@(!selectedPersonnages.Any())" title="Supprimer les personnages sélectionnés">
             <i class="bi bi-trash-fill"></i> Supprimer sélection (@selectedPersonnages.Count)
@@ -491,6 +495,22 @@ else
     private void ViewPersonnage(int id)
     {
         Navigation.NavigateTo($"/detail-personnage/{id}");
+    }
+
+    private async Task ExportToCsv()
+    {
+        try
+        {
+            var csvBytes = await CsvImportService.ExportToCsvAsync(personnagesFiltres);
+            var fileName = $"inventaire_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            
+            // Utiliser JavaScript pour télécharger le fichier
+            await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(csvBytes));
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de l'export: {ex.Message}");
+        }
     }
 }
 

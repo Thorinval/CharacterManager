@@ -45,6 +45,17 @@
                     else
                     {
                         <form @onsubmit="HandleImport">
+                            @if (!string.IsNullOrEmpty(lastImportedFileName))
+                            {
+                                <div class="alert alert-secondary">
+                                    <strong>Dernier fichier importé:</strong> @lastImportedFileName
+                                    @if (lastImportedFileName != null)
+                                    {
+                                        <small class="d-block text-muted mt-1">Vous pouvez sélectionner le même fichier ou en choisir un autre ci-dessous</small>
+                                    }
+                                </div>
+                            }
+                            
                             <div class="mb-3">
                                 <label for="csvFile" class="form-label">Sélectionner un fichier CSV</label>
                                 <InputFile 
@@ -152,6 +163,12 @@
     private bool isImporting = false;
     private bool importComplete = false;
     private ImportResult? importResult;
+    private string? lastImportedFileName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        lastImportedFileName = await CsvImportService.GetLastImportedFileName();
+    }
 
     private void OnFileSelected(InputFileChangeEventArgs e)
     {
@@ -170,8 +187,11 @@
         {
             using (var stream = selectedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024)) // 10MB max
             {
-                importResult = await CsvImportService.ImportCsvAsync(stream);
+                importResult = await CsvImportService.ImportCsvAsync(stream, selectedFileName ?? "");
                 importComplete = true;
+                
+                // Rafraîchir le nom du dernier fichier importé
+                lastImportedFileName = await CsvImportService.GetLastImportedFileName();
             }
         }
         catch (Exception ex)
