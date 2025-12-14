@@ -58,3 +58,16 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+/* Styles pour les boutons retour avec icône */
+.btn-retour {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-retour-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}

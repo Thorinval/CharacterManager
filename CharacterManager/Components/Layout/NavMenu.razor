@@ -1,4 +1,6 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@rendermode InteractiveServer
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">CharacterManager</a>
     </div>
@@ -33,12 +35,22 @@
         </div>
 
         <div class="nav-item px-3">
-            <a class="nav-link" href="#" @onclick="ShowAbout" @onclick:preventDefault>
+            <button class="nav-link nav-link-button" @onclick="ShowAbout">
                 <span class="bi bi-info-circle-nav-menu" aria-hidden="true"></span> À propos
-            </a>
+            </button>
         </div>
     </nav>
 </div>
+
+<style>
+    .nav-link-button {
+        background: none;
+        border: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+    }
+</style>
 
 @code {
     [Parameter]

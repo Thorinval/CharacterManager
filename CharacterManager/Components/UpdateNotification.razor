@@ -1,0 +1,216 @@
+@inject UpdateService UpdateService
+@inject IJSRuntime JSRuntime
+@using CharacterManager.Services
+@rendermode InteractiveServer
+
+@if (updateInfo?.IsUpdateAvailable == true)
+{
+    <div class="update-notification">
+        <div class="update-content">
+            <div class="update-icon">
+                <i class="bi bi-arrow-up-circle-fill"></i>
+            </div>
+            <div class="update-text">
+                <strong>Mise à jour disponible!</strong>
+                <span>Version @updateInfo.LatestVersion est disponible (actuelle: @updateInfo.CurrentVersion)</span>
+            </div>
+            <div class="update-actions">
+                <button class="btn btn-sm btn-light" @onclick="ShowDetails">Détails</button>
+                <button class="btn btn-sm btn-success" @onclick="DownloadUpdate">Télécharger</button>
+                <button class="btn btn-sm btn-link" @onclick="Dismiss">✕</button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showDetails && updateInfo != null)
+{
+    <div class="modal-overlay" @onclick="() => showDetails = false">
+        <div class="modal-dialog-custom" @onclick:stopPropagation="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Mise à jour disponible - v@updateInfo.LatestVersion</h5>
+                    <button type="button" class="btn-close" @onclick="() => showDetails = false"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Version actuelle:</strong> @updateInfo.CurrentVersion</p>
+                    <p><strong>Nouvelle version:</strong> @updateInfo.LatestVersion</p>
+                    <p><strong>Publiée le:</strong> @updateInfo.PublishedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                    
+                    @if (!string.IsNullOrEmpty(updateInfo.ReleaseNotes))
+                    {
+                        <hr />
+                        <h6>Notes de version:</h6>
+                        <div class="release-notes">
+                            @((MarkupString)System.Text.RegularExpressions.Regex.Replace(
+                                System.Web.HttpUtility.HtmlEncode(updateInfo.ReleaseNotes), 
+                                @"\n", "<br />"))
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => showDetails = false">Fermer</button>
+                    <button type="button" class="btn btn-success" @onclick="DownloadUpdate">Télécharger la mise à jour</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .update-notification {
+        position: fixed;
+        top: 70px;
+        right: 20px;
+        z-index: 1000;
+        max-width: 400px;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @@keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .update-content {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .update-icon {
+        font-size: 2rem;
+        flex-shrink: 0;
+    }
+
+    .update-text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .update-text strong {
+        font-size: 1rem;
+    }
+
+    .update-text span {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+
+    .update-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .update-actions .btn-link {
+        color: white;
+        text-decoration: none;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .release-notes {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 4px;
+        max-height: 300px;
+        overflow-y: auto;
+        font-size: 0.9rem;
+    }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+    }
+
+    .modal-dialog-custom {
+        background: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        max-width: 600px;
+        width: 90%;
+        z-index: 2001;
+    }
+
+    .modal-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-header {
+        padding: 1rem;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-body {
+        padding: 1rem;
+        flex: 1;
+    }
+
+    .modal-footer {
+        padding: 1rem;
+        border-top: 1px solid #dee2e6;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+</style>
+
+@code {
+    private UpdateInfo? updateInfo;
+    private bool showDetails = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckForUpdates();
+    }
+
+    private async Task CheckForUpdates()
+    {
+        updateInfo = await UpdateService.CheckForUpdatesAsync();
+        StateHasChanged();
+    }
+
+    private void ShowDetails()
+    {
+        showDetails = true;
+    }
+
+    private async Task DownloadUpdate()
+    {
+        if (updateInfo != null && !string.IsNullOrEmpty(updateInfo.DownloadUrl))
+        {
+            await JSRuntime.InvokeVoidAsync("open", updateInfo.DownloadUrl, "_blank");
+        }
+    }
+
+    private void Dismiss()
+    {
+        updateInfo = null;
+    }
+}

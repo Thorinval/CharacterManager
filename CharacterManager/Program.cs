@@ -16,6 +16,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<PersonnageService>();
 builder.Services.AddScoped<CsvImportService>();
 builder.Services.AddSingleton<AppVersionService>();
+builder.Services.AddHttpClient<UpdateService>();
 
 var app = builder.Build();
 

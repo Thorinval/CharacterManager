@@ -9,7 +9,8 @@
 
 <PageTitle>Inventaire</PageTitle>
 
-<h1>Inventaire des personnages</h1>
+<h1 class="inventaire-title">INVENTAIRE</h1>
+<p class="inventaire-subtitle">Gestion des personnages</p>
 
 <div class="row mb-3">
     <div class="col-md-6">
@@ -43,52 +44,79 @@
 
 @if (personnagesFiltres.Any())
 {
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>
-                    <input type="checkbox" checked="@selectAllChecked" @onchange="SelectAll" />
-                </th>
-                <th></th>
-                <th @onclick="SortByNom" style="cursor: pointer;">
-                    Nom
-                </th>
-                <th @onclick="SortByRarete" style="cursor: pointer;">
-                    Rareté
-                </th>
-                <th @onclick="SortByNiveau" style="cursor: pointer;">
-                    Niveau
-                </th>
-                <th @onclick="SortByRang" style="cursor: pointer;">
-                    Rang
-                </th>
-                <th @onclick="SortByType" style="cursor: pointer;">
-                    Type
-                </th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var personnage in personnagesFiltres)
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="sort-controls">
+            <label>Trier par:</label>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNom">Nom</button>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRarete">Rareté</button>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNiveau">Niveau</button>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRang">Rang</button>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByType">Type</button>
+        </div>
+        <div class="view-mode-controls">
+            <button class="btn btn-sm @GetViewModeClass("grid")" @onclick="@(() => viewMode = "grid")" title="Mode grille">
+                <i class="bi bi-grid-3x3-gap"></i> Grille
+            </button>
+            <button class="btn btn-sm @GetViewModeClass("list")" @onclick="@(() => viewMode = "list")" title="Mode liste">
+                <i class="bi bi-list-ul"></i> Liste
+            </button>
+        </div>
+    </div>
+
+    <div class="select-all-container mb-3">
+        <input type="checkbox" id="selectAll" checked="@selectAllChecked" @onchange="SelectAll" />
+        <label for="selectAll" class="ms-2">Tout sélectionner</label>
+    </div>
+
+    <div class="@GetContainerClass()">
+        @foreach (var personnage in personnagesFiltres)
+        {
+            @if (viewMode == "grid")
             {
-                <tr @onclick="() => ViewPersonnage(personnage.Id)" style="cursor: pointer;">
-                    <td @onclick:stopPropagation="true">
+                <div class="personnage-card-grid" @onclick="() => ViewPersonnage(personnage.Id)" style="cursor: pointer;">
+                    <div class="card-checkbox-grid" @onclick:stopPropagation="true">
                         <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)" @onchange="() => ToggleSelection(personnage.Id)" />
-                    </td>
-                    <td><img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="table-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" /></td>
-                    <td>@personnage.Nom</td>
-                    <td>@personnage.Rarete</td>
-                    <td>@personnage.Niveau</td>
-                    <td>@GetRankStars(personnage.Rang)</td>
-                    <td>@personnage.Type</td>
-                    <td @onclick:stopPropagation="true">
+                    </div>
+                    <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-grid" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
+                    <div class="personnage-card-content">
+                        <div class="personnage-name">@personnage.Nom</div>
+                        <div class="personnage-attribute-compact">Rareté: @personnage.Rarete</div>
+                        <div class="personnage-attribute-compact">Puissance: @personnage.Puissance</div>
+                        <div class="personnage-attribute-compact">Niveau: @personnage.Niveau</div>
+                        <div class="personnage-attribute-compact">Rang: @GetRankStars(personnage.Rang)</div>
+                        <div class="card-actions-grid" @onclick:stopPropagation="true">
+                            <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)">Éditer</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)">Suppr.</button>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="personnage-card-list" @onclick="() => ViewPersonnage(personnage.Id)" style="cursor: pointer;">
+                    <div class="card-checkbox" @onclick:stopPropagation="true">
+                        <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)" @onchange="() => ToggleSelection(personnage.Id)" />
+                    </div>
+                    <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-list" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
+                    <div class="personnage-info-list">
+                        <span class="personnage-name">@personnage.Nom</span>
+                        <span class="list-separator">|</span>
+                        <span>Rareté: @personnage.Rarete</span>
+                        <span class="list-separator">|</span>
+                        <span>Puissance: @personnage.Puissance</span>
+                        <span class="list-separator">|</span>
+                        <span>Niveau: @personnage.Niveau</span>
+                        <span class="list-separator">|</span>
+                        <span>Rang: @GetRankStars(personnage.Rang)</span>
+                    </div>
+                    <div class="card-actions-list" @onclick:stopPropagation="true">
                         <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)">Éditer</button>
                         <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)">Supprimer</button>
-                    </td>
-                </tr>
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
+        }
+    </div>
 }
 else
 {
@@ -210,6 +238,229 @@ else
             object-fit: cover;
             border-radius: 4px;
         }
+
+        /* Styles pour la présentation en grille */
+        .personnages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+            max-width: 100%;
+        }
+
+        @@media (min-width: 1920px) {
+            .personnages-grid {
+                grid-template-columns: repeat(10, 1fr);
+            }
+        }
+
+        @@media (min-width: 1440px) and (max-width: 1919px) {
+            .personnages-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+        }
+
+        @@media (min-width: 1200px) and (max-width: 1439px) {
+            .personnages-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        @@media (min-width: 768px) and (max-width: 1199px) {
+            .personnages-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @@media (max-width: 767px) {
+            .personnages-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .personnage-card-grid {
+            display: flex;
+            flex-direction: column;
+            background: white;
+            padding: 0.75rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid #dee2e6;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .personnage-card-grid:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .card-checkbox-grid {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            z-index: 10;
+        }
+
+        .card-checkbox-grid input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .personnage-card-image-grid {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .personnage-card-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .personnage-attribute-compact {
+            font-size: 0.8rem;
+            color: #555;
+        }
+
+        .card-actions-grid {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+        }
+
+        .card-actions-grid .btn {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        /* Styles pour la présentation en liste */
+        .personnages-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .personnage-card-list {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 1rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            border: 1px solid #dee2e6;
+            transition: background-color 0.2s;
+        }
+
+        .personnage-card-list:hover {
+            background-color: #f8f9fa;
+        }
+
+        .card-checkbox {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .card-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .personnage-card-image-list {
+            width: 50px;
+            height: 66px;
+            object-fit: cover;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .personnage-info-list {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            font-size: 0.9rem;
+        }
+
+        .list-separator {
+            color: #ccc;
+        }
+
+        .card-actions-list {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .personnage-name {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .sort-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .view-mode-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .select-all-container {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .select-all-container input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .select-all-container label {
+            margin: 0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Styles pour le titre */
+        .inventaire-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 
+                -2px -2px 0 #000,
+                2px -2px 0 #000,
+                -2px 2px 0 #000,
+                2px 2px 0 #000,
+                -3px 0 0 #000,
+                3px 0 0 #000,
+                0 -3px 0 #000,
+                0 3px 0 #000;
+            margin-bottom: 0.5rem;
+        }
+
+        .inventaire-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
     </style>
 }
 
@@ -237,10 +488,23 @@ else
     
     // Filtre
     private string searchTerm = "";
+    
+    // Mode d'affichage
+    private string viewMode = "grid";
 
     protected override void OnInitialized()
     {
         LoadPersonnages();
+    }
+
+    private string GetViewModeClass(string mode)
+    {
+        return viewMode == mode ? "btn-primary" : "btn-outline-secondary";
+    }
+
+    private string GetContainerClass()
+    {
+        return viewMode == "grid" ? "personnages-grid" : "personnages-list";
     }
 
     private void LoadPersonnages()

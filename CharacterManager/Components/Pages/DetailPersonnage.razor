@@ -11,7 +11,10 @@
 {
     <div class="personnage-detail-container">
         <div class="personnage-header">
-            <button class="btn btn-secondary mb-3" @onclick="GoBack">← Retour</button>
+            <button class="btn btn-secondary mb-3 btn-retour" @onclick="GoBack">
+                <img src="/images/btn_retour.png" alt="Retour" class="btn-retour-icon" onerror="this.style.display='none';" />
+                <span>← Retour</span>
+            </button>
         </div>
 
         <div class="row">
@@ -98,7 +101,10 @@
                 }
 
                 <div class="actions-card mt-4">
-                    <button class="btn btn-primary btn-lg w-100" @onclick="GoBack">Retour</button>
+                    <button class="btn btn-primary btn-lg w-100 btn-retour" @onclick="GoBack">
+                        <img src="/images/btn_retour.png" alt="Retour" class="btn-retour-icon" onerror="this.style.display='none';" />
+                        <span>Retour</span>
+                    </button>
                 </div>
             </div>
         </div>

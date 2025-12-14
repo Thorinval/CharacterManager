@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  charactermanager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: character-manager
+    ports:
+      - "5269:8080"
+    volumes:
+      # Persister la base de données
+      - ./data:/app/data
+      # Persister les images
+      - ./CharacterManager/wwwroot/images:/app/wwwroot/images
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+    restart: unless-stopped
+    networks:
+      - character-network
+
+networks:
+  character-network:
+    driver: bridge

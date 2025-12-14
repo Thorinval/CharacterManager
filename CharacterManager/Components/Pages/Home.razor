@@ -4,33 +4,54 @@
 
 <PageTitle>Home</PageTitle>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="welcome-card">
-                <h1>Character Manager</h1>
-                <p class="lead">Bienvenue sur votre gestionnaire de personnages</p>
-                
-                <hr />
-                
-                <div class="features-section">
-                    <h3>Fonctionnalités principales :</h3>
-                    <ul class="features-list">
-                        <li><strong>Inventaire :</strong> Gérez tous vos personnages en un seul endroit</li>
-                        <li><strong>Ajouter/Éditer :</strong> Créez et modifiez vos personnages facilement</li>
-                        <li><strong>Détails :</strong> Consultez les informations complètes de chaque personnage</li>
-                        <li><strong>Persistance :</strong> Vos données sont sauvegardées en base de données</li>
-                    </ul>
-                </div>
+<div class="home-container">
+    <div class="container mt-5">
+        <div class="row justify-content-end">
+            <div class="col-md-8 col-lg-7 col-xl-6">
+                <div class="welcome-card">
+                    <h1>Character Manager</h1>
+                    <p class="lead">Bienvenue sur votre gestionnaire de personnages</p>
+                    
+                    <hr />
+                    
+                    <div class="features-section">
+                        <h3>Fonctionnalités principales :</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="features-list">
+                                    <li><strong>Escouade :</strong> Composez votre équipe de mercenaires, commandants et androïdes</li>
+                                    <li><strong>Inventaire :</strong> Gérez tous vos personnages avec tri, filtres et recherche</li>
+                                    <li><strong>Sélection multiple :</strong> Modifiez plusieurs personnages en une fois</li>
+                                    <li><strong>Détails complets :</strong> Consultez stats, capacités et caractéristiques</li>
+                                    <li><strong>Import/Export CSV :</strong> Importez et exportez vos données facilement</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="features-list">
+                                    <li><strong>Images dynamiques :</strong> Visualisez vos personnages avec plusieurs vues</li>
+                                    <li><strong>Gestion des rangs :</strong> Système d'étoiles pour les rangs (1-7)</li>
+                                    <li><strong>Calcul de puissance :</strong> Puissance totale et maximale de l'escouade</li>
+                                    <li><strong>Filtres avancés :</strong> Par rareté, type, faction et rôle</li>
+                                    <li><strong>Persistance SQLite :</strong> Base de données locale intégrée</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
 
-                <hr />
+                    <hr />
 
-                <div class="version-info">
-                    <small class="text-muted">Version: @VersionService.GetFullVersionString()</small>
-                </div>
+                    <div class="version-info">
+                        <small class="text-muted">Version: @VersionService.GetFullVersionString()</small>
+                    </div>
 
-                <div class="mt-4">
-                    <a href="/inventaire" class="btn btn-primary btn-lg">Accéder à l'Inventaire</a>
+                    <div class="mt-4 text-center">
+                        <a href="/escouade" class="btn btn-primary btn-lg me-2">
+                            <i class="bi bi-people-fill"></i> Escouade
+                        </a>
+                        <a href="/inventaire" class="btn btn-primary btn-lg">
+                            <i class="bi bi-grid-3x3-gap-fill"></i> Inventaire
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -38,23 +59,51 @@
 </div>
 
 <style>
+    .home-container {
+        position: relative;
+        min-height: 100vh;
+        background-image: url('/images/accueil.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    .home-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1;
+    }
+
+    .home-container .container {
+        position: relative;
+        z-index: 2;
+    }
+
     .welcome-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: rgba(102, 126, 234, 0.85);
+        backdrop-filter: blur(10px);
         color: white;
         padding: 40px;
-        border-radius: 10px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        border-radius: 15px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
     }
 
     .welcome-card h1 {
-        font-size: 2.5rem;
+        font-size: 2.8rem;
         margin-bottom: 10px;
         font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .welcome-card .lead {
-        font-size: 1.3rem;
+        font-size: 1.4rem;
         opacity: 0.95;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
     }
 
     .features-section {
@@ -62,8 +111,9 @@
     }
 
     .features-section h3 {
-        font-size: 1.5rem;
-        margin-bottom: 15px;
+        font-size: 1.6rem;
+        margin-bottom: 20px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
     }
 
     .features-list {
@@ -72,10 +122,11 @@
     }
 
     .features-list li {
-        padding: 10px 0;
+        padding: 8px 0;
         padding-left: 30px;
         position: relative;
-        font-size: 1.1rem;
+        font-size: 1rem;
+        line-height: 1.6;
     }
 
     .features-list li:before {
@@ -84,6 +135,7 @@
         left: 0;
         font-weight: bold;
         font-size: 1.3rem;
+        color: #90EE90;
     }
 
     .version-info {
@@ -93,16 +145,23 @@
     }
 
     .btn-primary {
-        background-color: rgba(255, 255, 255, 0.2);
-        border-color: white;
+        background-color: rgba(255, 255, 255, 0.25);
+        border: 2px solid white;
         color: white;
         transition: all 0.3s ease;
+        font-weight: 600;
+        padding: 12px 30px;
     }
 
     .btn-primary:hover {
-        background-color: rgba(255, 255, 255, 0.3);
+        background-color: rgba(255, 255, 255, 0.4);
+        border-color: white;
         color: white;
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
     }
-</style>
+
+    .btn-primary i {
+        margin-right: 8px;
+    }
+    </style>

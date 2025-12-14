@@ -40,7 +40,10 @@
                         </div>
 
                         <button class="btn btn-primary" @onclick="Reset">Nouvel import</button>
-                        <a href="/inventaire" class="btn btn-secondary">Retour à l'inventaire</a>
+                        <a href="/inventaire" class="btn btn-secondary btn-retour">
+                            <img src="/images/btn_retour.png" alt="Retour" class="btn-retour-icon" onerror="this.style.display='none';" />
+                            <span>Retour à l'inventaire</span>
+                        </a>
                     }
                     else
                     {

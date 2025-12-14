@@ -8,7 +8,8 @@
 
 <PageTitle>Escouade</PageTitle>
 
-<h1>Liste des mercenaires sélectionnés de l'escouade</h1>
+<h1 class="escouade-title">ESCOUADE</h1>
+<p class="escouade-subtitle">Liste des mercenaires sélectionnés</p>
 
 
 @if (personnagesEscouade.Count == 0)
@@ -210,12 +211,42 @@ else
     .puissance-number {
         position: absolute;
         top: 50%;
-        left: 50%;
+        left: 60%;
         transform: translate(-50%, -50%);
-        font-size: 1.8rem;
+        font-size: 2rem;
         font-weight: bold;
-        color: #FFD700;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        color: white;
+        text-shadow: 
+            -1px -1px 0 #000,
+            1px -1px 0 #000,
+            -1px 1px 0 #000,
+            1px 1px 0 #000,
+            -2px 0 0 #000,
+            2px 0 0 #000,
+            0 -2px 0 #000,
+            0 2px 0 #000;
+    }
+
+    .escouade-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: white;
+        text-shadow: 
+            -2px -2px 0 #000,
+            2px -2px 0 #000,
+            -2px 2px 0 #000,
+            2px 2px 0 #000,
+            -3px 0 0 #000,
+            3px 0 0 #000,
+            0 -3px 0 #000,
+            0 3px 0 #000;
+        margin-bottom: 0.5rem;
+    }
+
+    .escouade-subtitle {
+        font-size: 1.2rem;
+        color: #666;
+        margin-bottom: 1.5rem;
     }
 </style>
 

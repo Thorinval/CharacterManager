@@ -1,5 +1,4 @@
 ﻿@inherits LayoutComponentBase
-@rendermode InteractiveServer
 
 <div class="page">
     <div class="sidebar">
@@ -8,10 +7,11 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="#" @onclick="ShowAboutModal" @onclick:preventDefault style="cursor: pointer;">À propos</a>
+            <button class="about-link" @onclick="ShowAboutModal">À propos</button>
         </div>
 
         <article class="content px-4">
+            <UpdateNotification />
             @Body
         </article>
     </main>
@@ -24,6 +24,21 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+<style>
+    .about-link {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        text-decoration: none;
+        font: inherit;
+    }
+    
+    .about-link:hover {
+        text-decoration: underline;
+    }
+</style>
 
 @code {
     private bool showAboutModal = false;
