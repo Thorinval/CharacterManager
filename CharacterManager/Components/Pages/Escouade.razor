@@ -10,7 +10,6 @@
 
 <h1>Liste des mercenaires sélectionnés de l'escouade</h1>
 
-<p>Nombre de mercenaires sélectionnés : @mercenaires.Count</p>
 
 @if (personnagesEscouade.Count == 0)
 {
@@ -20,6 +19,12 @@
 }
 else
 {
+
+<h2>Puissance de l'escouade : @puissanceEscouade</h2>
+<h2>Puissance max : @puissanceMax</h2>
+<br />
+
+
     <h2>Commandant</h2>
     <table class="table table-striped">
         <thead>
@@ -49,7 +54,7 @@ else
         </tbody>
     </table>
     <br />
-    <h2>Mercenaires</h2>
+    <h2>Mercenaires (@mercenaires.Count)</h2>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -87,8 +92,6 @@ else
                 <th>Type</th>
                 <th>Puissance</th>
                 <th>Niveau</th>
-                <th>Rang</th>
-                <th>Faction</th>
             </tr>
         </thead>
         <tbody> 
@@ -100,8 +103,6 @@ else
                     <td>@perso.Type</td>
                     <td>@perso.Puissance</td>
                     <td>@perso.Niveau</td>
-                    <td>@perso.Rang</td>
-                    <td>@perso.Faction</td>
                 </tr>
             }  
         </tbody>
@@ -228,6 +229,10 @@ else
     private Personnage currentPersonnage = new();
     private bool isEditing = false;
 
+    private int puissanceMax = 0;
+
+    private int puissanceEscouade = 0;
+
     protected override void OnInitialized()
     {
         LoadPersonnages();
@@ -239,6 +244,8 @@ else
         mercenaires = PersonnageService.GetMercenaires( true).ToList();
         commandants = PersonnageService.GetCommandants(true).ToList();
         androides = PersonnageService.GetAndroides(true).ToList();
+        puissanceEscouade = PersonnageService.GetPuissanceEscouade();
+        puissanceMax = PersonnageService.GetPuissanceMaxEscouade();
     }
     
 
