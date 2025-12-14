@@ -6,7 +6,6 @@
 @using CharacterManager.Models
 @using CharacterManager.Services
 @using Microsoft.AspNetCore.Components.Web
-@rendermode InteractiveServer
 
 <head>
     <title>Inventaire</title>
@@ -14,6 +13,30 @@
 
 <h1 class="inventaire-title">INVENTAIRE</h1>
 <p class="inventaire-subtitle">Gestion des personnages</p>
+
+<style>
+    .inventaire-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: white;
+        text-shadow: 
+            -2px -2px 0 #000,
+            2px -2px 0 #000,
+            -2px 2px 0 #000,
+            2px 2px 0 #000,
+            -3px 0 0 #000,
+            3px 0 0 #000,
+            0 -3px 0 #000,
+            0 3px 0 #000;
+        margin-bottom: 0.5rem;
+    }
+
+    .inventaire-subtitle {
+        font-size: 1.2rem;
+        color: #666;
+        margin-bottom: 1.5rem;
+    }
+</style>
 
 <div class="row mb-3">
     <div class="col-md-6">

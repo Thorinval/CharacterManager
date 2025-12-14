@@ -5,6 +5,7 @@
 @rendermode InteractiveServer
 
 @inject PersonnageService PersonnageService
+@inject NavigationManager Navigation
 
 <PageTitle>Escouade</PageTitle>
 
@@ -49,7 +50,7 @@ else
     <div class="personnages-list">
         @foreach (var perso in commandants)
         {
-            <div class="personnage-card">
+            <div class="personnage-card" @onclick="() => NavigateToDetail(perso.Id)" style="cursor: pointer;">
                 <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
@@ -67,7 +68,7 @@ else
     <div class="personnages-list">
         @foreach (var perso in mercenaires)
         {
-            <div class="personnage-card">
+            <div class="personnage-card" @onclick="() => NavigateToDetail(perso.Id)" style="cursor: pointer;">
                 <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
@@ -85,7 +86,7 @@ else
     <div class="personnages-list">
         @foreach (var perso in androides)
         {
-            <div class="personnage-card">
+            <div class="personnage-card" @onclick="() => NavigateToDetail(perso.Id)" style="cursor: pointer;">
                 <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
@@ -412,5 +413,10 @@ else
         showModal = false;
         currentPersonnage = new Personnage();
         StateHasChanged();
+    }
+
+    private void NavigateToDetail(int id)
+    {
+        Navigation.NavigateTo($"/detail-personnage/{id}");
     }
 }
