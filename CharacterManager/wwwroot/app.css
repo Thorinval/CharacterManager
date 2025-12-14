@@ -72,13 +72,32 @@ h1:focus {
     object-fit: contain;
 }
 
+/* Styles pour les icônes dans la navigation */
+.nav-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    vertical-align: middle;
+}
+
+/* Styles pour les icônes dans les en-têtes de pages */
+.page-header-icon {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    margin-right: 1rem;
+    vertical-align: middle;
+}
+
 /* Styles unifiés pour les en-têtes de pages */
 .page-header-banner {
-    background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 100%);
+    background: lightblue;
     padding: 1.5rem 2rem;
     margin: -1.1rem -1.5rem 2rem -1.5rem;
-    border-bottom: 3px solid #d0d0d0;
+    border-bottom: 3px solid #add8e6;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
 }
 
 .page-title {

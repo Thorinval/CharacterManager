@@ -13,6 +13,7 @@
 </head>
 
 <div class="page-header-banner">
+    <img src="/images/menu-icon.png" alt="" class="page-header-icon" />
     <h1 class="page-title">INVENTAIRE</h1>
 </div>
 
@@ -92,18 +93,15 @@
                     <div class="@GetContainerClassCompact()">
                         @foreach (var personnage in personnagesFiltres)
                         {
-                            @if (viewMode == "grid")
-                            {
-                                <div class="personnage-card-grid-compact" 
-                                     @ondragstart="@(e => HandleDragStart(e, personnage))"
-                                     draggable="true">
-                                    <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-compact" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
-                                    <div class="card-overlay-compact">
-                                        <span class="card-name-compact">@personnage.Nom</span>
-                                        <span class="card-puissance-compact">@personnage.Puissance</span>
-                                    </div>
+                            <div class="personnage-card-grid-compact" 
+                                 @ondragstart="@(e => HandleDragStart(e, personnage))"
+                                 draggable="true">
+                                <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-compact" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
+                                <div class="card-overlay-compact">
+                                    <span class="card-name-compact">@personnage.Nom</span>
+                                    <span class="card-puissance-compact">@personnage.Puissance</span>
                                 </div>
-                            }
+                            </div>
                         }
                     </div>
                 }
@@ -670,6 +668,8 @@ else
             flex-wrap: nowrap;
             gap: 6px;
             align-items: flex-start;
+            min-height: 100px;
+            width: max-content;
         }
 
         .personnage-card-grid-compact {
@@ -681,8 +681,9 @@ else
             border: 1px solid #ddd;
             transition: all 0.2s ease;
             width: 70px;
-            height: auto;
-            aspect-ratio: 0.75;
+            min-width: 70px;
+            max-width: 70px;
+            height: 93px;
             flex-shrink: 0;
         }
 

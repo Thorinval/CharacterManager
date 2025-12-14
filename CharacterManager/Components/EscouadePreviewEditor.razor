@@ -24,7 +24,8 @@
                     <div class="preview-card" @onclick="@(() => RemovePersonnage(0))">
                         <img src="@PersonnagesSelectionnes[0]!.ImageUrlPreview" 
                              alt="@PersonnagesSelectionnes[0]!.Nom" 
-                             title="Cliquez pour retirer">
+                             title="Cliquez pour retirer"
+                             onerror="this.onerror=null; this.src='/images/personnages/default.png';">
                         <span class="puissance">@PersonnagesSelectionnes[0]!.Puissance</span>
                     </div>
                 }
@@ -55,7 +56,8 @@
                             <div class="preview-card" @onclick="@(() => RemovePersonnage(index))">
                                 <img src="@PersonnagesSelectionnes[index]!.ImageUrlPreview"
                                      alt="@PersonnagesSelectionnes[index]!.Nom"
-                                     title="Cliquez pour retirer">
+                                     title="Cliquez pour retirer"
+                                     onerror="this.onerror=null; this.src='/images/personnages/default.png';">
                                 <span class="puissance">@PersonnagesSelectionnes[index]!.Puissance</span>
                             </div>
                         }
@@ -87,7 +89,8 @@
                             <div class="preview-card" @onclick="@(() => RemovePersonnage(index))">
                                 <img src="@PersonnagesSelectionnes[index]!.ImageUrlPreview"
                                      alt="@PersonnagesSelectionnes[index]!.Nom"
-                                     title="Cliquez pour retirer">
+                                     title="Cliquez pour retirer"
+                                     onerror="this.onerror=null; this.src='/images/personnages/default.png';">
                                 <span class="puissance">@PersonnagesSelectionnes[index]!.Puissance</span>
                             </div>
                         }

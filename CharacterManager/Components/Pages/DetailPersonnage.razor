@@ -20,6 +20,7 @@
     </div>
 
     <div class="page-header-banner">
+        <img src="/images/menu-icon.png" alt="" class="page-header-icon" />
         <h1 class="page-title">@currentPerso.Nom</h1>
         <p class="page-subtitle">Détails du personnage</p>
     </div>
@@ -34,8 +35,8 @@
                         <!-- Bouton Précédent -->
                         @if (HasNavigation)
                         {
-                            <button class="btn-nav-prev" @onclick="NavigateToPrevious" title="Personnage précédent">
-                                <img src="/images/gauche.png" alt="Précédent" class="nav-arrow-icon" onerror="this.onerror=null; this.src='/images/btn_retour.png';" />
+                            <button class="btn-nav-prev btn-nav-large" @onclick="NavigateToPrevious" title="Personnage précédent">
+                                <img src="/images/gauche.png" alt="Précédent" class="nav-arrow-icon-large" onerror="this.onerror=null; this.src='/images/btn_retour.png';" />
                             </button>
                         }
 
@@ -54,8 +55,8 @@
                         <!-- Bouton Suivant -->
                         @if (HasNavigation)
                         {
-                            <button class="btn-nav-next" @onclick="NavigateToNext" title="Personnage suivant">
-                                <img src="/images/droite.png" alt="Suivant" class="nav-arrow-icon" onerror="this.onerror=null; this.src='/images/btn_retour.png';" />
+                            <button class="btn-nav-next btn-nav-large" @onclick="NavigateToNext" title="Personnage suivant">
+                                <img src="/images/droite.png" alt="Suivant" class="nav-arrow-icon-large" onerror="this.onerror=null; this.src='/images/btn_retour.png';" />
                             </button>
                         }
                     </div>
@@ -328,6 +329,25 @@ else
         height: auto;
         object-fit: contain;
         filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    /* Styles pour les boutons de navigation agrandis */
+    .btn-nav-large {
+        width: 120px;
+        height: 120px;
+        min-width: 120px;
+        min-height: 120px;
+    }
+
+    .btn-nav-large:hover {
+        transform: scale(1.05);
+    }
+
+    .nav-arrow-icon-large {
+        width: 110px;
+        height: 110px;
+        object-fit: contain;
+        filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3));
     }
 
     /* Animations de transition */
