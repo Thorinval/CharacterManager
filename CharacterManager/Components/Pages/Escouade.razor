@@ -9,8 +9,44 @@
 
 <PageTitle>Escouade</PageTitle>
 
-<h1 class="escouade-title">ESCOUADE</h1>
-<p class="escouade-subtitle">Liste des mercenaires sélectionnés</p>
+<div class="page-header-banner escouade-header">
+    <div class="header-left"></div>
+
+    <div class="header-center">
+        <div class="puissance-header">
+            <img src="/images/puissance.png" alt="Puissance" class="puissance-image-header" onerror="this.style.display='none';" />
+            <span class="puissance-number-header">@puissanceEscouade</span>
+        </div>
+    </div>
+
+    @if (personnagesEscouade.Any())
+    {
+        <div class="escouade-preview-section mb-0">
+            <div class="escouade-images">
+                @foreach (var perso in personnagesEscouade.OrderByDescending(p => p.Puissance))
+                {
+                    var currentId = perso.Id;
+                    var returnPath = "/escouade";
+                    <div class="escouade-member-preview clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForEscouade(), returnPath))">
+                        <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
+                        <div class="escouade-member-name">@perso.Nom</div>
+                        <div class="escouade-member-power">@perso.Puissance</div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <div class="header-right">
+        @if (commandants.Any())
+        {
+            var cmd = commandants.First();
+            <img src="@cmd.ImageUrlPreview" alt="@cmd.Nom" class="commandant-hero" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
+        }
+    </div>
+
+    <h1 class="page-title"></h1>
+</div>
 
 
 @if (personnagesEscouade.Count == 0)
@@ -21,36 +57,26 @@
 }
 else
 {
-    <!-- Aperçu visuel de l'escouade -->
-    <div class="escouade-preview mb-4">
-        <div class="escouade-images d-flex flex-wrap gap-2">
-            @foreach (var perso in personnagesEscouade.OrderByDescending(p => p.Puissance))
-            {
-                <div class="escouade-member-preview">
-                    <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
-                    <div class="escouade-member-name">@perso.Nom</div>
-                    <div class="escouade-member-power">@perso.Puissance</div>
-                </div>
-            }
+<div class="puissance-summary">
+    <div class="puissance-max">
+        <img src="/images/puissance.png" alt="Puissance Max" class="puissance-image-mini" onerror="this.style.display='none';" />
+        <div class="puissance-max-text">
+            <span class="label">Puissance maximale</span>
+            <span class="value">@puissanceMax</span>
         </div>
     </div>
-
-<div class="puissance-display-container">
-    <h2>Puissance de l'escouade</h2>
-    <div class="puissance-value-display">
-        <img src="/images/puissance.png" alt="Puissance" class="puissance-image" onerror="this.style.display='none';" />
-        <span class="puissance-number">@puissanceEscouade</span>
-    </div>
 </div>
-<h2>Puissance max : @puissanceMax</h2>
-<br />
 
 
+<div class="section-header">
     <h2>Commandant</h2>
+</div>
     <div class="personnages-list">
         @foreach (var perso in commandants)
         {
-            <div class="personnage-card" @onclick="() => NavigateToDetail(perso.Id)" style="cursor: pointer;">
+            var currentId = perso.Id;
+            var returnPath = "/escouade";
+            <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForCommandants(), returnPath))">
                 <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
@@ -64,11 +90,15 @@ else
         }
     </div>
     <br />
-    <h2>Mercenaires (@mercenaires.Count)</h2>
+    <div class="section-header">
+        <h2>Mercenaires (@mercenaires.Count)</h2>
+    </div>
     <div class="personnages-list">
         @foreach (var perso in mercenaires)
         {
-            <div class="personnage-card" @onclick="() => NavigateToDetail(perso.Id)" style="cursor: pointer;">
+            var currentId = perso.Id;
+            var returnPath = "/escouade";
+            <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForMercenaires(), returnPath))">
                 <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
@@ -82,11 +112,15 @@ else
         }
     </div>
     <br />
-    <h2>Androïdes</h2>
+    <div class="section-header">
+        <h2>Androïdes</h2>
+    </div>
     <div class="personnages-list">
         @foreach (var perso in androides)
         {
-            <div class="personnage-card" @onclick="() => NavigateToDetail(perso.Id)" style="cursor: pointer;">
+            var currentId = perso.Id;
+            var returnPath = "/escouade";
+            <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForAndroides(), returnPath))">
                 <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
@@ -152,30 +186,29 @@ else
         color: #666;
     }
 
-    .escouade-preview {
-        background: #f8f9fa;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-    }
-
     .escouade-images {
         display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+        width: min-content;
     }
 
     .escouade-member-preview {
         text-align: center;
         background: white;
-        padding: 0.5rem;
-        border-radius: 8px;
+        padding: 0.4rem;
+        border-radius: 6px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        flex-shrink: 0;
+    }
+
+    .clickable {
+        cursor: pointer;
     }
 
     .escouade-image {
-        width: 120px;
-        height: 160px;
+        width: 80px;
+        height: 106px;
         object-fit: cover;
         border-radius: 4px;
         display: block;
@@ -183,71 +216,157 @@ else
 
     .escouade-member-name {
         font-weight: bold;
-        margin-top: 0.25rem;
-        font-size: 0.9rem;
+        margin-top: 0.15rem;
+        font-size: 0.75rem;
+        word-break: break-word;
     }
 
     .escouade-member-power {
         color: #666;
-        font-size: 0.85rem;
+        font-size: 0.7rem;
     }
 
-    .puissance-display-container {
+    .escouade-header {
+        --commandant-height: 320px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-height: var(--commandant-height);
+        padding: 0;
+    }
+
+    .escouade-header .page-title {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        text-align: center;
+        margin: 0;
+        height: var(--commandant-height);
         display: flex;
         align-items: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
+        justify-content: center;
+        z-index: 0;
     }
 
-    .puissance-value-display {
-        position: relative;
-        display: inline-block;
+    .header-left {
+        display: none;
     }
 
-    .puissance-image {
-        max-width: 200px;
-        height: auto;
-    }
-
-    .puissance-number {
+    .header-center {
         position: absolute;
-        top: 50%;
-        left: 60%;
+        top: 0.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.35rem;
+        z-index: 10;
+    }
+
+    .escouade-preview-section {
+        position: absolute;
+        top: 0.75rem;
+        left: 1rem;
+        right: 280px;
+        background: #f8f9fa;
+        padding: 0.75rem;
+        border-radius: 8px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        max-height: calc(var(--commandant-height) - 1.5rem);
+        z-index: 5;
+    }
+
+    .header-right {
+        position: absolute;
+        top: 0.5rem;
+        right: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        z-index: 10;
+    }
+
+    .commandant-hero {
+        width: 240px;
+        height: 320px;
+        object-fit: cover;
+        border-radius: 16px;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.7);
+        background: #f5f5f5;
+    }
+
+    .puissance-header {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .puissance-image-header {
+        width: 200px;
+        height: auto;
+        display: block;
+    }
+
+    .puissance-number-header {
+        position: absolute;
+        top: 55%;
+        left: 55%;
         transform: translate(-50%, -50%);
-        font-size: 2rem;
-        font-weight: bold;
+        font-size: 2.4rem;
+        font-weight: 800;
         color: white;
-        text-shadow: 
-            -1px -1px 0 #000,
-            1px -1px 0 #000,
-            -1px 1px 0 #000,
-            1px 1px 0 #000,
-            -2px 0 0 #000,
-            2px 0 0 #000,
-            0 -2px 0 #000,
-            0 2px 0 #000;
+        text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 6px rgba(0,0,0,0.35);
     }
 
-    .escouade-title {
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: white;
-        text-shadow: 
-            -2px -2px 0 #000,
-            2px -2px 0 #000,
-            -2px 2px 0 #000,
-            2px 2px 0 #000,
-            -3px 0 0 #000,
-            3px 0 0 #000,
-            0 -3px 0 #000,
-            0 3px 0 #000;
-        margin-bottom: 0.5rem;
+    .puissance-label {
+        font-size: 1.1rem;
+        color: #2c3e50;
+        font-weight: 600;
+        letter-spacing: 0.5px;
     }
 
-    .escouade-subtitle {
-        font-size: 1.2rem;
-        color: #666;
-        margin-bottom: 1.5rem;
+    .puissance-summary {
+        display: flex;
+        justify-content: flex-end;
+        margin: 0.5rem 0 1.5rem 0;
+    }
+
+    .puissance-max {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: #f4f4f4;
+        padding: 0.6rem 1rem;
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .puissance-image-mini {
+        width: 110px;
+        height: auto;
+        display: block;
+    }
+
+    .puissance-max-text .label {
+        display: block;
+        font-size: 0.9rem;
+        color: #555;
+        line-height: 1.2;
+    }
+
+    .puissance-max-text .value {
+        display: block;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2c3e50;
+        line-height: 1.2;
     }
 </style>
 
@@ -415,8 +534,15 @@ else
         StateHasChanged();
     }
 
-    private void NavigateToDetail(int id)
+    private void NavigateToDetail(int id, string filter, string? returnUrl = null)
     {
-        Navigation.NavigateTo($"/detail-personnage/{id}");
+        var back = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
+        var encodedBack = Uri.EscapeDataString(back);
+        Navigation.NavigateTo($"/detail-personnage/{id}?filter={filter}&returnUrl={encodedBack}");
     }
+
+    private string GetFilterForEscouade() => "escouade";
+    private string GetFilterForCommandants() => "commandants";
+    private string GetFilterForMercenaires() => "mercenaires";
+    private string GetFilterForAndroides() => "androides";
 }

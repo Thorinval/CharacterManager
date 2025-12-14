@@ -11,32 +11,9 @@
     <title>Inventaire</title>
 </head>
 
-<h1 class="inventaire-title">INVENTAIRE</h1>
-<p class="inventaire-subtitle">Gestion des personnages</p>
-
-<style>
-    .inventaire-title {
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: white;
-        text-shadow: 
-            -2px -2px 0 #000,
-            2px -2px 0 #000,
-            -2px 2px 0 #000,
-            2px 2px 0 #000,
-            -3px 0 0 #000,
-            3px 0 0 #000,
-            0 -3px 0 #000,
-            0 3px 0 #000;
-        margin-bottom: 0.5rem;
-    }
-
-    .inventaire-subtitle {
-        font-size: 1.2rem;
-        color: #666;
-        margin-bottom: 1.5rem;
-    }
-</style>
+<div class="page-header-banner">
+    <h1 class="page-title">INVENTAIRE</h1>
+</div>
 
 <div class="row mb-3">
     <div class="col-md-6">
@@ -125,7 +102,7 @@
                     </div>
                     <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-list" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
                     <div class="personnage-info-list">
-                        <span class="personnage-name">@personnage.Nom</span>
+                        <span class="personnage-name" style="font-weight: 700;">@personnage.Nom</span>
                         <span class="list-separator">|</span>
                         <span>Rareté: @personnage.Rarete</span>
                         <span class="list-separator">|</span>
@@ -268,15 +245,36 @@ else
         /* Styles pour la présentation en grille */
         .personnages-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 200px));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 0.75rem;
             margin-bottom: 1rem;
-            max-width: 100%;
-            justify-content: start;
+        }
+
+        @@media (max-width: 1400px) {
+            .personnages-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+
+        @@media (max-width: 992px) {
+            .personnages-grid {
+                grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .personnages-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .personnages-grid {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            }
         }
 
         .personnage-card-grid {
-            width: 100%;
             display: flex;
             flex-direction: column;
             background: white;
@@ -286,6 +284,8 @@ else
             border: 1px solid #dee2e6;
             transition: transform 0.2s, box-shadow 0.2s;
             position: relative;
+            gap: 1rem;
+            align-items: flex-start;
         }
 
         .personnage-card-grid:hover {
@@ -308,32 +308,51 @@ else
 
         .personnage-card-image-grid {
             width: 100%;
-            height: 200px;
+            height: 100px;
             object-fit: cover;
             border-radius: 4px;
-            margin-bottom: 0.5rem;
+            flex-shrink: 0;
         }
 
         .personnage-card-content {
             display: flex;
             flex-direction: column;
-            gap: 0.25rem;
+            gap: 0.3rem;
+            flex-grow: 1;
+            padding: 0.4rem;
+            min-width: 0;
+        }
+
+        .personnage-name {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 0.8rem;
+            word-break: break-word;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
         }
 
         .personnage-attribute-compact {
-            font-size: 0.8rem;
-            color: #555;
+            font-size: 0.7rem;
+            color: #666;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
         }
 
         .card-actions-grid {
             display: flex;
-            gap: 0.25rem;
-            margin-top: 0.5rem;
+            gap: 0.2rem;
+            margin-top: 0.3rem;
         }
 
         .card-actions-grid .btn {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.5rem;
+            font-size: 0.65rem;
+            padding: 0.2rem 0.4rem;
+            flex: 1;
         }
 
         /* Styles pour la présentation en liste */
