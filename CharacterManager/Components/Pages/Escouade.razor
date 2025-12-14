@@ -19,30 +19,32 @@
         </div>
     </div>
 
-    @if (personnagesEscouade.Any())
-    {
-        <div class="escouade-preview-section mb-0">
-            <div class="escouade-images">
-                @foreach (var perso in personnagesEscouade.OrderByDescending(p => p.Puissance))
-                {
-                    var currentId = perso.Id;
-                    var returnPath = "/escouade";
-                    <div class="escouade-member-preview clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForEscouade(), returnPath))">
-                        <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
-                        <div class="escouade-member-name">@perso.Nom</div>
-                        <div class="escouade-member-power">@perso.Puissance</div>
-                    </div>
-                }
-            </div>
-        </div>
-    }
-
-    <div class="header-right">
-        @if (commandants.Any())
+    <div class="header-body">
+        @if (personnagesEscouade.Any())
         {
-            var cmd = commandants.First();
-            <img src="@cmd.ImageUrlPreview" alt="@cmd.Nom" class="commandant-hero" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
+            <div class="escouade-preview-section mb-0">
+                <div class="escouade-images">
+                    @foreach (var perso in personnagesEscouade.Where(p => p.Type == TypePersonnage.Mercenaire).OrderByDescending(p => p.Puissance))
+                    {
+                        var currentId = perso.Id;
+                        var returnPath = "/escouade";
+                        <div class="escouade-member-preview clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForEscouade(), returnPath))">
+                            <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
+                            <div class="escouade-member-name">@perso.Nom</div>
+                            <div class="escouade-member-power">@perso.Puissance</div>
+                        </div>
+                    }
+                </div>
+            </div>
         }
+
+        <div class="header-right">
+            @if (commandants.Any())
+            {
+                var cmd = commandants.First();
+                <img src="@cmd.ImageUrlPreview" alt="@cmd.Nom" class="commandant-hero" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
+            }
+        </div>
     </div>
 
     <h1 class="page-title"></h1>
@@ -57,18 +59,7 @@
 }
 else
 {
-<div class="puissance-summary">
-    <div class="puissance-max">
-        <img src="/images/puissance.png" alt="Puissance Max" class="puissance-image-mini" onerror="this.style.display='none';" />
-        <div class="puissance-max-text">
-            <span class="label">Puissance maximale</span>
-            <span class="value">@puissanceMax</span>
-        </div>
-    </div>
-</div>
-
-
-<div class="section-header">
+<div class="section-header commandant-header">
     <h2>Commandant</h2>
 </div>
     <div class="personnages-list">
@@ -195,7 +186,7 @@ else
 
     .escouade-member-preview {
         text-align: center;
-        background: white;
+        background: lightblue;
         padding: 0.4rem;
         border-radius: 6px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -207,10 +198,10 @@ else
     }
 
     .escouade-image {
-        width: 80px;
-        height: 106px;
+        width: 200px;
+        height: 266px;
         object-fit: cover;
-        border-radius: 4px;
+        border-radius: 8px;
         display: block;
     }
 
@@ -231,23 +222,22 @@ else
         position: relative;
         display: flex;
         flex-direction: column;
-        min-height: var(--commandant-height);
-        padding: 0;
+        min-height: calc(var(--commandant-height) + 60px);
+        padding-top: 170px; /* space for puissance bloc */
+        gap: 0.75rem;
     }
 
     .escouade-header .page-title {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
+        position: relative;
         width: 100%;
         text-align: center;
         margin: 0;
-        height: var(--commandant-height);
+        padding: 0.5rem 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 0;
+        background: lightblue;
+        color: #1f2f3a;
     }
 
     .header-left {
@@ -266,33 +256,48 @@ else
         z-index: 10;
     }
 
+    .header-body {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 0 1.5rem 0 1rem;
+    }
+
     .escouade-preview-section {
-        position: absolute;
-        top: 0.75rem;
-        left: 1rem;
-        right: 280px;
+        flex: 1;
         background: #f8f9fa;
         padding: 0.75rem;
         border-radius: 8px;
         overflow-x: auto;
         overflow-y: hidden;
-        max-height: calc(var(--commandant-height) - 1.5rem);
-        z-index: 5;
+        height: var(--commandant-height);
+        display: flex;
+        align-items: center;
     }
 
     .header-right {
-        position: absolute;
-        top: 0.5rem;
-        right: 1.5rem;
         display: flex;
         align-items: flex-start;
         gap: 1rem;
-        z-index: 10;
+    }
+
+    .section-header {
+        background: lightblue;
+        padding: 0.5rem 0.75rem;
+        margin: 1rem 0;
+        border-radius: 6px;
+    }
+
+    .section-header h2 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #1f2f3a;
+        font-weight: 700;
     }
 
     .commandant-hero {
-        width: 240px;
-        height: 320px;
+        width: 280px;
+        height: 373px;
         object-fit: cover;
         border-radius: 16px;
         box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
@@ -308,7 +313,7 @@ else
     }
 
     .puissance-image-header {
-        width: 200px;
+        width: 300px;
         height: auto;
         display: block;
     }
@@ -331,43 +336,6 @@ else
         letter-spacing: 0.5px;
     }
 
-    .puissance-summary {
-        display: flex;
-        justify-content: flex-end;
-        margin: 0.5rem 0 1.5rem 0;
-    }
-
-    .puissance-max {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.75rem;
-        background: #f4f4f4;
-        padding: 0.6rem 1rem;
-        border-radius: 10px;
-        border: 1px solid #e0e0e0;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    }
-
-    .puissance-image-mini {
-        width: 110px;
-        height: auto;
-        display: block;
-    }
-
-    .puissance-max-text .label {
-        display: block;
-        font-size: 0.9rem;
-        color: #555;
-        line-height: 1.2;
-    }
-
-    .puissance-max-text .value {
-        display: block;
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: #2c3e50;
-        line-height: 1.2;
-    }
 </style>
 
 @if (showModal)
