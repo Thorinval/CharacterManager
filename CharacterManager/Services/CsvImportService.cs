@@ -121,7 +121,7 @@ public class CsvImportService(PersonnageService personnageService)
             else if (rareteStr.Equals("R", StringComparison.OrdinalIgnoreCase))
                 personnage.Rarete = Rarete.R;
             else
-                personnage.Rarete = Rarete.R; // Default
+                personnage.Rarete = Rarete.Inconnu; // Default
         }
 
         // Type
@@ -133,10 +133,10 @@ public class CsvImportService(PersonnageService personnageService)
             else if (typeStr.Contains("Commandant", StringComparison.OrdinalIgnoreCase))
                 personnage.Type = TypePersonnage.Commandant;
             else if (typeStr.Contains("Androïde", StringComparison.OrdinalIgnoreCase) || 
-                     typeStr.Contains("Android", StringComparison.OrdinalIgnoreCase))
-                personnage.Type = TypePersonnage.Androide;
+                     typeStr.Contains("Androide", StringComparison.OrdinalIgnoreCase))
+                personnage.Type = TypePersonnage.Androïde;
             else
-                personnage.Type = TypePersonnage.Mercenaire; // Default
+                personnage.Type = TypePersonnage.Inconnu; // Default
         }
 
         // Puissance
@@ -191,7 +191,7 @@ public class CsvImportService(PersonnageService personnageService)
             if (Enum.TryParse<Role>(roleStr, true, out var role))
                 personnage.Role = role;
             else
-                personnage.Role = Role.Sentinelle; // Default
+                personnage.Role = Role.Inconnu; // Default
         }
 
         // Faction
@@ -210,7 +210,7 @@ public class CsvImportService(PersonnageService personnageService)
             else if (factionStr.Contains("Commandant", StringComparison.OrdinalIgnoreCase))
                 personnage.Faction = Faction.Syndicat; // Default
             else
-                personnage.Faction = Faction.Syndicat; // Default
+                personnage.Faction = Faction.Inconnu; // Default
         }
 
         // Sélection (Oui/Non)
@@ -224,16 +224,16 @@ public class CsvImportService(PersonnageService personnageService)
         if (mapping.TryGetValue("TypeAttaque", out int actionIndex) && actionIndex < values.Count)
         {
             var actionStr = values[actionIndex].Trim();
-            if (Enum.TryParse<Models.TypeAttaque>(actionStr, true, out var typeAttaque))
+            if (Enum.TryParse<TypeAttaque>(actionStr, true, out var typeAttaque))
                 personnage.TypeAttaque = typeAttaque;
             else if (actionStr.Contains("Mêlée", StringComparison.OrdinalIgnoreCase))
-                personnage.TypeAttaque = Models.TypeAttaque.Mêlée;
+                personnage.TypeAttaque = TypeAttaque.Mêlée;
             else if (actionStr.Contains("Distance", StringComparison.OrdinalIgnoreCase))
-                personnage.TypeAttaque = Models.TypeAttaque.Distance;
+                personnage.TypeAttaque = TypeAttaque.Distance;
             else if (actionStr.Contains("Androïde", StringComparison.OrdinalIgnoreCase))
-                personnage.TypeAttaque = Models.TypeAttaque.Androïde;
+                personnage.TypeAttaque = TypeAttaque.Androïde;
             else
-                personnage.TypeAttaque = Models.TypeAttaque.Mêlée; // Default
+                personnage.TypeAttaque = TypeAttaque.Inconnu; // Default
         }
 
         personnage.ImageUrl = $"https://via.placeholder.com/150?text={Uri.EscapeDataString(personnage.Nom)}";
@@ -255,7 +255,7 @@ public class CsvImportService(PersonnageService personnageService)
                 mapping["Personnage"] = i;
             else if (header.Contains("rareté") || header.Contains("rarete"))
                 mapping["Rarete"] = i;
-            else if (header.Contains("type"))
+            else if (header.Contains("categorie"))
                 mapping["Type"] = i;
             else if (header.Contains("puissance"))
                 mapping["Puissance"] = i;
@@ -273,7 +273,7 @@ public class CsvImportService(PersonnageService personnageService)
                 mapping["Role"] = i;
             else if (header.Contains("faction"))
                 mapping["Faction"] = i;
-            else if (header.Contains("selection") || header.Contains("selectionne"))
+            else if (header.Contains("selection"))
                 mapping["Selection"] = i;
             else if (header.Contains("typeattaque"))
                 mapping["TypeAttaque"] = i;
@@ -317,5 +317,5 @@ public class ImportResult
     public bool IsSuccess { get; set; }
     public int SuccessCount { get; set; }
     public string? Error { get; set; }
-    public List<string> Errors { get; set; } = new();
+    public List<string> Errors { get; set; } = [];
 }

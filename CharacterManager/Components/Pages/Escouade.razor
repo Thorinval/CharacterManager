@@ -1,0 +1,251 @@
+@page "/escouade"
+
+@using CharacterManager.Models
+@using CharacterManager.Services
+@rendermode InteractiveServer
+
+@inject PersonnageService PersonnageService
+
+<PageTitle>Escouade</PageTitle>
+
+<h1>Liste des mercenaires sélectionnés de l'escouade</h1>
+
+<p>Nombre de mercenaires sélectionnés : @mercenaires.Count</p>
+
+@if (personnagesEscouade.Count == 0)
+{
+    <div class="alert alert-info" role="alert">
+        Aucun mercenaire n'a été sélectionné pour l'escouade.
+    </div>
+}
+else
+{
+    <h2>Commandant</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Rareté</th>
+                <th>Type</th>
+                <th>Puissance</th>
+                <th>Niveau</th>
+                <th>Rang</th>
+                <th>Faction</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var perso in commandants)
+            {
+                <tr>
+                    <td>@perso.Nom</td>
+                    <td>@perso.Rarete</td>
+                    <td>@perso.Type</td>
+                    <td>@perso.Puissance</td>
+                    <td>@perso.Niveau</td>
+                    <td>@perso.Rang</td>
+                    <td>@perso.Faction</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <br />
+    <h2>Mercenaires</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Rareté</th>
+                <th>Type</th>
+                <th>Puissance</th>
+                <th>Niveau</th>
+                <th>Rang</th>
+                <th>Faction</th>
+            </tr>
+        </thead>        
+        <tbody>
+            @foreach (var perso in mercenaires)
+            {
+                <tr>
+                    <td>@perso.Nom</td>
+                    <td>@perso.Rarete</td>
+                    <td>@perso.Type</td>
+                    <td>@perso.Puissance</td>
+                    <td>@perso.Niveau</td>
+                    <td>@perso.Rang</td>
+                    <td>@perso.Faction</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <br />
+    <h2>Androïdes</h2>
+    <table class="table table-striped"> 
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Rareté</th>
+                <th>Type</th>
+                <th>Puissance</th>
+                <th>Niveau</th>
+                <th>Rang</th>
+                <th>Faction</th>
+            </tr>
+        </thead>
+        <tbody> 
+            @foreach (var perso in androides)
+            {
+                <tr>
+                    <td>@perso.Nom</td>
+                    <td>@perso.Rarete</td>
+                    <td>@perso.Type</td>
+                    <td>@perso.Puissance</td>
+                    <td>@perso.Niveau</td>
+                    <td>@perso.Rang</td>
+                    <td>@perso.Faction</td>
+                </tr>
+            }  
+        </tbody>
+    </table>
+}
+@if (showModal)
+{
+    <div class="modal-overlay" @onclick:stopPropagation="true">
+        <div class="modal-dialog-custom" @onclick:stopPropagation="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEditing ? "Éditer Personnage" : "Ajouter Personnage")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nom" class="form-label">Nom</label>
+                        <input type="text" class="form-control" id="nom" @bind="currentPersonnage.Nom" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="rarete" class="form-label">Rarete</label>
+                        <select class="form-control" id="rarete" @bind="currentPersonnage.Rarete">
+                            @foreach (var rarete in Enum.GetValues(typeof(Rarete)))
+                            {
+                                <option value="@rarete">@rarete</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="niveau" class="form-label">Niveau</label>
+                        <input type="number" class="form-control" id="niveau" @bind="currentPersonnage.Niveau" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Type</label>
+                        <select class="form-control" id="type" @bind="currentPersonnage.Type">
+                            @foreach (var type in Enum.GetValues(typeof(TypePersonnage)))
+                            {
+                                <option value="@type">@type</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="action" class="form-label">Type d'attaque</label>
+                        <select class="form-control" id="action" @bind="currentPersonnage.TypeAttaque">
+                            <option value="">Sélectionner un type d'attaque</option>
+                            <option value="Mêlée">Mêlée</option>
+                            <option value="Distance">Distance</option>
+                            <option value="Androïde">Androïde</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1050;
+        }
+
+        .modal-dialog-custom {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            max-width: 500px;
+            width: 90%;
+            z-index: 1051;
+        }
+
+        .modal-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 500;
+        }
+
+        .modal-body {
+            padding: 1rem;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 1rem;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+    </style>
+}
+
+@code {
+
+    private List<Personnage> personnagesEscouade = new();
+    private List<Personnage> mercenaires = new();   
+    private List<Personnage> commandants = new();   
+    private List<Personnage> androides = new();
+
+    private bool showModal = false;
+    private Personnage currentPersonnage = new();
+    private bool isEditing = false;
+
+    protected override void OnInitialized()
+    {
+        LoadPersonnages();
+    }
+
+    private void LoadPersonnages()
+    {
+        personnagesEscouade = PersonnageService.GetEscouade().ToList();
+        mercenaires = PersonnageService.GetMercenaires( true).ToList();
+        commandants = PersonnageService.GetCommandants(true).ToList();
+        androides = PersonnageService.GetAndroides(true).ToList();
+    }
+    
+
+        private void CloseModal()
+    {
+        showModal = false;
+        currentPersonnage = new Personnage();
+        StateHasChanged();
+    }
+}

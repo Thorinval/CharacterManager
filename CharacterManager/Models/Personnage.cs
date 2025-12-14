@@ -6,14 +6,16 @@ public enum Rarete
 {
     R,
     SR,
-    SSR
+    SSR,
+    Inconnu
 }
 
 public enum TypePersonnage
 {
     Mercenaire,
     Commandant,
-    Androide
+    Androïde,
+    Inconnu
 }
 
 public enum Role
@@ -21,14 +23,16 @@ public enum Role
     Sentinelle,
     Combattante,
     Androide,
-    Commandant
+    Commandant,
+    Inconnu
 }
 
 public enum Faction
 {
     Syndicat,
     Pacificateurs,
-    HommesLibres
+    HommesLibres,
+    Inconnu
 }
 
 public enum TypeAttaque
@@ -36,6 +40,7 @@ public enum TypeAttaque
     Mêlée, 
     Distance, 
     Androïde,
+    Inconnu
 }
 
 public class Personnage

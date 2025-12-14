@@ -13,6 +13,52 @@ public class PersonnageService(ApplicationDbContext context)
         return [.. _context.Personnages.Include(p => p.Capacites)];
     }
 
+    public IEnumerable<Personnage> GetEscouade()
+    {
+        return _context.Personnages
+            .Include(p => p.Capacites)
+            .Where(p => p.Selectionne);
+    }
+    public IEnumerable<Personnage> GetMercenaires(bool selectionneOnly = false)
+    {
+        var query = _context.Personnages
+            .Include(p => p.Capacites)
+            .Where(p => p.Type == TypePersonnage.Mercenaire);
+
+        if (selectionneOnly)
+        {
+            query = query.Where(p => p.Selectionne);
+        }
+
+        return query;
+    }
+    public IEnumerable<Personnage> GetCommandants(bool selectionneOnly = false)
+    {
+        var query = _context.Personnages
+            .Include(p => p.Capacites)
+            .Where(p => p.Type == TypePersonnage.Commandant);
+
+        if (selectionneOnly)
+        {
+            query = query.Where(p => p.Selectionne);
+        }
+
+        return query;
+    }
+    public IEnumerable<Personnage> GetAndroides(bool selectionneOnly = false)
+    {
+        var query = _context.Personnages
+            .Include(p => p.Capacites)
+            .Where(p => p.Type == TypePersonnage.Androïde);
+
+        if (selectionneOnly)
+        {
+            query = query.Where(p => p.Selectionne);
+        }
+
+        return query;
+    }
+
     public Personnage? GetById(int id)
     {
         return _context.Personnages
