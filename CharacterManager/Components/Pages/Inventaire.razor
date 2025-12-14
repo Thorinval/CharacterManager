@@ -13,14 +13,6 @@
 <div class="row mb-3">
     <div class="col-md-6">
         <div class="input-group">
-            <select class="form-select" @bind="filterProperty" @bind:event="onchange">
-                <option value="Nom">Nom</option>
-                <option value="Rarete">Rareté</option>
-                <option value="Type">Type</option>
-                <option value="Role">Rôle</option>
-                <option value="Faction">Faction</option>
-                <option value="TypeAttaque">Type d'attaque</option>
-            </select>
             <input type="text" class="form-control" placeholder="Rechercher..." @bind="searchTerm" @oninput="HandleSearchInput" />
             <button class="btn btn-outline-secondary" type="button" @onclick="ClearSearch" title="Effacer la recherche">
                 <i class="bi bi-x-lg"></i>
@@ -232,7 +224,6 @@ else
     
     // Filtre
     private string searchTerm = "";
-    private string filterProperty = "Nom";
 
     protected override void OnInitialized()
     {
@@ -255,16 +246,13 @@ else
         else
         {
             personnagesFiltres = personnages.Where(p => 
-                filterProperty switch
-                {
-                    "Nom" => p.Nom.Contains(searchTerm, StringComparison.OrdinalIgnoreCase),
-                    "Rarete" => p.Rarete.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase),
-                    "Type" => p.Type.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase),
-                    "Role" => p.Role.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase),
-                    "Faction" => p.Faction.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase),
-                    "TypeAttaque" => p.TypeAttaque.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase),
-                    _ => p.Nom.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-                }).ToList();
+                p.Nom.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                    || p.Rarete.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                    || p.Type.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                    || p.Role.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                    || p.Faction.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                    || p.TypeAttaque.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                ).ToList();
         }
 
         // Appliquer le tri
@@ -339,12 +327,6 @@ else
             }
         }
         return new MarkupString(stars);
-    }
-
-    private void OnFilterPropertyChanged(string value)
-    {
-        filterProperty = value;
-        ApplyFiltersAndSorting();
     }
 
     private void ToggleSelection(int id)
