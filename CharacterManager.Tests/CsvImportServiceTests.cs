@@ -21,7 +21,7 @@ public class CsvImportServiceTests : IDisposable
         _context = new ApplicationDbContext(options);
         _context.Database.EnsureCreated();
         _personnageService = new PersonnageService(_context);
-        _csvImportService = new CsvImportService(_personnageService);
+        _csvImportService = new CsvImportService(_personnageService, _context);
     }
 
     public void Dispose()
@@ -52,7 +52,7 @@ BELLE;SSR;Mercenaire;3090;143;330;Distance;Sentinelle;8;3;Oui;Syndicat";
         
         var regina = personnages.FirstOrDefault(p => p.Nom == "REGINA");
         Assert.NotNull(regina);
-        Assert.Equal(Rareté.SSR, regina.Rarete);
+        Assert.Equal(Rarete.SSR, regina.Rarete);
         Assert.Equal(TypePersonnage.Mercenaire, regina.Type);
         Assert.Equal(3320, regina.Puissance);
     }
@@ -64,22 +64,19 @@ BELLE;SSR;Mercenaire;3090;143;330;Distance;Sentinelle;8;3;Oui;Syndicat";
         var existingPersonnage = new Personnage
         {
             Nom = "REGINA",
-            Rarete = Rareté.SR,
-            Type = TypePersonnage.Androide,
+            Rarete = Rarete.SR,
+            Type = TypePersonnage.Androïde,
             Puissance = 1000,
             Niveau = 1,
             Rang = 1,
             PA = 50,
-            PAMax = 50,
             PV = 100,
-            PVMax = 100,
-            Sante = 50,
-            SanteMax = 50,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            ImageUrl = "old-url.jpg",
+            ImageUrlDetail = "old-url.jpg",
+            ImageUrlPreview = "old-url_small_portrait.png",
+            ImageUrlSelected = "old-url_small_select.png",
             Description = "Old description",
-            Localisation = "Old location",
             Selectionne = false
         };
 
@@ -102,7 +99,7 @@ REGINA;SSR;Mercenaire;3320;140;509;Mêlée;Sentinelle;14;2;Oui;Syndicat";
         
         var updated = personnages.First();
         Assert.Equal("REGINA", updated.Nom);
-        Assert.Equal(Rareté.SSR, updated.Rarete);
+        Assert.Equal(Rarete.SSR, updated.Rarete);
         Assert.Equal(TypePersonnage.Mercenaire, updated.Type);
         Assert.Equal(3320, updated.Puissance);
         Assert.Equal(140, updated.PA);
@@ -189,7 +186,7 @@ ISABELLA;SSR;Androïde;835;;20;Androïde;Androïde;2;;Oui;Androïde";
         
         var android = _personnageService.GetAll().First();
         Assert.Equal("ISABELLA", android.Nom);
-        Assert.Equal(TypePersonnage.Androide, android.Type);
-        Assert.Equal(Rareté.SSR, android.Rarete);
+        Assert.Equal(TypePersonnage.Androïde, android.Type);
+        Assert.Equal(Rarete.SSR, android.Rarete);
     }
 }

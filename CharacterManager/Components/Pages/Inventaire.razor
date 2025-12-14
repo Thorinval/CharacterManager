@@ -5,9 +5,12 @@
 @inject CsvImportService CsvImportService
 @using CharacterManager.Models
 @using CharacterManager.Services
+@using Microsoft.AspNetCore.Components.Web
 @rendermode InteractiveServer
 
-<PageTitle>Inventaire</PageTitle>
+<head>
+    <title>Inventaire</title>
+</head>
 
 <h1 class="inventaire-title">INVENTAIRE</h1>
 <p class="inventaire-subtitle">Gestion des personnages</p>
@@ -242,43 +245,15 @@ else
         /* Styles pour la présentation en grille */
         .personnages-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(180px, 200px));
             gap: 1rem;
             margin-bottom: 1rem;
             max-width: 100%;
-        }
-
-        @@media (min-width: 1920px) {
-            .personnages-grid {
-                grid-template-columns: repeat(10, 1fr);
-            }
-        }
-
-        @@media (min-width: 1440px) and (max-width: 1919px) {
-            .personnages-grid {
-                grid-template-columns: repeat(8, 1fr);
-            }
-        }
-
-        @@media (min-width: 1200px) and (max-width: 1439px) {
-            .personnages-grid {
-                grid-template-columns: repeat(6, 1fr);
-            }
-        }
-
-        @@media (min-width: 768px) and (max-width: 1199px) {
-            .personnages-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        @@media (max-width: 767px) {
-            .personnages-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            justify-content: start;
         }
 
         .personnage-card-grid {
+            width: 100%;
             display: flex;
             flex-direction: column;
             background: white;

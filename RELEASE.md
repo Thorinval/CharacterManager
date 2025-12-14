@@ -55,6 +55,7 @@ git push origin v1.0.1
 ### 3. Release automatique
 
 GitHub Actions va automatiquement :
+
 - ✅ Compiler pour Windows x64 et Linux x64
 - ✅ Créer les archives ZIP/TAR.GZ
 - ✅ Publier la release sur GitHub
@@ -62,9 +63,10 @@ GitHub Actions va automatiquement :
 
 ### 4. Vérifier la release
 
-Allez sur : https://github.com/Thorinval/CharacterManager/releases
+Allez sur : [https://github.com/Thorinval/CharacterManager/releases](https://github.com/Thorinval/CharacterManager/releases)
 
 Vous verrez :
+
 - CharacterManager-1.0.1-win-x64.zip
 - CharacterManager-1.0.1-linux-x64.tar.gz
 - Notes de version générées automatiquement
@@ -72,6 +74,7 @@ Vous verrez :
 ## 🔄 Système de Mise à Jour Automatique
 
 Une fois déployée, l'application :
+
 1. ✅ Vérifie automatiquement les nouvelles versions au démarrage
 2. ✅ Affiche une notification colorée en haut à droite si une mise à jour est disponible
 3. ✅ Permet de voir les notes de version
@@ -126,6 +129,7 @@ docker-compose down
 ### La notification de mise à jour ne s'affiche pas
 
 1. Vérifier `appsettings.json` :
+
    ```json
    "GitHubRepo": "Thorinval/CharacterManager"
    ```
@@ -147,6 +151,7 @@ docker-compose up -d
 ## 📞 Plus d'informations
 
 Consultez [DEPLOYMENT.md](DEPLOYMENT.md) pour un guide complet de déploiement incluant :
+
 - Installation sur serveurs Windows/Linux
 - Configuration de production
 - Sauvegarde et restauration

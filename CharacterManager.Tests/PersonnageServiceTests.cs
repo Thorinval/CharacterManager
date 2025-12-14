@@ -34,22 +34,19 @@ public class PersonnageServiceTests : IDisposable
         var existingPersonnage = new Personnage
         {
             Nom = "Ancien Nom",
-            Rarete = Rareté.R,
+            Rarete = Rarete.R,
             Niveau = 1,
             Type = TypePersonnage.Mercenaire,
             Rang = 1,
             Puissance = 10,
             PA = 5,
-            PAMax = 10,
             PV = 20,
-            PVMax = 30,
-            Sante = 15,
-            SanteMax = 20,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            ImageUrl = "old-url.jpg",
+            ImageUrlDetail = "old-url.jpg",
+            ImageUrlPreview = "old-url_small_portrait.png",
+            ImageUrlSelected = "old-url_small_select.png",
             Description = "Ancienne description",
-            Localisation = "Ancienne localisation",
             Selectionne = false,
             TypeAttaque = TypeAttaque.Mêlée
         };
@@ -62,22 +59,19 @@ public class PersonnageServiceTests : IDisposable
         {
             Id = personId,
             Nom = "Nouveau Nom",
-            Rarete = Rareté.SSR,
+            Rarete = Rarete.SSR,
             Niveau = 50,
             Type = TypePersonnage.Commandant,
             Rang = 5,
             Puissance = 100,
             PA = 15,
-            PAMax = 20,
             PV = 50,
-            PVMax = 80,
-            Sante = 40,
-            SanteMax = 50,
             Role = Role.Combattante,
             Faction = Faction.Pacificateurs,
-            ImageUrl = "new-url.jpg",
+            ImageUrlDetail = "new-url.jpg",
+            ImageUrlPreview = "new-url_small_portrait.png",
+            ImageUrlSelected = "new-url_small_select.png",
             Description = "Nouvelle description",
-            Localisation = "Nouvelle localisation",
             Selectionne = true,
             TypeAttaque = TypeAttaque.Distance
         };
@@ -89,22 +83,17 @@ public class PersonnageServiceTests : IDisposable
         var result = _context.Personnages.Find(personId);
         Assert.NotNull(result);
         Assert.Equal("Nouveau Nom", result.Nom);
-        Assert.Equal(Rareté.SSR, result.Rarete);
+        Assert.Equal(Rarete.SSR, result.Rarete);
         Assert.Equal(50, result.Niveau);
         Assert.Equal(TypePersonnage.Commandant, result.Type);
         Assert.Equal(5, result.Rang);
         Assert.Equal(100, result.Puissance);
         Assert.Equal(15, result.PA);
-        Assert.Equal(20, result.PAMax);
         Assert.Equal(50, result.PV);
-        Assert.Equal(80, result.PVMax);
-        Assert.Equal(40, result.Sante);
-        Assert.Equal(50, result.SanteMax);
         Assert.Equal(Role.Combattante, result.Role);
         Assert.Equal(Faction.Pacificateurs, result.Faction);
-        Assert.Equal("new-url.jpg", result.ImageUrl);
+        Assert.Equal("new-url.jpg", result.ImageUrlDetail);
         Assert.Equal("Nouvelle description", result.Description);
-        Assert.Equal("Nouvelle localisation", result.Localisation);
         Assert.True(result.Selectionne);
     }
 
@@ -133,22 +122,19 @@ public class PersonnageServiceTests : IDisposable
         var existingPersonnage = new Personnage
         {
             Nom = "Original",
-            Rarete = Rareté.R,
+            Rarete = Rarete.R,
             Niveau = 1,
             Type = TypePersonnage.Mercenaire,
             Rang = 1,
             Puissance = 10,
             PA = 5,
-            PAMax = 10,
             PV = 20,
-            PVMax = 30,
-            Sante = 15,
-            SanteMax = 20,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            ImageUrl = "url.jpg",
+            ImageUrlDetail = "url.jpg",
+            ImageUrlPreview = "url_small_portrait.png",
+            ImageUrlSelected = "url_small_select.png",
             Description = "desc",
-            Localisation = "loc",
             Selectionne = false
         };
 
@@ -160,22 +146,19 @@ public class PersonnageServiceTests : IDisposable
         {
             Id = originalId,
             Nom = "Updated",
-            Rarete = Rareté.SR,
+            Rarete = Rarete.SR,
             Niveau = 2,
             Type = TypePersonnage.Commandant,
             Rang = 2,
             Puissance = 20,
             PA = 10,
-            PAMax = 15,
             PV = 25,
-            PVMax = 40,
-            Sante = 20,
-            SanteMax = 30,
             Role = Role.Combattante,
             Faction = Faction.Pacificateurs,
-            ImageUrl = "new-url.jpg",
+            ImageUrlDetail = "new-url.jpg",
+            ImageUrlPreview = "new-url_small_portrait.png",
+            ImageUrlSelected = "new-url_small_select.png",
             Description = "new desc",
-            Localisation = "new loc",
             Selectionne = true
         };
 
@@ -195,22 +178,19 @@ public class PersonnageServiceTests : IDisposable
         var existingPersonnage = new Personnage
         {
             Nom = "Original Nom",
-            Rarete = Rareté.R,
+            Rarete = Rarete.R,
             Niveau = 1,
             Type = TypePersonnage.Mercenaire,
             Rang = 1,
             Puissance = 10,
             PA = 5,
-            PAMax = 10,
             PV = 20,
-            PVMax = 30,
-            Sante = 15,
-            SanteMax = 20,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            ImageUrl = "url.jpg",
+            ImageUrlDetail = "url.jpg",
+            ImageUrlPreview = "url_small_portrait.png",
+            ImageUrlSelected = "url_small_select.png",
             Description = "desc",
-            Localisation = "loc",
             Selectionne = false
         };
 
@@ -222,22 +202,19 @@ public class PersonnageServiceTests : IDisposable
         {
             Id = personId,
             Nom = "Nouveau Nom",
-            Rarete = Rareté.R,
+            Rarete = Rarete.R,
             Niveau = 1,
             Type = TypePersonnage.Mercenaire,
             Rang = 1,
             Puissance = 10,
             PA = 5,
-            PAMax = 10,
             PV = 20,
-            PVMax = 30,
-            Sante = 15,
-            SanteMax = 20,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            ImageUrl = "url.jpg",
+            ImageUrlDetail = "url.jpg",
+            ImageUrlPreview = "url_small_portrait.png",
+            ImageUrlSelected = "url_small_select.png",
             Description = "desc",
-            Localisation = "loc",
             Selectionne = false
         };
 
@@ -248,7 +225,7 @@ public class PersonnageServiceTests : IDisposable
         var result = _context.Personnages.Find(personId);
         Assert.NotNull(result);
         Assert.Equal("Nouveau Nom", result.Nom);
-        Assert.Equal(Rareté.R, result.Rarete);
+        Assert.Equal(Rarete.R, result.Rarete);
         Assert.Equal(1, result.Niveau);
         Assert.Equal(TypePersonnage.Mercenaire, result.Type);
     }
@@ -260,22 +237,19 @@ public class PersonnageServiceTests : IDisposable
         var existingPersonnage = new Personnage
         {
             Nom = "Test",
-            Rarete = Rareté.R,
+            Rarete = Rarete.R,
             Niveau = 1,
             Type = TypePersonnage.Mercenaire,
             Rang = 1,
             Puissance = 10,
             PA = 5,
-            PAMax = 10,
             PV = 20,
-            PVMax = 30,
-            Sante = 15,
-            SanteMax = 20,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            ImageUrl = "url.jpg",
+            ImageUrlDetail = "url.jpg",
+            ImageUrlPreview = "url_small_portrait.png",
+            ImageUrlSelected = "url_small_select.png",
             Description = "desc",
-            Localisation = "loc",
             Selectionne = false
         };
 
@@ -287,22 +261,19 @@ public class PersonnageServiceTests : IDisposable
         {
             Id = personId,
             Nom = "Updated Test",
-            Rarete = Rareté.SR,
+            Rarete = Rarete.SR,
             Niveau = 10,
             Type = TypePersonnage.Commandant,
             Rang = 5,
             Puissance = 50,
             PA = 15,
-            PAMax = 20,
             PV = 60,
-            PVMax = 100,
-            Sante = 50,
-            SanteMax = 60,
             Role = Role.Combattante,
             Faction = Faction.Pacificateurs,
-            ImageUrl = "new-url.jpg",
+            ImageUrlDetail = "new-url.jpg",
+            ImageUrlPreview = "new-url_small_portrait.png",
+            ImageUrlSelected = "new-url_small_select.png",
             Description = "new desc",
-            Localisation = "new loc",
             Selectionne = true
         };
 
@@ -313,7 +284,7 @@ public class PersonnageServiceTests : IDisposable
         var persistedResult = _context.Personnages.Find(personId);
         Assert.NotNull(persistedResult);
         Assert.Equal("Updated Test", persistedResult.Nom);
-        Assert.Equal(Rareté.SR, persistedResult.Rarete);
+        Assert.Equal(Rarete.SR, persistedResult.Rarete);
         Assert.Equal(10, persistedResult.Niveau);
     }
 }

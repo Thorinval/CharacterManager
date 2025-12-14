@@ -2,12 +2,12 @@
 @inject AppVersionService VersionService
 @using CharacterManager.Services
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Accueil</PageTitle>
 
 <div class="home-container">
-    <div class="container mt-5">
-        <div class="row justify-content-end">
-            <div class="col-md-8 col-lg-7 col-xl-6">
+    <div class="container-fluid mt-5">
+        <div class="row">
+            <div class="col-md-6 col-lg-5 col-xl-4 offset-md-6 offset-lg-7 offset-xl-8">
                 <div class="welcome-card">
                     <h1>Character Manager</h1>
                     <p class="lead">Bienvenue sur votre gestionnaire de personnages</p>
@@ -63,23 +63,12 @@
         position: relative;
         min-height: 100vh;
         background-image: url('/images/accueil.png');
-        background-size: cover;
-        background-position: center;
+        background-size: auto 100%;
+        background-position: left center;
         background-repeat: no-repeat;
     }
 
-    .home-container::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1;
-    }
-
-    .home-container .container {
+    .home-container .container-fluid {
         position: relative;
         z-index: 2;
     }

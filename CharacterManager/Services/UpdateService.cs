@@ -26,7 +26,12 @@ public class UpdateService
 
             // Appel à l'API GitHub pour récupérer la dernière release
             var url = $"https://api.github.com/repos/{githubRepo}/releases/latest";
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("CharacterManager");
+            
+            // Ajouter le User-Agent seulement s'il n'est pas déjà présent
+            if (_httpClient.DefaultRequestHeaders.UserAgent.Count == 0)
+            {
+                _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("CharacterManager");
+            }
 
             var response = await _httpClient.GetAsync(url);
             if (!response.IsSuccessStatusCode)
@@ -35,7 +40,8 @@ public class UpdateService
             var json = await response.Content.ReadAsStringAsync();
             var release = JsonSerializer.Deserialize<GitHubRelease>(json, new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
             });
 
             if (release == null)

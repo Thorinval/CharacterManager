@@ -5,6 +5,7 @@
 ### 1. Publication Locale (Windows)
 
 #### Avec le script PowerShell
+
 ```powershell
 # Publication pour Windows x64
 .\publish.ps1
@@ -16,6 +17,7 @@
 Cela créera un fichier ZIP prêt à être distribué contenant tout le nécessaire.
 
 #### Manuellement avec .NET CLI
+
 ```bash
 dotnet publish .\CharacterManager\CharacterManager.csproj `
     --configuration Release `
@@ -28,11 +30,13 @@ dotnet publish .\CharacterManager\CharacterManager.csproj `
 ### 2. Déploiement avec Docker
 
 #### Construction de l'image
+
 ```bash
 docker build -t character-manager .
 ```
 
 #### Lancement du conteneur
+
 ```bash
 # Avec docker run
 docker run -d \
@@ -47,11 +51,13 @@ docker-compose up -d
 ```
 
 #### Accès à l'application
-Ouvrez votre navigateur à: http://localhost:5269
+
+Ouvrez votre navigateur à: <http://localhost:5269>
 
 ### 3. Déploiement Automatisé (GitHub Actions)
 
 #### Création d'une release
+
 ```bash
 # 1. Créer un tag de version
 git tag -a v1.0.0 -m "Version 1.0.0"
@@ -61,12 +67,14 @@ git push origin v1.0.0
 ```
 
 GitHub Actions va automatiquement :
+
 - Compiler l'application pour Windows et Linux
 - Créer des archives ZIP/TAR.GZ
 - Publier une release GitHub avec les fichiers
 - Construire et publier l'image Docker
 
 #### Configuration requise sur GitHub
+
 1. Aller dans **Settings** → **Actions** → **General**
 2. Activer "Read and write permissions" pour GITHUB_TOKEN
 
@@ -75,6 +83,7 @@ GitHub Actions va automatiquement :
 L'application intègre un système de vérification automatique des mises à jour.
 
 ### Configuration dans appsettings.json
+
 ```json
 {
   "AppInfo": {
@@ -87,6 +96,7 @@ L'application intègre un système de vérification automatique des mises à jou
 ```
 
 ### Fonctionnement
+
 - Vérification automatique au démarrage de l'application
 - Notification visuelle si une nouvelle version est disponible
 - Lien direct vers la page de téléchargement
@@ -97,6 +107,7 @@ L'application intègre un système de vérification automatique des mises à jou
 ### Option 1: Installation Directe (Windows Server)
 
 1. **Télécharger la dernière release**
+
    ```powershell
    # Créer un dossier d'installation
    New-Item -Path "C:\Apps\CharacterManager" -ItemType Directory
@@ -108,6 +119,7 @@ L'application intègre un système de vérification automatique des mises à jou
    ```
 
 2. **Créer un service Windows**
+
    ```powershell
    # Avec NSSM (Non-Sucking Service Manager)
    nssm install CharacterManager "C:\Apps\CharacterManager\CharacterManager.exe"
@@ -154,6 +166,7 @@ docker logs -f character-manager
 ### Option 3: Hébergement Cloud
 
 #### Azure App Service
+
 ```bash
 # Publier sur Azure
 az webapp up --name character-manager --resource-group MyResourceGroup --sku F1
@@ -163,6 +176,7 @@ az webapp config appsettings set --name character-manager --settings ASPNETCORE_
 ```
 
 #### AWS Elastic Beanstalk
+
 ```bash
 # Créer un package de déploiement
 dotnet publish -c Release -o ./publish
@@ -180,6 +194,7 @@ aws elasticbeanstalk create-application-version --application-name CharacterMana
 ### Sécurisation
 
 1. **Activer HTTPS**
+
    ```json
    // appsettings.Production.json
    {
@@ -194,6 +209,7 @@ aws elasticbeanstalk create-application-version --application-name CharacterMana
    ```
 
 2. **Limiter les hôtes autorisés**
+
    ```json
    {
      "AllowedHosts": "votre-domaine.com"
@@ -201,6 +217,7 @@ aws elasticbeanstalk create-application-version --application-name CharacterMana
    ```
 
 3. **Configuration de la base de données**
+
    - Par défaut: SQLite dans le dossier de l'application
    - Pour production: Utiliser un volume Docker ou un chemin persistant
 
@@ -218,6 +235,7 @@ docker cp character-manager:/app/data/backup.db ./backup.db
 ## 📊 Monitoring
 
 ### Logs Docker
+
 ```bash
 # Voir les logs en temps réel
 docker logs -f character-manager
@@ -227,6 +245,7 @@ docker logs --tail 100 character-manager
 ```
 
 ### Vérifier la santé de l'application
+
 ```bash
 # Vérifier que l'application répond
 curl http://localhost:5269
@@ -238,6 +257,7 @@ docker ps | grep character-manager
 ## 🔄 Mise à Jour de l'Application
 
 ### Méthode 1: Manuelle
+
 1. Télécharger la nouvelle version
 2. Arrêter l'application
 3. Remplacer les fichiers
@@ -245,6 +265,7 @@ docker ps | grep character-manager
 5. Conserver la base de données (caractermanager.db)
 
 ### Méthode 2: Docker
+
 ```bash
 # Télécharger la nouvelle image
 docker pull ghcr.io/thorinval/charactermanager:latest
@@ -257,6 +278,7 @@ docker-compose up -d
 ```
 
 ### Méthode 3: Via l'interface
+
 - L'application notifie automatiquement quand une mise à jour est disponible
 - Cliquer sur "Télécharger" ouvre la page de release
 - Suivre les instructions d'installation
@@ -264,6 +286,7 @@ docker-compose up -d
 ## 🆘 Dépannage
 
 ### L'application ne démarre pas
+
 ```bash
 # Vérifier les logs
 docker logs character-manager
@@ -276,6 +299,7 @@ netstat -tulpn | grep 5269
 ```
 
 ### Problème de base de données
+
 ```bash
 # Recréer la base
 rm charactermanager.db
@@ -283,6 +307,7 @@ rm charactermanager.db
 ```
 
 ### Problème de mise à jour
+
 - Vérifier la connexion internet
 - Vérifier que GitHubRepo est configuré dans appsettings.json
 - Consulter les logs pour les erreurs HTTP
@@ -290,5 +315,6 @@ rm charactermanager.db
 ## 📞 Support
 
 Pour toute question ou problème :
-- Créer une issue sur GitHub: https://github.com/Thorinval/CharacterManager/issues
-- Consulter les releases: https://github.com/Thorinval/CharacterManager/releases
+
+- Créer une issue sur GitHub: <https://github.com/Thorinval/CharacterManager/issues>
+- Consulter les releases: <https://github.com/Thorinval/CharacterManager/releases>
