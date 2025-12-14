@@ -8,6 +8,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Personnage> Personnages { get; set; }
     public DbSet<Capacite> Capacites { get; set; }
     public DbSet<AppSettings> AppSettings { get; set; }
+    public DbSet<Template> Templates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

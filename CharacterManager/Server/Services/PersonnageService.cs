@@ -150,4 +150,86 @@ public class PersonnageService(ApplicationDbContext context)
             _context.SaveChanges();
         }
     }
+
+    // ===== Méthodes pour Templates =====
+
+    public async Task<Template> CreateTemplateAsync(string nom, string description, List<int> personnageIds)
+    {
+        var personnages = _context.Personnages
+            .Where(p => personnageIds.Contains(p.Id))
+            .ToList();
+
+        var template = new Template
+        {
+            Nom = nom,
+            Description = description,
+            PuissanceTotal = personnages.Sum(p => p.Puissance),
+            DateCreation = DateTime.UtcNow,
+            DateModification = DateTime.UtcNow
+        };
+
+        template.SetPersonnageIds(personnageIds);
+        _context.Templates.Add(template);
+        await _context.SaveChangesAsync();
+        return template;
+    }
+
+    public async Task<Template?> GetTemplateAsync(int id)
+    {
+        return await _context.Templates.FirstOrDefaultAsync(t => t.Id == id);
+    }
+
+    public IEnumerable<Template> GetAllTemplates()
+    {
+        return [.. _context.Templates.OrderByDescending(t => t.DateModification)];
+    }
+
+    public async Task<bool> UpdateTemplateAsync(int templateId, string nom, string description, List<int> personnageIds)
+    {
+        var template = await _context.Templates.FirstOrDefaultAsync(t => t.Id == templateId);
+        if (template == null)
+            return false;
+
+        var personnages = _context.Personnages
+            .Where(p => personnageIds.Contains(p.Id))
+            .ToList();
+
+        template.Nom = nom;
+        template.Description = description;
+        template.PuissanceTotal = personnages.Sum(p => p.Puissance);
+        template.DateModification = DateTime.UtcNow;
+        template.SetPersonnageIds(personnageIds);
+
+        _context.Templates.Update(template);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> DeleteTemplateAsync(int id)
+    {
+        var template = await _context.Templates.FindAsync(id);
+        if (template == null)
+            return false;
+
+        _context.Templates.Remove(template);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public IEnumerable<Personnage> GetTemplatePersonnages(Template template)
+    {
+        var ids = template.GetPersonnageIds();
+        return _context.Personnages
+            .Include(p => p.Capacites)
+            .Where(p => ids.Contains(p.Id))
+            .ToList();
+    }
+
+    public int GetTemplatePuissance(Template template)
+    {
+        var ids = template.GetPersonnageIds();
+        return _context.Personnages
+            .Where(p => ids.Contains(p.Id))
+            .Sum(p => p.Puissance);
+    }
 }

@@ -6,6 +6,7 @@
 @using CharacterManager.Server.Models
 @using CharacterManager.Server.Services
 @using Microsoft.AspNetCore.Components.Web
+@using CharacterManager.Components
 
 <head>
     <title>Inventaire</title>
@@ -14,6 +15,63 @@
 <div class="page-header-banner">
     <h1 class="page-title">INVENTAIRE</h1>
 </div>
+
+<Toast @ref="toastRef" />
+
+<!-- Section Template Preview -->
+@if (showTemplateEditor)
+{
+    <div class="template-editor-section">
+        <EscouadePreviewEditor 
+            PersonnagesSelectionnes="@templatePersonnages"
+            OnSelectionChanged="@HandleTemplateSelectionChanged"
+            OnPersonnageRequested="@GetPersonnageById"
+            DraggedPersonnageId="@currentlyDraggedId"
+            OnInvalidDrop="@HandleInvalidDrop" />
+
+        <div class="template-actions mt-3">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <input type="text" 
+                               class="form-control" 
+                               placeholder="Nom du template" 
+                               @bind="templateNom" />
+                        <input type="text" 
+                               class="form-control" 
+                               placeholder="Description (optionnel)" 
+                               @bind="templateDescription" />
+                    </div>
+                    <div class="input-group full mt-2">
+                        <select class="form-select" @bind="selectedTemplateId">
+                            <option value="0">Sélectionner un template à charger</option>
+                            @foreach (var t in templates)
+                            {
+                                <option value="@t.Id">@t.Nom (@t.PuissanceTotal)</option>
+                            }
+                        </select>
+                        <button class="btn btn-outline-primary" @onclick="LoadSelectedTemplate" disabled="@(selectedTemplateId == 0)">
+                            <i class="bi bi-upload"></i> Charger
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-success" 
+                            @onclick="SaveTemplate" 
+                            disabled="@(string.IsNullOrEmpty(templateNom) || templateSelectedIds.Count == 0)">
+                        <i class="bi bi-check-circle"></i> Créer Template
+                    </button>
+                    <button class="btn btn-secondary ms-2" @onclick="() => CancelTemplateCreation()">
+                        <i class="bi bi-x"></i> Annuler
+                    </button>
+                    <button class="btn btn-info ms-2" @onclick="ExportTemplateAsCsv">
+                        <i class="bi bi-download"></i> Exporter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 <div class="row mb-3">
     <div class="col-md-6">
@@ -33,6 +91,9 @@
         }
         <button class="btn btn-primary" @onclick="() => { isEditing = false; currentPersonnage = new Personnage(); showModal = true; }">
             Ajouter Personnage
+        </button>
+        <button class="btn btn-info ms-2" @onclick="() => OpenTemplateEditor()" title="Créer un template d'escouade">
+            <i class="bi bi-plus-circle"></i> Template
         </button>
         <button class="btn btn-success ms-2" @onclick="ExportToCsv" title="Exporter l'inventaire en CSV">
             <i class="bi bi-download"></i> Exporter CSV
@@ -76,7 +137,11 @@
         {
             @if (viewMode == "grid")
             {
-                <div class="personnage-card-grid" @onclick="() => ViewPersonnage(personnage.Id)" style="cursor: pointer;">
+                <div class="personnage-card-grid" 
+                     @onclick="() => ViewPersonnage(personnage.Id)" 
+                     style="cursor: pointer;"
+                     draggable="true"
+                     @ondragstart="@(e => HandleDragStart(e, personnage))">
                     <div class="card-checkbox-grid" @onclick:stopPropagation="true">
                         <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)" @onchange="() => ToggleSelection(personnage.Id)" />
                     </div>
@@ -97,7 +162,11 @@
             }
             else
             {
-                <div class="personnage-card-list" @onclick="() => ViewPersonnage(personnage.Id)" style="cursor: pointer;">
+                <div class="personnage-card-list" 
+                     @onclick="() => ViewPersonnage(personnage.Id)" 
+                     style="cursor: pointer;"
+                     draggable="true"
+                     @ondragstart="@(e => HandleDragStart(e, personnage))">
                     <div class="card-checkbox" @onclick:stopPropagation="true">
                         <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)" @onchange="() => ToggleSelection(personnage.Id)" />
                     </div>
@@ -483,6 +552,35 @@ else
             color: #666;
             margin-bottom: 1.5rem;
         }
+
+        /* Styles pour le Template Editor */
+        .template-editor-section {
+            background: linear-gradient(135deg, #f0f4f8 0%, #e8eef7 100%);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #add8e6;
+        }
+
+        .template-actions {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+
+        .template-actions .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .template-actions .input-group input {
+            flex: 1;
+        }
+
+        .template-actions .input-group.full {
+            margin-bottom: 10px;
+        }
     </style>
 }
 
@@ -517,6 +615,27 @@ else
     protected override void OnInitialized()
     {
         LoadPersonnages();
+        // Charger un template si présent dans l'URL
+        var uri = new Uri(Navigation.Uri);
+        var query = uri.Query.TrimStart('?');
+        if (!string.IsNullOrEmpty(query))
+        {
+            var parts = query.Split('&', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var part in parts)
+            {
+                var kv = part.Split('=', 2);
+                if (kv.Length == 2 && kv[0].Equals("templateId", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (int.TryParse(Uri.UnescapeDataString(kv[1]), out var templateId))
+                    {
+                        showTemplateEditor = true;
+                        templates = PersonnageService.GetAllTemplates().ToList();
+                        selectedTemplateId = templateId;
+                        _ = InvokeAsync(async () => await LoadSelectedTemplate());
+                    }
+                }
+            }
+        }
     }
 
     private string GetViewModeClass(string mode)
@@ -797,6 +916,137 @@ else
         {
             await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de l'export: {ex.Message}");
         }
+    }
+
+    // ===== Template Methods =====
+
+    private bool showTemplateEditor = false;
+        private Toast? toastRef;
+    private string templateNom = string.Empty;
+    private string templateDescription = string.Empty;
+    private List<Personnage?> templatePersonnages = new();
+    private List<int> templateSelectedIds = new();
+    private List<Template> templates = new();
+    private int selectedTemplateId = 0;
+
+    private void OpenTemplateEditor()
+    {
+        showTemplateEditor = true;
+        templateNom = string.Empty;
+        templateDescription = string.Empty;
+        templatePersonnages.Clear();
+        templateSelectedIds.Clear();
+        templates = PersonnageService.GetAllTemplates().ToList();
+        selectedTemplateId = 0;
+    }
+
+    private void CancelTemplateCreation()
+    {
+        showTemplateEditor = false;
+        templateNom = string.Empty;
+        templateDescription = string.Empty;
+        templatePersonnages.Clear();
+        templateSelectedIds.Clear();
+        selectedTemplateId = 0;
+    }
+
+    private async Task HandleTemplateSelectionChanged(List<int> selectedIds)
+    {
+        templateSelectedIds = selectedIds;
+        // Recharger les personnages sélectionnés
+        templatePersonnages.Clear();
+        foreach (var id in selectedIds)
+        {
+            var p = await GetPersonnageById(id);
+            if (p != null)
+                templatePersonnages.Add(p);
+        }
+    }
+
+    private Task<Personnage?> GetPersonnageById(int id)
+    {
+        return Task.FromResult(PersonnageService.GetById(id));
+    }
+
+    private async Task SaveTemplate()
+    {
+        if (string.IsNullOrEmpty(templateNom) || templateSelectedIds.Count == 0)
+            return;
+
+        try
+        {
+            var template = await PersonnageService.CreateTemplateAsync(
+                templateNom,
+                templateDescription,
+                templateSelectedIds
+            );
+
+            toastRef?.Show($"Template '{template.Nom}' créé avec succès!", "success");
+            CancelTemplateCreation();
+            templates = PersonnageService.GetAllTemplates().ToList();
+        }
+        catch (Exception ex)
+        {
+            toastRef?.Show($"Erreur lors de la création du template: {ex.Message}", "error");
+        }
+    }
+
+    private async Task LoadSelectedTemplate()
+    {
+        if (selectedTemplateId == 0)
+            return;
+
+        var template = await PersonnageService.GetTemplateAsync(selectedTemplateId);
+        if (template is null)
+        {
+            toastRef?.Show("Template introuvable", "error");
+            return;
+        }
+
+        var ids = template.GetPersonnageIds();
+        templateSelectedIds = ids;
+        templatePersonnages = new List<Personnage?>();
+        foreach (var id in ids)
+        {
+            var p = PersonnageService.GetById(id);
+            if (p != null)
+                templatePersonnages.Add(p);
+        }
+        templateNom = template.Nom;
+        templateDescription = template.Description;
+        toastRef?.Show($"Template '{template.Nom}' chargé.", "info");
+    }
+
+    private async Task ExportTemplateAsCsv()
+    {
+        if (templateSelectedIds.Count == 0)
+            return;
+
+        try
+        {
+            var csvBytes = await CsvImportService.ExportToCsvAsync(templatePersonnages.Where(p => p != null).Select(p => p!));
+            var fileName = $"template_{templateNom}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            
+            await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(csvBytes));
+        }
+        catch (Exception ex)
+        {
+            toastRef?.Show($"Erreur lors de l'export du template: {ex.Message}", "error");
+        }
+    }
+
+    private Task HandleInvalidDrop(string message)
+    {
+        toastRef?.Show(message, "warning");
+        return Task.CompletedTask;
+    }
+
+    // Drag & Drop depuis les cartes
+    private int? currentlyDraggedId;
+
+    private void HandleDragStart(DragEventArgs e, Personnage personnage)
+    {
+        currentlyDraggedId = personnage.Id;
     }
 }
 

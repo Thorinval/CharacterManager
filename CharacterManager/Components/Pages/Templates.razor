@@ -1,0 +1,174 @@
+@page "/templates"
+@rendermode InteractiveServer
+@using CharacterManager.Server.Models
+@using CharacterManager.Server.Services
+
+@inject PersonnageService PersonnageService
+@inject CsvImportService CsvImportService
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@using CharacterManager.Components
+
+<PageTitle>Templates</PageTitle>
+
+<h2>Templates d'escouade</h2>
+
+<Toast @ref="toastRef" />
+
+@if (templates is null)
+{
+    <p>Chargement...</p>
+}
+else if (!templates.Any())
+{
+    <p>Aucun template enregistré.</p>
+}
+else
+{
+    <div class="templates-list">
+        @foreach (var t in templates)
+        {
+            <div class="template-card">
+                <div class="template-header">
+                    @if (editingTemplateId == t.Id)
+                    {
+                        <input class="form-control form-control-sm" style="max-width: 240px; display:inline-block;" @bind="editingName" />
+                        <button class="btn btn-sm btn-success ms-2" @onclick="(() => SaveRename(t))"><i class="bi bi-check"></i></button>
+                        <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelRename"><i class="bi bi-x"></i></button>
+                    }
+                    else
+                    {
+                        <span class="template-name">@t.Nom</span>
+                        <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="(() => StartRename(t))"><i class="bi bi-pencil"></i></button>
+                    }
+                    <span class="template-power">Puissance: <strong>@t.PuissanceTotal</strong></span>
+                </div>
+                <div class="template-meta">
+                    <span>Créé: @t.DateCreation.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</span>
+                    <span>Modifié: @t.DateModification.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</span>
+                </div>
+                <div class="template-actions">
+                    <button class="btn btn-primary" @onclick="(() => OpenInInventaire(t.Id))">
+                        <i class="bi bi-folder2-open"></i> Ouvrir dans Inventaire
+                    </button>
+                    <button class="btn btn-info" @onclick="(() => ExportTemplate(t.Id))">
+                        <i class="bi bi-download"></i> Exporter CSV
+                    </button>
+                    <button class="btn btn-secondary" @onclick="(() => DuplicateTemplate(t.Id))">
+                        <i class="bi bi-files"></i> Dupliquer
+                    </button>
+                    <button class="btn btn-danger" @onclick="(() => DeleteTemplate(t.Id))">
+                        <i class="bi bi-trash"></i> Supprimer
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<style>
+    .templates-list { display: flex; flex-direction: column; gap: 12px; }
+    .template-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 12px; }
+    .template-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .template-name { font-weight: 700; font-size: 1.1rem; }
+    .template-power { font-size: 0.95rem; }
+    .template-meta { display: flex; gap: 10px; color: #666; font-size: 0.85rem; margin-bottom: 8px; }
+    .template-actions { display: flex; gap: 8px; }
+</style>
+
+@code {
+    private List<Template> templates = new();
+    private Toast? toastRef;
+    private int? editingTemplateId = null;
+    private string editingName = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        templates = PersonnageService.GetAllTemplates().ToList();
+    }
+
+    private void OpenInInventaire(int id)
+    {
+        Navigation.NavigateTo($"/inventaire?templateId={id}");
+    }
+
+    private async Task ExportTemplate(int id)
+    {
+        var template = await PersonnageService.GetTemplateAsync(id);
+        if (template is null)
+        {
+            toastRef?.Show("Template introuvable", "error");
+            return;
+        }
+        var personnages = PersonnageService.GetTemplatePersonnages(template).ToList();
+        var csvBytes = await CsvImportService.ExportToCsvAsync(personnages);
+        var fileName = $"template_{template.Nom}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+        await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(csvBytes));
+        toastRef?.Show($"Export de '{template.Nom}' effectué", "success");
+    }
+
+    private async Task DeleteTemplate(int id)
+    {
+        var ok = await JSRuntime.InvokeAsync<bool>("confirm", "Supprimer ce template ?");
+        if (!ok) return;
+        var success = await PersonnageService.DeleteTemplateAsync(id);
+        if (success)
+        {
+            templates = PersonnageService.GetAllTemplates().ToList();
+            StateHasChanged();
+        }
+        else
+        {
+            toastRef?.Show("Suppression échouée", "error");
+        }
+    }
+
+    private async Task DuplicateTemplate(int id)
+    {
+        var template = await PersonnageService.GetTemplateAsync(id);
+        if (template is null)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Template introuvable");
+            return;
+        }
+
+        var ids = template.GetPersonnageIds();
+        var copyName = template.Nom + " (copie)";
+        var newTemplate = await PersonnageService.CreateTemplateAsync(copyName, template.Description, ids);
+        templates = PersonnageService.GetAllTemplates().ToList();
+        toastRef?.Show($"Template '{newTemplate.Nom}' créé.", "success");
+    }
+
+    private void StartRename(Template t)
+    {
+        editingTemplateId = t.Id;
+        editingName = t.Nom;
+    }
+
+    private void CancelRename()
+    {
+        editingTemplateId = null;
+        editingName = string.Empty;
+    }
+
+    private async Task SaveRename(Template t)
+    {
+        if (string.IsNullOrWhiteSpace(editingName))
+        {
+            toastRef?.Show("Le nom ne peut pas être vide", "warning");
+            return;
+        }
+        var ids = t.GetPersonnageIds();
+        var ok = await PersonnageService.UpdateTemplateAsync(t.Id, editingName, t.Description, ids);
+        if (ok)
+        {
+            toastRef?.Show("Template renommé", "success");
+            templates = PersonnageService.GetAllTemplates().ToList();
+            CancelRename();
+        }
+        else
+        {
+            toastRef?.Show("Échec du renommage", "error");
+        }
+    }
+}

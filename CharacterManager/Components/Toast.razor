@@ -1,0 +1,74 @@
+<div class="toast-container" style="display:@(isVisible ? "block" : "none")">
+    <div class="toast-message @GetCssClass()">
+        <span>@message</span>
+        <button class="btn-close" @onclick="Hide"></button>
+    </div>
+</div>
+
+<style>
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 2000;
+        min-width: 280px;
+    }
+    .toast-message {
+        border-radius: 6px;
+        padding: 10px 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .toast-success { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+    .toast-info { background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; }
+    .toast-warning { background-color: #fff3cd; color: #664d03; border: 1px solid #ffecb5; }
+    .toast-error { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+    .btn-close {
+        margin-left: auto;
+        background: none;
+        border: none;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+    }
+</style>
+
+@code {
+    private string message = string.Empty;
+    private string type = "info";
+    private bool isVisible = false;
+    private System.Timers.Timer? timer;
+
+    public void Show(string msg, string t = "info", int durationMs = 3000)
+    {
+        message = msg;
+        type = t;
+        isVisible = true;
+        StateHasChanged();
+
+        timer?.Stop();
+        timer = new System.Timers.Timer(durationMs);
+        timer.Elapsed += (_, __) => { Hide(); };
+        timer.AutoReset = false;
+        timer.Start();
+    }
+
+    public void Hide()
+    {
+        isVisible = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private string GetCssClass()
+    {
+        return type switch
+        {
+            "success" => "toast-message toast-success",
+            "warning" => "toast-message toast-warning",
+            "error" => "toast-message toast-error",
+            _ => "toast-message toast-info"
+        };
+    }
+}
