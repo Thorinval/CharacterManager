@@ -289,13 +289,22 @@
     {
         try
         {
+            System.Diagnostics.Debug.WriteLine($"HandleDrop called for slot {slotIndex}, DraggedPersonnageId={DraggedPersonnageId}");
+            
             if (DraggedPersonnageId is null)
+            {
+                System.Diagnostics.Debug.WriteLine("Drop failed: DraggedPersonnageId is null");
                 return;
+            }
 
             if (OnPersonnageRequested is null)
+            {
+                System.Diagnostics.Debug.WriteLine("Drop failed: OnPersonnageRequested is null");
                 return;
+            }
 
             var personnage = await OnPersonnageRequested.Invoke(DraggedPersonnageId.Value);
+            System.Diagnostics.Debug.WriteLine($"Retrieved personnage: {personnage?.Nom ?? "null"}");
             if (personnage == null)
                 return;
 
