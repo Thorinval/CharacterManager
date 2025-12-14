@@ -1,6 +1,8 @@
 using CharacterManager.Data;
 using CharacterManager.Models;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
+using SQLitePCL;
 
 namespace CharacterManager.Services;
 
@@ -12,6 +14,35 @@ public class PersonnageService(ApplicationDbContext context)
     {
         return [.. _context.Personnages.Include(p => p.Capacites)];
     }
+
+    public int GetPuissanceEscouade()
+    {
+        return _context.Personnages
+            .Where(p => p.Selectionne)
+            .Sum(p => p.Puissance);
+    }
+
+    public int GetPuissanceMaxEscouade()
+    {
+        return GetSommePuissanceMaxMercenaires() +
+               GetPuissanceMaxCommandant() +
+               GetSommePuissanceMaxAndroides(); 
+    }
+
+    public int GetSommePuissanceMaxMercenaires()
+    {
+        return _context.Personnages.Where(p => p.Type == TypePersonnage.Mercenaire).OrderByDescending(p => p.Puissance).Take(8).Sum(p => p.Puissance);
+    }
+
+      public int GetPuissanceMaxCommandant()
+    {
+        return _context.Personnages.Where(p => p.Type == TypePersonnage.Commandant).Max(p => p.Puissance);
+    }  
+
+       public int GetSommePuissanceMaxAndroides()
+    {
+        return _context.Personnages.Where(p => p.Type == TypePersonnage.Androïde).OrderByDescending(p => p.Puissance).Take(3).Sum(p => p.Puissance);
+    }     
 
     public IEnumerable<Personnage> GetEscouade()
     {
