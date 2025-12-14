@@ -18,13 +18,13 @@
             <!-- Colonne gauche : Image et infos de base -->
             <div class="col-md-6">
                 <div class="personnage-card">
-                    @if (!string.IsNullOrEmpty(currentPerso.ImageUrl))
+                    @if (!string.IsNullOrEmpty(currentPerso.ImageUrlDetail))
                     {
-                        <img src="@currentPerso.ImageUrl" alt="@currentPerso.Nom" class="personnage-image" />
+                        <img src="@currentPerso.ImageUrlDetail" alt="@currentPerso.Nom" class="personnage-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
                     }
                     else
                     {
-                        <div class="personnage-image-placeholder">Pas d'image</div>
+                        <img src="/images/personnages/default.png" alt="@currentPerso.Nom" class="personnage-image" />
                     }
 
                     <div class="personnage-info">
@@ -67,39 +67,14 @@
                     
                     <div class="stat-bar mt-3">
                         <div class="stat-bar-label">PV (Points de Vie)</div>
-                        <div class="progress" style="height: 25px;">
-                            @{
-                                int pvPercent = currentPerso.PVMax > 0 ? (currentPerso.PV * 100 / currentPerso.PVMax) : 0;
-                            }
-                            <div class="progress-bar bg-success" style="width: @(pvPercent)%">
-                                @currentPerso.PV / @currentPerso.PVMax
-                            </div>
-                        </div>
+                        <div class="stat-value">@currentPerso.PV</div>
                     </div>
 
                     <div class="stat-bar mt-3">
                         <div class="stat-bar-label">PA (Attaque)</div>
-                        <div class="progress" style="height: 25px;">
-                            @{
-                                int paPercent = currentPerso.PAMax > 0 ? (currentPerso.PA * 100 / currentPerso.PAMax) : 0;
-                            }
-                            <div class="progress-bar bg-warning" style="width: @(paPercent)%">
-                                @currentPerso.PA @if (currentPerso.PAMax > 0) { <span>/ @currentPerso.PAMax</span> }
-                            </div>
-                        </div>
+                        <div class="stat-value">@currentPerso.PA</div>
                     </div>
 
-                    <div class="stat-bar mt-3">
-                        <div class="stat-bar-label">Santé</div>
-                        <div class="progress" style="height: 25px;">
-                            @{
-                                int santePercent = currentPerso.SanteMax > 0 ? (currentPerso.Sante * 100 / currentPerso.SanteMax) : 0;
-                            }
-                            <div class="progress-bar bg-info" style="width: @(santePercent)%">
-                                @currentPerso.Sante @if (currentPerso.SanteMax > 0) { <span>/ @currentPerso.SanteMax</span> }
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 @if (currentPerso.Capacites.Any())

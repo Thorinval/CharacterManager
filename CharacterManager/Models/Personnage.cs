@@ -56,26 +56,21 @@ public class Personnage
 
     // points d'attaque
     public int PA { get; set; }
-    public int PAMax { get; set; }
 
     // points de vie
     public int PV { get; set; }
-    public int PVMax { get; set; }
 
     public Role Role { get; set; }
     public Faction Faction { get; set; }
 
-    // Image du personnage
-    public string ImageUrl { get; set; } = string.Empty;
+    // Images du personnage
+    public string ImageUrlDetail { get; set; } = string.Empty;        // Pour la vue détail (grande image)
+    public string ImageUrlPreview { get; set; } = string.Empty;       // Pour les aperçus (escouade, inventaire) - _small_portrait.png
+    public string ImageUrlSelected { get; set; } = string.Empty;      // Quand le personnage est sélectionné - _small_select.png
 
     // Description et capacités
     public string Description { get; set; } = string.Empty;
     public List<Capacite> Capacites { get; set; } = new();
-
-    // Statistiques
-    public int Sante { get; set; }
-    public int SanteMax { get; set; }
-    public string Localisation { get; set; } = string.Empty;
 
     // Type d'attaque
     public TypeAttaque TypeAttaque { get; set; }

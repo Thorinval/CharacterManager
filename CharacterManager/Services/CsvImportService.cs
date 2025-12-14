@@ -79,9 +79,7 @@ public class CsvImportService(PersonnageService personnageService)
             existing.Type = nouveauPersonnage.Type;
             existing.Puissance = nouveauPersonnage.Puissance;
             existing.PA = nouveauPersonnage.PA;
-            existing.PAMax = Math.Max(existing.PAMax, nouveauPersonnage.PA);
             existing.PV = nouveauPersonnage.PV;
-            existing.PVMax = Math.Max(existing.PVMax, nouveauPersonnage.PV);
             existing.Niveau = nouveauPersonnage.Niveau;
             existing.Rang = nouveauPersonnage.Rang;
             existing.Role = nouveauPersonnage.Role;
@@ -152,7 +150,6 @@ public class CsvImportService(PersonnageService personnageService)
             if (int.TryParse(values[paIndex].Trim(), out var pa))
                 personnage.PA = pa;
         }
-        personnage.PAMax = Math.Max(personnage.PA, 10);
 
         // PV
         if (mapping.TryGetValue("PV", out int pvIndex) && pvIndex < values.Count)
@@ -160,16 +157,9 @@ public class CsvImportService(PersonnageService personnageService)
             if (int.TryParse(values[pvIndex].Trim(), out var pv))
                 personnage.PV = pv;
         }
-        personnage.PVMax = Math.Max(personnage.PV, 10);
 
-        // Santé (si disponible)
+        // Niveau
         if (mapping.TryGetValue("Sante", out int santeIndex) && santeIndex < values.Count)
-        {
-            if (int.TryParse(values[santeIndex].Trim(), out var sante))
-                personnage.Sante = sante;
-        }
-        personnage.SanteMax = Math.Max(personnage.Sante, 10);
-
         // Niveau
         if (mapping.TryGetValue("Niveau", out int niveauIndex) && niveauIndex < values.Count)
         {
@@ -236,9 +226,11 @@ public class CsvImportService(PersonnageService personnageService)
                 personnage.TypeAttaque = TypeAttaque.Inconnu; // Default
         }
 
-        personnage.ImageUrl = $"https://via.placeholder.com/150?text={Uri.EscapeDataString(personnage.Nom)}";
+        string nomLower = personnage.Nom.ToLower();
+        personnage.ImageUrlDetail = $"/images/personnages/{nomLower}.png";
+        personnage.ImageUrlPreview = $"/images/personnages/{nomLower}_small_portrait.png";
+        personnage.ImageUrlSelected = $"/images/personnages/{nomLower}_small_select.png";
         personnage.Description = $"Personnage {personnage.Nom} importé";
-        personnage.Localisation = "Non assignée";
 
         return personnage;
     }

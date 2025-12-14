@@ -19,6 +19,19 @@
 }
 else
 {
+    <!-- Aperçu visuel de l'escouade -->
+    <div class="escouade-preview mb-4">
+        <div class="escouade-images d-flex flex-wrap gap-2">
+            @foreach (var perso in personnagesEscouade.OrderByDescending(p => p.Puissance))
+            {
+                <div class="escouade-member-preview">
+                    <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
+                    <div class="escouade-member-name">@perso.Nom</div>
+                    <div class="escouade-member-power">@perso.Puissance</div>
+                </div>
+            }
+        </div>
+    </div>
 
 <h2>Puissance de l'escouade : @puissanceEscouade</h2>
 <h2>Puissance max : @puissanceMax</h2>
@@ -29,6 +42,7 @@ else
     <table class="table table-striped">
         <thead>
             <tr>
+                <th>Image</th>
                 <th>Nom</th>
                 <th>Rareté</th>
                 <th>Type</th>
@@ -42,6 +56,7 @@ else
             @foreach (var perso in commandants)
             {
                 <tr>
+                    <td><img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="table-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" /></td>
                     <td>@perso.Nom</td>
                     <td>@perso.Rarete</td>
                     <td>@perso.Type</td>
@@ -58,6 +73,7 @@ else
     <table class="table table-striped">
         <thead>
             <tr>
+                <th></th>
                 <th>Nom</th>
                 <th>Rareté</th>
                 <th>Type</th>
@@ -71,6 +87,7 @@ else
             @foreach (var perso in mercenaires)
             {
                 <tr>
+                    <td><img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="table-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" /></td>
                     <td>@perso.Nom</td>
                     <td>@perso.Rarete</td>
                     <td>@perso.Type</td>
@@ -87,6 +104,7 @@ else
     <table class="table table-striped"> 
         <thead>
             <tr>
+                <th></th>
                 <th>Nom</th>
                 <th>Rareté</th>
                 <th>Type</th>
@@ -98,6 +116,7 @@ else
             @foreach (var perso in androides)
             {
                 <tr>
+                    <td><img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="table-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" /></td>
                     <td>@perso.Nom</td>
                     <td>@perso.Rarete</td>
                     <td>@perso.Type</td>
@@ -214,6 +233,53 @@ else
             display: flex;
             justify-content: flex-end;
             gap: 0.5rem;
+        }
+
+        .escouade-preview {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .escouade-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .escouade-member-preview {
+            text-align: center;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .escouade-image {
+            width: 120px;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 4px;
+            display: block;
+        }
+
+        .escouade-member-name {
+            font-weight: bold;
+            margin-top: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .escouade-member-power {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .table-image {
+            width: 50px;
+            height: 66px;
+            object-fit: cover;
+            border-radius: 4px;
         }
     </style>
 }

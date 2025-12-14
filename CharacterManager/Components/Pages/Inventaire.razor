@@ -45,6 +45,7 @@
                 <th>
                     <input type="checkbox" checked="@selectAllChecked" @onchange="SelectAll" />
                 </th>
+                <th></th>
                 <th @onclick="SortByNom" style="cursor: pointer;">
                     Nom
                 </th>
@@ -70,6 +71,7 @@
                     <td @onclick:stopPropagation="true">
                         <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)" @onchange="() => ToggleSelection(personnage.Id)" />
                     </td>
+                    <td><img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="table-image" onerror="this.onerror=null; this.src='/images/personnages/default.png';" /></td>
                     <td>@personnage.Nom</td>
                     <td>@personnage.Rarete</td>
                     <td>@personnage.Niveau</td>
@@ -196,6 +198,13 @@ else
             display: flex;
             justify-content: flex-end;
             gap: 0.5rem;
+        }
+
+        .table-image {
+            width: 50px;
+            height: 66px;
+            object-fit: cover;
+            border-radius: 4px;
         }
     </style>
 }
@@ -381,9 +390,6 @@ else
                         if (Enum.TryParse<CharacterManager.Models.TypeAttaque>(bulkEditValue, out var typeAttaqueValue))
                             personnage.TypeAttaque = typeAttaqueValue;
                         break;
-                    case "Localisation":
-                        personnage.Localisation = bulkEditValue;
-                        break;
                 }
                 PersonnageService.Update(personnage);
             }
@@ -416,16 +422,13 @@ else
             Rang = personnage.Rang,
             Puissance = personnage.Puissance,
             PA = personnage.PA,
-            PAMax = personnage.PAMax,
             PV = personnage.PV,
-            PVMax = personnage.PVMax,
-            Sante = personnage.Sante,
-            SanteMax = personnage.SanteMax,
             Role = personnage.Role,
             Faction = personnage.Faction,
-            ImageUrl = personnage.ImageUrl,
+            ImageUrlDetail = personnage.ImageUrlDetail,
+            ImageUrlPreview = personnage.ImageUrlPreview,
+            ImageUrlSelected = personnage.ImageUrlSelected,
             Description = personnage.Description,
-            Localisation = personnage.Localisation,
             Selectionne = personnage.Selectionne,
             TypeAttaque = personnage.TypeAttaque
         };

@@ -31,17 +31,20 @@ public class PersonnageService(ApplicationDbContext context)
 
     public int GetSommePuissanceMaxMercenaires()
     {
-        return _context.Personnages.Where(p => p.Type == TypePersonnage.Mercenaire).OrderByDescending(p => p.Puissance).Take(8).Sum(p => p.Puissance);
+        var mercenaires = _context.Personnages.Where(p => p.Type == TypePersonnage.Mercenaire).OrderByDescending(p => p.Puissance).Take(8);
+        return mercenaires.Any() ? mercenaires.Sum(p => p.Puissance) : 0;
     }
 
       public int GetPuissanceMaxCommandant()
     {
-        return _context.Personnages.Where(p => p.Type == TypePersonnage.Commandant).Max(p => p.Puissance);
+        var commandants = _context.Personnages.Where(p => p.Type == TypePersonnage.Commandant);
+        return commandants.Any() ? commandants.Max(p => p.Puissance) : 0;
     }  
 
        public int GetSommePuissanceMaxAndroides()
     {
-        return _context.Personnages.Where(p => p.Type == TypePersonnage.Androïde).OrderByDescending(p => p.Puissance).Take(3).Sum(p => p.Puissance);
+        var androides = _context.Personnages.Where(p => p.Type == TypePersonnage.Androïde).OrderByDescending(p => p.Puissance).Take(3);
+        return androides.Any() ? androides.Sum(p => p.Puissance) : 0;
     }     
 
     public IEnumerable<Personnage> GetEscouade()
@@ -115,16 +118,13 @@ public class PersonnageService(ApplicationDbContext context)
             existing.Rang = personnage.Rang;
             existing.Puissance = personnage.Puissance;
             existing.PA = personnage.PA;
-            existing.PAMax = personnage.PAMax;
             existing.PV = personnage.PV;
-            existing.PVMax = personnage.PVMax;
-            existing.Sante = personnage.Sante;
-            existing.SanteMax = personnage.SanteMax;
             existing.Role = personnage.Role;
             existing.Faction = personnage.Faction;
-            existing.ImageUrl = personnage.ImageUrl;
+            existing.ImageUrlDetail = personnage.ImageUrlDetail;
+            existing.ImageUrlPreview = personnage.ImageUrlPreview;
+            existing.ImageUrlSelected = personnage.ImageUrlSelected;
             existing.Description = personnage.Description;
-            existing.Localisation = personnage.Localisation;
             existing.Selectionne = personnage.Selectionne;
             existing.TypeAttaque = personnage.TypeAttaque;
 
