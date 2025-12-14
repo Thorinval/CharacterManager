@@ -37,6 +37,19 @@ using (var scope = app.Services.CreateScope())
         {
             // Ensure database and tables exist
             db.Database.EnsureCreated();
+
+            // Hotfix: Ensure 'Templates' table exists in existing SQLite DBs without migrations
+            // This avoids 'no such table: Templates' when upgrading from versions without the Templates entity.
+            var createTemplatesSql = @"CREATE TABLE IF NOT EXISTS Templates (
+                Id INTEGER NOT NULL CONSTRAINT PK_Templates PRIMARY KEY AUTOINCREMENT,
+                Nom TEXT NOT NULL,
+                Description TEXT NULL,
+                PuissanceTotal INTEGER NOT NULL,
+                DateCreation TEXT NOT NULL,
+                DateModification TEXT NULL,
+                PersonnagesJson TEXT NOT NULL
+            );";
+            db.Database.ExecuteSqlRaw(createTemplatesSql);
         }
     }
     catch (Exception ex)
