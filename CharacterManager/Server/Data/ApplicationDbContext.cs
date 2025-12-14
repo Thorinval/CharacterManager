@@ -1,7 +1,7 @@
-using CharacterManager.Models;
+using CharacterManager.Server.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace CharacterManager.Data;
+namespace CharacterManager.Server.Data;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {

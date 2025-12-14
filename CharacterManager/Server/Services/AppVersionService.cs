@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Diagnostics;
 using Microsoft.Extensions.Configuration;
 
-namespace CharacterManager.Services;
+namespace CharacterManager.Server.Services;
 
 public class AppVersionService
 {

@@ -3,8 +3,8 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 @inject CsvImportService CsvImportService
-@using CharacterManager.Models
-@using CharacterManager.Services
+@using CharacterManager.Server.Models
+@using CharacterManager.Server.Services
 @using Microsoft.AspNetCore.Components.Web
 
 <head>
@@ -83,6 +83,7 @@
                     <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-grid" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
                     <div class="personnage-card-content">
                         <div class="personnage-name">@personnage.Nom</div>
+                        <div class="personnage-attribute-compact">Type: @personnage.Type</div>
                         <div class="personnage-attribute-compact">Rareté: @personnage.Rarete</div>
                         <div class="personnage-attribute-compact">Puissance: @personnage.Puissance</div>
                         <div class="personnage-attribute-compact">Niveau: @personnage.Niveau</div>
@@ -103,6 +104,8 @@
                     <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-list" onerror="this.onerror=null; this.src='/images/personnages/default.png';" />
                     <div class="personnage-info-list">
                         <span class="personnage-name" style="font-weight: 700;">@personnage.Nom</span>
+                        <span class="list-separator">|</span>
+                        <span>Type: @personnage.Type</span>
                         <span class="list-separator">|</span>
                         <span>Rareté: @personnage.Rarete</span>
                         <span class="list-separator">|</span>
@@ -245,38 +248,39 @@ else
         /* Styles pour la présentation en grille */
         .personnages-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 0.75rem;
             margin-bottom: 1rem;
         }
 
         @@media (max-width: 1400px) {
             .personnages-grid {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             }
         }
 
-        @@media (max-width: 992px) {
+        @@media (max-width: 1100px) {
             .personnages-grid {
-                grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             }
         }
 
-        @@media (max-width: 768px) {
+        @@media (max-width: 800px) {
             .personnages-grid {
-                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             }
         }
 
-        @@media (max-width: 480px) {
+        @@media (max-width: 600px) {
             .personnages-grid {
-                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             }
         }
 
         .personnage-card-grid {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            flex-wrap: nowrap;
             background: white;
             padding: 0.75rem;
             border-radius: 8px;
@@ -284,7 +288,7 @@ else
             border: 1px solid #dee2e6;
             transition: transform 0.2s, box-shadow 0.2s;
             position: relative;
-            gap: 1rem;
+            gap: 0.75rem;
             align-items: flex-start;
         }
 
@@ -307,19 +311,20 @@ else
         }
 
         .personnage-card-image-grid {
-            width: 100%;
-            height: 100px;
+            width: 90px;
+            height: 120px;
             object-fit: cover;
             border-radius: 4px;
             flex-shrink: 0;
+            align-self: flex-start;
         }
 
         .personnage-card-content {
             display: flex;
             flex-direction: column;
-            gap: 0.3rem;
+            gap: 0.25rem;
             flex-grow: 1;
-            padding: 0.4rem;
+            padding: 0.2rem 0.2rem 0.2rem 0.4rem;
             min-width: 0;
         }
 
@@ -672,7 +677,7 @@ else
                             personnage.Niveau = niveau;
                         break;
                     case "TypeAttaque":
-                        if (Enum.TryParse<CharacterManager.Models.TypeAttaque>(bulkEditValue, out var typeAttaqueValue))
+                        if (Enum.TryParse<CharacterManager.Server.Models.TypeAttaque>(bulkEditValue, out var typeAttaqueValue))
                             personnage.TypeAttaque = typeAttaqueValue;
                         break;
                 }

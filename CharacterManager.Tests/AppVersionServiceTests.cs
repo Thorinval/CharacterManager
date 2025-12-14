@@ -1,4 +1,4 @@
-using CharacterManager.Services;
+using CharacterManager.Server.Services;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;

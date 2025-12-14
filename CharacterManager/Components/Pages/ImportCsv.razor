@@ -1,5 +1,5 @@
 @page "/import-csv"
-@using CharacterManager.Services
+@using CharacterManager.Server.Services
 @using System.IO
 @inject CsvImportService CsvImportService
 @inject NavigationManager NavigationManager
@@ -45,9 +45,8 @@
                         </div>
 
                         <button class="btn btn-primary" @onclick="Reset">Nouvel import</button>
-                        <a href="/inventaire" class="btn btn-secondary btn-retour">
+                        <a href="/inventaire" class="btn btn-secondary btn-retour" title="Retour à l'inventaire">
                             <img src="/images/btn_retour.png" alt="Retour" class="btn-retour-icon" onerror="this.style.display='none';" />
-                            <span>Retour à l'inventaire</span>
                         </a>
                     }
                     else
@@ -73,7 +72,7 @@
                                     OnChange="@OnFileSelected"
                                     disabled="@isImporting" />
                                 <small class="text-muted">
-                                    Format attendu: Personnage;Rareté;Type;Puissance;PA;PV;Action;Role;Niveau;Rang;Selection;Faction
+                                    Format attendu: Personnage;Rareté;Categorie;Puissance;PA;PV;TypeAttaque;Role;Niveau;Rang;Selection;Faction
                                 </small>
                             </div>
 

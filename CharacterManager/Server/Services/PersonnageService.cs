@@ -1,10 +1,10 @@
-using CharacterManager.Data;
-using CharacterManager.Models;
+using CharacterManager.Server.Data;
+using CharacterManager.Server.Models;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using SQLitePCL;
 
-namespace CharacterManager.Services;
+namespace CharacterManager.Server.Services;
 
 public class PersonnageService(ApplicationDbContext context)
 {
@@ -24,28 +24,37 @@ public class PersonnageService(ApplicationDbContext context)
 
     public int GetPuissanceMaxEscouade()
     {
-        return GetSommePuissanceMaxMercenaires() +
-               GetPuissanceMaxCommandant() +
-               GetSommePuissanceMaxAndroides(); 
+        return GetTopMercenaires().Sum(p => p.Puissance) +
+               (GetTopCommandant()?.Puissance ?? 0) +
+               GetTopAndroides().Sum(p => p.Puissance);
     }
 
-    public int GetSommePuissanceMaxMercenaires()
+    public IEnumerable<Personnage> GetTopMercenaires(int count = 8)
     {
-        var mercenaires = _context.Personnages.Where(p => p.Type == TypePersonnage.Mercenaire).OrderByDescending(p => p.Puissance).Take(8);
-        return mercenaires.Any() ? mercenaires.Sum(p => p.Puissance) : 0;
+        return _context.Personnages
+            .Include(p => p.Capacites)
+            .Where(p => p.Type == TypePersonnage.Mercenaire)
+            .OrderByDescending(p => p.Puissance)
+            .Take(count);
     }
 
-      public int GetPuissanceMaxCommandant()
+    public Personnage? GetTopCommandant()
     {
-        var commandants = _context.Personnages.Where(p => p.Type == TypePersonnage.Commandant);
-        return commandants.Any() ? commandants.Max(p => p.Puissance) : 0;
-    }  
+        return _context.Personnages
+            .Include(p => p.Capacites)
+            .Where(p => p.Type == TypePersonnage.Commandant)
+            .OrderByDescending(p => p.Puissance)
+            .FirstOrDefault();
+    }
 
-       public int GetSommePuissanceMaxAndroides()
+    public IEnumerable<Personnage> GetTopAndroides(int count = 3)
     {
-        var androides = _context.Personnages.Where(p => p.Type == TypePersonnage.Androïde).OrderByDescending(p => p.Puissance).Take(3);
-        return androides.Any() ? androides.Sum(p => p.Puissance) : 0;
-    }     
+        return _context.Personnages
+            .Include(p => p.Capacites)
+            .Where(p => p.Type == TypePersonnage.Androïde)
+            .OrderByDescending(p => p.Puissance)
+            .Take(count);
+    }
 
     public IEnumerable<Personnage> GetEscouade()
     {

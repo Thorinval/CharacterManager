@@ -1,8 +1,8 @@
 @page "/detail-personnage/{id:int}"
 @inject PersonnageService PersonnageService
 @inject NavigationManager Navigation
-@using CharacterManager.Models
-@using CharacterManager.Services
+@using CharacterManager.Server.Models
+@using CharacterManager.Server.Services
 @using System
 @using System.Linq
 @using Microsoft.AspNetCore.Components
@@ -14,9 +14,8 @@
 @if (currentPerso != null)
 {
     <div class="mb-3">
-        <button class="btn btn-secondary btn-retour" @onclick="GoBack">
+        <button class="btn btn-secondary btn-retour" @onclick="GoBack" title="Retour">
             <img src="/images/btn_retour.png" alt="Retour" class="btn-retour-icon" onerror="this.style.display='none';" />
-            <span>← Retour</span>
         </button>
     </div>
 
@@ -132,9 +131,8 @@
                 }
 
                 <div class="actions-card mt-4">
-                    <button class="btn btn-primary btn-lg w-100 btn-retour" @onclick="GoBack">
+                    <button class="btn btn-primary btn-lg w-100 btn-retour" @onclick="GoBack" title="Retour">
                         <img src="/images/btn_retour.png" alt="Retour" class="btn-retour-icon" onerror="this.style.display='none';" />
-                        <span>Retour</span>
                     </button>
                 </div>
             </div>

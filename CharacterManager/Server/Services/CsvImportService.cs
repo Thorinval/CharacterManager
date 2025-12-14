@@ -1,9 +1,9 @@
-using CharacterManager.Models;
-using CharacterManager.Data;
+using CharacterManager.Server.Models;
+using CharacterManager.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 
-namespace CharacterManager.Services;
+namespace CharacterManager.Server.Services;
 
 public class CsvImportService(PersonnageService personnageService, ApplicationDbContext context)
 {
@@ -133,7 +133,7 @@ public class CsvImportService(PersonnageService personnageService, ApplicationDb
         }
 
         // Type
-        if (mapping.TryGetValue("Type", out int typeIndex) && typeIndex < values.Count)
+        if (mapping.TryGetValue("Categorie", out int typeIndex) && typeIndex < values.Count)
         {
             var typeStr = values[typeIndex].Trim();
             if (typeStr.Contains("Mercenaire", StringComparison.OrdinalIgnoreCase))
@@ -168,8 +168,6 @@ public class CsvImportService(PersonnageService personnageService, ApplicationDb
                 personnage.PV = pv;
         }
 
-        // Niveau
-        if (mapping.TryGetValue("Sante", out int santeIndex) && santeIndex < values.Count)
         // Niveau
         if (mapping.TryGetValue("Niveau", out int niveauIndex) && niveauIndex < values.Count)
         {
@@ -258,15 +256,13 @@ public class CsvImportService(PersonnageService personnageService, ApplicationDb
             else if (header.Contains("rareté") || header.Contains("rarete"))
                 mapping["Rarete"] = i;
             else if (header.Contains("categorie"))
-                mapping["Type"] = i;
+                mapping["Categorie"] = i;
             else if (header.Contains("puissance"))
                 mapping["Puissance"] = i;
             else if (header.Contains("pa"))
                 mapping["PA"] = i;
             else if (header.Contains("pv"))
                 mapping["PV"] = i;
-            else if (header.Contains("sante"))
-                mapping["Sante"] = i;
             else if (header.Contains("niveau"))
                 mapping["Niveau"] = i;
             else if (header.Contains("rang"))
@@ -338,7 +334,7 @@ public class CsvImportService(PersonnageService personnageService, ApplicationDb
         var sb = new StringBuilder();
         
         // Header
-        sb.AppendLine("Personnage;Rareté;Type;Puissance;PA;PV;Action;Role;Niveau;Rang;Selection;Faction");
+        sb.AppendLine("Personnage;Rarete;Categorie;Puissance;PA;PV;Action;Role;Niveau;Rang;Selection;Faction");
         
         // Data rows
         foreach (var p in personnages)

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace CharacterManager.Models;
+namespace CharacterManager.Server.Models;
 
 public enum Rarete
 {

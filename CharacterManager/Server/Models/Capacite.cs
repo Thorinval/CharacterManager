@@ -1,4 +1,4 @@
-namespace CharacterManager.Models;
+namespace CharacterManager.Server.Models;
 
 public class Capacite
 {

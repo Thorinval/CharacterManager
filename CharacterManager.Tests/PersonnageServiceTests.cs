@@ -1,6 +1,6 @@
-using CharacterManager.Data;
-using CharacterManager.Models;
-using CharacterManager.Services;
+using CharacterManager.Server.Data;
+using CharacterManager.Server.Models;
+using CharacterManager.Server.Services;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 

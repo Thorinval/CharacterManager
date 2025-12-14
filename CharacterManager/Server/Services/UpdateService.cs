@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 
-namespace CharacterManager.Services;
+namespace CharacterManager.Server.Services;
 
 public class UpdateService
 {

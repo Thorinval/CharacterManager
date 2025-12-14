@@ -1,6 +1,6 @@
 using CharacterManager.Components; 
-using CharacterManager.Data;
-using CharacterManager.Services; 
+using CharacterManager.Server.Data;
+using CharacterManager.Server.Services; 
 using Microsoft.EntityFrameworkCore; 
 
 var builder = WebApplication.CreateBuilder(args);
