@@ -16,10 +16,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<PersonnageService>();
 builder.Services.AddScoped<CsvImportService>();
+builder.Services.AddScoped<HistoriqueEscouadeService>();
+builder.Services.AddScoped<ClientLocalizationService>();
 // AppImageService no longer used for categorization; DI registration removed
 builder.Services.AddSingleton<PersonnageImageConfigService>();
 builder.Services.AddSingleton<AppVersionService>();
+builder.Services.AddSingleton<LocalizationService>();
 builder.Services.AddHttpClient<UpdateService>();
+builder.Services.AddHttpClient();  // Pour les appels HTTP du ClientLocalizationService
 
 var app = builder.Build();
 

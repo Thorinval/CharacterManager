@@ -1,11 +1,11 @@
 @page "/settings"
-@inject ApplicationDbContext DbContext
-@inject AppVersionService AppVersionService
 @using CharacterManager.Server.Data
 @using CharacterManager.Server.Models
 @using CharacterManager.Server.Services
 @using Microsoft.EntityFrameworkCore
 @rendermode InteractiveServer
+
+<link rel="stylesheet" href="../Styles/Settings.css" />
 
 <PageTitle>Paramètres - Character Manager</PageTitle>
 
@@ -16,6 +16,30 @@
 </div>
 
 <div class="settings-container">
+    <!-- Section Langue -->
+    <div class="settings-section">
+        <div class="section-header">
+            <h2>Localisation</h2>
+        </div>
+
+        <div class="setting-item">
+            <div class="setting-label">
+                <h3>Langue</h3>
+                <p class="setting-description">
+                    Choisissez la langue de l'interface
+                </p>
+            </div>
+            <div class="setting-control">
+                <select class="form-select" @onchange="OnLanguageChanged">
+                    @foreach (var lang in availableLanguages)
+                    {
+                        <option value="@lang.Code" selected="@(currentLanguage == lang.Code)">@lang.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
     <!-- Section Mode Adulte -->
     <div class="settings-section">
         <div class="section-header">
@@ -59,133 +83,3 @@
     </div>
 </div>
 
-<style>
-.settings-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-.settings-section {
-    background: white;
-    border-radius: 8px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.section-header {
-    margin-bottom: 2rem;
-    border-bottom: 2px solid #e0e0e0;
-    padding-bottom: 1rem;
-}
-
-.section-header h2 {
-    color: #2c3e50;
-    font-size: 1.8rem;
-    margin: 0 0 0.5rem 0;
-    font-weight: 600;
-}
-
-.section-description {
-    color: #666;
-    margin: 0;
-    font-size: 0.95rem;
-}
-
-.setting-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 2rem;
-    padding: 1.5rem 0;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.setting-item:last-child {
-    border-bottom: none;
-}
-
-.setting-label h3 {
-    margin: 0 0 0.5rem 0;
-    color: #2c3e50;
-    font-size: 1.1rem;
-}
-
-.setting-description {
-    margin: 0;
-    color: #666;
-    font-size: 0.9rem;
-    line-height: 1.4;
-}
-
-.setting-control {
-    display: flex;
-    align-items: center;
-    min-width: 150px;
-}
-
-.form-check {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.form-check-input {
-    cursor: pointer;
-    margin: 0;
-}
-
-.setting-control .form-check-input {
-    width: 2.5rem;
-    height: 1.5rem;
-}
-
-.form-check-label {
-    margin: 0;
-    cursor: pointer;
-    font-weight: 500;
-}
-
-/* (liste de configuration supprimée) */
-
-.about-info {
-    padding: 1rem 0;
-}
-
-.about-info p {
-    margin: 0.5rem 0;
-}
-
-.about-info strong {
-    color: #2c3e50;
-}
-</style>
-
-@code {
-    private bool isAdultModeEnabled = true;
-    private string appVersion = "Unknown";
-
-    protected override async Task OnInitializedAsync()
-    {
-        var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
-        if (settings != null)
-        {
-            isAdultModeEnabled = settings.IsAdultModeEnabled;
-        }
-
-        appVersion = AppVersionService.GetAppVersion();
-    }
-
-    private async Task OnAdultModeChanged()
-    {
-        var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
-        if (settings != null)
-        {
-            settings.IsAdultModeEnabled = isAdultModeEnabled;
-            DbContext.AppSettings.Update(settings);
-            await DbContext.SaveChangesAsync();
-            StateHasChanged();
-        }
-    }
-}

@@ -1,0 +1,14 @@
+@using CharacterManager.Server.Services
+@inject ClientLocalizationService LocalizationService
+
+@* Composant pour afficher une chaîne traduite *@
+@{
+    var text = LocalizationService.T(Key);
+}
+
+@text
+
+@code {
+    [Parameter]
+    public string Key { get; set; } = string.Empty;
+}

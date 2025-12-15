@@ -10,4 +10,9 @@ public class AppSettings
     /// Mode adulte activé par défaut (permet d'afficher les images marquées comme "adulte")
     /// </summary>
     public bool IsAdultModeEnabled { get; set; } = true;
+
+    /// <summary>
+    /// Langue actuelle : "fr" pour français, "en" pour anglais
+    /// </summary>
+    public string Language { get; set; } = "fr";
 }

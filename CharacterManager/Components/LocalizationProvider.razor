@@ -1,0 +1,22 @@
+@using CharacterManager.Server.Data
+@using CharacterManager.Server.Services
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
+@inject ClientLocalizationService LocalizationService
+
+@ChildContent
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Charger la langue préférée de la base de données
+        var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+        var language = settings?.Language ?? "fr";
+
+        // Initialiser le service de localisation
+        await LocalizationService.InitializeAsync(language);
+    }
+}
