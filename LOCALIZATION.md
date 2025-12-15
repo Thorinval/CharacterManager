@@ -3,17 +3,21 @@
 ## Vue d'ensemble
 
 L'application dispose d'un système de localisation complet permettant de supporter plusieurs langues. Actuellement, deux langues sont disponibles :
+
 - **Français (fr)** - Langue par défaut
 - **Anglais (en)**
 
 ## Structure
 
 ### Fichiers de ressources
+
 Les ressources de traduction se trouvent dans `wwwroot/i18n/`:
+
 - `fr.json` - Traductions en français
 - `en.json` - Traductions en anglais
 
 Chaque fichier JSON est structuré par sections (sections.key):
+
 ```json
 {
   "common": {
@@ -24,17 +28,21 @@ Chaque fichier JSON est structuré par sections (sections.key):
     "home": "Accueil"
   }
 }
+
 ```
 
 ### Services
 
 #### `LocalizationService`
+
 Service backend singleton pour gérer les ressources de traduction.
 
 #### `ClientLocalizationService`
+
 Service scoped pour les composants Blazor permettant d'accéder aux traductions.
 
 Méthodes disponibles:
+
 - `InitializeAsync(languageCode)` - Initialise le service avec une langue
 - `T(key)` - Récupère une traduction par sa clé (notation pointée)
 - `SetLanguageAsync(languageCode)` - Change de langue
@@ -48,6 +56,7 @@ Méthodes disponibles:
 Modifier les fichiers JSON dans `wwwroot/i18n/`:
 
 **fr.json:**
+
 ```json
 {
   "mySection": {
@@ -57,6 +66,7 @@ Modifier les fichiers JSON dans `wwwroot/i18n/`:
 ```
 
 **en.json:**
+
 ```json
 {
   "mySection": {
@@ -95,6 +105,7 @@ Pour plus de simplicité, utiliser le composant `LocalizedText`:
 ## Stockage de la langue
 
 La langue préférée est stockée dans la table `AppSettings.Language`:
+
 - Valeur par défaut: "fr"
 - Modifiable via la page Settings
 
@@ -110,6 +121,7 @@ Pour ajouter une nouvelle langue (ex: Espagnol):
 
 1. **Créer le fichier de ressources** `wwwroot/i18n/es.json`
 2. **Ajouter la langue à `LocalizationService.GetAvailableLanguages()`**:
+
    ```csharp
    public List<LanguageOption> GetAvailableLanguages()
    {
@@ -132,6 +144,7 @@ Pour ajouter une nouvelle langue (ex: Espagnol):
 ## Exemple complet
 
 **fr.json:**
+
 ```json
 {
   "inventory": {
@@ -143,6 +156,7 @@ Pour ajouter une nouvelle langue (ex: Espagnol):
 ```
 
 **en.json:**
+
 ```json
 {
   "inventory": {
@@ -154,6 +168,7 @@ Pour ajouter une nouvelle langue (ex: Espagnol):
 ```
 
 **Composant Razor:**
+
 ```razor
 @using CharacterManager.Server.Services
 @inject ClientLocalizationService Loc
@@ -174,11 +189,13 @@ Pour ajouter une nouvelle langue (ex: Espagnol):
 ## Débogage
 
 Pour vérifier les traductions chargées:
+
 ```csharp
 var resources = LocalizationService.GetResources();
 ```
 
 Pour recharger les ressources:
+
 ```csharp
 LocalizationService.ClearCache();
 await LocalizationService.InitializeAsync("fr");

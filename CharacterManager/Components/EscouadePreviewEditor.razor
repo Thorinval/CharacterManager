@@ -138,8 +138,9 @@
 
     .escouade-preview-sections {
         display: flex;
-        flex-direction: column;
+        flex-wrap: wrap;
         gap: 20px;
+        align-items: flex-start;
     }
 
     .preview-section {
@@ -147,6 +148,8 @@
         border-radius: 6px;
         padding: 15px;
         border: 1px solid #ddd;
+        flex: 1 1 320px;
+        min-width: 300px;
     }
 
     .preview-section h5 {

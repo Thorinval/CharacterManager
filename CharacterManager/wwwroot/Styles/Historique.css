@@ -1,0 +1,99 @@
+.historique-container {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(147, 112, 219, 0.1) 100%);
+    min-height: 100vh;
+    padding: 20px 0;
+}
+
+.controls-section {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.historique-table {
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    font-size: 0.9rem;
+}
+
+.historique-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.historique-table tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.1);
+}
+
+.col-date { width: 90px; }
+.col-heure { width: 80px; }
+.col-puissance { width: 80px; }
+.col-classement { width: 80px; }
+.col-mercenaire { width: 120px; }
+.col-commandant { width: 120px; }
+.col-android { width: 120px; }
+.col-niveau { width: 50px; }
+.col-rarete { width: 70px; }
+.col-puissance-pers { width: 60px; }
+.col-actions { width: 100px; }
+
+.badge-rarity {
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badge-rarity[data-rarity="R"] {
+    background-color: #a0aec0;
+    color: white;
+}
+
+.badge-rarity[data-rarity="SR"] {
+    background-color: #4299e1;
+    color: white;
+}
+
+.badge-rarity[data-rarity="SSR"] {
+    background-color: #ed8936;
+    color: white;
+}
+
+.badge-rarity[data-rarity="Inconnu"] {
+    background-color: #718096;
+    color: white;
+}
+
+.table-responsive {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.btn {
+    font-size: 0.9rem;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .controls-section {
+        margin-bottom: 20px;
+    }
+
+    .historique-table {
+        font-size: 0.8rem;
+    }
+
+    .col-mercenaire,
+    .col-commandant,
+    .col-android {
+        width: 80px;
+    }
+
+    .col-date { width: 70px; }
+    .col-heure { width: 65px; }
+}

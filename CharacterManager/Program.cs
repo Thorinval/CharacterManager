@@ -107,6 +107,17 @@ using (var scope = app.Services.CreateScope())
             db.Database.ExecuteSqlRaw(createTemplatesSql);
             Console.WriteLine("[DB] Ensured Templates table exists.");
 
+            // Hotfix: Ensure 'HistoriquesEscouade' table exists
+            var createHistoriquesEscouadeSql = @"CREATE TABLE IF NOT EXISTS HistoriquesEscouade (
+                Id INTEGER NOT NULL CONSTRAINT PK_HistoriquesEscouade PRIMARY KEY AUTOINCREMENT,
+                DateEnregistrement TEXT NOT NULL,
+                PuissanceTotal INTEGER NOT NULL,
+                Classement INTEGER NULL,
+                DonneesEscouadeJson TEXT NOT NULL
+            );";
+            db.Database.ExecuteSqlRaw(createHistoriquesEscouadeSql);
+            Console.WriteLine("[DB] Ensured HistoriquesEscouade table exists.");
+
             // AppImages table initialization removed (unused)
         }
         // Hotfix: Add missing 'IsAdultModeEnabled' column to AppSettings table if it doesn't exist
@@ -122,6 +133,21 @@ using (var scope = app.Services.CreateScope())
                 Console.WriteLine($"[DB] Could not add IsAdultModeEnabled: {ex.Message}");
             }
         }
+        
+        // Hotfix: Add missing 'Language' column to AppSettings table if it doesn't exist
+        if (TableExists("AppSettings") && !ColumnExists("AppSettings", "Language"))
+        {
+            try
+            {
+                db.Database.ExecuteSqlRaw("ALTER TABLE AppSettings ADD COLUMN Language TEXT NOT NULL DEFAULT 'fr';");
+                Console.WriteLine("[DB] Added Language to AppSettings.");
+            }
+            catch (Microsoft.Data.Sqlite.SqliteException ex)
+            {
+                Console.WriteLine($"[DB] Could not add Language: {ex.Message}");
+            }
+        }
+        
         // Removed ThumbnailHeightPx column hotfix (unused)
         
         

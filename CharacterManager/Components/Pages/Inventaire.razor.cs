@@ -43,6 +43,10 @@ public partial class Inventaire
         set => SelectAll();
     }
     
+    private IEnumerable<IGrouping<TypePersonnage, Personnage>> GroupedPersonnages =>
+        personnagesFiltres.GroupBy(p => p.Type)
+            .OrderBy(g => g.Key == TypePersonnage.Commandant ? 1 : g.Key == TypePersonnage.Mercenaire ? 2 : 3);
+    
     // Filtre
     private string searchTerm = "";
     
@@ -115,25 +119,32 @@ public partial class Inventaire
                 ).ToList();
         }
 
-        // Appliquer le tri
+        // Appliquer le tri par type d'abord (Commandant, Mercenaire, Androïde), puis par colonne sélectionnée
+        var typeOrder = new Dictionary<TypePersonnage, int>
+        {
+            { TypePersonnage.Commandant, 1 },
+            { TypePersonnage.Mercenaire, 2 },
+            { TypePersonnage.Androïde, 3 }
+        };
+
         personnagesFiltres = sortColumn switch
         {
             "Nom" => sortAscending 
-                ? personnagesFiltres.OrderBy(p => p.Nom).ToList() 
-                : personnagesFiltres.OrderByDescending(p => p.Nom).ToList(),
+                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Nom).ToList() 
+                : personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Nom).ToList(),
             "Rarete" => sortAscending 
-                ? personnagesFiltres.OrderBy(p => p.Rarete).ToList() 
-                : personnagesFiltres.OrderByDescending(p => p.Rarete).ToList(),
+                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Rarete).ToList() 
+                : personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Rarete).ToList(),
             "Niveau" => sortAscending 
-                ? personnagesFiltres.OrderBy(p => p.Niveau).ToList() 
-                : personnagesFiltres.OrderByDescending(p => p.Niveau).ToList(),
+                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Niveau).ToList() 
+                : personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Niveau).ToList(),
             "Type" => sortAscending 
-                ? personnagesFiltres.OrderBy(p => p.Type).ToList() 
-                : personnagesFiltres.OrderByDescending(p => p.Type).ToList(),
+                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Type).ToList() 
+                : personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Type).ToList(),
             "Rang" => sortAscending 
-                ? personnagesFiltres.OrderBy(p => p.Rang).ToList()
-                : personnagesFiltres.OrderByDescending(p => p.Rang).ToList(),
-            _ => personnagesFiltres
+                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Rang).ToList()
+                : personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Rang).ToList(),
+            _ => personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Nom).ToList()
         };
     }
 

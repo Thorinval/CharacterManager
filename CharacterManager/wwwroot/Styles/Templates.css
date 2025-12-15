@@ -1,0 +1,7 @@
+.templates-list { display: flex; flex-direction: column; gap: 12px; }
+.template-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 12px; }
+.template-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.template-name { font-weight: 700; font-size: 1.1rem; }
+.template-power { font-size: 0.95rem; }
+.template-meta { display: flex; gap: 10px; color: #666; font-size: 0.85rem; margin-bottom: 8px; }
+.template-actions { display: flex; gap: 8px; }

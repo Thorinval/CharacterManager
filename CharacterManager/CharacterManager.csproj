@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <Target Name="KillCharacterManagerProcess" BeforeTargets="Build" Condition="'$(OS)' == 'Windows_NT'">
-    <Exec Command="taskkill /F /IM CharacterManager.exe /T 2&gt;nul" ContinueOnError="true" />
+    <Exec Command="powershell -NoProfile -Command &quot;Stop-Process -Name CharacterManager -Force -ErrorAction SilentlyContinue; exit 0&quot;" />
   </Target>
 
 </Project>

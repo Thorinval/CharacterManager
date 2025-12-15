@@ -4,14 +4,14 @@
 @using Microsoft.AspNetCore.Components.Web
 @using CharacterManager.Components
 
-<link rel="stylesheet" href="../Styles/Inventaire.css" />
+<link rel="stylesheet" href="/Styles/Inventaire.css" />
 
 <head>
     <title>Inventaire</title>
 </head>
 
 <div class="page-header-banner">
-    <img src="/images/interface/menu-icon.png" alt="" class="page-header-icon" />
+    <img src="/images/interface/menu_inventaire.png" alt="" class="page-header-icon" />
     <h1 class="page-title">INVENTAIRE</h1>
 </div>
 
@@ -88,20 +88,26 @@
             <div class="template-inventory-content">
                 @if (personnagesFiltres.Any())
                 {
-                    <div class="@GetContainerClassCompact()">
-                        @foreach (var personnage in personnagesFiltres)
-                        {
-                            <div class="personnage-card-grid-compact" 
-                                 @ondragstart="@(e => HandleDragStart(e, personnage))"
-                                 draggable="true">
-                                <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-compact" onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
-                                <div class="card-overlay-compact">
-                                    <span class="card-name-compact">@personnage.Nom</span>
-                                    <span class="card-puissance-compact">@personnage.Puissance</span>
+                    @foreach (var groupe in GroupedPersonnages)
+                    {
+                        <div class="template-type-group-header">
+                            <h6>@groupe.Key (@groupe.Count())</h6>
+                        </div>
+                        <div class="template-inventory-grid-grouped">
+                            @foreach (var personnage in groupe)
+                            {
+                                <div class="personnage-card-grid-compact" 
+                                     @ondragstart="@(e => HandleDragStart(e, personnage))"
+                                     draggable="true">
+                                    <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-compact" onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
+                                    <div class="card-overlay-compact">
+                                        <span class="card-name-compact">@personnage.Nom</span>
+                                        <span class="card-puissance-compact">@personnage.Puissance</span>
+                                    </div>
                                 </div>
-                            </div>
-                        }
-                    </div>
+                            }
+                        </div>
+                    }
                 }
             </div>
         </div>
@@ -154,7 +160,6 @@ else
             <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRarete">Rareté</button>
             <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNiveau">Niveau</button>
             <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRang">Rang</button>
-            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByType">Type</button>
         </div>
         <div class="view-mode-controls">
             <button class="btn btn-sm @GetViewModeClass("grid")" @onclick="@(() => viewMode = "grid")" title="Mode grille">
@@ -171,66 +176,73 @@ else
         <label for="selectAll" class="ms-2">Tout sélectionner</label>
     </div>
 
-    <div class="@GetContainerClass()">
-        @foreach (var personnage in personnagesFiltres)
-        {
-            @if (viewMode == "grid")
+    @foreach (var groupe in GroupedPersonnages)
+    {
+        <div class="type-group-header">
+            <h4>@groupe.Key (@groupe.Count())</h4>
+        </div>
+
+        <div class="@GetContainerClass()">
+            @foreach (var personnage in groupe)
             {
-                <div class="personnage-card-grid" 
-                     @onclick="() => ViewPersonnage(personnage.Id)" 
-                     style="cursor: pointer;"
-                     draggable="true"
-                     @ondragstart="@(e => HandleDragStart(e, personnage))">
-                    <div class="card-checkbox-grid" @onclick:stopPropagation="true">
-                        <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)" @onchange="() => ToggleSelection(personnage.Id)" />
-                    </div>
-                    <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-grid" onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
-                    <div class="personnage-card-content">
-                        <div class="personnage-name">@personnage.Nom</div>
-                        <div class="personnage-attribute-compact">Type: @personnage.Type</div>
-                        <div class="personnage-attribute-compact">Rareté: @personnage.Rarete</div>
-                        <div class="personnage-attribute-compact">Puissance: @personnage.Puissance</div>
-                        <div class="personnage-attribute-compact">Niveau: @personnage.Niveau</div>
-                        <div class="personnage-attribute-compact">Rang: @GetRankStars(personnage.Rang)</div>
-                        <div class="card-actions-grid" @onclick:stopPropagation="true">
-                            <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)">Éditer</button>
-                            <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)">Suppr.</button>
+                @if (viewMode == "grid")
+                {
+                    <div class="personnage-card-grid" 
+                         @onclick="() => ViewPersonnage(personnage.Id)" 
+                         style="cursor: pointer;"
+                         draggable="true"
+                         @ondragstart="@(e => HandleDragStart(e, personnage))">
+                        <div class="card-checkbox-grid" @onclick:stopPropagation="true">
+                            <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)" @onchange="() => ToggleSelection(personnage.Id)" />
+                        </div>
+                        <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-grid" onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
+                        <div class="personnage-card-content">
+                            <div class="personnage-name">@personnage.Nom</div>
+                            <div class="personnage-attribute-compact">Type: @personnage.Type</div>
+                            <div class="personnage-attribute-compact">Rareté: @personnage.Rarete</div>
+                            <div class="personnage-attribute-compact">Puissance: @personnage.Puissance</div>
+                            <div class="personnage-attribute-compact">Niveau: @personnage.Niveau</div>
+                            <div class="personnage-attribute-compact">Rang: @GetRankStars(personnage.Rang)</div>
+                            <div class="card-actions-grid" @onclick:stopPropagation="true">
+                                <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)">Éditer</button>
+                                <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)">Suppr.</button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                }
+                else
+                {
+                    <div class="personnage-card-list" 
+                         @onclick="() => ViewPersonnage(personnage.Id)" 
+                         style="cursor: pointer;"
+                         draggable="true"
+                         @ondragstart="@(e => HandleDragStart(e, personnage))">
+                        <div class="card-checkbox" @onclick:stopPropagation="true">
+                            <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)" @onchange="() => ToggleSelection(personnage.Id)" />
+                        </div>
+                        <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-list" onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
+                        <div class="personnage-info-list">
+                            <span class="personnage-name" style="font-weight: 700;">@personnage.Nom</span>
+                            <span class="list-separator">|</span>
+                            <span>Type: @personnage.Type</span>
+                            <span class="list-separator">|</span>
+                            <span>Rareté: @personnage.Rarete</span>
+                            <span class="list-separator">|</span>
+                            <span>Puissance: @personnage.Puissance</span>
+                            <span class="list-separator">|</span>
+                            <span>Niveau: @personnage.Niveau</span>
+                            <span class="list-separator">|</span>
+                            <span>Rang: @GetRankStars(personnage.Rang)</span>
+                        </div>
+                        <div class="card-actions-list" @onclick:stopPropagation="true">
+                            <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)">Éditer</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)">Supprimer</button>
+                        </div>
+                    </div>
+                }
             }
-            else
-            {
-                <div class="personnage-card-list" 
-                     @onclick="() => ViewPersonnage(personnage.Id)" 
-                     style="cursor: pointer;"
-                     draggable="true"
-                     @ondragstart="@(e => HandleDragStart(e, personnage))">
-                    <div class="card-checkbox" @onclick:stopPropagation="true">
-                        <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)" @onchange="() => ToggleSelection(personnage.Id)" />
-                    </div>
-                    <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-list" onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
-                    <div class="personnage-info-list">
-                        <span class="personnage-name" style="font-weight: 700;">@personnage.Nom</span>
-                        <span class="list-separator">|</span>
-                        <span>Type: @personnage.Type</span>
-                        <span class="list-separator">|</span>
-                        <span>Rareté: @personnage.Rarete</span>
-                        <span class="list-separator">|</span>
-                        <span>Puissance: @personnage.Puissance</span>
-                        <span class="list-separator">|</span>
-                        <span>Niveau: @personnage.Niveau</span>
-                        <span class="list-separator">|</span>
-                        <span>Rang: @GetRankStars(personnage.Rang)</span>
-                    </div>
-                    <div class="card-actions-list" @onclick:stopPropagation="true">
-                        <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)">Éditer</button>
-                        <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)">Supprimer</button>
-                    </div>
-                </div>
-            }
-        }
-    </div>
+        </div>
+    }
     }
     else
     {
@@ -294,4 +306,42 @@ else
 
 }
 
-
+@if (showBulkEditModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modifier @selectedPersonnages.Count personnages</h5>
+                    <button type="button" class="btn-close" @onclick="() => showBulkEditModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Propriété à modifier</label>
+                        <select class="form-select" @bind="bulkEditProperty">
+                            <option value="">Sélectionner une propriété</option>
+                            <option value="Niveau">Niveau</option>
+                            <option value="TypeAttaque">Type d'attaque</option>
+                            <option value="Localisation">Localisation</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nouvelle valeur</label>
+                        @if (bulkEditProperty == "Niveau")
+                        {
+                            <input type="number" class="form-control" @bind="bulkEditValue" placeholder="Entrez le niveau" />
+                        }
+                        else
+                        {
+                            <input type="text" class="form-control" @bind="bulkEditValue" placeholder="Entrez la valeur" />
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => showBulkEditModal = false">Annuler</button>
+                    <button type="button" class="btn btn-primary" @onclick="ApplyBulkEdit" disabled="@(string.IsNullOrEmpty(bulkEditProperty) || string.IsNullOrEmpty(bulkEditValue))">Appliquer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

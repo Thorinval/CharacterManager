@@ -2,6 +2,7 @@ using CharacterManager.Server.Models;
 using CharacterManager.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
+using System.IO;
 
 namespace CharacterManager.Server.Services;
 
@@ -235,12 +236,18 @@ public class CsvImportService(PersonnageService personnageService, ApplicationDb
         }
 
         string nomLower = personnage.Nom.ToLower();
-        personnage.ImageUrlDetail = $"/images/personnages/{nomLower}.png";
-        personnage.ImageUrlPreview = $"/images/personnages/{nomLower}_small_portrait.png";
-        personnage.ImageUrlSelected = $"/images/personnages/{nomLower}_small_select.png";
+        personnage.ImageUrlDetail = EnsureImageOrDefault($"/images/personnages/{nomLower}.png");
+        personnage.ImageUrlPreview = EnsureImageOrDefault($"/images/personnages/{nomLower}_small_portrait.png");
+        personnage.ImageUrlSelected = EnsureImageOrDefault($"/images/personnages/{nomLower}_small_select.png");
         personnage.Description = $"Personnage {personnage.Nom} importé";
 
         return personnage;
+    }
+
+    private static string EnsureImageOrDefault(string relativePath)
+    {
+        var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+        return File.Exists(fullPath) ? relativePath : "/images/personnages/default_portrait.png";
     }
 
     private static Dictionary<string, int> MapColumns(List<string> headers)
