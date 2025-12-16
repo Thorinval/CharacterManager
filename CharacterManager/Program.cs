@@ -138,10 +138,98 @@ using (var scope = app.Services.CreateScope())
                     Id INTEGER NOT NULL CONSTRAINT PK_Profiles PRIMARY KEY AUTOINCREMENT,
                     Username TEXT NOT NULL UNIQUE,
                     AdultMode INTEGER NOT NULL DEFAULT 0,
-                    Language TEXT NOT NULL DEFAULT 'fr'
+                    Language TEXT NOT NULL DEFAULT 'fr',
+                    Role TEXT NOT NULL DEFAULT 'utilisateur',
+                    PasswordHash TEXT NOT NULL DEFAULT '',
+                    PasswordSalt TEXT NOT NULL DEFAULT '',
+                    HashAlgorithm TEXT NOT NULL DEFAULT 'PBKDF2',
+                    FailedLoginCount INTEGER NOT NULL DEFAULT 0,
+                    LockoutUntil TEXT NULL
                 );";
                 db.Database.ExecuteSqlRaw(createProfilesSql);
                 Console.WriteLine("[DB] Ensured Profiles table exists.");
+
+            // Hotfix: Add missing Profile columns if they don't exist
+            if (TableExists("Profiles"))
+            {
+                if (!ColumnExists("Profiles", "Role"))
+                {
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Profiles ADD COLUMN Role TEXT NOT NULL DEFAULT 'utilisateur';");
+                        Console.WriteLine("[DB] Added Role column to Profiles.");
+                    }
+                    catch (Microsoft.Data.Sqlite.SqliteException ex)
+                    {
+                        Console.WriteLine($"[DB] Could not add Role: {ex.Message}");
+                    }
+                }
+                
+                if (!ColumnExists("Profiles", "PasswordHash"))
+                {
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Profiles ADD COLUMN PasswordHash TEXT NOT NULL DEFAULT '';");
+                        Console.WriteLine("[DB] Added PasswordHash column to Profiles.");
+                    }
+                    catch (Microsoft.Data.Sqlite.SqliteException ex)
+                    {
+                        Console.WriteLine($"[DB] Could not add PasswordHash: {ex.Message}");
+                    }
+                }
+                
+                if (!ColumnExists("Profiles", "PasswordSalt"))
+                {
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Profiles ADD COLUMN PasswordSalt TEXT NOT NULL DEFAULT '';");
+                        Console.WriteLine("[DB] Added PasswordSalt column to Profiles.");
+                    }
+                    catch (Microsoft.Data.Sqlite.SqliteException ex)
+                    {
+                        Console.WriteLine($"[DB] Could not add PasswordSalt: {ex.Message}");
+                    }
+                }
+                
+                if (!ColumnExists("Profiles", "HashAlgorithm"))
+                {
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Profiles ADD COLUMN HashAlgorithm TEXT NOT NULL DEFAULT 'PBKDF2';");
+                        Console.WriteLine("[DB] Added HashAlgorithm column to Profiles.");
+                    }
+                    catch (Microsoft.Data.Sqlite.SqliteException ex)
+                    {
+                        Console.WriteLine($"[DB] Could not add HashAlgorithm: {ex.Message}");
+                    }
+                }
+                
+                if (!ColumnExists("Profiles", "FailedLoginCount"))
+                {
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Profiles ADD COLUMN FailedLoginCount INTEGER NOT NULL DEFAULT 0;");
+                        Console.WriteLine("[DB] Added FailedLoginCount column to Profiles.");
+                    }
+                    catch (Microsoft.Data.Sqlite.SqliteException ex)
+                    {
+                        Console.WriteLine($"[DB] Could not add FailedLoginCount: {ex.Message}");
+                    }
+                }
+                
+                if (!ColumnExists("Profiles", "LockoutUntil"))
+                {
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Profiles ADD COLUMN LockoutUntil TEXT NULL;");
+                        Console.WriteLine("[DB] Added LockoutUntil column to Profiles.");
+                    }
+                    catch (Microsoft.Data.Sqlite.SqliteException ex)
+                    {
+                        Console.WriteLine($"[DB] Could not add LockoutUntil: {ex.Message}");
+                    }
+                }
+            }
 
             // AppImages table initialization removed (unused)
         }
@@ -220,15 +308,8 @@ using (var scope = app.Services.CreateScope())
         configService.LoadConfiguration();
         Console.WriteLine("[Init] Personnages image configuration loaded.");
 
-        // Seed default admin from configuration
-        var adminUser = app.Configuration["Admin:Username"] ?? "admin";
-        var adminPass = app.Configuration["Admin:Password"] ?? "admin";
-        var profileService = scope.ServiceProvider.GetRequiredService<ProfileService>();
-        if (!db.Profiles.Any(p => p.Username == adminUser))
-        {
-            await profileService.CreateUserAsync(adminUser, adminPass, "admin");
-            Console.WriteLine($"[Init] Seeded admin user '{adminUser}'.");
-        }
+        // Admin seeding removed - handled dynamically in Login page
+        // If no profiles exist, Login page will create admin/admin by default
     }
     catch (Exception ex)
     {

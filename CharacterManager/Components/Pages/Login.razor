@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
 @using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Components.Web
 @inject IHttpContextAccessor HttpContextAccessor
 @inject NavigationManager Nav
 @using CharacterManager.Server.Services
@@ -12,11 +13,11 @@
     <div class="card p-3 mt-3">
         <div class="mb-3">
             <label class="form-label">Nom d'utilisateur</label>
-            <input class="form-control" @bind="username" />
+            <input class="form-control" @bind="username" @onkeypress="HandleKeyPress" />
         </div>
         <div class="mb-3">
             <label class="form-label">Mot de passe</label>
-            <input class="form-control" type="password" @bind="password" />
+            <input class="form-control" type="password" @bind="password" @onkeypress="HandleKeyPress" />
         </div>
         @if (!string.IsNullOrEmpty(errorMessage))
         {
@@ -33,6 +34,14 @@
     private string password = string.Empty;
     private string errorMessage = string.Empty;
 
+    private void HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            _ = LoginAsync();
+        }
+    }
+
     private async Task LoginAsync()
     {
         errorMessage = string.Empty;
@@ -42,12 +51,12 @@
             return;
         }
 
-        // Bootstrap default admin if none exists
-        var anyProfiles = await ProfileService.GetByUsernameAsync(username) != null;
-        var adminProfile = await ProfileService.GetByUsernameAsync("admin");
-        if (adminProfile == null)
+        // Bootstrap default admin if no profiles exist at all
+        var allProfiles = await ProfileService.GetAllAsync();
+        if (allProfiles == null || !allProfiles.Any())
         {
             await ProfileService.CreateUserAsync("admin", "admin", "admin");
+            Console.WriteLine("[Login] No profiles found - created default admin account (admin/admin)");
         }
 
         var profile = await ProfileService.GetByUsernameAsync(username);

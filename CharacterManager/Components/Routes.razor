@@ -4,10 +4,13 @@
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
             <NotAuthorized>
-                <div class="container mt-4">
-                    <p>Vous devez être connecté pour accéder à l'application.</p>
-                    <a class="btn btn-primary" href="/login">Se connecter</a>
-                </div>
+                @if (routeData.PageType.Name != "Login")
+                {
+                    <div class="container mt-4">
+                        <p>Vous devez être connecté pour accéder à l'application.</p>
+                        <a class="btn btn-primary" href="/login">Se connecter</a>
+                    </div>
+                }
             </NotAuthorized>
         </AuthorizeRouteView>
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
