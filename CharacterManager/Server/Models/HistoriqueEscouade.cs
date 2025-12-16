@@ -43,6 +43,7 @@ public class PersonnelHistorique
     public int Id { get; set; }
     public string Nom { get; set; } = string.Empty;
     public int Niveau { get; set; }
+    public int Rang { get; set; }
     public string Rarete { get; set; } = string.Empty;
     public int Puissance { get; set; }
     public string ImageUrl { get; set; } = string.Empty;
@@ -61,4 +62,22 @@ public class DonneesEscouadeSerialisees
 
     [JsonPropertyName("androides")]
     public List<PersonnelHistorique> Androides { get; set; } = new();
+
+    [JsonPropertyName("luciePuissance")]
+    public int LuciePuissance { get; set; } = 0;
+
+    [JsonPropertyName("ligue")]
+    public int Ligue { get; set; } = 0;
+
+    [JsonPropertyName("nutaku")]
+    public int Nutaku { get; set; } = 0;
+
+    [JsonPropertyName("top150")]
+    public int Top150 { get; set; } = 0;
+
+    [JsonPropertyName("pays")]
+    public int Pays { get; set; } = 0;
+
+    [JsonPropertyName("score")]
+    public int Score { get; set; } = 0;
 }

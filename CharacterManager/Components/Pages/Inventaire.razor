@@ -88,12 +88,12 @@
             <div class="template-inventory-content">
                 @if (personnagesFiltres.Any())
                 {
-                    @foreach (var groupe in GroupedPersonnages)
-                    {
-                        <div class="template-type-group-header">
-                            <h6>@groupe.Key (@groupe.Count())</h6>
-                        </div>
-                        <div class="template-inventory-grid-grouped">
+                    <div class="template-inventory-grid-grouped">
+                        @foreach (var groupe in GroupedPersonnages)
+                        {
+                            <div class="template-type-group-header">
+                                <h6>@groupe.Key (@groupe.Count())</h6>
+                            </div>
                             @foreach (var personnage in groupe)
                             {
                                 <div class="personnage-card-grid-compact" 
@@ -106,8 +106,8 @@
                                     </div>
                                 </div>
                             }
-                        </div>
-                    }
+                        }
+                    </div>
                 }
             </div>
         </div>
@@ -187,25 +187,65 @@ else
             {
                 @if (viewMode == "grid")
                 {
-                    <div class="personnage-card-grid" 
-                         @onclick="() => ViewPersonnage(personnage.Id)" 
-                         style="cursor: pointer;"
+                    <div class="personnage-card-editable @GetRarityClass(personnage.Rarete)" 
                          draggable="true"
                          @ondragstart="@(e => HandleDragStart(e, personnage))">
                         <div class="card-checkbox-grid" @onclick:stopPropagation="true">
                             <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)" @onchange="() => ToggleSelection(personnage.Id)" />
                         </div>
-                        <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-grid" onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
-                        <div class="personnage-card-content">
+                        <div class="card-rarity-badge">@personnage.Rarete</div>
+                        <img src="@personnage.ImageUrlPreview" 
+                             alt="@personnage.Nom" 
+                             class="personnage-card-image-editable" 
+                             @onclick="() => ViewPersonnage(personnage.Id)"
+                             style="cursor: pointer;"
+                             onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
+                        <div class="personnage-card-info">
                             <div class="personnage-name">@personnage.Nom</div>
-                            <div class="personnage-attribute-compact">Type: @personnage.Type</div>
-                            <div class="personnage-attribute-compact">Rareté: @personnage.Rarete</div>
-                            <div class="personnage-attribute-compact">Puissance: @personnage.Puissance</div>
-                            <div class="personnage-attribute-compact">Niveau: @personnage.Niveau</div>
-                            <div class="personnage-attribute-compact">Rang: @GetRankStars(personnage.Rang)</div>
-                            <div class="card-actions-grid" @onclick:stopPropagation="true">
-                                <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)">Éditer</button>
-                                <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)">Suppr.</button>
+                            <div class="personnage-type">@personnage.Type</div>
+                            
+                            <div class="editable-field">
+                                <label>Niveau:</label>
+                                <input type="number" 
+                                       min="1" 
+                                       max="200" 
+                                       class="form-control form-control-sm" 
+                                       value="@personnage.Niveau" 
+                                       @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Niveau", e.Value?.ToString() ?? "1"))"
+                                       @onclick:stopPropagation="true" />
+                            </div>
+                            
+                            <div class="editable-field">
+                                <label>Rang:</label>
+                                <input type="number" 
+                                       min="0" 
+                                       max="7" 
+                                       class="form-control form-control-sm" 
+                                       value="@personnage.Rang" 
+                                       @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Rang", e.Value?.ToString() ?? "0"))"
+                                       @onclick:stopPropagation="true" />
+                            </div>
+                            
+                            <div class="editable-field">
+                                <label>Puissance:</label>
+                                <input type="number" 
+                                       min="0" 
+                                       class="form-control form-control-sm" 
+                                       value="@personnage.Puissance" 
+                                       @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Puissance", e.Value?.ToString() ?? "0"))"
+                                       @onclick:stopPropagation="true" />
+                            </div>
+                            
+                            <div class="card-actions-editable" @onclick:stopPropagation="true">
+                                <button class="btn btn-sm btn-info" @onclick="() => ViewPersonnage(personnage.Id)" title="Voir détails">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)" title="Éditer">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)" title="Supprimer">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </div>
                         </div>
                     </div>

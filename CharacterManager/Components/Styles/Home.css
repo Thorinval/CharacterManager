@@ -1,28 +1,48 @@
 .home-container {
     position: relative;
     min-height: 100vh;
-    background-image: url('/images/personnages/accueil.png');
-    background-size: auto 100%;
-    background-position: left center;
-    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
 }
 
-.home-container .container-fluid {
-    position: relative;
-    z-index: 2;
+.home-row {
+    flex: 1;
+    min-height: 100vh;
+}
+
+.home-image-pane {
+    background-image: url('/images/personnages/accueil.png');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+}
+
+@media (max-width: 991.98px) {
+    .home-image-pane {
+        min-height: 400px;
+    }
 }
 
 .welcome-card {
     background: rgba(102, 126, 234, 0.85);
     backdrop-filter: blur(10px);
     color: white;
-    padding: 40px;
+    padding: 32px;
     border-radius: 15px;
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+@media (max-width: 991.98px) {
+    .welcome-card {
+        min-height: auto;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
 }
 
 .welcome-card h1 {

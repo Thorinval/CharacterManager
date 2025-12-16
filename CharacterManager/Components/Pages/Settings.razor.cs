@@ -56,26 +56,25 @@ public partial class Settings
         }
     }
 
-    private async Task OnLanguageChanged(ChangeEventArgs e)
+    private async Task OnLanguageChanged()
     {
-        if (e.Value is string newLanguage)
-        {
-            currentLanguage = newLanguage;
-            
-            // Mettre à jour la base de données
-            var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
-            if (settings != null)
-            {
-                settings.Language = newLanguage;
-                DbContext.AppSettings.Update(settings);
-                await DbContext.SaveChangesAsync();
-            }
+        var newLanguage = currentLanguage;
 
-            // Mettre à jour le service de localisation
-            await LocalizationService.SetLanguageAsync(newLanguage);
-            
-            // Recharger la page pour appliquer les changements
-            await JSRuntime.InvokeVoidAsync("location.reload");
+        // Mettre à jour la base de données
+        var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+        if (settings != null)
+        {
+            settings.Language = newLanguage;
+            DbContext.AppSettings.Update(settings);
+            await DbContext.SaveChangesAsync();
         }
+
+        // Mettre à jour le service de localisation
+        await LocalizationService.SetLanguageAsync(newLanguage);
+
+        StateHasChanged();
+
+        // Recharger la page pour appliquer les changements
+        await JSRuntime.InvokeVoidAsync("eval", "window.location.reload(true);");
     }
 }

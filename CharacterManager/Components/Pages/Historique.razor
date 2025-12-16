@@ -4,11 +4,11 @@
 
 <link rel="stylesheet" href="/Styles/Historique.css" />
 
-<PageTitle>Historique des Escouades</PageTitle>
+<PageTitle>Historique des Classements</PageTitle>
 
 <div class="page-header-banner">
     <img src="/images/interface/menu-icon.png" alt="" class="page-header-icon" />
-    <h1 class="page-title">HISTORIQUE DES ESCOUADES</h1>
+    <h1 class="page-title">HISTORIQUE DES CLASSEMENTS</h1>
 </div>
 
 <div class="historique-container">
@@ -23,9 +23,15 @@
                     <label for="dateFin" class="form-label">Date de fin:</label>
                     <input type="date" id="dateFin" class="form-control" @bind="dateFin" />
                 </div>
-                <div class="col-md-4 d-flex align-items-end gap-2">
+                <div class="col-md-4 d-flex align-items-end gap-2 flex-wrap">
                     <button class="btn btn-primary" @onclick="FiltrerHistorique">Filtrer</button>
                     <button class="btn btn-secondary" @onclick="RinitialiserFiltres">Réinitialiser</button>
+                    <button class="btn btn-success" @onclick="ExporterHistorique" title="Exporter l'historique en XML">
+                        <i class="bi bi-download"></i> Exporter XML
+                    </button>
+                    <button class="btn btn-info" @onclick="ImporterHistorique" title="Importer un historique XML">
+                        <i class="bi bi-upload"></i> Importer XML
+                    </button>
                     <button class="btn btn-danger" @onclick="ViderHistorique" title="Vider tout l'historique">Vider</button>
                 </div>
             </div>
@@ -34,31 +40,24 @@
         @if (historiques != null && historiques.Count > 0)
         {
             <div class="table-responsive">
-                <table class="table table-striped table-hover historique-table">
+                <table class="table table-hover historique-table">
                     <thead class="table-dark">
                         <tr>
                             <th class="col-date">Date</th>
-                            <th class="col-heure">Heure</th>
+                            <th class="col-ligue">Ligue</th>
+                            <th class="col-score">Score</th>
                             <th class="col-puissance">Puissance</th>
                             <th class="col-classement">Classement</th>
+                            <th class="text-center">Commandant</th>
                             @for (int i = 1; i <= nbMercenairesMax; i++)
                             {
-                                <th class="col-mercenaire">Mercenaire @i</th>
-                                <th class="col-niveau">Niv</th>
-                                <th class="col-rarete">Rareté</th>
-                                <th class="col-puissance-pers">Puiss</th>
+                                <th class="text-center">Mercenaire @i</th>
                             }
-                            <th class="col-commandant">Commandant</th>
-                            <th class="col-niveau">Niv</th>
-                            <th class="col-rarete">Rareté</th>
-                            <th class="col-puissance-pers">Puiss</th>
                             @for (int i = 1; i <= nbAndroidsMax; i++)
                             {
-                                <th class="col-android">Androïde @i</th>
-                                <th class="col-niveau">Niv</th>
-                                <th class="col-rarete">Rareté</th>
-                                <th class="col-puissance-pers">Puiss</th>
+                                <th class="text-center">Androide @i</th>
                             }
+                            <th class="col-lucie">Lucie</th>
                             <th class="col-actions">Actions</th>
                         </tr>
                     </thead>
@@ -69,43 +68,58 @@
                             if (donnees != null)
                             {
                                 <tr>
-                                    <td>@historique.DateEnregistrement:dd/MM/yyyy</td>
-                                    <td>@historique.DateEnregistrement:HH:mm:ss</td>
-                                    <td class="fw-bold">@historique.PuissanceTotal</td>
-                                    <td>@(historique.Classement?.ToString() ?? "-")</td>
+                                    <td class="info-cell date-cell"><span class="pill pill-date">@historique.DateEnregistrement.ToString("dd/MM/yyyy")</span></td>
+                                    <td class="info-cell ligue-cell"><span class="pill pill-ligue">@donnees.Ligue</span></td>
+                                    <td class="info-cell score-cell"><span class="pill pill-score">@donnees.Score</span></td>
+                                    <td class="info-cell puissance-cell"><span class="pill pill-puissance">@historique.PuissanceTotal</span></td>
+                                    <td class="ranking-inline info-cell">
+                                        <span class="chip chip-nutaku"><strong>Nutaku</strong> : @donnees.Nutaku</span>
+                                        <span class="chip chip-top"><strong>Top 150</strong> : @donnees.Top150</span>
+                                        <span class="chip chip-pays"><strong>Pays</strong> : @donnees.Pays</span>
+                                    </td>
+
+                                    @if (donnees.Commandant != null)
+                                    {
+                                        <td>
+                                            <div class="personnage-card">
+                                                <div class="card-name">@donnees.Commandant.Nom</div>
+                                                <div class="card-rarity rarity-@donnees.Commandant.Rarete.ToLower()">@donnees.Commandant.Rarete</div>
+                                                <img src="@GetImageUrl(donnees.Commandant.Nom)" alt="@donnees.Commandant.Nom" class="card-image" onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
+                                                <div class="card-info">
+                                                    <div>Niv: @donnees.Commandant.Niveau</div>
+                                                    <div class="card-stars">@RenderStars(donnees.Commandant.Rang)</div>
+                                                    <div>Puiss: @donnees.Commandant.Puissance</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>-</td>
+                                    }
 
                                     @for (int i = 0; i < nbMercenairesMax; i++)
                                     {
                                         if (i < donnees.Mercenaires.Count)
                                         {
                                             var merc = donnees.Mercenaires[i];
-                                            <td class="text-truncate" title="@merc.Nom">@merc.Nom</td>
-                                            <td>@merc.Niveau</td>
-                                            <td><span class="badge badge-rarity" data-rarity="@merc.Rarete">@merc.Rarete</span></td>
-                                            <td>@merc.Puissance</td>
+                                            <td>
+                                                <div class="personnage-card">
+                                                    <div class="card-name">@merc.Nom</div>
+                                                    <div class="card-rarity rarity-@merc.Rarete.ToLower()">@merc.Rarete</div>
+                                                    <img src="@GetImageUrl(merc.Nom)" alt="@merc.Nom" class="card-image" onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
+                                                    <div class="card-info">
+                                                        <div>Niv: @merc.Niveau</div>
+                                                        <div class="card-stars">@RenderStars(merc.Rang)</div>
+                                                        <div>Puiss: @merc.Puissance</div>
+                                                    </div>
+                                                </div>
+                                            </td>
                                         }
                                         else
                                         {
                                             <td>-</td>
-                                            <td>-</td>
-                                            <td>-</td>
-                                            <td>-</td>
                                         }
-                                    }
-
-                                    @if (donnees.Commandant != null)
-                                    {
-                                        <td class="text-truncate fw-bold" title="@donnees.Commandant.Nom">@donnees.Commandant.Nom</td>
-                                        <td>@donnees.Commandant.Niveau</td>
-                                        <td><span class="badge badge-rarity" data-rarity="@donnees.Commandant.Rarete">@donnees.Commandant.Rarete</span></td>
-                                        <td>@donnees.Commandant.Puissance</td>
-                                    }
-                                    else
-                                    {
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
                                     }
 
                                     @for (int i = 0; i < nbAndroidsMax; i++)
@@ -113,22 +127,33 @@
                                         if (i < donnees.Androides.Count)
                                         {
                                             var android = donnees.Androides[i];
-                                            <td class="text-truncate" title="@android.Nom">@android.Nom</td>
-                                            <td>@android.Niveau</td>
-                                            <td><span class="badge badge-rarity" data-rarity="@android.Rarete">@android.Rarete</span></td>
-                                            <td>@android.Puissance</td>
+                                            <td>
+                                                <div class="personnage-card">
+                                                    <div class="card-name">@android.Nom</div>
+                                                    <div class="card-rarity rarity-@android.Rarete.ToLower()">@android.Rarete</div>
+                                                    <img src="@GetImageUrl(android.Nom)" alt="@android.Nom" class="card-image" onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
+                                                    <div class="card-info">
+                                                        <div>Niv: @android.Niveau</div>
+                                                        <div>Puiss: @android.Puissance</div>
+                                                    </div>
+                                                </div>
+                                            </td>
                                         }
                                         else
                                         {
-                                            <td>-</td>
-                                            <td>-</td>
-                                            <td>-</td>
                                             <td>-</td>
                                         }
                                     }
 
                                     <td>
-                                        <button class="btn btn-sm btn-outline-danger" @onclick="@(() => SupprimerEnregistrement(historique.Id))">Supprimer</button>
+                                        <span class="label">Puiss:</span> @donnees.LuciePuissance
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-outline-danger" @onclick="@(() => SupprimerEnregistrement(historique.Id))" title="Supprimer">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -145,4 +170,6 @@
         }
     </div>
 </div>
+
+<InputFile id="historiqueFileInput" @ref="inputFileRef" OnChange="HandleFileSelected" accept=".xml" style="display:none;" />
 

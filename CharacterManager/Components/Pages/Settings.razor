@@ -30,10 +30,10 @@
                 </p>
             </div>
             <div class="setting-control">
-                <select class="form-select" @onchange="OnLanguageChanged">
+                <select class="form-select" @bind="currentLanguage" @bind:after="OnLanguageChanged">
                     @foreach (var lang in availableLanguages)
                     {
-                        <option value="@lang.Code" selected="@(currentLanguage == lang.Code)">@lang.Name</option>
+                        <option value="@lang.Code">@lang.Name</option>
                     }
                 </select>
             </div>

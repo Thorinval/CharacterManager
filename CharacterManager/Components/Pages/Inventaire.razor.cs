@@ -93,6 +93,56 @@ public partial class Inventaire
     {
         return "personnages-grid-compact";
     }
+    
+    private string GetRarityClass(Rarete rarete)
+    {
+        return rarete switch
+        {
+            Rarete.SSR => "rarity-ssr",
+            Rarete.SR => "rarity-sr",
+            Rarete.R => "rarity-r",
+            _ => ""
+        };
+    }
+    
+    private void UpdatePersonnageField(int personnageId, string field, string value)
+    {
+        var personnage = personnages.FirstOrDefault(p => p.Id == personnageId);
+        if (personnage == null) return;
+
+        try
+        {
+            switch (field)
+            {
+                case "Niveau":
+                    if (int.TryParse(value, out int niveau) && niveau >= 1 && niveau <= 200)
+                    {
+                        personnage.Niveau = niveau;
+                    }
+                    break;
+                case "Rang":
+                    if (int.TryParse(value, out int rang) && rang >= 0 && rang <= 7)
+                    {
+                        personnage.Rang = rang;
+                    }
+                    break;
+                case "Puissance":
+                    if (int.TryParse(value, out int puissance) && puissance >= 0)
+                    {
+                        personnage.Puissance = puissance;
+                    }
+                    break;
+            }
+
+            PersonnageService.Update(personnage);
+            LoadPersonnages();
+            toastRef?.Show($"{field} mis à jour avec succès", "success");
+        }
+        catch (Exception ex)
+        {
+            toastRef?.Show($"Erreur lors de la mise à jour: {ex.Message}", "error");
+        }
+    }
 
     private void LoadPersonnages()
     {
@@ -358,7 +408,12 @@ public partial class Inventaire
     {
         try
         {
-            var csvBytes = await CsvImportService.ExportToCsvAsync(personnagesFiltres);
+            // Exporter uniquement les personnages sélectionnés s'il y en a, sinon exporter la liste filtrée
+            var personnagesAExporter = selectedPersonnages.Any()
+                ? personnagesFiltres.Where(p => selectedPersonnages.Contains(p.Id))
+                : personnagesFiltres;
+                
+            var csvBytes = await CsvImportService.ExportToCsvAsync(personnagesAExporter);
             var fileName = $"inventaire_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
             
             // Utiliser JavaScript pour télécharger le fichier

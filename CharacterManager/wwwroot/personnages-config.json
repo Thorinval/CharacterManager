@@ -3,12 +3,12 @@
     {
       "CheminImage": "/images/personnages/accueil.png",
       "NomFichier": "accueil.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/accueil_old.png",
       "NomFichier": "accueil_old.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/alexa.png",
@@ -18,132 +18,132 @@
     {
       "CheminImage": "/images/personnages/alexa_small_portrait.png",
       "NomFichier": "alexa_small_portrait.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/alexa_small_select.png",
       "NomFichier": "alexa_small_select.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/audrey_small_select.png",
       "NomFichier": "audrey_small_select.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/belle.png",
       "NomFichier": "belle.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/belle_small_portrait.png",
       "NomFichier": "belle_small_portrait.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/belle_small_select.png",
       "NomFichier": "belle_small_select.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/hunter.png",
       "NomFichier": "hunter.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/hunter_small_portrait.png",
       "NomFichier": "hunter_small_portrait.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/isabella_small_select.png",
       "NomFichier": "isabella_small_select.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/kitty_small_portrait.png",
       "NomFichier": "kitty_small_portrait.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/kitty_small_select.png",
       "NomFichier": "kitty_small_select.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/naomi_small_select.png",
       "NomFichier": "naomi_small_select.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/natasha.png",
       "NomFichier": "natasha.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/natasha_small_portrait.png",
       "NomFichier": "natasha_small_portrait.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/natasha_small_select.png",
       "NomFichier": "natasha_small_select.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/ravenna.png",
       "NomFichier": "ravenna.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/ravenna_small_portrait.png",
       "NomFichier": "ravenna_small_portrait.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/ravenna_small_select.png",
       "NomFichier": "ravenna_small_select.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/regina.png",
       "NomFichier": "regina.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/regina_small.png",
       "NomFichier": "regina_small.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/regina_small_portrait.png",
       "NomFichier": "regina_small_portrait.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/regina_small_select.png",
       "NomFichier": "regina_small_select.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/ruby_small_select.png",
       "NomFichier": "ruby_small_select.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/skye_small_select.png",
       "NomFichier": "skye_small_select.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/sunmi_small_select.png",
       "NomFichier": "sunmi_small_select.png",
-      "IsAdult": false
+      "IsAdult": true
     },
     {
       "CheminImage": "/images/personnages/default_portrait.png",
       "NomFichier": "default_portrait.png",
-      "IsAdult": false
+      "IsAdult": true
     }
   ]
 }
