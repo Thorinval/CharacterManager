@@ -1,0 +1,11 @@
+Line 198: Change from
+<div class="card-rarity-text rarity-text-@personnage.Rarete.ToLower()">@personnage.Rarete</div>
+
+To:
+<div class="card-rarity-text rarity-text-@personnage.Rarete.ToString().ToLower()">@personnage.Rarete</div>
+
+Line 229: Change from
+@onclick="() => UpdatePersonnageField(personnage.Id, "Rang", starIndex.ToString())">
+
+To:
+@onclick='() => UpdatePersonnageField(personnage.Id, "Rang", starIndex.ToString())'>

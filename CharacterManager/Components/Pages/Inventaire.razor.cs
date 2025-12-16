@@ -144,6 +144,13 @@ public partial class Inventaire
         }
     }
 
+    private void UpdateRankFromStar(int personnageId, int clickedStar, int currentRank)
+    {
+        // Toggle down if clicking the currently selected star (allows rank 0)
+        var newRank = clickedStar == currentRank ? Math.Max(0, clickedStar - 1) : clickedStar;
+        UpdatePersonnageField(personnageId, "Rang", newRank.ToString());
+    }
+
     private void LoadPersonnages()
     {
         personnages = PersonnageService.GetAll().ToList();

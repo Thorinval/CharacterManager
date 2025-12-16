@@ -1,0 +1,175 @@
+@page "/admin/users"
+@using Microsoft.AspNetCore.Components.Authorization
+@using CharacterManager.Server.Services
+@using Microsoft.JSInterop
+@inject ProfileService ProfileService
+@inject NavigationManager Nav
+
+<AuthorizeView Roles="admin">
+    <Authorized>
+        <div class="container mt-4" style="max-width:720px;">
+            <h2>Gestion des utilisateurs</h2>
+            <div class="card p-3 mt-3">
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <label class="form-label">Nom d'utilisateur</label>
+                        <input class="form-control" @bind="newUsername" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Mot de passe</label>
+                        <input class="form-control" type="password" @bind="newPassword" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Rôle</label>
+                        <select class="form-select" @bind="newRole">
+                            <option value="utilisateur">Utilisateur</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-success" @onclick="CreateUser">Créer utilisateur</button>
+                    <span class="text-muted ms-2">@message</span>
+                </div>
+                @if (!string.IsNullOrEmpty(tempPassword))
+                {
+                    <div class="alert alert-info mt-3" role="alert">
+                        <strong>Mot de passe temporaire:</strong> 
+                        <code>@tempPassword</code>
+                        <button class="btn btn-sm btn-outline-primary ms-2" @onclick="CopyTempPassword">Copier</button>
+                    </div>
+                }
+            </div>
+            <div class="card p-3 mt-4">
+                <h5>Utilisateurs existants</h5>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Rôle</th>
+                            <th>Lockout</th>
+                            <th style="width:220px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (users == null)
+                        {
+                            <tr><td colspan="4">Chargement...</td></tr>
+                        }
+                        else if (!users.Any())
+                        {
+                            <tr><td colspan="4">Aucun utilisateur</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var u in users)
+                            {
+                                <tr>
+                                    <td>@u.Username</td>
+                                    <td>
+                                        <select class="form-select form-select-sm" @onchange="(e)=>ChangeRole(u.Username, e.Value?.ToString() ?? u.Role)">
+                                            <option value="utilisateur" selected="@(u.Role=="utilisateur")">Utilisateur</option>
+                                            <option value="admin" selected="@(u.Role=="admin")">Admin</option>
+                                        </select>
+                                    </td>
+                                    <td>@(u.LockoutUntil.HasValue ? u.LockoutUntil.Value.ToLocalTime().ToString("g") : "-")</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-secondary" @onclick="() => ResetPassword(u.Username)">Reset MDP</button>
+                                            <button class="btn btn-outline-danger" @onclick="() => DeleteUser(u.Username)">Supprimer</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="container mt-4">
+            <p>Accès réservé aux administrateurs.</p>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private string newUsername = string.Empty;
+    private string newPassword = string.Empty;
+    private string newRole = "utilisateur";
+    private string message = string.Empty;
+    private string? tempPassword = null;
+    private List<CharacterManager.Server.Models.Profile>? users;
+    [Inject] private IJSRuntime? JS { get; set; }
+
+    private async Task CreateUser()
+    {
+        tempPassword = null;
+        if (string.IsNullOrWhiteSpace(newUsername) || string.IsNullOrWhiteSpace(newPassword))
+        {
+            message = "Nom et mot de passe requis";
+            return;
+        }
+        var strength = ProfileService.ValidatePasswordStrength(newPassword);
+        if (!strength.ok) { message = $"Mot de passe faible: {strength.error}"; return; }
+        var ok = await ProfileService.CreateUserAsync(newUsername, newPassword, newRole);
+        message = ok ? "Utilisateur créé" : "Utilisateur déjà existant";
+        if (ok)
+        {
+            newUsername = string.Empty;
+            newPassword = string.Empty;
+            newRole = "utilisateur";
+            await LoadUsers();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        users = await ProfileService.GetAllAsync();
+    }
+
+    private async Task ChangeRole(string username, string role)
+    {
+        await ProfileService.UpdateRoleAsync(username, role);
+        message = "Rôle mis à jour";
+    }
+
+    private async Task ResetPassword(string username)
+    {
+        // For demo purposes, reset to random strong password
+        var pwd = Guid.NewGuid().ToString("N").Substring(0, 12) + "!A1";
+        var ok = await ProfileService.ResetPasswordAsync(username, pwd);
+        if (ok)
+        {
+            tempPassword = pwd;
+            message = $"MDP réinitialisé pour {username}. Copiez le mot de passe temporaire ci-dessous.";
+        }
+        else
+        {
+            message = "Échec de réinitialisation";
+        }
+    }
+
+    private async Task CopyTempPassword()
+    {
+        if (JS != null && !string.IsNullOrEmpty(tempPassword))
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", tempPassword);
+            message = "Mot de passe copié dans le presse-papiers";
+        }
+    }
+
+    private async Task DeleteUser(string username)
+    {
+        tempPassword = null;
+        await ProfileService.DeleteAsync(username);
+        message = "Utilisateur supprimé";
+        await LoadUsers();
+    }
+}

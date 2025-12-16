@@ -10,8 +10,20 @@
     </div>
 
     <main>
-        <div class="top-row px-4">
+        <div class="top-row px-4" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
             <button class="about-link" @onclick="ShowAboutModal">À propos</button>
+            @using Microsoft.AspNetCore.Components.Authorization
+            <AuthorizeView>
+                <Authorized>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="text-muted">Connecté: @userName (@userRole)</span>
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="Logout">Logout</button>
+                    </div>
+                </Authorized>
+                <NotAuthorized>
+                    <a class="btn btn-sm btn-primary" href="/login">Se connecter</a>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
 
         <article class="content px-4">
@@ -46,10 +58,36 @@
 
 @code {
     private bool showAboutModal = false;
+    [CascadingParameter] private Task<Microsoft.AspNetCore.Components.Authorization.AuthenticationState> AuthStateTask { get; set; } = default!;
+    [Inject] private Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private Microsoft.AspNetCore.Authentication.IAuthenticationService AuthService { get; set; } = default!;
+    private string userName = "";
+    private string userRole = "";
 
     private void ShowAboutModal()
     {
         showAboutModal = true;
         StateHasChanged();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var auth = await AuthStateTask;
+        if (auth.User.Identity?.IsAuthenticated == true)
+        {
+            userName = auth.User.Identity!.Name ?? "";
+            userRole = auth.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "utilisateur";
+        }
+        else
+        {
+            userName = ""; userRole = "";
+        }
+    }
+
+    private async Task Logout()
+    {
+        await AuthService.SignOutAsync(HttpContextAccessor.HttpContext!, Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme, null);
+        Navigation.NavigateTo("/login", forceLoad: true);
     }
 }

@@ -3,8 +3,10 @@ namespace CharacterManager.Components.Pages;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
+using Microsoft.AspNetCore.Components.Authorization;
 using CharacterManager.Server.Data;
 using CharacterManager.Server.Services;
+using CharacterManager.Server.Models;
 
 public partial class Settings
 {
@@ -20,6 +22,16 @@ public partial class Settings
     [Inject]
     public IJSRuntime JSRuntime { get; set; } = null!;
 
+    [Inject]
+    public ProfileService ProfileService { get; set; } = null!;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
+
+    private Profile? currentProfile;
+    private string userRole = "utilisateur";
+    public bool IsAdmin => string.Equals(userRole, "admin", StringComparison.OrdinalIgnoreCase);
+
     private bool isAdultModeEnabled = true;
     private string currentLanguage = "fr";
     private string appVersion = "Unknown";
@@ -27,11 +39,15 @@ public partial class Settings
 
     protected override async Task OnInitializedAsync()
     {
-        var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
-        if (settings != null)
+        // Load profile if authenticated
+        var authState = await AuthStateTask;
+        if (authState.User.Identity?.IsAuthenticated == true)
         {
-            isAdultModeEnabled = settings.IsAdultModeEnabled;
-            currentLanguage = settings.Language ?? "fr";
+            var username = authState.User.Identity!.Name ?? "";
+            currentProfile = await ProfileService.GetOrCreateAsync(username);
+            isAdultModeEnabled = currentProfile.AdultMode;
+            currentLanguage = currentProfile.Language ?? "fr";
+            userRole = authState.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "utilisateur";
         }
 
         appVersion = AppVersionService.GetAppVersion();
@@ -46,12 +62,10 @@ public partial class Settings
 
     private async Task OnAdultModeChanged()
     {
-        var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
-        if (settings != null)
+        if (currentProfile != null)
         {
-            settings.IsAdultModeEnabled = isAdultModeEnabled;
-            DbContext.AppSettings.Update(settings);
-            await DbContext.SaveChangesAsync();
+            currentProfile.AdultMode = isAdultModeEnabled;
+            await ProfileService.UpdateAsync(currentProfile);
             StateHasChanged();
         }
     }
@@ -60,13 +74,11 @@ public partial class Settings
     {
         var newLanguage = currentLanguage;
 
-        // Mettre à jour la base de données
-        var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
-        if (settings != null)
+        // Mettre à jour le profil utilisateur
+        if (currentProfile != null)
         {
-            settings.Language = newLanguage;
-            DbContext.AppSettings.Update(settings);
-            await DbContext.SaveChangesAsync();
+            currentProfile.Language = newLanguage;
+            await ProfileService.UpdateAsync(currentProfile);
         }
 
         // Mettre à jour le service de localisation

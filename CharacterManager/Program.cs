@@ -3,12 +3,26 @@ using CharacterManager.Server.Data;
 using CharacterManager.Server.Services; 
 using Microsoft.EntityFrameworkCore; 
 using Microsoft.Data.Sqlite;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Authentication & Authorization
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/login";
+        options.LogoutPath = "/logout";
+        options.AccessDeniedPath = "/login";
+    });
+builder.Services.AddAuthorization();
+builder.Services.AddHttpContextAccessor();
 
 // Configure SQLite database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -24,6 +38,7 @@ builder.Services.AddSingleton<AppVersionService>();
 builder.Services.AddSingleton<LocalizationService>();
 builder.Services.AddHttpClient<UpdateService>();
 builder.Services.AddHttpClient();  // Pour les appels HTTP du ClientLocalizationService
+builder.Services.AddScoped<ProfileService>();
 
 var app = builder.Build();
 
@@ -118,6 +133,16 @@ using (var scope = app.Services.CreateScope())
             db.Database.ExecuteSqlRaw(createHistoriquesEscouadeSql);
             Console.WriteLine("[DB] Ensured HistoriquesEscouade table exists.");
 
+                // Ensure Profiles table exists
+                var createProfilesSql = @"CREATE TABLE IF NOT EXISTS Profiles (
+                    Id INTEGER NOT NULL CONSTRAINT PK_Profiles PRIMARY KEY AUTOINCREMENT,
+                    Username TEXT NOT NULL UNIQUE,
+                    AdultMode INTEGER NOT NULL DEFAULT 0,
+                    Language TEXT NOT NULL DEFAULT 'fr'
+                );";
+                db.Database.ExecuteSqlRaw(createProfilesSql);
+                Console.WriteLine("[DB] Ensured Profiles table exists.");
+
             // AppImages table initialization removed (unused)
         }
         // Hotfix: Add missing 'IsAdultModeEnabled' column to AppSettings table if it doesn't exist
@@ -194,12 +219,26 @@ using (var scope = app.Services.CreateScope())
         var configService = scope.ServiceProvider.GetRequiredService<PersonnageImageConfigService>();
         configService.LoadConfiguration();
         Console.WriteLine("[Init] Personnages image configuration loaded.");
+
+        // Seed default admin from configuration
+        var adminUser = app.Configuration["Admin:Username"] ?? "admin";
+        var adminPass = app.Configuration["Admin:Password"] ?? "admin";
+        var profileService = scope.ServiceProvider.GetRequiredService<ProfileService>();
+        if (!db.Profiles.Any(p => p.Username == adminUser))
+        {
+            await profileService.CreateUserAsync(adminUser, adminPass, "admin");
+            Console.WriteLine($"[Init] Seeded admin user '{adminUser}'.");
+        }
     }
     catch (Exception ex)
     {
         Console.WriteLine($"Initialization error: {ex.Message}");
     }
 }
+
+// Security pipeline
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

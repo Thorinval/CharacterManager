@@ -1,0 +1,88 @@
+@page "/login"
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager Nav
+@using CharacterManager.Server.Services
+@inject ProfileService ProfileService
+
+<div class="container mt-5" style="max-width: 420px;">
+    <h2>Connexion</h2>
+    <div class="card p-3 mt-3">
+        <div class="mb-3">
+            <label class="form-label">Nom d'utilisateur</label>
+            <input class="form-control" @bind="username" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Mot de passe</label>
+            <input class="form-control" type="password" @bind="password" />
+        </div>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                @errorMessage
+            </div>
+        }
+        <button class="btn btn-primary" @onclick="LoginAsync">Se connecter</button>
+    </div>
+</div>
+
+@code {
+    private string username = string.Empty;
+    private string password = string.Empty;
+    private string errorMessage = string.Empty;
+
+    private async Task LoginAsync()
+    {
+        errorMessage = string.Empty;
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password)) 
+        {
+            errorMessage = "Nom d'utilisateur et mot de passe requis";
+            return;
+        }
+
+        // Bootstrap default admin if none exists
+        var anyProfiles = await ProfileService.GetByUsernameAsync(username) != null;
+        var adminProfile = await ProfileService.GetByUsernameAsync("admin");
+        if (adminProfile == null)
+        {
+            await ProfileService.CreateUserAsync("admin", "admin", "admin");
+        }
+
+        var profile = await ProfileService.GetByUsernameAsync(username);
+        if (profile == null)
+        {
+            // invalid username
+            await ProfileService.RegisterLoginAttemptAsync(username, false);
+            errorMessage = "Nom d'utilisateur ou mot de passe invalide";
+            return;
+        }
+        if (profile.LockoutUntil.HasValue && profile.LockoutUntil.Value > DateTimeOffset.UtcNow)
+        {
+            // locked out
+            var remaining = profile.LockoutUntil.Value - DateTimeOffset.UtcNow;
+            errorMessage = $"Compte verrouillé. Réessayez dans {remaining.Minutes} min {remaining.Seconds} sec";
+            return;
+        }
+        if (!ProfileService.VerifyPassword(profile, password))
+        {
+            // invalid password
+            await ProfileService.RegisterLoginAttemptAsync(username, false);
+            errorMessage = "Nom d'utilisateur ou mot de passe invalide";
+            return;
+        }
+        await ProfileService.RegisterLoginAttemptAsync(username, true);
+
+        var claims = new List<System.Security.Claims.Claim>
+        {
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, username),
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, profile.Role)
+        };
+        var identity = new System.Security.Claims.ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new System.Security.Claims.ClaimsPrincipal(identity);
+        await HttpContextAccessor.HttpContext!.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+        Nav.NavigateTo("/");
+    }
+}

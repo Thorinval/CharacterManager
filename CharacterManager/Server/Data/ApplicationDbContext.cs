@@ -10,6 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<AppSettings> AppSettings { get; set; }
     public DbSet<Template> Templates { get; set; }
     public DbSet<HistoriqueEscouade> HistoriquesEscouade { get; set; }
+    public DbSet<Profile> Profiles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

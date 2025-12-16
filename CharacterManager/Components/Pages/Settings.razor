@@ -3,6 +3,7 @@
 @using CharacterManager.Server.Models
 @using CharacterManager.Server.Services
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.Authorization
 @rendermode InteractiveServer
 
 <link rel="stylesheet" href="/Styles/Settings.css" />
@@ -10,11 +11,13 @@
 <PageTitle>Paramètres - Character Manager</PageTitle>
 
 <div class="page-header-banner">
-    <img src="/images/interface/gear.gif" alt="" class="page-header-icon" />
+    <img src="/images/interface/parametres.png" alt="" class="page-header-icon" />
     <h1 class="page-title">Paramètres</h1>
     <p class="page-subtitle">Gestion des paramètres et des images</p>
 </div>
 
+<AuthorizeView>
+    <Authorized>
 <div class="settings-container">
     <!-- Section Langue -->
     <div class="settings-section">
@@ -61,7 +64,8 @@
                         type="checkbox" 
                         id="adultModeToggle"
                         @bind:get="isAdultModeEnabled"
-                        @bind:set="async (value) => { isAdultModeEnabled = value; await OnAdultModeChanged(); }" />
+                        @bind:set="async (value) => { isAdultModeEnabled = value; await OnAdultModeChanged(); }"
+                        disabled="@(!IsAdmin)" />
                     <label class="form-check-label" for="adultModeToggle">
                         @(isAdultModeEnabled ? "Activé" : "Désactivé")
                     </label>
@@ -82,4 +86,12 @@
         </div>
     </div>
 </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="container mt-4">
+            <p>Veuillez vous connecter pour modifier les paramètres.</p>
+            <a class="btn btn-primary" href="/login">Se connecter</a>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
 

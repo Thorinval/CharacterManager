@@ -193,7 +193,12 @@ else
                         <div class="card-checkbox-grid" @onclick:stopPropagation="true">
                             <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)" @onchange="() => ToggleSelection(personnage.Id)" />
                         </div>
-                        <div class="card-rarity-badge">@personnage.Rarete</div>
+                        
+                        <div class="card-name-header">
+                            <div class="personnage-name-top">@personnage.Nom</div>
+                            <div class="card-rarity-text rarity-text-@personnage.Rarete.ToString().ToLower()">@personnage.Rarete</div>
+                        </div>
+                        
                         <img src="@personnage.ImageUrlPreview" 
                              alt="@personnage.Nom" 
                              class="personnage-card-image-editable" 
@@ -201,9 +206,6 @@ else
                              style="cursor: pointer;"
                              onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
                         <div class="personnage-card-info">
-                            <div class="personnage-name">@personnage.Nom</div>
-                            <div class="personnage-type">@personnage.Type</div>
-                            
                             <div class="editable-field">
                                 <label>Niveau:</label>
                                 <input type="number" 
@@ -217,13 +219,16 @@ else
                             
                             <div class="editable-field">
                                 <label>Rang:</label>
-                                <input type="number" 
-                                       min="0" 
-                                       max="7" 
-                                       class="form-control form-control-sm" 
-                                       value="@personnage.Rang" 
-                                       @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Rang", e.Value?.ToString() ?? "0"))"
-                                       @onclick:stopPropagation="true" />
+                                <div class="star-selector" @onclick:stopPropagation="true">
+                                    @for (int i = 1; i <= 7; i++)
+                                    {
+                                        var starIndex = i;
+                                        <span class="star-interactive @(starIndex <= personnage.Rang ? "filled" : "empty")"
+                                              @onclick="() => UpdateRankFromStar(personnage.Id, starIndex, personnage.Rang)">
+                                            @(starIndex <= personnage.Rang ? "★" : "☆")
+                                        </span>
+                                    }
+                                </div>
                             </div>
                             
                             <div class="editable-field">
@@ -237,14 +242,14 @@ else
                             </div>
                             
                             <div class="card-actions-editable" @onclick:stopPropagation="true">
-                                <button class="btn btn-sm btn-info" @onclick="() => ViewPersonnage(personnage.Id)" title="Voir détails">
-                                    <i class="bi bi-eye"></i>
+                                <button class="btn btn-sm btn-info" @onclick="() => ViewPersonnage(personnage.Id)" title="Détails">
+                                    <i class="bi bi-eye"></i> D
                                 </button>
                                 <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)" title="Éditer">
-                                    <i class="bi bi-pencil"></i>
+                                    <i class="bi bi-pencil"></i> E
                                 </button>
                                 <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)" title="Supprimer">
-                                    <i class="bi bi-trash"></i>
+                                    <i class="bi bi-trash"></i> S
                                 </button>
                             </div>
                         </div>
