@@ -1,4 +1,5 @@
 @page "/detail-personnage/{id:int}"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inject PersonnageService PersonnageService
 @inject NavigationManager Navigation
 @using CharacterManager.Server.Models

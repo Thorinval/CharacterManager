@@ -1,4 +1,5 @@
 @page "/historique"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @rendermode InteractiveServer
 @using CharacterManager.Server.Models
 
@@ -73,9 +74,9 @@
                                     <td class="info-cell score-cell"><span class="pill pill-score">@donnees.Score</span></td>
                                     <td class="info-cell puissance-cell"><span class="pill pill-puissance">@historique.PuissanceTotal</span></td>
                                     <td class="ranking-inline info-cell">
-                                        <span class="chip chip-nutaku" title="Classement Nutaku (global)"><i class="bi bi-globe"></i><strong>Nutaku</strong> : @donnees.Nutaku</span>
-                                        <span class="chip chip-top" title="Classement Top 150"><i class="bi bi-trophy"></i><strong>Top 150</strong> : @donnees.Top150</span>
-                                        <span class="chip chip-pays" title="Classement par pays"><i class="bi bi-flag"></i><strong>Pays</strong> : @donnees.Pays</span>
+                                        <div class="chip chip-nutaku" title="Classement Nutaku (global)"><i class="bi bi-globe"></i><strong>Nutaku</strong> : @donnees.Nutaku</div>
+                                        <div class="chip chip-top" title="Classement Top 150"><i class="bi bi-trophy"></i><strong>Top 150</strong> : @donnees.Top150</div>
+                                        <div class="chip chip-pays" title="Classement par pays"><i class="bi bi-flag"></i><strong>Pays</strong> : @donnees.Pays</div>
                                     </td>
 
                                     @if (donnees.Commandant != null)

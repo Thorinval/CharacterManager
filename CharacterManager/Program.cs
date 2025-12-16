@@ -4,6 +4,7 @@ using CharacterManager.Server.Services;
 using Microsoft.EntityFrameworkCore; 
 using Microsoft.Data.Sqlite;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 
@@ -320,6 +321,63 @@ using (var scope = app.Services.CreateScope())
 // Security pipeline
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Login endpoint for handling authentication (avoids Blazor Server SignalR conflict)
+app.MapPost("/api/login", async (HttpContext context, ProfileService profileService) =>
+{
+    var form = await context.Request.ReadFormAsync();
+    var username = form["username"].ToString();
+    var password = form["password"].ToString();
+    
+    if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+    {
+        context.Response.Redirect("/login?error=required");
+        return;
+    }
+
+    // Bootstrap default admin if no profiles exist
+    var allProfiles = await profileService.GetAllAsync();
+    if (allProfiles == null || !allProfiles.Any())
+    {
+        await profileService.CreateUserAsync("admin", "admin", "admin");
+        Console.WriteLine("[Login] No profiles found - created default admin account (admin/admin)");
+    }
+
+    var profile = await profileService.GetByUsernameAsync(username);
+    if (profile == null)
+    {
+        await profileService.RegisterLoginAttemptAsync(username, false);
+        context.Response.Redirect("/login?error=invalid");
+        return;
+    }
+
+    if (profile.LockoutUntil.HasValue && profile.LockoutUntil.Value > DateTimeOffset.UtcNow)
+    {
+        var remaining = (int)(profile.LockoutUntil.Value - DateTimeOffset.UtcNow).TotalMinutes;
+        context.Response.Redirect($"/login?error=locked&minutes={remaining}");
+        return;
+    }
+
+    if (!profileService.VerifyPassword(profile, password))
+    {
+        await profileService.RegisterLoginAttemptAsync(username, false);
+        context.Response.Redirect("/login?error=invalid");
+        return;
+    }
+
+    await profileService.RegisterLoginAttemptAsync(username, true);
+
+    var claims = new List<System.Security.Claims.Claim>
+    {
+        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, username),
+        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, profile.Role)
+    };
+    var identity = new System.Security.Claims.ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+    var principal = new System.Security.Claims.ClaimsPrincipal(identity);
+
+    await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+    context.Response.Redirect("/");
+});
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

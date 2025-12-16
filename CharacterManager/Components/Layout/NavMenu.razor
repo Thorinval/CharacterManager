@@ -1,4 +1,5 @@
 ﻿@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Authorization
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -51,6 +52,16 @@
                 <img src="/images/interface/menu-icon.png?v=1" alt="" class="nav-icon me-2" /> Historique
             </NavLink>
         </div>
+
+        <AuthorizeView Roles="admin">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="admin/users">
+                        <img src="/images/interface/menu-icon.png?v=1" alt="" class="nav-icon me-2" /> Gestion utilisateurs
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
 
     </nav>
 </div>

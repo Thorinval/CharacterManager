@@ -2,35 +2,38 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using CharacterManager.Server.Services
 @using Microsoft.JSInterop
+@using Microsoft.AspNetCore.Components.Forms
 @inject ProfileService ProfileService
 @inject NavigationManager Nav
 
 <AuthorizeView Roles="admin">
-    <Authorized>
+    <Authorized Context="auth">
         <div class="container mt-4" style="max-width:720px;">
             <h2>Gestion des utilisateurs</h2>
             <div class="card p-3 mt-3">
-                <div class="row g-2">
-                    <div class="col-md-4">
-                        <label class="form-label">Nom d'utilisateur</label>
-                        <input class="form-control" @bind="newUsername" />
+                <EditForm Model="@this" OnValidSubmit="CreateUser" FormName="createUserForm">
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <label class="form-label">Nom d'utilisateur</label>
+                            <InputText class="form-control" @bind-Value="newUsername" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Mot de passe</label>
+                            <InputText class="form-control" type="password" @bind-Value="newPassword" autocomplete="new-password" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Rôle</label>
+                            <InputSelect class="form-select" @bind-Value="newRole">
+                                <option value="utilisateur">Utilisateur</option>
+                                <option value="admin">Admin</option>
+                            </InputSelect>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Mot de passe</label>
-                        <input class="form-control" type="password" @bind="newPassword" />
+                    <div class="mt-3">
+                        <button class="btn btn-success" type="submit">Créer utilisateur</button>
+                        <span class="text-muted ms-2">@message</span>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Rôle</label>
-                        <select class="form-select" @bind="newRole">
-                            <option value="utilisateur">Utilisateur</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="mt-3">
-                    <button class="btn btn-success" @onclick="CreateUser">Créer utilisateur</button>
-                    <span class="text-muted ms-2">@message</span>
-                </div>
+                </EditForm>
                 @if (!string.IsNullOrEmpty(tempPassword))
                 {
                     <div class="alert alert-info mt-3" role="alert">
@@ -95,9 +98,14 @@
 </AuthorizeView>
 
 @code {
-    private string newUsername = string.Empty;
-    private string newPassword = string.Empty;
-    private string newRole = "utilisateur";
+    [SupplyParameterFromForm]
+    private string newUsername { get; set; } = string.Empty;
+    
+    [SupplyParameterFromForm]
+    private string newPassword { get; set; } = string.Empty;
+    
+    [SupplyParameterFromForm]
+    private string newRole { get; set; } = "utilisateur";
     private string message = string.Empty;
     private string? tempPassword = null;
     private List<CharacterManager.Server.Models.Profile>? users;
