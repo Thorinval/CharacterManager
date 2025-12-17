@@ -22,11 +22,15 @@ public partial class Inventaire
     [Inject]
     public CsvImportService CsvImportService { get; set; } = null!;
 
+    [Inject]
+    public IWebHostEnvironment WebHostEnvironment { get; set; } = null!;
+
     private List<Personnage> personnages = new();
     private List<Personnage> personnagesFiltres = new();
     private bool showModal = false;
     private bool isEditing = false;
     private Personnage currentPersonnage = new();
+    private IBrowserFile? selectedImageFile = null;
     
     // Tri
     private string sortColumn = "Nom";
@@ -372,14 +376,72 @@ public partial class Inventaire
         {
             PersonnageService.Add(currentPersonnage);
         }
+        
+        // Sauvegarder l'image si elle a été uploadée
+        if (selectedImageFile != null)
+        {
+            _ = SaveImageAsync();
+        }
+        
         LoadPersonnages();
         CloseModal();
+    }
+
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        selectedImageFile = e.File;
+        
+        // Créer un aperçu temporaire
+        if (selectedImageFile != null)
+        {
+            var buffer = new byte[selectedImageFile.Size];
+            await selectedImageFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).ReadExactlyAsync(buffer);
+            var imageDataUrl = $"data:{selectedImageFile.ContentType};base64,{Convert.ToBase64String(buffer)}";
+            currentPersonnage.ImageUrlPreview = imageDataUrl;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SaveImageAsync()
+    {
+        if (selectedImageFile == null || string.IsNullOrEmpty(currentPersonnage.Nom))
+            return;
+
+        try
+        {
+            // Générer le nom de fichier: nompersonnage_small_portrait.png
+            var fileName = $"{currentPersonnage.Nom.ToLower().Replace(" ", "_")}_small_portrait.png";
+            var personnageFolder = Path.Combine(WebHostEnvironment.WebRootPath, "images", "personnages");
+            
+            // Créer le dossier s'il n'existe pas
+            if (!Directory.Exists(personnageFolder))
+            {
+                Directory.CreateDirectory(personnageFolder);
+            }
+
+            var filePath = Path.Combine(personnageFolder, fileName);
+
+            // Sauvegarder le fichier
+            await using var fileStream = new FileStream(filePath, FileMode.Create);
+            await selectedImageFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(fileStream);
+
+            // Mettre à jour l'URL de l'image du personnage
+            currentPersonnage.ImageUrlPreview = $"/images/personnages/{fileName}";
+            PersonnageService.Update(currentPersonnage);
+            
+            selectedImageFile = null;
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", $"Erreur lors de la sauvegarde de l'image: {ex.Message}");
+        }
     }
 
     private void CloseModal()
     {
         showModal = false;
         currentPersonnage = new Personnage();
+        selectedImageFile = null;
         StateHasChanged();
     }
 

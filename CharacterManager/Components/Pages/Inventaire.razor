@@ -244,14 +244,11 @@ else
                             </div>
                             
                             <div class="card-actions-editable" @onclick:stopPropagation="true">
-                                <button class="btn btn-sm btn-info" @onclick="() => ViewPersonnage(personnage.Id)" title="@LocalizationService.T("inventory.view")">
-                                    <i class="bi bi-eye"></i> D
-                                </button>
                                 <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)" title="@LocalizationService.T("inventory.edit")">
-                                    <i class="bi bi-pencil"></i> M
+                                    <i class="bi bi-pencil"></i> <LocalizedText Key="inventory.edit" />
                                 </button>
                                 <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)" title="@LocalizationService.T("inventory.delete")">
-                                    <i class="bi bi-trash"></i> S
+                                    <i class="bi bi-trash"></i> <LocalizedText Key="inventory.delete" />
                                 </button>
                             </div>
                         </div>
@@ -341,6 +338,17 @@ else
                             <option value="Distance">Distance</option>
                             <option value="Androïde">Androïde</option>
                         </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="imageUpload" class="form-label">Image du personnage</label>
+                        <InputFile id="imageUpload" class="form-control" OnChange="@HandleImageUpload" accept="image/png,image/jpeg,image/jpg" />
+                        @if (!string.IsNullOrEmpty(currentPersonnage.ImageUrlPreview))
+                        {
+                            <div class="mt-2">
+                                <img src="@currentPersonnage.ImageUrlPreview" alt="Aperçu" style="max-width: 150px; max-height: 150px; object-fit: contain;" />
+                            </div>
+                        }
+                        <small class="form-text text-muted">Format: nompersonnage_small_portrait.png (ex: belle_small_portrait.png)</small>
                     </div>
                 </div>
                 <div class="modal-footer">
