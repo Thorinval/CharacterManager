@@ -322,6 +322,10 @@ else
                         <input type="number" class="form-control" id="niveau" @bind="currentPersonnage.Niveau" />
                     </div>
                     <div class="mb-3">
+                        <label for="puissance" class="form-label">Puissance</label>
+                        <input type="number" class="form-control" id="puissance" @bind="currentPersonnage.Puissance" />
+                    </div>
+                    <div class="mb-3">
                         <label for="type" class="form-label">Type</label>
                         <select class="form-control" id="type" @bind="currentPersonnage.Type">
                             @foreach (var type in Enum.GetValues(typeof(TypePersonnage)))
@@ -340,15 +344,26 @@ else
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="imageUpload" class="form-label">Image du personnage</label>
-                        <InputFile id="imageUpload" class="form-control" OnChange="@HandleImageUpload" accept="image/png,image/jpeg,image/jpg" />
+                        <label for="imagePortrait" class="form-label">Image portrait (inventaire)</label>
+                        <InputFile id="imagePortrait" class="form-control" OnChange="@HandlePortraitUpload" accept="image/png,image/jpeg,image/jpg" />
                         @if (!string.IsNullOrEmpty(currentPersonnage.ImageUrlPreview))
                         {
                             <div class="mt-2">
-                                <img src="@currentPersonnage.ImageUrlPreview" alt="Aperçu" style="max-width: 150px; max-height: 150px; object-fit: contain;" />
+                                <img src="@currentPersonnage.ImageUrlPreview" alt="Aperçu portrait" style="max-width: 150px; max-height: 150px; object-fit: contain;" />
                             </div>
                         }
                         <small class="form-text text-muted">Format: nompersonnage_small_portrait.png (ex: belle_small_portrait.png)</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="imageSelect" class="form-label">Image sélection (escouade)</label>
+                        <InputFile id="imageSelect" class="form-control" OnChange="@HandleSelectionUpload" accept="image/png,image/jpeg,image/jpg" />
+                        @if (!string.IsNullOrEmpty(previewSelectionImage))
+                        {
+                            <div class="mt-2">
+                                <img src="@previewSelectionImage" alt="Aperçu sélection" style="max-width: 150px; max-height: 150px; object-fit: contain;" />
+                            </div>
+                        }
+                        <small class="form-text text-muted">Format: nompersonnage_small_select.png (ex: belle_small_select.png)</small>
                     </div>
                 </div>
                 <div class="modal-footer">
