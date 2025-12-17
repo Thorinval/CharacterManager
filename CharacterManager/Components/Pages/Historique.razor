@@ -2,14 +2,15 @@
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @rendermode InteractiveServer
 @using CharacterManager.Server.Models
+@using CharacterManager.Components
 
 <link rel="stylesheet" href="/Styles/Historique.css" />
 
-<PageTitle>Historique des Classements</PageTitle>
+<PageTitle><LocalizedText Key="history.title" /></PageTitle>
 
 <div class="page-header-banner">
     <img src="/images/interface/menu-icon.png" alt="" class="page-header-icon" />
-    <h1 class="page-title">HISTORIQUE DES CLASSEMENTS</h1>
+    <h1 class="page-title"><LocalizedText Key="history.pageTitle" /></h1>
 </div>
 
 <div class="historique-container">
@@ -17,23 +18,19 @@
         <div class="controls-section mb-4">
             <div class="row">
                 <div class="col-md-4">
-                    <label for="dateDebut" class="form-label">Date de début:</label>
+                    <label for="dateDebut" class="form-label"><LocalizedText Key="history.startDate" /></label>
                     <input type="date" id="dateDebut" class="form-control" @bind="dateDebut" />
                 </div>
                 <div class="col-md-4">
-                    <label for="dateFin" class="form-label">Date de fin:</label>
+                    <label for="dateFin" class="form-label"><LocalizedText Key="history.endDate" /></label>
                     <input type="date" id="dateFin" class="form-control" @bind="dateFin" />
                 </div>
                 <div class="col-md-4 d-flex align-items-end gap-2 flex-wrap">
-                    <button class="btn btn-primary" @onclick="FiltrerHistorique">Filtrer</button>
-                    <button class="btn btn-secondary" @onclick="RinitialiserFiltres">Réinitialiser</button>
-                    <button class="btn btn-success" @onclick="ExporterHistorique" title="Exporter l'historique en XML">
-                        <i class="bi bi-download"></i> Exporter XML
-                    </button>
-                    <button class="btn btn-info" @onclick="ImporterHistorique" title="Importer un historique XML">
-                        <i class="bi bi-upload"></i> Importer XML
-                    </button>
-                    <button class="btn btn-danger" @onclick="ViderHistorique" title="Vider tout l'historique">Vider</button>
+                    <button class="btn btn-primary" @onclick="FiltrerHistorique"><LocalizedText Key="history.filter" /></button>
+                    <button class="btn btn-secondary" @onclick="RinitialiserFiltres"><LocalizedText Key="history.reset" /></button>
+                    <button class="btn btn-success" @onclick="ExporterHistorique" title=""><i class="bi bi-download"></i> <LocalizedText Key="history.exportXml" /></button>
+                    <button class="btn btn-info" @onclick="ImporterHistorique" title=""><i class="bi bi-upload"></i> <LocalizedText Key="history.importXml" /></button>
+                    <button class="btn btn-danger" @onclick="ViderHistorique" title=""><LocalizedText Key="history.clear" /></button>
                 </div>
             </div>
         </div>
@@ -44,22 +41,22 @@
                 <table class="table table-hover historique-table">
                     <thead class="table-dark">
                         <tr>
-                            <th class="col-date">Date</th>
-                            <th class="col-ligue">Ligue</th>
-                            <th class="col-score">Score</th>
-                            <th class="col-puissance">Puissance</th>
-                            <th class="col-classement">Classement</th>
-                            <th class="text-center">Commandant</th>
+                            <th class="col-date"><LocalizedText Key="history.table.date" /></th>
+                            <th class="col-ligue"><LocalizedText Key="history.table.league" /></th>
+                            <th class="col-score"><LocalizedText Key="history.table.score" /></th>
+                            <th class="col-puissance"><LocalizedText Key="history.table.power" /></th>
+                            <th class="col-classement"><LocalizedText Key="history.table.rank" /></th>
+                            <th class="text-center"><LocalizedText Key="history.table.commander" /></th>
                             @for (int i = 1; i <= nbMercenairesMax; i++)
                             {
-                                <th class="text-center">Mercenaire @i</th>
+                                <th class="text-center"><LocalizedText Key="history.table.mercenary" /> @i</th>
                             }
                             @for (int i = 1; i <= nbAndroidsMax; i++)
                             {
-                                <th class="text-center">Androide @i</th>
+                                <th class="text-center"><LocalizedText Key="history.table.android" /> @i</th>
                             }
-                            <th class="col-lucie">Lucie</th>
-                            <th class="col-actions">Actions</th>
+                            <th class="col-lucie"><LocalizedText Key="history.table.lucie" /></th>
+                            <th class="col-actions"><LocalizedText Key="history.table.actions" /></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -157,8 +154,8 @@
                                     </td>
                                     <td>
                                         <div class="action-buttons">
-                                            <button class="btn btn-sm btn-danger" @onclick="@(() => SupprimerEnregistrement(historique.Id))" title="Supprimer">
-                                                <i class="bi bi-trash"></i> Supprimer
+                                            <button class="btn btn-sm btn-danger" @onclick="@(() => SupprimerEnregistrement(historique.Id))" title="">
+                                                <i class="bi bi-trash"></i> <LocalizedText Key="common.delete" />
                                             </button>
                                         </div>
                                     </td>
@@ -172,7 +169,7 @@
         else
         {
             <div class="alert alert-info" role="alert">
-                Aucun historique trouvé. Commencez à créer des escouades pour remplir l'historique.
+                <LocalizedText Key="history.empty" />
             </div>
         }
     </div>

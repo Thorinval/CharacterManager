@@ -1,18 +1,19 @@
 ﻿@page "/"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inject AppVersionService VersionService
+@inject ClientLocalizationService LocalizationService
 @using CharacterManager.Server.Services
 
 <link rel="stylesheet" href="/Styles/Home.css" />
 
-<PageTitle>Accueil</PageTitle>
+<PageTitle><LocalizedText Key="navigation.home" /></PageTitle>
 
 <div class="page-header-banner">
     <img src="/images/interface/menu-icon.png" alt="" class="page-header-icon" />
-    <h1 class="page-title">ACCUEIL</h1>
+    <h1 class="page-title"><LocalizedText Key="home.title" /></h1>
     <div class="header-actions">
-        <a href="/settings" class="settings-link" title="Paramètres">
-            <img src="/images/interface/parametres.png" alt="Paramètres" class="settings-icon" />
+        <a href="/settings" class="settings-link" title="@LocalizationService.T("navigation.settings")">
+            <img src="/images/interface/parametres.png" alt="@LocalizationService.T("navigation.settings")" class="settings-icon" />
         </a>
     </div>
 </div>
@@ -24,29 +25,29 @@
             <div class="col-lg-6 d-flex">
                 <div class="welcome-card flex-fill">
                     <h1>Character Manager</h1>
-                    <p class="lead">Bienvenue sur votre gestionnaire de personnages</p>
+                    <p class="lead"><LocalizedText Key="home.welcome" /></p>
                     
                     <hr />
                     
                     <div class="features-section">
-                        <h3>Fonctionnalités principales :</h3>
+                        <h3><LocalizedText Key="home.features" /></h3>
                         <div class="row">
                             <div class="col-md-6">
                                 <ul class="features-list">
-                                    <li><strong>Escouade :</strong> Composez votre équipe de mercenaires, commandants et androïdes</li>
-                                    <li><strong>Inventaire :</strong> Gérez tous vos personnages avec tri, filtres et recherche</li>
-                                    <li><strong>Sélection multiple :</strong> Modifiez plusieurs personnages en une fois</li>
-                                    <li><strong>Détails complets :</strong> Consultez stats, capacités et caractéristiques</li>
-                                    <li><strong>Import/Export CSV :</strong> Importez et exportez vos données facilement</li>
+                                    <li><strong><LocalizedText Key="navigation.squad" /> :</strong> <LocalizedText Key="home.squad" /></li>
+                                    <li><strong><LocalizedText Key="navigation.inventory" /> :</strong> <LocalizedText Key="home.inventory" /></li>
+                                    <li><strong><LocalizedText Key="home.bulkLabel" /> :</strong> <LocalizedText Key="home.bulk" /></li>
+                                    <li><strong><LocalizedText Key="home.detailsLabel" /> :</strong> <LocalizedText Key="home.details" /></li>
+                                    <li><strong><LocalizedText Key="home.csvLabel" /> :</strong> <LocalizedText Key="home.csvImport" /></li>
                                 </ul>
                             </div>
                             <div class="col-md-6">
                                 <ul class="features-list">
-                                    <li><strong>Images dynamiques :</strong> Visualisez vos personnages avec plusieurs vues</li>
-                                    <li><strong>Gestion des rangs :</strong> Système d'étoiles pour les rangs (1-7)</li>
-                                    <li><strong>Calcul de puissance :</strong> Puissance totale et maximale de l'escouade</li>
-                                    <li><strong>Filtres avancés :</strong> Par rareté, type, faction et rôle</li>
-                                    <li><strong>Persistance SQLite :</strong> Base de données locale intégrée</li>
+                                    <li><strong><LocalizedText Key="home.dynamicLabel" /> :</strong> <LocalizedText Key="home.dynamicImages" /></li>
+                                    <li><strong><LocalizedText Key="home.ranksLabel" /> :</strong> <LocalizedText Key="home.ranks" /></li>
+                                    <li><strong><LocalizedText Key="home.powerLabel" /> :</strong> <LocalizedText Key="home.power" /></li>
+                                    <li><strong><LocalizedText Key="home.filtersLabel" /> :</strong> <LocalizedText Key="home.filters" /></li>
+                                    <li><strong><LocalizedText Key="home.sqliteLabel" /> :</strong> <LocalizedText Key="home.sqlite" /></li>
                                 </ul>
                             </div>
                         </div>
@@ -55,15 +56,15 @@
                     <hr />
 
                     <div class="version-info">
-                        <small class="text-muted">Version: @VersionService.GetFullVersionString()</small>
+                        <small class="text-muted"><LocalizedText Key="home.versionLabel" /> @VersionService.GetFullVersionString()</small>
                     </div>
 
                     <div class="mt-4 text-center">
                         <a href="/escouade" class="btn btn-primary btn-lg me-2">
-                            <i class="bi bi-people-fill"></i> Escouade
+                            <i class="bi bi-people-fill"></i> <LocalizedText Key="home.ctaSquad" />
                         </a>
                         <a href="/inventaire" class="btn btn-primary btn-lg">
-                            <i class="bi bi-grid-3x3-gap-fill"></i> Inventaire
+                            <i class="bi bi-grid-3x3-gap-fill"></i> <LocalizedText Key="home.ctaInventory" />
                         </a>
                     </div>
                 </div>

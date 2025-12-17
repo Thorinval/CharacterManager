@@ -4,13 +4,14 @@
 @using CharacterManager.Server.Models
 @using CharacterManager.Server.Services
 @rendermode InteractiveServer
+@using CharacterManager.Components
 
 @inject PersonnageService PersonnageService
 @inject NavigationManager Navigation
 
 <link rel="stylesheet" href="/Styles/Escouade.css" />
 
-<PageTitle>Escouade</PageTitle>
+<PageTitle><LocalizedText Key="squad.title" /></PageTitle>
 
 <div class="page-header-banner escouade-header">
     <div class="header-left">
@@ -52,20 +53,20 @@
         </div>
     </div>
 
-    <h1 class="page-title"></h1>
+    <h1 class="page-title"><LocalizedText Key="squad.title" /></h1>
 </div>
 
 
 @if (personnagesEscouade.Count == 0)
 {
     <div class="alert alert-info" role="alert">
-        Aucun mercenaire n'a été sélectionné pour l'escouade.
+            <LocalizedText Key="squad.noMercenary" />
     </div>
 }
 else
 {
 <div class="section-header commandant-header">
-    <h2>Commandant</h2>
+        <h2><LocalizedText Key="squad.commander" /></h2>
 </div>
     <div class="personnages-list">
         @foreach (var perso in commandants)
@@ -87,7 +88,7 @@ else
     </div>
     <br />
     <div class="section-header">
-        <h2>Mercenaires (@mercenaires.Count)</h2>
+        <h2><LocalizedText Key="squad.mercenaries" /> (@mercenaires.Count)</h2>
     </div>
     <div class="personnages-list">
         @foreach (var perso in mercenaires)
@@ -109,7 +110,7 @@ else
     </div>
     <br />
     <div class="section-header">
-        <h2>Androïdes</h2>
+        <h2><LocalizedText Key="squad.androids" /></h2>
     </div>
     <div class="personnages-list">
         @foreach (var perso in androides)

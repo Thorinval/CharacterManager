@@ -16,7 +16,9 @@
 @using Microsoft.AspNetCore.Components.Authorization
 <body>
     <CascadingAuthenticationState>
-        <Routes @rendermode="InteractiveServer" />
+        <LocalizationProvider>
+            <Routes @rendermode="InteractiveServer" />
+        </LocalizationProvider>
     </CascadingAuthenticationState>
     <script src="_framework/blazor.web.js"></script>
     <script src="/lib/bootstrap/dist/js/dragdrop-interop.js"></script>

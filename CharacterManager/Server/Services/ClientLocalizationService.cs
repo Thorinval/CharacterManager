@@ -2,7 +2,7 @@ namespace CharacterManager.Server.Services;
 
 using System.Collections.Generic;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using Microsoft.Extensions.Hosting;
 using Microsoft.JSInterop;
 
 /// <summary>
@@ -10,15 +10,16 @@ using Microsoft.JSInterop;
 /// </summary>
 public class ClientLocalizationService
 {
-    private readonly IJSRuntime _jsRuntime;
     private readonly ILogger<ClientLocalizationService> _logger;
+    private readonly IWebHostEnvironment _env;
     private Dictionary<string, object>? _currentResources;
     private string _currentLanguage = "fr";
+    private readonly object _lock = new();
 
-    public ClientLocalizationService(IJSRuntime jsRuntime, ILogger<ClientLocalizationService> logger)
+    public ClientLocalizationService(IWebHostEnvironment env, ILogger<ClientLocalizationService> logger)
     {
-        _jsRuntime = jsRuntime;
         _logger = logger;
+        _env = env;
     }
 
     /// <summary>
@@ -37,25 +38,19 @@ public class ClientLocalizationService
     {
         try
         {
-            var jsonContent = await _jsRuntime.InvokeAsync<string>(
-                "fetch",
-                $"i18n/{languageCode}.json"
-            );
-
-            // Pour Blazor WebAssembly/InteractiveServer, on utilise une approche différente
-            // On fait un appel HTTP au serveur pour récupérer le fichier JSON
-            using (var client = new HttpClient())
+            var path = Path.Combine(_env.WebRootPath, "i18n", $"{languageCode}.json");
+            if (!File.Exists(path))
             {
-                var response = await client.GetAsync($"i18n/{languageCode}.json");
-                if (response.IsSuccessStatusCode)
-                {
-                    var json = await response.Content.ReadAsStringAsync();
-                    _currentResources = JsonSerializer.Deserialize<Dictionary<string, object>>(
-                        json,
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-                    );
-                }
+                _logger.LogWarning($"Fichier de localisation introuvable: {path}");
+                _currentResources = new Dictionary<string, object>();
+                return;
             }
+
+            var json = await File.ReadAllTextAsync(path);
+            _currentResources = JsonSerializer.Deserialize<Dictionary<string, object>>(
+                json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
         }
         catch (Exception ex)
         {
@@ -70,10 +65,7 @@ public class ClientLocalizationService
     /// </summary>
     public string T(string key)
     {
-        if (_currentResources == null)
-        {
-            return key;
-        }
+        EnsureResourcesLoaded();
 
         var keys = key.Split('.');
         object? current = _currentResources;
@@ -135,4 +127,42 @@ public class ClientLocalizationService
     /// Retourne les ressources complètes (pour debug ou accès direct)
     /// </summary>
     public Dictionary<string, object>? GetResources() => _currentResources;
+
+    private void EnsureResourcesLoaded()
+    {
+        if (_currentResources != null)
+        {
+            return;
+        }
+
+        lock (_lock)
+        {
+            if (_currentResources != null)
+            {
+                return;
+            }
+
+            try
+            {
+                var path = Path.Combine(_env.WebRootPath, "i18n", $"{_currentLanguage}.json");
+                if (!File.Exists(path))
+                {
+                    _logger.LogWarning($"Fichier de localisation introuvable (lazy): {path}");
+                    _currentResources = new Dictionary<string, object>();
+                    return;
+                }
+
+                var json = File.ReadAllText(path);
+                _currentResources = JsonSerializer.Deserialize<Dictionary<string, object>>(
+                    json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Erreur lors du chargement lazy des ressources: {ex.Message}");
+                _currentResources = new Dictionary<string, object>();
+            }
+        }
+    }
 }

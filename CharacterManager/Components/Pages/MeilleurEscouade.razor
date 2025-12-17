@@ -4,13 +4,14 @@
 @using CharacterManager.Server.Models
 @using CharacterManager.Server.Services
 @rendermode InteractiveServer
+@using CharacterManager.Components
 
 @inject PersonnageService PersonnageService
 @inject NavigationManager Navigation
 
 <link rel="stylesheet" href="/Styles/MeilleurEscouade.css" />
 
-<PageTitle>Meilleure Escouade</PageTitle>
+<PageTitle><LocalizedText Key="bestSquad.title" /></PageTitle>
 
 <div class="page-header-banner escouade-header">
     <div class="header-left">
@@ -51,11 +52,11 @@
         </div>
     </div>
 
-    <h1 class="page-title"></h1>
+    <h1 class="page-title"><LocalizedText Key="bestSquad.title" /></h1>
 </div>
 
 <div class="section-header commandant-header">
-    <h2>Commandant</h2>
+        <h2><LocalizedText Key="bestSquad.commander" /></h2>
 </div>
 @if (topCommandant != null)
 {
@@ -79,7 +80,7 @@
 }
 <br />
 <div class="section-header">
-    <h2>Mercenaires (@topMercenaires.Count)</h2>
+    <h2><LocalizedText Key="bestSquad.mercenaries" /> (@topMercenaires.Count)</h2>
 </div>
 <div class="personnages-list">
     @foreach (var perso in topMercenaires)
@@ -101,7 +102,7 @@
 </div>
 <br />
 <div class="section-header">
-    <h2>Androïdes (@topAndroides.Count)</h2>
+    <h2><LocalizedText Key="bestSquad.androids" /> (@topAndroides.Count)</h2>
 </div>
 <div class="personnages-list">
     @foreach (var perso in topAndroides)

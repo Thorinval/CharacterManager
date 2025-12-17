@@ -4,16 +4,17 @@
 @using CharacterManager.Server.Services
 @using Microsoft.AspNetCore.Components.Web
 @using CharacterManager.Components
+@inject ClientLocalizationService LocalizationService
 
 <link rel="stylesheet" href="/Styles/Inventaire.css" />
 
 <head>
-    <title>Inventaire</title>
+    <title><LocalizedText Key="inventory.title" /></title>
 </head>
 
 <div class="page-header-banner">
     <img src="/images/interface/menu_inventaire.png" alt="" class="page-header-icon" />
-    <h1 class="page-title">INVENTAIRE</h1>
+    <h1 class="page-title"><LocalizedText Key="inventory.title" /></h1>
 </div>
 
 <Toast @ref="toastRef" />
@@ -119,8 +120,8 @@ else
 <div class="row mb-3">
     <div class="col-md-6">
         <div class="input-group">
-            <input type="text" class="form-control" placeholder="Rechercher..." @bind="searchTerm" @oninput="HandleSearchInput" />
-            <button class="btn btn-outline-secondary" type="button" @onclick="ClearSearch" title="Effacer la recherche">
+            <input type="text" class="form-control" placeholder="@LocalizationService.T("inventory.searchPlaceholder")" @bind="searchTerm" @oninput="HandleSearchInput" />
+            <button class="btn btn-outline-secondary" type="button" @onclick="ClearSearch" title="@LocalizationService.T("inventory.clearSearch")">
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
@@ -129,20 +130,20 @@ else
         @if (selectedPersonnages.Any())
         {
             <button class="btn btn-warning me-2" @onclick="ShowBulkEditModal">
-                Modifier sélection (@selectedPersonnages.Count)
+                <LocalizedText Key="inventory.bulkEdit" /> (@selectedPersonnages.Count)
             </button>
         }
         <button class="btn btn-primary" @onclick="() => { isEditing = false; currentPersonnage = new Personnage(); showModal = true; }">
-            Ajouter Personnage
+            <LocalizedText Key="inventory.add" />
         </button>
         <button class="btn btn-info ms-2" @onclick="() => OpenTemplateEditor()" title="Créer un template d'escouade">
-            <i class="bi bi-plus-circle"></i> Template
+            <i class="bi bi-plus-circle"></i> <LocalizedText Key="inventory.template" />
         </button>
         <button class="btn btn-success ms-2" @onclick="ExportToCsv" title="Exporter l'inventaire en CSV">
-            <i class="bi bi-download"></i> Exporter CSV
+            <i class="bi bi-download"></i> <LocalizedText Key="inventory.exportCsv" />
         </button>
         <button class="btn btn-danger ms-2" @onclick="DeleteSelectedPersonnages" disabled="@(!selectedPersonnages.Any())" title="Supprimer les personnages sélectionnés">
-            <i class="bi bi-trash-fill"></i> Supprimer sélection (@selectedPersonnages.Count)
+            <i class="bi bi-trash-fill"></i> <LocalizedText Key="inventory.bulkDelete" /> (@selectedPersonnages.Count)
         </button>
     </div>
 </div>
@@ -150,31 +151,31 @@ else
 
 @if (!showTemplateEditor)
 {
-    <p>Nombre de personnages: @personnagesFiltres.Count</p>
+    <p><LocalizedText Key="inventory.count" /> @personnagesFiltres.Count</p>
 
     @if (personnagesFiltres.Any())
 {
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="sort-controls">
-            <label>Trier par:</label>
-            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNom">Nom</button>
-            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRarete">Rareté</button>
-            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNiveau">Niveau</button>
-            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRang">Rang</button>
+            <label><LocalizedText Key="inventory.sort" /></label>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNom"><LocalizedText Key="inventory.name" /></button>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRarete"><LocalizedText Key="inventory.rarity" /></button>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNiveau"><LocalizedText Key="inventory.level" /></button>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRang"><LocalizedText Key="inventory.rank" /></button>
         </div>
         <div class="view-mode-controls">
-            <button class="btn btn-sm @GetViewModeClass("grid")" @onclick="@(() => viewMode = "grid")" title="Mode grille">
-                <i class="bi bi-grid-3x3-gap"></i> Grille
+            <button class="btn btn-sm @GetViewModeClass("grid")" @onclick="@(() => viewMode = "grid")" title="@LocalizationService.T("inventory.grid")">
+                <i class="bi bi-grid-3x3-gap"></i> <LocalizedText Key="inventory.grid" />
             </button>
-            <button class="btn btn-sm @GetViewModeClass("list")" @onclick="@(() => viewMode = "list")" title="Mode liste">
-                <i class="bi bi-list-ul"></i> Liste
+            <button class="btn btn-sm @GetViewModeClass("list")" @onclick="@(() => viewMode = "list")" title="@LocalizationService.T("inventory.list")">
+                <i class="bi bi-list-ul"></i> <LocalizedText Key="inventory.list" />
             </button>
         </div>
     </div>
 
     <div class="select-all-container mb-3">
         <input type="checkbox" id="selectAll" checked="@selectAllChecked" @onchange="SelectAll" />
-        <label for="selectAll" class="ms-2">Tout sélectionner</label>
+        <label for="selectAll" class="ms-2"><LocalizedText Key="inventory.selectAll" /></label>
     </div>
 
     @foreach (var groupe in GroupedPersonnages)
@@ -208,7 +209,7 @@ else
                              onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
                         <div class="personnage-card-info">
                             <div class="editable-field">
-                                <label>Niveau:</label>
+                                <label><LocalizedText Key="inventory.level" />:</label>
                                 <input type="number" 
                                        min="1" 
                                        max="200" 
@@ -219,7 +220,7 @@ else
                             </div>
                             
                             <div class="editable-field">
-                                <label>Rang:</label>
+                                <label><LocalizedText Key="inventory.rank" />:</label>
                                 <div class="star-selector" @onclick:stopPropagation="true">
                                     @for (int i = 1; i <= 7; i++)
                                     {
@@ -233,7 +234,7 @@ else
                             </div>
                             
                             <div class="editable-field">
-                                <label>Puissance:</label>
+                                <label><LocalizedText Key="inventory.power" />:</label>
                                 <input type="number" 
                                        min="0" 
                                        class="form-control form-control-sm" 
@@ -243,13 +244,13 @@ else
                             </div>
                             
                             <div class="card-actions-editable" @onclick:stopPropagation="true">
-                                <button class="btn btn-sm btn-info" @onclick="() => ViewPersonnage(personnage.Id)" title="Détails">
+                                <button class="btn btn-sm btn-info" @onclick="() => ViewPersonnage(personnage.Id)" title="@LocalizationService.T("inventory.view")">
                                     <i class="bi bi-eye"></i> D
                                 </button>
-                                <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)" title="Éditer">
-                                    <i class="bi bi-pencil"></i> E
+                                <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)" title="@LocalizationService.T("inventory.edit")">
+                                    <i class="bi bi-pencil"></i> M
                                 </button>
-                                <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)" title="Supprimer">
+                                <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)" title="@LocalizationService.T("inventory.delete")">
                                     <i class="bi bi-trash"></i> S
                                 </button>
                             </div>
@@ -281,8 +282,8 @@ else
                             <span>Rang: @GetRankStars(personnage.Rang)</span>
                         </div>
                         <div class="card-actions-list" @onclick:stopPropagation="true">
-                            <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)">Éditer</button>
-                            <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)">Supprimer</button>
+                            <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)"><LocalizedText Key="inventory.edit" /></button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)"><LocalizedText Key="inventory.delete" /></button>
                         </div>
                     </div>
                 }
@@ -292,7 +293,7 @@ else
     }
     else
     {
-        <p>Aucun personnage trouvé.</p>
+        <p><LocalizedText Key="inventory.empty" /></p>
     }
 }
 

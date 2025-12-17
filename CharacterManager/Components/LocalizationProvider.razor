@@ -3,20 +3,55 @@
 @using Microsoft.EntityFrameworkCore
 @inject ApplicationDbContext DbContext
 @inject ClientLocalizationService LocalizationService
+@inject ProfileService ProfileService
+@inject IHttpContextAccessor HttpContextAccessor
 
-@ChildContent
+@if (isReady)
+{
+    @ChildContent
+}
+else
+{
+    <div></div>
+}
 
 @code {
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
+    private bool isReady;
+
     protected override async Task OnInitializedAsync()
     {
-        // Charger la langue préférée de la base de données
-        var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
-        var language = settings?.Language ?? "fr";
+        // Charger la langue préférée : priorité au profil utilisateur, sinon réglages globaux
+        var language = "fr";
+
+        var user = HttpContextAccessor.HttpContext?.User;
+        if (user?.Identity?.IsAuthenticated == true)
+        {
+            var username = user.Identity?.Name ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(username))
+            {
+                var profile = await ProfileService.GetByUsernameAsync(username);
+                if (profile != null && !string.IsNullOrWhiteSpace(profile.Language))
+                {
+                    language = profile.Language;
+                }
+            }
+        }
+
+        // Si aucune langue utilisateur spécifique, utiliser les réglages globaux
+        if (language == "fr")
+        {
+            var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
+            language = settings?.Language ?? "fr";
+        }
 
         // Initialiser le service de localisation
         await LocalizationService.InitializeAsync(language);
+
+        // Rafraîchir l'UI une fois les ressources chargées
+        isReady = true;
+        StateHasChanged();
     }
 }

@@ -85,9 +85,9 @@
         }
     }
 
-    private async Task Logout()
+    private void Logout()
     {
-        await AuthService.SignOutAsync(HttpContextAccessor.HttpContext!, Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme, null);
-        Navigation.NavigateTo("/login", forceLoad: true);
+        // Use dedicated HTTP endpoint to sign out to avoid SignalR response conflicts
+        Navigation.NavigateTo("/api/logout", forceLoad: true);
     }
 }

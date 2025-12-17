@@ -20,6 +20,9 @@ public partial class Settings
     public ClientLocalizationService LocalizationService { get; set; } = null!;
 
     [Inject]
+    public ApplicationDbContext AppDb { get; set; } = null!;
+
+    [Inject]
     public IJSRuntime JSRuntime { get; set; } = null!;
 
     [Inject]
@@ -83,6 +86,23 @@ public partial class Settings
 
         // Mettre à jour le service de localisation
         await LocalizationService.SetLanguageAsync(newLanguage);
+
+        // Mettre à jour le réglage global pour les utilisateurs non authentifiés
+        var settings = await AppDb.AppSettings.FirstOrDefaultAsync();
+        if (settings == null)
+        {
+            settings = new CharacterManager.Server.Models.AppSettings
+            {
+                Language = newLanguage,
+                IsAdultModeEnabled = isAdultModeEnabled
+            };
+            AppDb.AppSettings.Add(settings);
+        }
+        else
+        {
+            settings.Language = newLanguage;
+        }
+        await AppDb.SaveChangesAsync();
 
         StateHasChanged();
 

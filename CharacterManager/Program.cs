@@ -379,6 +379,13 @@ app.MapPost("/api/login", async (HttpContext context, ProfileService profileServ
     context.Response.Redirect("/");
 });
 
+// Logout endpoint to avoid SignalR response conflicts
+app.MapGet("/api/logout", async (HttpContext context) =>
+{
+    await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    context.Response.Redirect("/login");
+});
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

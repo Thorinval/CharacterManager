@@ -9,11 +9,11 @@
 
 <link rel="stylesheet" href="/Styles/Settings.css" />
 
-<PageTitle>Paramètres - Character Manager</PageTitle>
+<PageTitle><LocalizedText Key="settings.title" /> - Character Manager</PageTitle>
 
 <div class="page-header-banner">
     <img src="/images/interface/parametres.png" alt="" class="page-header-icon" />
-    <h1 class="page-title">Paramètres</h1>
+    <h1 class="page-title"><LocalizedText Key="settings.title" /></h1>
 </div>
 
 <AuthorizeView>
@@ -22,14 +22,14 @@
     <!-- Section Langue -->
     <div class="settings-section">
         <div class="section-header">
-            <h2>Localisation</h2>
+            <h2><LocalizedText Key="settings.title" /></h2>
         </div>
 
         <div class="setting-item">
             <div class="setting-label">
-                <h3>Langue</h3>
+                <h3><LocalizedText Key="settings.language" /></h3>
                 <p class="setting-description">
-                    Choisissez la langue de l'interface
+                    <LocalizedText Key="settings.languageDescription" />
                 </p>
             </div>
             <div class="setting-control">
@@ -46,15 +46,14 @@
     <!-- Section Mode Adulte -->
     <div class="settings-section">
         <div class="section-header">
-            <h2>Mode Contenu</h2>
+            <h2><LocalizedText Key="settings.contentMode" /></h2>
         </div>
 
         <div class="setting-item">
             <div class="setting-label">
-                <h3>Mode Adulte</h3>
+                <h3><LocalizedText Key="settings.adultMode" /></h3>
                 <p class="setting-description">
-                    Lorsque le mode adulte est activé, toutes les images marquées comme contenu réservé aux adultes 
-                    seront affichées. Désactivez cette option pour afficher uniquement les images alternatives.
+                    <LocalizedText Key="settings.adultModeDescription" />
                 </p>
             </div>
             <div class="setting-control">
@@ -67,7 +66,7 @@
                         @bind:set="async (value) => { isAdultModeEnabled = value; await OnAdultModeChanged(); }"
                         disabled="@(!IsAdmin)" />
                     <label class="form-check-label" for="adultModeToggle">
-                        @(isAdultModeEnabled ? "Activé" : "Désactivé")
+                        @(isAdultModeEnabled ? LocalizationService.T("settings.enabled") : LocalizationService.T("settings.disabled"))
                     </label>
                 </div>
             </div>
@@ -77,20 +76,20 @@
     <!-- Section À propos -->
     <div class="settings-section">
         <div class="section-header">
-            <h2>À propos</h2>
+            <h2><LocalizedText Key="settings.subtitle" /></h2>
         </div>
         <div class="about-info">
             <p><strong>Character Manager</strong></p>
             <p>Version: @appVersion</p>
-            <p class="text-muted">Une application pour gérer votre équipe de personnages.</p>
+            <p class="text-muted"><LocalizedText Key="settings.version" /></p>
         </div>
     </div>
 </div>
     </Authorized>
     <NotAuthorized>
         <div class="container mt-4">
-            <p>Veuillez vous connecter pour modifier les paramètres.</p>
-            <a class="btn btn-primary" href="/login">Se connecter</a>
+            <p><LocalizedText Key="settings.signInPrompt" /></p>
+            <a class="btn btn-primary" href="/login"><LocalizedText Key="settings.signIn" /></a>
         </div>
     </NotAuthorized>
 </AuthorizeView>

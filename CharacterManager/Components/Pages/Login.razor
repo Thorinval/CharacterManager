@@ -1,17 +1,21 @@
 @page "/login"
 @using Microsoft.AspNetCore.Components.Web
+@using CharacterManager.Server.Services
 @inject NavigationManager Nav
+@inject ClientLocalizationService LocalizationService
+
+<PageTitle><LocalizedText Key="login.title" /></PageTitle>
 
 <div class="container mt-5" style="max-width: 420px;">
-    <h2>Connexion</h2>
+    <h2><LocalizedText Key="login.heading" /></h2>
     <div class="card p-3 mt-3">
         <form method="post" action="/api/login">
             <div class="mb-3">
-                <label class="form-label">Nom d'utilisateur</label>
+                <label class="form-label"><LocalizedText Key="login.username" /></label>
                 <input class="form-control" name="username" autocomplete="username" required />
             </div>
             <div class="mb-3">
-                <label class="form-label">Mot de passe</label>
+                <label class="form-label"><LocalizedText Key="login.password" /></label>
                 <input class="form-control" type="password" name="password" autocomplete="current-password" required />
             </div>
             @if (!string.IsNullOrEmpty(errorMessage))
@@ -20,7 +24,7 @@
                     @errorMessage
                 </div>
             }
-            <button class="btn btn-primary" type="submit">Se connecter</button>
+            <button class="btn btn-primary" type="submit"><LocalizedText Key="login.submit" /></button>
         </form>
     </div>
 </div>
@@ -39,10 +43,10 @@
         {
             errorMessage = error switch
             {
-                "required" => "Nom d'utilisateur et mot de passe requis",
-                "invalid" => "Nom d'utilisateur ou mot de passe invalide",
-                "locked" => $"Compte verrouillé. Réessayez dans {query["minutes"]} minutes",
-                _ => "Erreur de connexion"
+                "required" => LocalizationService.T("login.error.required"),
+                "invalid" => LocalizationService.T("login.error.invalid"),
+                "locked" => string.Format(LocalizationService.T("login.error.locked"), query["minutes"]),
+                _ => LocalizationService.T("login.error.default")
             };
         }
     }
