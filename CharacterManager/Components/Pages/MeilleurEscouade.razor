@@ -35,7 +35,7 @@
                         var currentId = perso.Id;
                         var returnPath = "/meilleur-escouade";
                         <div class="escouade-member-preview clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForMercenaires(), returnPath))">
-                            <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image" onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
+                            <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
                             <div class="escouade-member-name">@perso.Nom</div>
                             <div class="escouade-member-power">@perso.Puissance</div>
                         </div>
@@ -47,7 +47,7 @@
         <div class="header-right">
             @if (topCommandant != null)
             {
-                <img src="@topCommandant.ImageUrlPreview" alt="@topCommandant.Nom" class="commandant-hero" onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
+                <img src="@topCommandant.ImageUrlPreview" alt="@topCommandant.Nom" class="commandant-hero" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
             }
         </div>
     </div>
@@ -66,7 +66,7 @@
             var returnPath = "/meilleur-escouade";
         }
         <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForCommandants(), returnPath))">
-            <img src="@topCommandant.ImageUrlPreview" alt="@topCommandant.Nom" class="personnage-card-image" onerror="this.onerror=null; this.src='/images/personnages/default_portrait.png';" />
+            <img src="@topCommandant.ImageUrlPreview" alt="@topCommandant.Nom" class="personnage-card-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
             <div class="personnage-card-info">
                 <div class="personnage-name">@topCommandant.Nom</div>
                 <div class="personnage-attribute"><span class="attribute-label">Rareté:</span> @topCommandant.Rarete</div>

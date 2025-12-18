@@ -247,7 +247,7 @@ public class CsvImportService(PersonnageService personnageService, ApplicationDb
     private static string EnsureImageOrDefault(string relativePath)
     {
         var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
-        return File.Exists(fullPath) ? relativePath : "/images/personnages/default_portrait.png";
+        return File.Exists(fullPath) ? relativePath : "/images/interface/default_portrait.png";
     }
 
     private static Dictionary<string, int> MapColumns(List<string> headers)

@@ -109,7 +109,7 @@ public class PersonnageImageConfigService
         
         if (image != null && image.IsAdult && !isAdultModeEnabled)
         {
-            return "/images/personnages/default_portrait.png";
+            return "/images/interface/default_portrait.png";
         }
         
         return cheminImage;
