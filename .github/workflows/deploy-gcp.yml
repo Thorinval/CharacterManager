@@ -22,6 +22,30 @@ env:
 
 jobs:
   # ════════════════════════════════════════════════════════════════════════════════
+  # Verify Required Secrets
+  # ════════════════════════════════════════════════════════════════════════════════
+  secrets:
+    name: Verify Required Secrets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check required secrets
+        id: check
+        env:
+          GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          missing=()
+          [ -z "$GCP_CREDENTIALS" ] && missing+=("GCP_CREDENTIALS")
+          [ -z "$GCP_PROJECT_ID" ] && missing+=("GCP_PROJECT_ID")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "Missing required secrets: ${missing[*]}"
+            echo "Please add repository secrets in Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          echo "All required secrets are present."
+
+  # ════════════════════════════════════════════════════════════════════════════════
   # Build & Test
   # ════════════════════════════════════════════════════════════════════════════════
   build:
@@ -67,7 +91,7 @@ jobs:
   docker:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
-    needs: build
+    needs: [secrets, build]
     
     if: github.event_name == 'push'
     
@@ -119,9 +143,7 @@ jobs:
       github.event_name == 'push' && 
       github.ref == 'refs/heads/develop'
     
-    environment:
-      name: staging
-      url: https://character-manager-staging-${{ github.run_id }}.run.app
+    environment: staging
 
     permissions:
       contents: read
@@ -170,9 +192,7 @@ jobs:
       github.event_name == 'push' && 
       github.ref == 'refs/heads/main'
     
-    environment:
-      name: production
-      url: https://character-manager.run.app
+    environment: production
 
     permissions:
       contents: read
@@ -261,13 +281,14 @@ jobs:
     needs: [build, docker]
     
     if: always()
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
     steps:
       - name: Slack notification
         uses: slackapi/slack-github-action@v1.24.0
-        if: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: ${{ env.SLACK_WEBHOOK_URL != '' }}
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
           payload: |
             {
               "text": "Character Manager Deployment",

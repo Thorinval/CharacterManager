@@ -1,0 +1,7 @@
+{
+  "event_name": "push",
+  "ref": "refs/heads/main",
+  "repository": {
+    "full_name": "Thorinval/CharacterManager"
+  }
+}
