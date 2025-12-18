@@ -61,7 +61,7 @@ function Test-Prerequisites {
     Write-Log "✅ Tous les prérequis sont installés" "Success"
 }
 
-function Setup-GCPProject {
+function Initialize-GCPProject {
     Write-Log "📋 Configuration du projet GCP..." "Info"
     
     # Vérifier si le projet existe
@@ -97,7 +97,7 @@ function Setup-GCPProject {
     Write-Log "✅ APIs activées" "Success"
 }
 
-function Setup-ArtifactRegistry {
+function Initialize-ArtifactRegistry {
     Write-Log "📦 Configuration de l'Artifact Registry..." "Info"
     
     # Vérifier si le repository existe
@@ -122,7 +122,7 @@ function Setup-ArtifactRegistry {
     Write-Log "✅ Artifact Registry prêt" "Success"
 }
 
-function Build-DotNetApp {
+function Invoke-DotNetBuild {
     Write-Log "🏗️  Build de l'application .NET..." "Info"
     
     $appPath = Join-Path (Split-Path $PSScriptRoot -Parent) "CharacterManager" "CharacterManager.csproj"
@@ -145,11 +145,10 @@ function Build-DotNetApp {
     Write-Log "✅ Application compilée" "Success"
 }
 
-function Build-DockerImage {
+function New-DockerImage {
     Write-Log "🐳 Construction de l'image Docker..." "Info"
     
-    $imageUri = "$Region-docker.pkg.dev/$ProjectId/$ServiceName/$ImageName"
-    $imageTag = "$imageUri:latest"
+    $imageTag = "$Region-docker.pkg.dev/$ProjectId/$ServiceName/$ImageName:latest"
     
     # Vérifier si Docker est disponible
     $dockerAvailable = Get-Command docker -ErrorAction SilentlyContinue
@@ -188,7 +187,7 @@ function Build-DockerImage {
     return $imageTag
 }
 
-function Push-DockerImage {
+function Publish-DockerImage {
     param([string]$ImageTag)
     
     # Si Cloud Build a été utilisé, l'image est déjà pushée
@@ -210,7 +209,7 @@ function Push-DockerImage {
     Write-Log "✅ Image envoyée" "Success"
 }
 
-function Deploy-CloudRun {
+function Publish-CloudRun {
     param([string]$ImageTag)
     
     Write-Log "🚀 Déploiement sur Cloud Run..." "Info"
@@ -240,7 +239,7 @@ function Deploy-CloudRun {
     Write-Log "🌐 URL de l'application: $serviceUrl" "Success"
 }
 
-function Show-Completion {
+function Write-DeploymentSummary {
     Write-Log "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Info"
     Write-Log "✅ DÉPLOIEMENT COMPLÉTÉ AVEC SUCCÈS" "Success"
     Write-Log "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Info"
@@ -269,29 +268,29 @@ try {
     Write-Log "" "Info"
     
     # Phase 2: Configuration GCP
-    Setup-GCPProject
+    Initialize-GCPProject
     Write-Log "" "Info"
     
     # Phase 3: Setup Artifact Registry
-    Setup-ArtifactRegistry
+    Initialize-ArtifactRegistry
     Write-Log "" "Info"
     
     # Phase 4: Build
-    Build-DotNetApp
+    Invoke-DotNetBuild
     Write-Log "" "Info"
     
     # Phase 5: Docker
-    $imageTag = Build-DockerImage
-    Push-DockerImage $imageTag
+    $imageTag = New-DockerImage
+    Publish-DockerImage $imageTag
     Write-Log "" "Info"
     
     # Phase 6: Déploiement
     if ($DeploymentType -eq "CloudRun") {
-        Deploy-CloudRun $imageTag
+        Publish-CloudRun $imageTag
     }
     
     Write-Log "" "Info"
-    Show-Completion
+    Write-DeploymentSummary
 }
 catch {
     Write-Log "❌ Erreur: $_" "Error"

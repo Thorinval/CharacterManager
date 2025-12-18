@@ -91,12 +91,13 @@ ENV ConnectionStrings__DefaultConnection="Data Source=/app/data/CharacterManager
 
 ### 🚀 Prérequis
 
-1. **Compte Google Cloud** : https://console.cloud.google.com/
-2. **Google Cloud SDK** : https://cloud.google.com/sdk/docs/install
+1. **Compte Google Cloud** : <https://console.cloud.google.com/>
+2. **Google Cloud SDK** : <https://cloud.google.com/sdk/docs/install>
 3. **dotnet CLI 9.0+**
 4. **Docker Desktop** (optionnel, seulement pour build local)
 
 Vérification :
+
 ```bash
 gcloud --version          # Google Cloud SDK
 dotnet --version          # .NET 9.0+
@@ -114,12 +115,14 @@ docker --version          # Docker Desktop
 **Meilleur pour** : Applications petites à moyennes, auto-scaling, coûts faibles
 
 **Avantages** :
+
 - ✅ Sans serveur (serverless)
 - ✅ Auto-scaling automatique
 - ✅ Gratuit jusqu'à 2M requêtes/mois
 - ✅ Certificat SSL inclus
 
 **Inconvénients** :
+
 - ❌ Stateless (redémarrage après 15 min d'inactivité)
 - ❌ SQLite pas persistant → besoin de Cloud SQL
 
@@ -300,7 +303,8 @@ gcloud app deploy
 ### 🌐 Via URL Cloud Run
 
 L'URL est **automatiquement accessible** de partout :
-```
+
+```text
 https://character-manager-xxxxx-ew.a.run.app
 ```
 
@@ -318,11 +322,13 @@ gcloud run domain-mappings create \
 #### Configurer DNS chez votre Registrar
 
 Ajouter un enregistrement CNAME :
-```
+
+```text
 monapp.com    CNAME    goog-managed-ssl.run.app
 ```
 
 Vérification après 5-10 minutes :
+
 ```bash
 # Le certificat SSL est généré automatiquement
 # Accédez à https://monapp.com
@@ -510,6 +516,7 @@ gridLayout:
 ```
 
 Appliquer le dashboard :
+
 ```bash
 gcloud monitoring dashboards create --config-from-file=dashboard.yaml
 ```
@@ -583,6 +590,7 @@ gcloud run deploy character-manager \
 ## Système de Mise à Jour
 
 L'application intègre un système de vérification automatique des mises à jour
+
 - Notification visuelle si une nouvelle version est disponible
 - Lien direct vers la page de téléchargement
 - Affichage des notes de version

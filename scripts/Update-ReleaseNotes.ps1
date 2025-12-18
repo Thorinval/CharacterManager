@@ -125,11 +125,7 @@ try {
 
 "@
 
-    # Insérer après le premier ---
-    $pattern = '---\s*(\r?\n)'
-    $replacement = "---`n`n$newEntry"
-    
-    # Remplacer en trouvant la position du premier ---
+    # Insérer la nouvelle entrée juste après le premier séparateur ---
     $splitPoint = $content.IndexOf("---")
     if ($splitPoint -eq -1) {
         Write-Host "❌ Erreur: Impossible de trouver le séparateur --- dans RELEASE_NOTES.md" -ForegroundColor Red

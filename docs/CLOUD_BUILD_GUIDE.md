@@ -7,6 +7,7 @@
 ## ✨ Pourquoi Cloud Build ?
 
 **Avantages** :
+
 - ✅ Pas besoin d'installer Docker Desktop localement
 - ✅ Build plus rapide (infrastructure Google)
 - ✅ Gratuit jusqu'à 120 minutes/jour
@@ -14,6 +15,7 @@
 - ✅ Cache intelligent
 
 **Inconvénients** :
+
 - ❌ Nécessite connexion internet
 - ❌ Premier build plus lent (téléchargement du code)
 
@@ -70,6 +72,7 @@ options:
 ```
 
 Puis lancer :
+
 ```bash
 gcloud builds submit --config cloudbuild.yaml
 ```
@@ -94,6 +97,7 @@ gcloud builds submit --config cloudbuild.yaml
 - Au-delà : $0.003/minute build (~$0.18/heure)
 
 **Exemple** :
+
 - Build CharacterManager : ~3-5 minutes
 - 10 builds/jour : 30-50 minutes → **Gratuit** ✅
 

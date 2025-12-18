@@ -41,7 +41,7 @@ gcloud iam service-accounts keys create key.json \
 
 ### 3. Ajouter d'autres Secrets (Optionnel)
 
-```
+```text
 GCP_PROJECT_ID          = character-manager-prod
 SLACK_WEBHOOK_URL       = https://hooks.slack.com/services/... (optionnel)
 REGION                  = europe-west1
@@ -66,6 +66,7 @@ rm key.json
 ### Jobs
 
 #### 1. **build**
+
 - Checkout code
 - Setup .NET 9.0
 - Restore & Build
@@ -73,26 +74,31 @@ rm key.json
 - Publish
 
 #### 2. **docker**
+
 - Build image Docker
 - Push vers Artifact Registry
 - Tags : `latest`, `sha`, `branch`
 
 #### 3. **deploy-staging**
+
 - Triggered par : `git push origin develop`
 - Environment : staging
 - URL : `character-manager-staging-xxx.run.app`
 
 #### 4. **deploy-production**
+
 - Triggered par : `git push origin main`
 - Environment : production
 - URL : `character-manager.run.app`
 - Min instances : 1 (warm start)
 
 #### 5. **release** (Optionnel)
+
 - Triggered par : tags `v*`
 - Update Release Notes
 
 #### 6. **notify**
+
 - Slack webhook (si configuré)
 
 ---
@@ -168,7 +174,7 @@ gcloud logging read "resource.type=cloud_run_revision" --limit 50
 
 ## 🔄 Workflow Complet
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │  Développeur fait un changement         │
 └─────────────┬───────────────────────────┘
@@ -247,10 +253,12 @@ gcloud projects get-iam-policy CHARACTER-MANAGER-PROD \
 ## 📊 Coûts
 
 ### GitHub Actions Gratuit
+
 - ✅ 2000 minutes/mois pour les dépôts publics
 - ✅ 3000 minutes/mois pour les dépôts privés (avec compte Pro)
 
 ### Google Cloud (Build & Push)
+
 - Artifact Registry : ~$0.10/Go
 - Cloud Run invocations : $0.40 / M requêtes
 
@@ -259,18 +267,21 @@ gcloud projects get-iam-policy CHARACTER-MANAGER-PROD \
 ## 🔐 Best Practices
 
 ### Secrets Management
+
 - ✅ Ne pas commiter les secrets
 - ✅ Rotate les clés tous les 90 jours
 - ✅ Utiliser des rôles limités (least privilege)
 - ✅ Audit les accès via Cloud Logging
 
 ### Déploiement
+
 - ✅ Toujours tester sur staging d'abord
 - ✅ Utiliser des tags sémantiques (v1.0.0)
 - ✅ Écrire des tests avant déployer
 - ✅ Monitorer après déploiement
 
 ### Sécurité
+
 - ✅ Limiter les permissions du service account
 - ✅ Activer Cloud Armor pour DDoS
 - ✅ Utiliser des certificats SSL (automatique)

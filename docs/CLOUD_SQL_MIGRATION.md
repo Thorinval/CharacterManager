@@ -7,12 +7,14 @@
 ## 📋 Vue d'ensemble
 
 ### Avant (SQLite Local)
+
 - ✅ Simple à développer
 - ❌ Pas persistant sur Cloud Run
 - ❌ Pas de sauvegarde
 - ❌ Scalabilité limitée
 
 ### Après (Cloud SQL)
+
 - ✅ Persistant
 - ✅ Backups automatiques
 - ✅ Réplication haute dispo

@@ -5,7 +5,8 @@ Infrastructure as Code (IaC) pour déployer Character Manager sur Google Cloud a
 ## 📋 Prérequis
 
 1. **Terraform 1.0+**
-   ```bash
+
+  ```bash
    # Installer Terraform
    # Windows: https://www.terraform.io/downloads.html
    
@@ -13,14 +14,15 @@ Infrastructure as Code (IaC) pour déployer Character Manager sur Google Cloud a
    terraform --version
    ```
 
-2. **Google Cloud SDK**
-   ```bash
+1. **Google Cloud SDK**
+
+  ```bash
    gcloud --version
    gcloud auth login
    gcloud config set project character-manager-prod
    ```
 
-3. **Permissions Google Cloud**
+1. **Permissions Google Cloud**
    - Editor role sur le projet GCP
    - Ou permissions manuelles sur : Cloud Run, Compute Engine, Cloud SQL, Artifact Registry
 
@@ -84,7 +86,7 @@ Confirmez avec `yes`.
 
 ## 📝 Structure des Fichiers
 
-```
+```text
 terraform/
 ├── main.tf                  # Configuration principale (providers, ressources)
 ├── terraform.tfvars.example # Exemple de variables
@@ -100,41 +102,50 @@ terraform/
 ### Variables Principales
 
 #### GCP Configuration
+
 - `gcp_project_id` : ID du projet GCP
 - `gcp_region` : Région (ex: europe-west1, us-central1)
 - `gcp_zone` : Zone (ex: europe-west1-b)
 
 #### Application
+
 - `app_name` : Nom de l'application (défaut: character-manager)
 - `app_version` : Version de l'app (défaut: 0.2.0)
 
 #### Type de Déploiement
+
 - `deployment_type` : "cloud_run" (serverless) ou "compute_engine" (VMs)
 
 #### Cloud Run
+
 - `cloud_run_memory` : RAM (128Mi, 256Mi, 512Mi, 1Gi, 2Gi, 4Gi, 6Gi, 8Gi)
 - `cloud_run_cpu` : CPU (1, 2, 4, 6, 8)
 
 #### Compute Engine
+
 - `gce_machine_type` : Type de VM (e2-small, e2-medium, e2-large, n1-standard-1)
 
 ### Ressources Créées
 
 **Toujours créées** :
+
 - ✅ Artifact Registry (Docker images)
 - ✅ APIs activées (Cloud Run, Compute Engine, SQL Admin, etc.)
 
 **Si deployment_type = "cloud_run"** :
+
 - ✅ Cloud Run Service
 - ✅ Service Account
 - ✅ IAM Policy (accès public)
 
 **Si deployment_type = "compute_engine"** :
+
 - ✅ Compute Engine Instance
 - ✅ Persistent Disks (data + images)
 - ✅ Firewall Rules
 
 **Optionnel** :
+
 - ⚠️ Cloud SQL (décommentez dans main.tf)
 - ⚠️ Cloud Storage Bucket (décommentez dans main.tf)
 - ⚠️ Monitoring Alerts (décommentez dans main.tf)
@@ -164,21 +175,24 @@ terraform output artifact_registry_url
 Pour partager la configuration avec une équipe, utiliser Google Cloud Storage :
 
 1. **Créer un bucket**
-   ```bash
+
+  ```bash
    gsutil mb gs://character-manager-terraform-state
    gsutil versioning set on gs://character-manager-terraform-state
    ```
 
-2. **Décommenter dans main.tf**
-   ```hcl
+1. **Décommenter dans main.tf**
+
+  ```hcl
    backend "gcs" {
      bucket = "character-manager-terraform-state"
      prefix = "terraform/state"
    }
    ```
 
-3. **Re-initialiser**
-   ```bash
+1. **Re-initialiser**
+
+  ```bash
    terraform init  # Confirmez la migration
    ```
 
@@ -195,6 +209,7 @@ terraform.tfvars
 ```
 
 Utiliser des variables d'environnement pour les secrets :
+
 ```bash
 export TF_VAR_gcp_project_id="your-project"
 ```
@@ -272,6 +287,7 @@ terraform destroy -target=google_cloud_run_service.character_manager
 ## 🐛 Troubleshooting
 
 ### Erreur : "Permission denied"
+
 ```bash
 gcloud auth login
 gcloud config set project character-manager-prod
@@ -279,6 +295,7 @@ terraform init -upgrade
 ```
 
 ### Erreur : "Resource already exists"
+
 ```bash
 # Importer la ressource existante
 terraform import google_cloud_run_service.character_manager projects/PROJECT_ID/locations/europe-west1/services/character-manager
@@ -288,6 +305,7 @@ terraform destroy -target=google_cloud_run_service.character_manager
 ```
 
 ### Stateful File Conflicts
+
 ```bash
 # Réinitialiser le state
 terraform state rm google_cloud_run_service.character_manager

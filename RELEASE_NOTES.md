@@ -10,6 +10,7 @@
 ### ✨ Nouvelles Fonctionnalités
 
 #### Localization Multilingue
+
 - **Localization complète** de l'interface utilisateur en français et anglais
 - Support pour tous les écrans majeurs (Login, Inventaire, Escouade, Templates, Historique, Importation CSV, etc.)
 - **Service de localization centralisé** (ClientLocalizationService) pour maintenance facile
@@ -17,6 +18,7 @@
 - Menu de navigation traduit avec **détection automatique de la langue** de l'utilisateur
 
 #### Gestion des Personnages Améliorée
+
 - **Ajout du champ Puissance** dans les formulaires d'ajout/modification
 - **Téléchargement d'images doubles**:
   - Image portrait pour l'inventaire : `{nom}_small_portrait.png`
@@ -25,6 +27,7 @@
 - Stockage automatique dans `wwwroot/images/personnages/` avec nommage conventionnel
 
 #### Interface Inventaire Optimisée
+
 - **Nouvelle mise en page CSS Grid** responsive pour afficher les cartes:
   - Base: 250px de largeur
   - Écrans larges (1600px+): 290px
@@ -39,6 +42,7 @@
   - Padding et espacement optimisés pour meilleure lisibilité
 
 #### Versionning Centralisé
+
 - **Version unique** stockée dans `appsettings.json` (`AppInfo:Version`)
 - Synchronisation automatique avec `.csproj` (Version, InformationalVersion)
 - Service `AppVersionService` fournit la version depuis la configuration
@@ -47,18 +51,21 @@
 ### 🔧 Améliorations Techniques
 
 #### Architecture de Localization
+
 - `LocalizationProvider.razor` : Composant passerelle qui gate le rendu jusqu'à l'initialisation
 - `ClientLocalizationService` : Lecture efficace des fichiers JSON i18n depuis le disque
 - `LocalizedText.razor` : Composant réutilisable pour traductions dans les templates
 - Mécanisme lazy-load pour gérer les appels pré-initialisation
 
 #### Optimisation CSS
+
 - Utilisation de `repeat(auto-fit)` pour grilles responsive
 - `justify-content: start` pour alignement gauche stable
 - Propriétés d'aspect-ratio pour images responsive
 - Breakpoints media queries granulaires pour tous les appareils
 
 #### Gestion d'Uploads
+
 - Support de fichiers PNG/JPEG jusqu'à 10 MB
 - Validation de noms de fichiers (minuscules, underscores)
 - Création automatique du dossier de destination
@@ -84,7 +91,7 @@
 
 ### 📁 Structure de Fichiers Mise à Jour
 
-```
+```text
 wwwroot/
 ├── images/
 │   └── personnages/          # Dossier pour les images uploadées
@@ -179,7 +186,7 @@ Exécutez le script PowerShell fourni pour ajouter automatiquement une nouvelle 
 **Auteur**: [AUTEUR]
 ```
 
-3. Complétez le template avec les changements de cette version
+1. Complétez le template avec les changements de cette version
 
 ### Synchronisation avec appsettings.json
 

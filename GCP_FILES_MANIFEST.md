@@ -6,7 +6,7 @@
 
 ## 📂 Structure Créée
 
-```
+```text
 CharacterManager/
 ├── 📄 DEPLOYMENT.md                    # Guide complet de déploiement
 ├── 📄 GCP_QUICKSTART.md               # Démarrage rapide (5-10 min)
@@ -35,7 +35,9 @@ CharacterManager/
 ## 📄 Documentation
 
 ### 1. **DEPLOYMENT.md** (Principal Guide)
+
 **Contenu** : 350+ lignes
+
 - ✅ Options de déploiement : Local, Docker, Cloud Run, Compute Engine
 - ✅ Configuration détaillée étape par étape
 - ✅ Base de données : Cloud SQL, SQLite
@@ -46,7 +48,9 @@ CharacterManager/
 **À utiliser pour** : Référence complète
 
 ### 2. **GCP_QUICKSTART.md** (Démarrage Rapide)
+
 **Contenu** : 150+ lignes
+
 - ✅ Prérequis simplifiés
 - ✅ Déploiement en 1 commande
 - ✅ 3 options : automatisé, Terraform, manuel
@@ -56,7 +60,9 @@ CharacterManager/
 **À utiliser pour** : Premiers déploiements
 
 ### 3. **GCP_DEPLOYMENT_SUMMARY.md** (Résumé)
+
 **Contenu** : 200+ lignes
+
 - ✅ Vue d'ensemble de tous les fichiers
 - ✅ Architecture complète
 - ✅ Checklist déploiement
@@ -66,7 +72,9 @@ CharacterManager/
 **À utiliser pour** : Vue d'ensemble générale
 
 ### 4. **terraform/README.md** (Guide Terraform)
+
 **Contenu** : 250+ lignes
+
 - ✅ Installation Terraform
 - ✅ Configuration variables
 - ✅ Commands principales
@@ -76,7 +84,9 @@ CharacterManager/
 **À utiliser pour** : Infrastructure as Code
 
 ### 5. **docs/CLOUD_SQL_MIGRATION.md** (Migration BD)
+
 **Contenu** : 200+ lignes
+
 - ✅ Migrer de SQLite à PostgreSQL
 - ✅ Setup Cloud SQL
 - ✅ Export/Import données
@@ -90,7 +100,9 @@ CharacterManager/
 ## 🔧 Scripts
 
 ### 1. **scripts/Deploy-GoogleCloud.ps1**
+
 **PowerShell** | 300+ lignes
+
 ```powershell
 .\scripts\Deploy-GoogleCloud.ps1 `
   -ProjectId "character-manager-prod" `
@@ -99,6 +111,7 @@ CharacterManager/
 ```
 
 **Effectue** :
+
 - ✅ Vérification des prérequis
 - ✅ Setup projet GCP
 - ✅ Configuration Artifact Registry
@@ -109,12 +122,15 @@ CharacterManager/
 **À utiliser** : Déploiement complet automatisé
 
 ### 2. **scripts/check-prerequisites.ps1**
+
 **PowerShell** | 300+ lignes
+
 ```powershell
 .\scripts\check-prerequisites.ps1
 ```
 
 **Vérifie** :
+
 - ✅ gcloud CLI
 - ✅ Docker
 - ✅ .NET 9.0+
@@ -127,7 +143,9 @@ CharacterManager/
 **À utiliser** : Avant déploiement
 
 ### 3. **scripts/check-prerequisites.sh**
+
 **Bash** | 250+ lignes
+
 ```bash
 chmod +x scripts/check-prerequisites.sh
 ./scripts/check-prerequisites.sh
@@ -140,6 +158,7 @@ chmod +x scripts/check-prerequisites.sh
 ## 🏗️ Infrastructure as Code (Terraform)
 
 ### **terraform/main.tf**
+
 **Terraform** | 400+ lignes
 
 **Ressources créées** :
@@ -155,6 +174,7 @@ chmod +x scripts/check-prerequisites.sh
 | Firewall Rules | Sécurité réseau |
 
 **Utilisation** :
+
 ```bash
 cd terraform
 terraform init
@@ -163,6 +183,7 @@ terraform apply
 ```
 
 ### **terraform/terraform.tfvars.example**
+
 Configuration prédéfinie pour adapter
 
 ---
@@ -170,7 +191,9 @@ Configuration prédéfinie pour adapter
 ## 🐳 Docker & Infrastructure
 
 ### **docker-compose.gcp.yml**
+
 Configuration spécifique Google Cloud :
+
 - ✅ Volumes persistants (disques GCP)
 - ✅ Health checks
 - ✅ Resource limits
@@ -178,7 +201,9 @@ Configuration spécifique Google Cloud :
 - ✅ Labels GCP
 
 ### **nginx.conf**
+
 Configuration Nginx avancée :
+
 - ✅ SSL/TLS automatique
 - ✅ WebSocket support (Blazor SignalR)
 - ✅ Rate limiting
@@ -187,7 +212,9 @@ Configuration Nginx avancée :
 - ✅ Image caching
 
 ### **startup-script.sh**
+
 Script auto-exécution Compute Engine :
+
 - ✅ Installation Docker
 - ✅ Installation git
 - ✅ Clone du repo
@@ -199,7 +226,9 @@ Script auto-exécution Compute Engine :
 ## ⚙️ Configuration
 
 ### **.env.example**
+
 Variables d'environnement pour Google Cloud :
+
 - ✅ Configuration GCP (project, région)
 - ✅ Cloud Run settings (CPU, mémoire)
 - ✅ Compute Engine (machine type)
@@ -216,6 +245,7 @@ Variables d'environnement pour Google Cloud :
 ### ☁️ Cloud Run (Recommandé pour Démarrage)
 
 **Avantages** :
+
 - ✅ Serverless, aucune gestion serveur
 - ✅ Auto-scaling automatique
 - ✅ Gratuit jusqu'à 2M requêtes/mois
@@ -223,10 +253,12 @@ Variables d'environnement pour Google Cloud :
 - ✅ Déploiement 5 minutes
 
 **Inconvénients** :
+
 - ❌ Stateless (redémarrage après 15 min inactivité)
 - ❌ Fichiers locaux pas persistants
 
 **Fichiers utilisés** :
+
 - `scripts/Deploy-GoogleCloud.ps1`
 - `GCP_QUICKSTART.md`
 - `terraform/main.tf` (avec `deployment_type = "cloud_run"`)
@@ -234,15 +266,18 @@ Variables d'environnement pour Google Cloud :
 ### 🖥️ Compute Engine (Plus de Contrôle)
 
 **Avantages** :
+
 - ✅ Contrôle total de l'environnement
 - ✅ SQLite persistant via disques
 - ✅ Coût prévisible (~$13/mois)
 
 **Inconvénients** :
+
 - ❌ Gestion manuelle des updates
 - ❌ Scaling manuel
 
 **Fichiers utilisés** :
+
 - `startup-script.sh`
 - `docker-compose.gcp.yml`
 - `nginx.conf`
@@ -251,12 +286,14 @@ Variables d'environnement pour Google Cloud :
 ### 📦 Infrastructure as Code (Terraform)
 
 **Avantages** :
+
 - ✅ Reproductible
 - ✅ Versionnable
 - ✅ Team collaboration
 - ✅ Destroy/Recreate facile
 
 **Fichiers utilisés** :
+
 - `terraform/main.tf`
 - `terraform/terraform.tfvars.example`
 - `terraform/README.md`
@@ -266,6 +303,7 @@ Variables d'environnement pour Google Cloud :
 ## 🎯 Scénarios d'Utilisation
 
 ### Scénario 1 : Je veux déployer MAINTENANT
+
 1. Lancer : `./scripts/check-prerequisites.ps1`
 2. Lancer : `./scripts/Deploy-GoogleCloud.ps1`
 3. ✅ En ligne en 10 minutes
@@ -273,6 +311,7 @@ Variables d'environnement pour Google Cloud :
 **Documentation** : `GCP_QUICKSTART.md`
 
 ### Scénario 2 : Je veux l'Infrastructure as Code
+
 1. Copier : `terraform/terraform.tfvars.example` → `terraform/terraform.tfvars`
 2. Adapter : Variables GCP
 3. Lancer : `terraform init && terraform apply`
@@ -281,6 +320,7 @@ Variables d'environnement pour Google Cloud :
 **Documentation** : `terraform/README.md`
 
 ### Scénario 3 : Je veux comprendre tous les détails
+
 1. Lire : `DEPLOYMENT.md` (complet)
 2. Lire : `GCP_DEPLOYMENT_SUMMARY.md` (vue d'ensemble)
 3. Choisir son approche
@@ -289,6 +329,7 @@ Variables d'environnement pour Google Cloud :
 **Documentation** : `DEPLOYMENT.md`
 
 ### Scénario 4 : Je dois migrer la base de données
+
 1. Lire : `docs/CLOUD_SQL_MIGRATION.md`
 2. Créer Cloud SQL instance
 3. Migrer données
@@ -302,6 +343,7 @@ Variables d'environnement pour Google Cloud :
 ## 📋 Checklist Déploiement Complet
 
 ### Avant
+
 - [ ] Compte Google Cloud créé
 - [ ] Projet GCP créé (`character-manager-prod`)
 - [ ] Gcloud CLI installé et configuré
@@ -310,23 +352,27 @@ Variables d'environnement pour Google Cloud :
 - [ ] Fichiers deployments copiés du repo
 
 ### Prérequis
+
 - [ ] `./scripts/check-prerequisites.ps1` - Tout ✅
 - [ ] gcloud auth login - Authentifié
 - [ ] gcloud config set project CHARACTER-MANAGER-PROD
 
 ### Déploiement
+
 - [ ] Choisir option (Cloud Run / Compute Engine / Terraform)
 - [ ] Lancer le déploiement (script/terraform/manuel)
 - [ ] Récupérer l'URL
 - [ ] Tester accès HTTPS
 
 ### Configuration
+
 - [ ] Configurer domaine personnalisé (optionnel)
 - [ ] Ajouter utilisateurs (IAM)
 - [ ] Configurer monitoring & alertes
 - [ ] Tester backups
 
 ### Production
+
 - [ ] Cloud SQL configuré (si needed)
 - [ ] Images stockées correctement
 - [ ] Logs centralisés
@@ -350,12 +396,14 @@ Variables d'environnement pour Google Cloud :
 ## 📞 Support
 
 ### Documentation
+
 - 📖 [Google Cloud Run](https://cloud.google.com/run/docs)
 - 📖 [Google Cloud Compute Engine](https://cloud.google.com/compute/docs)
 - 📖 [Google Cloud SQL](https://cloud.google.com/sql/docs)
 - 📖 [Terraform Google Provider](https://registry.terraform.io/providers/hashicorp/google/latest)
 
 ### Community
+
 - 💬 [Stack Overflow - google-cloud-run](https://stackoverflow.com/questions/tagged/google-cloud-run)
 - 💬 [GitHub Issues](https://github.com/Thorinval/CharacterManager/issues)
 
@@ -364,6 +412,7 @@ Variables d'environnement pour Google Cloud :
 ## ✨ Résumé
 
 **Vous avez maintenant** :
+
 - ✅ 5 guides documentation complète
 - ✅ 3 scripts déploiement automatisés
 - ✅ Infrastructure as Code (Terraform)
@@ -373,6 +422,7 @@ Variables d'environnement pour Google Cloud :
 - ✅ Checklists complètes
 
 **Prochaine étape** :
+
 1. `./scripts/check-prerequisites.ps1`
 2. `./scripts/Deploy-GoogleCloud.ps1`
 3. ✅ Character Manager en ligne !

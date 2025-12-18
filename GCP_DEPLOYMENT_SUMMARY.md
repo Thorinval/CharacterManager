@@ -7,6 +7,7 @@
 ## 📊 Fichiers Créés / Modifiés
 
 ### 📋 Documentation
+
 - ✅ **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Guide complet de déploiement (3 options)
   - Local (Windows/Linux)
   - Docker (local)
@@ -19,6 +20,7 @@
   - Logs & Monitoring
 
 ### 🔧 Scripts & Configuration
+
 - ✅ **[scripts/Deploy-GoogleCloud.ps1](./scripts/Deploy-GoogleCloud.ps1)** - Script PowerShell automatisé
   - Vérification des prérequis
   - Setup GCP Project
@@ -38,6 +40,7 @@
   - Auto-start application
 
 ### 🐳 Docker & Infrastructure
+
 - ✅ **[docker-compose.gcp.yml](./docker-compose.gcp.yml)** - Compose pour Compute Engine
   - Volumes persistants Google Cloud
   - Health checks
@@ -52,6 +55,7 @@
   - Image caching
 
 ### 🏗️ Terraform (Infrastructure as Code)
+
 - ✅ **[terraform/main.tf](./terraform/main.tf)** - Configuration complète
   - Cloud Run + Compute Engine
   - Artifact Registry
@@ -117,14 +121,16 @@ Voir [DEPLOYMENT.md](./DEPLOYMENT.md) pour les commandes détaillées.
 ## 🌐 Accès à Distance
 
 ### URL Cloud Run (Automatique)
-```
+
+```text
 https://character-manager-xxxxx-ew.a.run.app
-```
+```text
 ✅ Accessible de partout
 ✅ HTTPS automatique
 ✅ Auto-scaling
 
 ### Domaine Personnalisé (Optionnel)
+
 ```bash
 # Ajouter le domaine
 gcloud run domain-mappings create \
@@ -137,6 +143,7 @@ gcloud run domain-mappings create \
 ```
 
 ### Sécurisé avec IAM (Optionnel)
+
 ```bash
 # Limit access to specific users
 gcloud run services add-iam-policy-binding character-manager \
@@ -148,7 +155,7 @@ gcloud run services add-iam-policy-binding character-manager \
 
 ## 📊 Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────┐
 │        Internet / Utilisateurs              │
 └────────────────────┬────────────────────────┘
@@ -201,6 +208,7 @@ gcloud run services add-iam-policy-binding character-manager \
 ## 📈 Monitoring
 
 ### Logs
+
 ```bash
 # Voir les logs
 gcloud logging read --limit 50
@@ -213,12 +221,14 @@ gcloud alpha monitoring policies create --display-name="Error Alert"
 ```
 
 ### Dashboard
+
 ```bash
 # Cloud Console (interface web)
 gcloud console
 ```
 
 Inclut :
+
 - 📊 Nombre de requêtes
 - ⚠️ Taux d'erreurs
 - ⏱️ Latency
@@ -246,21 +256,25 @@ Inclut :
 ## 🔒 Sécurité
 
 ### SSL/HTTPS
+
 - ✅ Automatique avec Cloud Run
 - ✅ Géré par Google (certificats Let's Encrypt)
 - ✅ Renouvelé automatiquement
 
 ### Authentification
+
 - ✅ Cookie-based auth (existant)
 - ✅ Optional: Google OAuth
 - ✅ Optional: SAML/SSO
 
 ### Firewall
+
 - ✅ Cloud Armor (DDoS protection)
 - ✅ Cloud NAT (IP sortante)
 - ✅ VPC Network (isolation réseau)
 
 ### Données
+
 - ✅ Backup automatique (Cloud SQL)
 - ✅ Versioning (Cloud Storage)
 - ✅ Encryption at rest
@@ -278,11 +292,13 @@ Inclut :
 ## 📞 Support & Ressources
 
 ### Documentation Google Cloud
+
 - 📖 [Cloud Run Guide](https://cloud.google.com/run/docs)
 - 📖 [Compute Engine Guide](https://cloud.google.com/compute/docs)
 - 📖 [Cloud SQL Guide](https://cloud.google.com/sql/docs)
 
 ### Community
+
 - 💬 [Stack Overflow - google-cloud-run](https://stackoverflow.com/questions/tagged/google-cloud-run)
 - 💬 [GitHub Issues](https://github.com/Thorinval/CharacterManager/issues)
 - 📧 Contact: Thorinval
@@ -292,6 +308,7 @@ Inclut :
 ## 🎯 Prochaines Étapes (Optionnel)
 
 ### Avant Production
+
 - [ ] Configurer domaine personnalisé
 - [ ] Activer Cloud Armor (protection DDoS)
 - [ ] Configurer Cloud CDN (cache global)
@@ -299,6 +316,7 @@ Inclut :
 - [ ] Planifier les backups
 
 ### Post-Déploiement
+
 - [ ] Configurer CI/CD (GitHub Actions)
 - [ ] Mettre en place Health Checks
 - [ ] Configurer auto-scaling
@@ -306,6 +324,7 @@ Inclut :
 - [ ] Former l'équipe ops
 
 ### Optimisation
+
 - [ ] Profiler l'app pour coûts
 - [ ] Réduire les cold starts (min-instances)
 - [ ] Optimiser la taille des images Docker

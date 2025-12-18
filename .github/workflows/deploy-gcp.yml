@@ -30,20 +30,21 @@ jobs:
     steps:
       - name: Check required secrets
         id: check
-        env:
-          GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          missing=()
-          [ -z "$GCP_CREDENTIALS" ] && missing+=("GCP_CREDENTIALS")
-          [ -z "$GCP_PROJECT_ID" ] && missing+=("GCP_PROJECT_ID")
-          if [ ${#missing[@]} -gt 0 ]; then
-            echo "Missing required secrets: ${missing[*]}"
-            echo "Please add repository secrets in Settings > Secrets and variables > Actions."
+          echo "Verifying required secrets are configured..."
+          if [ -z "${{ secrets.WIF_PROVIDER }}" ]; then
+            echo "Error: WIF_PROVIDER secret is not configured"
             exit 1
           fi
-          echo "All required secrets are present."
+          if [ -z "${{ secrets.WIF_SERVICE_ACCOUNT }}" ]; then
+            echo "Error: WIF_SERVICE_ACCOUNT secret is not configured"
+            exit 1
+          fi
+          if [ -z "${{ secrets.GCP_PROJECT_ID }}" ]; then
+            echo "Error: GCP_PROJECT_ID secret is not configured"
+            exit 1
+          fi
+          echo "All required secrets are configured."
 
   # ════════════════════════════════════════════════════════════════════════════════
   # Build & Test
@@ -111,7 +112,8 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
       - name: Setup Cloud SDK (configure Docker)
         run: |
@@ -154,7 +156,8 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
@@ -204,7 +207,8 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v1

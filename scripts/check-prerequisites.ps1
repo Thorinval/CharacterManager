@@ -31,7 +31,7 @@ function Write-Info {
     Write-Host "ℹ️  $Message" -ForegroundColor Cyan
 }
 
-function Check-Command {
+function Test-InstalledCommand {
     param(
         [string]$Command,
         [string]$DisplayName,
@@ -93,7 +93,7 @@ function Check-Command {
     }
 }
 
-function Check-Environment {
+function Test-EnvironmentPrerequisites {
     Write-Host ""
     Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
     Write-Host "🔍 Vérification des Prérequis - Déploiement Google Cloud" -ForegroundColor Cyan
@@ -106,21 +106,21 @@ function Check-Environment {
     Write-Host "📋 Outils Essentiels" -ForegroundColor Yellow
     Write-Host "─────────────────────────────────────────────────────────────" -ForegroundColor Gray
     
-    $results.gcloud = Check-Command "gcloud" "Google Cloud SDK" "450.0" "https://cloud.google.com/sdk/docs/install"
-    $results.dotnet = Check-Command "dotnet" ".NET CLI" "9.0" "https://dotnet.microsoft.com/en-us/download/dotnet/9.0"
+    $results.gcloud = Test-InstalledCommand "gcloud" "Google Cloud SDK" "450.0" "https://cloud.google.com/sdk/docs/install"
+    $results.dotnet = Test-InstalledCommand "dotnet" ".NET CLI" "9.0" "https://dotnet.microsoft.com/en-us/download/dotnet/9.0"
     
     Write-Host ""
     Write-Info "Note: Docker peut utiliser Google Cloud Build au lieu de Docker local"
-    $results.docker = Check-Command "docker" "Docker (optionnel pour build local)" "20.0" "https://www.docker.com/products/docker-desktop"
+    $results.docker = Test-InstalledCommand "docker" "Docker (optionnel pour build local)" "20.0" "https://www.docker.com/products/docker-desktop"
     
     # Vérification des outils optionnels
     Write-Host ""
     Write-Host "📦 Outils Optionnels" -ForegroundColor Yellow
     Write-Host "─────────────────────────────────────────────────────────────" -ForegroundColor Gray
     
-    $results.git = Check-Command "git" "Git" "2.0" "https://git-scm.com/download/win"
-    $results.terraform = Check-Command "terraform" "Terraform" "1.0" "https://www.terraform.io/downloads.html"
-    $results.node = Check-Command "node" "Node.js (optionnel)" "16.0" "https://nodejs.org/en/download/"
+    $results.git = Test-InstalledCommand "git" "Git" "2.0" "https://git-scm.com/download/win"
+    $results.terraform = Test-InstalledCommand "terraform" "Terraform" "1.0" "https://www.terraform.io/downloads.html"
+    $results.node = Test-InstalledCommand "node" "Node.js (optionnel)" "16.0" "https://nodejs.org/en/download/"
     
     # Vérification de la configuration GCP
     Write-Host ""
@@ -250,7 +250,7 @@ function Show-Help {
 }
 
 # Exécution principale
-$success = Check-Environment
+$success = Test-EnvironmentPrerequisites
 
 Show-Help
 

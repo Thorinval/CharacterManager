@@ -1,4 +1,4 @@
-# 🎉 Docker Desktop n'est plus obligatoire !
+# 🎉 Docker Desktop n'est plus obligatoire
 
 > Déployez Character Manager sur Google Cloud **sans installer Docker**
 
@@ -7,11 +7,13 @@
 ## ✨ Ce qui a changé
 
 ### Avant
+
 - ❌ Installation de Docker Desktop obligatoire (4+ GB)
 - ❌ Configuration complexe sur Windows
 - ❌ Licence payante pour entreprise
 
 ### Maintenant
+
 - ✅ **Google Cloud Build** construit l'image pour vous
 - ✅ Aucune installation Docker requise
 - ✅ Plus rapide (infrastructure Google)
@@ -39,7 +41,9 @@ gcloud builds submit --config cloudbuild.yaml
 ## 📂 Nouveaux Fichiers
 
 ### 1. **cloudbuild.yaml**
+
 Configuration Google Cloud Build avec :
+
 - Build .NET 9.0
 - Tests automatiques
 - Build Docker
@@ -47,14 +51,18 @@ Configuration Google Cloud Build avec :
 - Multi-tagging (latest, SHA, branch)
 
 ### 2. **.gcloudignore**
+
 Exclut les fichiers inutiles du build :
+
 - Documentation
 - Tests artifacts
 - IDE files
 - Build outputs
 
 ### 3. **docs/CLOUD_BUILD_GUIDE.md**
+
 Guide complet sur :
+
 - Pourquoi utiliser Cloud Build
 - Comparaison Docker vs Cloud Build
 - Configuration avancée
@@ -82,11 +90,13 @@ gcloud builds submit --config cloudbuild.yaml
 ## 📊 Mises à Jour des Scripts
 
 ### **scripts/Deploy-GoogleCloud.ps1**
+
 - ✅ Détecte automatiquement si Docker est installé
 - ✅ Utilise Cloud Build si Docker absent
 - ✅ Fallback sur Docker local si disponible
 
 ### **scripts/check-prerequisites.ps1**
+
 - ✅ Docker marqué comme "optionnel"
 - ✅ Nouveau message : "Docker peut utiliser Google Cloud Build"
 
@@ -95,16 +105,19 @@ gcloud builds submit --config cloudbuild.yaml
 ## 📚 Documentation Mise à Jour
 
 ### **GCP_QUICKSTART.md**
+
 - ✅ Docker marqué comme optionnel
 - ✅ Nouvelle section "Option 4a : Avec Cloud Build"
 - ✅ Note explicative sur Cloud Build
 
 ### **DEPLOYMENT.md**
+
 - ✅ Prérequis Docker mis à jour
 - ✅ Nouvelle option Cloud Build
 - ✅ Guide complet Cloud Build vs Docker
 
 ### **GCP_DEPLOYMENT_SUMMARY.md**
+
 - ✅ Résumé des options mis à jour
 - ✅ Docker mentionné comme optionnel
 
@@ -119,7 +132,9 @@ gcloud builds submit --config cloudbuild.yaml
 | Build time | ~3-5 min/build | ~3-5 min/build |
 
 **Exemple** :
+
 - 10 déploiements/jour × 4 minutes = 40 minutes
+
 - **Entièrement gratuit** ✅
 
 ---
@@ -127,6 +142,7 @@ gcloud builds submit --config cloudbuild.yaml
 ## ⚙️ Workflow Recommandé
 
 ### Développement Local
+
 ```bash
 # Option 1 : Sans Docker (Cloud Build)
 gcloud builds submit
@@ -136,6 +152,7 @@ docker build -t myapp .
 ```
 
 ### Production
+
 ```bash
 # CI/CD avec GitHub Actions
 # .github/workflows/deploy-gcp.yml utilise Cloud Build
@@ -166,6 +183,7 @@ git push origin main
 ## 📞 Support
 
 Des questions ? Voir :
+
 - 📖 [CLOUD_BUILD_GUIDE.md](./docs/CLOUD_BUILD_GUIDE.md)
 - 📖 [GCP_QUICKSTART.md](./GCP_QUICKSTART.md)
 - 📖 [Cloud Build Docs](https://cloud.google.com/build/docs)
