@@ -8,6 +8,7 @@ steps:
   # ═══════════════════════════════════════════════════════════════════════════════
   - name: 'mcr.microsoft.com/dotnet/sdk:9.0'
     id: 'restore'
+    entrypoint: 'dotnet'
     args:
       - 'restore'
       - 'CharacterManager/CharacterManager.csproj'
@@ -18,6 +19,7 @@ steps:
   # ═══════════════════════════════════════════════════════════════════════════════
   - name: 'mcr.microsoft.com/dotnet/sdk:9.0'
     id: 'build'
+    entrypoint: 'dotnet'
     args:
       - 'build'
       - 'CharacterManager/CharacterManager.csproj'
@@ -32,6 +34,7 @@ steps:
   # ═══════════════════════════════════════════════════════════════════════════════
   - name: 'mcr.microsoft.com/dotnet/sdk:9.0'
     id: 'test'
+    entrypoint: 'dotnet'
     args:
       - 'test'
       - 'CharacterManager.Tests/CharacterManager.Tests.csproj'
@@ -48,6 +51,7 @@ steps:
   # ═══════════════════════════════════════════════════════════════════════════════
   - name: 'mcr.microsoft.com/dotnet/sdk:9.0'
     id: 'publish'
+    entrypoint: 'dotnet'
     args:
       - 'publish'
       - 'CharacterManager/CharacterManager.csproj'
