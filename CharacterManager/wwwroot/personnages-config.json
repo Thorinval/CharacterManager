@@ -11,11 +11,6 @@
       "IsAdult": true
     },
     {
-      "CheminImage": "/images/personnages/alexa.png",
-      "NomFichier": "alexa.png",
-      "IsAdult": true
-    },
-    {
       "CheminImage": "/images/personnages/alexa_small_portrait.png",
       "NomFichier": "alexa_small_portrait.png",
       "IsAdult": true
@@ -111,11 +106,6 @@
       "IsAdult": true
     },
     {
-      "CheminImage": "/images/personnages/regina_small.png",
-      "NomFichier": "regina_small.png",
-      "IsAdult": true
-    },
-    {
       "CheminImage": "/images/personnages/regina_small_portrait.png",
       "NomFichier": "regina_small_portrait.png",
       "IsAdult": true
@@ -141,9 +131,144 @@
       "IsAdult": true
     },
     {
-      "CheminImage": "/images/personnages/default_portrait.png",
-      "NomFichier": "default_portrait.png",
-      "IsAdult": true
+      "CheminImage": "/images/personnages/alexa.jpg",
+      "NomFichier": "alexa.jpg",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/audrey.png",
+      "NomFichier": "audrey.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/aurelia.jpg",
+      "NomFichier": "aurelia.jpg",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/aurelia.png",
+      "NomFichier": "aurelia.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/ayong.png",
+      "NomFichier": "ayong.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/ceres.png",
+      "NomFichier": "ceres.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/chloe.png",
+      "NomFichier": "chloe.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/chloe_small_portrait.png",
+      "NomFichier": "chloe_small_portrait.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/cyrax.png",
+      "NomFichier": "cyrax.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/dragana-small_portrait.png",
+      "NomFichier": "dragana-small_portrait.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/dragana.png",
+      "NomFichier": "dragana.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/hunter2.png",
+      "NomFichier": "hunter2.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/hunter_small_select.png",
+      "NomFichier": "hunter_small_select.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/isabella.png",
+      "NomFichier": "isabella.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/kitty.png",
+      "NomFichier": "kitty.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/kity.jpg",
+      "NomFichier": "kity.jpg",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/Melissa.png",
+      "NomFichier": "Melissa.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/naomi.png",
+      "NomFichier": "naomi.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/naomi_small_portrait.png",
+      "NomFichier": "naomi_small_portrait.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/rachie.png",
+      "NomFichier": "rachie.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/ramona.png",
+      "NomFichier": "ramona.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/ruby.png",
+      "NomFichier": "ruby.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/skye.jpg",
+      "NomFichier": "skye.jpg",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/skye_small_portrait.png",
+      "NomFichier": "skye_small_portrait.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/sunmi.jpg",
+      "NomFichier": "sunmi.jpg",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/sunmi_small_portrait.png",
+      "NomFichier": "sunmi_small_portrait.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/thora_small_portrait.png",
+      "NomFichier": "thora_small_portrait.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/verene.png",
+      "NomFichier": "verene.png",
+      "IsAdult": false
     }
   ]
 }

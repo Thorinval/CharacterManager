@@ -229,7 +229,7 @@ Les personnages supportent 3 types d'images :
 2. **Preview** : `{nom}_small_portrait.png` - Vignettes (listes/tables)
 3. **Selected** : `{nom}_small_select.png` - État sélectionné (escouade)
 
-Les images doivent être placées dans `wwwroot/images/personnages/`. Un fichier `default.png` sert de fallback.
+Les images doivent être placées dans `wwwroot/images/interface/`. Un fichier `default.png` sert de fallback.
 
 ## 🔐 Configuration
 

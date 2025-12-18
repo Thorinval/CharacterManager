@@ -138,6 +138,7 @@ Exécutez le script PowerShell fourni pour ajouter automatiquement une nouvelle 
 ### Option 2 : Manuellement
 
 1. Mettez à jour la version dans `appsettings.json` :
+
    ```json
    "AppInfo": {
      "Version": "0.3.0",
