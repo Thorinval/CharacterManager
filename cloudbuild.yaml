@@ -84,6 +84,9 @@ images:
   - 'europe-west1-docker.pkg.dev/$PROJECT_ID/character-manager/app:$SHORT_SHA'
   - 'europe-west1-docker.pkg.dev/$PROJECT_ID/character-manager/app:$BRANCH_NAME'
 
+# Timeout global (30 minutes)
+timeout: 1800s
+
 # Options de build
 options:
   # Type de machine (E2_HIGHCPU_8 = 8 vCPUs, bon compromis vitesse/coût)
@@ -98,9 +101,6 @@ options:
   # Variables d'environnement globales
   env:
     - 'ASPNETCORE_ENVIRONMENT=Production'
-  
-  # Timeout global
-  timeout: 1800s
 
 # Substitutions (variables personnalisables)
 substitutions:
