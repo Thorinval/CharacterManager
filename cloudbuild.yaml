@@ -4,6 +4,23 @@
 
 steps:
   # ═══════════════════════════════════════════════════════════════════════════════
+  # Étape 0 : Créer le repository si nécessaire
+  # ═══════════════════════════════════════════════════════════════════════════════
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'create-repo'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud artifacts repositories describe character-manager \
+          --location=europe-west1 2>/dev/null || \
+        gcloud artifacts repositories create character-manager \
+          --repository-format=docker \
+          --location=europe-west1 \
+          --description="Character Manager Docker Images"
+    timeout: 120s
+
+  # ═══════════════════════════════════════════════════════════════════════════════
   # Étape 1 : Restaurer les dépendances NuGet
   # ═══════════════════════════════════════════════════════════════════════════════
   - name: 'mcr.microsoft.com/dotnet/sdk:9.0'
