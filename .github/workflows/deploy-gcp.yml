@@ -1,0 +1,310 @@
+name: Deploy to Google Cloud
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  REGISTRY: europe-west1-docker.pkg.dev
+  IMAGE_NAME: character-manager
+  REGION: europe-west1
+
+jobs:
+  # ════════════════════════════════════════════════════════════════════════════════
+  # Build & Test
+  # ════════════════════════════════════════════════════════════════════════════════
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      - name: Publish
+        run: dotnet publish CharacterManager/CharacterManager.csproj \
+          --configuration Release \
+          --output publish
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish
+          path: publish/
+
+  # ════════════════════════════════════════════════════════════════════════════════
+  # Build & Push Docker Image
+  # ════════════════════════════════════════════════════════════════════════════════
+  docker:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: build
+    
+    if: github.event_name == 'push'
+    
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          version: 'latest'
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Setup Cloud SDK (configure Docker)
+        run: |
+          gcloud auth configure-docker $REGISTRY
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t $REGISTRY/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME/app:latest \
+            -t $REGISTRY/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME/app:${{ github.sha }} \
+            -t $REGISTRY/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME/app:${{ github.ref_name }} \
+            .
+
+      - name: Push Docker image
+        run: |
+          docker push $REGISTRY/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME/app:latest
+          docker push $REGISTRY/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME/app:${{ github.sha }}
+          docker push $REGISTRY/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME/app:${{ github.ref_name }}
+
+  # ════════════════════════════════════════════════════════════════════════════════
+  # Deploy to Cloud Run (Staging)
+  # ════════════════════════════════════════════════════════════════════════════════
+  deploy-staging:
+    name: Deploy to Cloud Run (Staging)
+    runs-on: ubuntu-latest
+    needs: docker
+    
+    if: |
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/develop'
+    
+    environment:
+      name: staging
+      url: https://character-manager-staging-${{ github.run_id }}.run.app
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          version: 'latest'
+
+      - name: Deploy to Cloud Run (Staging)
+        run: |
+          gcloud run deploy character-manager-staging \
+            --image=$REGISTRY/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME/app:${{ github.sha }} \
+            --region=$REGION \
+            --platform=managed \
+            --allow-unauthenticated \
+            --memory=512Mi \
+            --cpu=1 \
+            --timeout=3600 \
+            --set-env-vars="ASPNETCORE_ENVIRONMENT=Staging,LOG_LEVEL=Debug" \
+            --project=${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Get service URL
+        run: |
+          gcloud run services describe character-manager-staging \
+            --region=$REGION \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --format="value(status.url)"
+
+  # ════════════════════════════════════════════════════════════════════════════════
+  # Deploy to Cloud Run (Production)
+  # ════════════════════════════════════════════════════════════════════════════════
+  deploy-production:
+    name: Deploy to Cloud Run (Production)
+    runs-on: ubuntu-latest
+    needs: docker
+    
+    if: |
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/main'
+    
+    environment:
+      name: production
+      url: https://character-manager.run.app
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          version: 'latest'
+
+      - name: Deploy to Cloud Run (Production)
+        run: |
+          gcloud run deploy character-manager \
+            --image=$REGISTRY/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME/app:${{ github.sha }} \
+            --region=$REGION \
+            --platform=managed \
+            --allow-unauthenticated \
+            --memory=512Mi \
+            --cpu=1 \
+            --timeout=3600 \
+            --min-instances=1 \
+            --set-env-vars="ASPNETCORE_ENVIRONMENT=Production,LOG_LEVEL=Information" \
+            --project=${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Get service URL
+        run: |
+          gcloud run services describe character-manager \
+            --region=$REGION \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --format="value(status.url)"
+
+      - name: Create deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: 'production',
+              required_contexts: [],
+              auto_merge: false,
+              description: 'Deployed to Cloud Run'
+            });
+
+  # ════════════════════════════════════════════════════════════════════════════════
+  # Update Release Notes
+  # ════════════════════════════════════════════════════════════════════════════════
+  release:
+    name: Update Release Notes
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    
+    if: |
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/main' &&
+      startsWith(github.ref, 'refs/tags/v')
+    
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Update Release Notes
+        run: |
+          # Récupérer la version du tag
+          VERSION=${GITHUB_REF#refs/tags/v}
+          
+          # Mettre à jour RELEASE_NOTES.md (optionnel)
+          echo "Version $VERSION deployed successfully"
+
+  # ════════════════════════════════════════════════════════════════════════════════
+  # Notify
+  # ════════════════════════════════════════════════════════════════════════════════
+  notify:
+    name: Send Notifications
+    runs-on: ubuntu-latest
+    needs: [build, docker]
+    
+    if: always()
+
+    steps:
+      - name: Slack notification
+        uses: slackapi/slack-github-action@v1.24.0
+        if: ${{ secrets.SLACK_WEBHOOK_URL }}
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "Character Manager Deployment",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "📦 Deployment Status"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Build Status:*\n${{ needs.build.result }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Docker Status:*\n${{ needs.docker.result }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch:*\n${{ github.ref_name }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Commit:*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>"
+                    }
+                  ]
+                }
+              ]
+            }
+
+      - name: Email notification
+        if: failure()
+        run: |
+          echo "Deployment failed - sending email notification"
+          # Utiliser sendgrid, mailgun, ou autre service d'email

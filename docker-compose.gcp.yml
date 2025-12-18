@@ -1,0 +1,148 @@
+version: '3.8'
+
+# Docker Compose pour Google Cloud (Compute Engine)
+# Utilise des volumes persistants Google Cloud pour la durabilité
+
+services:
+  charactermanager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: character-manager
+    
+    # Port public
+    ports:
+      - "80:8080"      # HTTP -> Cloud Run compatible
+      - "443:8443"     # HTTPS (optionnel, géré par proxy reverse)
+    
+    # Volumes persistants
+    volumes:
+      # Base de données SQLite sur disque Google Cloud persistant
+      - /mnt/data:/app/data
+      # Images utilisateur sur disque Google Cloud persistant
+      - /mnt/images:/app/wwwroot/images
+      # Configuration (optionnel)
+      - ./CharacterManager/appsettings.json:/app/appsettings.json:ro
+    
+    # Variables d'environnement
+    environment:
+      # ASP.NET Core
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      
+      # Application Configuration
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/CharacterManager.db
+      
+      # Logging
+      - Logging__LogLevel__Default=Information
+      - Logging__LogLevel__Microsoft=Warning
+      
+      # Localization
+      - DefaultLanguage=en
+    
+    # Santé check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Redémarrage automatique
+    restart: unless-stopped
+    
+    # Limites de ressources
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=character-manager"
+    
+    # Labels pour GCP
+    labels:
+      - "com.google.cloud.application=character-manager"
+      - "com.google.cloud.version=0.2.0"
+    
+    networks:
+      - character-network
+
+# Nginx Reverse Proxy (optionnel, pour HTTPS et load balancing)
+  nginx:
+    image: nginx:latest
+    container_name: character-manager-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      # Pour HTTPS avec Let's Encrypt
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot:ro
+    depends_on:
+      - charactermanager
+    restart: unless-stopped
+    networks:
+      - character-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+# Volumes Docker pour les disques persistants Google Cloud
+volumes:
+  # Créés via: gcloud compute disks create character-manager-data
+  gce-data-disk:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /mnt/data
+  
+  gce-images-disk:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /mnt/images
+
+networks:
+  character-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1500
+
+# Notes pour déploiement Google Cloud:
+# 
+# 1. Création des disques persistants:
+#    gcloud compute disks create character-manager-data --size=20GB --zone=europe-west1-b
+#    gcloud compute disks create character-manager-images --size=50GB --zone=europe-west1-b
+#
+# 2. Montage des disques sur la VM:
+#    gcloud compute instances attach-disk character-manager-vm --disk=character-manager-data --zone=europe-west1-b
+#    gcloud compute instances attach-disk character-manager-vm --disk=character-manager-images --zone=europe-west1-b
+#
+# 3. Format et montage (SSH dans la VM):
+#    sudo mkfs.ext4 -F /dev/sdb
+#    sudo mkdir -p /mnt/data /mnt/images
+#    sudo mount /dev/sdb /mnt/data
+#    sudo mount /dev/sdc /mnt/images
+#
+# 4. Faire persister après redémarrage:
+#    sudo blkid  # Récupérer les UUIDs
+#    # Ajouter à /etc/fstab
+#
+# 5. Permissions:
+#    sudo chmod 755 /mnt/data /mnt/images
+#    sudo chown -R 1000:1000 /mnt/data /mnt/images  # UID de l'app container

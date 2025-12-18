@@ -1,0 +1,120 @@
+# Cloud Build Configuration for Character Manager
+# Permet de construire l'image Docker sans installer Docker localement
+# Usage: gcloud builds submit --config cloudbuild.yaml
+
+steps:
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # Étape 1 : Restaurer les dépendances NuGet
+  # ═══════════════════════════════════════════════════════════════════════════════
+  - name: 'mcr.microsoft.com/dotnet/sdk:9.0'
+    id: 'restore'
+    args:
+      - 'restore'
+      - 'CharacterManager/CharacterManager.csproj'
+    timeout: 300s
+
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # Étape 2 : Build l'application .NET
+  # ═══════════════════════════════════════════════════════════════════════════════
+  - name: 'mcr.microsoft.com/dotnet/sdk:9.0'
+    id: 'build'
+    args:
+      - 'build'
+      - 'CharacterManager/CharacterManager.csproj'
+      - '--configuration'
+      - 'Release'
+      - '--no-restore'
+    waitFor: ['restore']
+    timeout: 600s
+
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # Étape 3 : Run tests (optionnel)
+  # ═══════════════════════════════════════════════════════════════════════════════
+  - name: 'mcr.microsoft.com/dotnet/sdk:9.0'
+    id: 'test'
+    args:
+      - 'test'
+      - 'CharacterManager.Tests/CharacterManager.Tests.csproj'
+      - '--configuration'
+      - 'Release'
+      - '--no-build'
+      - '--verbosity'
+      - 'minimal'
+    waitFor: ['build']
+    timeout: 300s
+
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # Étape 4 : Publier l'application
+  # ═══════════════════════════════════════════════════════════════════════════════
+  - name: 'mcr.microsoft.com/dotnet/sdk:9.0'
+    id: 'publish'
+    args:
+      - 'publish'
+      - 'CharacterManager/CharacterManager.csproj'
+      - '--configuration'
+      - 'Release'
+      - '--output'
+      - 'publish'
+      - '--no-build'
+    waitFor: ['build', 'test']
+    timeout: 300s
+
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # Étape 5 : Build l'image Docker
+  # ═══════════════════════════════════════════════════════════════════════════════
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'docker-build'
+    args:
+      - 'build'
+      - '-t'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/character-manager/app:latest'
+      - '-t'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/character-manager/app:$SHORT_SHA'
+      - '-t'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/character-manager/app:$BRANCH_NAME'
+      - '-f'
+      - 'Dockerfile'
+      - '.'
+    waitFor: ['publish']
+    timeout: 600s
+
+# Images à pousser vers Artifact Registry
+images:
+  - 'europe-west1-docker.pkg.dev/$PROJECT_ID/character-manager/app:latest'
+  - 'europe-west1-docker.pkg.dev/$PROJECT_ID/character-manager/app:$SHORT_SHA'
+  - 'europe-west1-docker.pkg.dev/$PROJECT_ID/character-manager/app:$BRANCH_NAME'
+
+# Options de build
+options:
+  # Type de machine (E2_HIGHCPU_8 = 8 vCPUs, bon compromis vitesse/coût)
+  machineType: 'E2_HIGHCPU_8'
+  
+  # Taille du disque (en GB)
+  diskSizeGb: 100
+  
+  # Logging
+  logging: CLOUD_LOGGING_ONLY
+  
+  # Variables d'environnement globales
+  env:
+    - 'ASPNETCORE_ENVIRONMENT=Production'
+  
+  # Timeout global
+  timeout: 1800s
+
+# Substitutions (variables personnalisables)
+substitutions:
+  _REGION: 'europe-west1'
+  _SERVICE_NAME: 'character-manager'
+
+# Tags pour organiser les builds
+tags:
+  - 'character-manager'
+  - 'dotnet-9'
+  - 'blazor'
+
+# Notifications (optionnel - décommentez pour activer)
+# notifications:
+#   - type: 'slack'
+#     config:
+#       webhook_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'

@@ -1,0 +1,47 @@
+# Exemple de fichier variables Terraform
+# Copier en terraform.tfvars et adapter les valeurs
+
+# ═══════════════════════════════════════════════════════════════════════
+# Configuration Google Cloud
+# ═══════════════════════════════════════════════════════════════════════
+
+gcp_project_id = "character-manager-prod"
+gcp_region     = "europe-west1"
+gcp_zone       = "europe-west1-b"
+
+# ═══════════════════════════════════════════════════════════════════════
+# Application Configuration
+# ═══════════════════════════════════════════════════════════════════════
+
+app_name    = "character-manager"
+app_version = "0.2.0"
+
+# ═══════════════════════════════════════════════════════════════════════
+# Déploiement: "cloud_run" ou "compute_engine"
+# ═══════════════════════════════════════════════════════════════════════
+
+deployment_type = "cloud_run"
+
+# ═══════════════════════════════════════════════════════════════════════
+# Cloud Run Configuration
+# ═══════════════════════════════════════════════════════════════════════
+
+cloud_run_memory = "512Mi"   # Options: 128Mi, 256Mi, 512Mi, 1Gi, 2Gi, 4Gi, 6Gi, 8Gi
+cloud_run_cpu    = "1"       # Options: 1, 2, 4, 6, 8
+
+# ═══════════════════════════════════════════════════════════════════════
+# Compute Engine Configuration
+# ═══════════════════════════════════════════════════════════════════════
+
+gce_machine_type = "e2-medium"  # Options: e2-small, e2-medium, e2-large, n1-standard-1
+
+# ═══════════════════════════════════════════════════════════════════════
+# Application Environment Variables
+# ═══════════════════════════════════════════════════════════════════════
+
+environment_variables = {
+  ASPNETCORE_ENVIRONMENT = "Production"
+  Logging__LogLevel__Default = "Information"
+  Logging__LogLevel__Microsoft = "Warning"
+  DefaultLanguage = "en"
+}
