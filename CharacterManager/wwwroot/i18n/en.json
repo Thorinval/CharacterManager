@@ -64,11 +64,8 @@
     "messageError": "Update error",
     "signInPrompt": "Please sign in."
   },
-  "inventory": {
-    "title": "Inventory"
-  },
   "home": {
-    "title": "HOME",
+    "title": "Home",
     "welcome": "Welcome to your character manager",
     "features": "Main Features:",
     "squad": "Build your team of mercenaries, commanders and androids",
@@ -214,7 +211,7 @@
     "empty": "No history found. Create squads to populate history."
   },
   "importCsv": {
-    "title": "IMPORT CSV",
+    "title": "Import CSV files",
     "subtitle": "Import characters from a CSV file",
     "cardTitle": "Import characters (CSV)",
     "selectFile": "Select a CSV file",

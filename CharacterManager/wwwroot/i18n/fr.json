@@ -64,11 +64,8 @@
     "messageError": "Erreur de mise à jour",
     "signInPrompt": "Veuillez vous connecter."
   },
-  "inventory": {
-    "title": "Inventaire"
-  },
   "home": {
-    "title": "ACCUEIL",
+    "title": "Accueil",
     "welcome": "Bienvenue sur votre gestionnaire de personnages",
     "features": "Fonctionnalités principales :",
     "squad": "Composez votre équipe de mercenaires, commandants et androïdes",
@@ -214,7 +211,7 @@
     "empty": "Aucun historique trouvé. Commencez à créer des escouades pour remplir l'historique."
   },
   "importCsv": {
-    "title": "IMPORT CSV",
+    "title": "Import des fichiers CSV",
     "subtitle": "Importer des personnages depuis un fichier CSV",
     "cardTitle": "Importer des personnages (CSV)",
     "selectFile": "Sélectionner un fichier CSV",
