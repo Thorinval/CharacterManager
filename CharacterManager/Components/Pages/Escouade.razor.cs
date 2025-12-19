@@ -69,4 +69,31 @@ public partial class Escouade
     private string GetFilterForCommandants() => "commandants";
     private string GetFilterForMercenaires() => "mercenaires";
     private string GetFilterForAndroides() => "androides";
+
+    private string GetCommandantHeaderImage()
+    {
+        if (commandants.Any())
+        {
+            var commandant = commandants.First();
+            if (!string.IsNullOrEmpty(commandant.ImageUrlHeader))
+            {
+                return commandant.ImageUrlHeader;
+            }
+            if (!string.IsNullOrEmpty(commandant.Nom))
+            {
+                var nomFichier = commandant.Nom.ToLower().Replace(" ", "_");
+                return $"/images/personnages/{nomFichier}_header.png";
+            }
+        }
+        return "/images/interface/hunter_header.png";
+    }
+
+    private void NavigateToCommandantDetail()
+    {
+        if (commandants.Any())
+        {
+            var cmd = commandants.First();
+            NavigateToDetail(cmd.Id, GetFilterForCommandants(), "/escouade");
+        }
+    }
 }

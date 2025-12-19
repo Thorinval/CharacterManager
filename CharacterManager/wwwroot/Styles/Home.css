@@ -42,7 +42,9 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: 60px;
+    overflow-y: auto;
 }
 
 @media (max-width: 991.98px) {

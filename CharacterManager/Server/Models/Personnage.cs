@@ -67,6 +67,7 @@ public class Personnage
     public string ImageUrlDetail { get; set; } = string.Empty;        // Pour la vue détail (grande image)
     public string ImageUrlPreview { get; set; } = string.Empty;       // Pour les aperçus (escouade, inventaire) - _small_portrait.png
     public string ImageUrlSelected { get; set; } = string.Empty;      // Quand le personnage est sélectionné - _small_select.png
+    public string ImageUrlHeader { get; set; } = string.Empty;        // Pour l'image de fond du header
 
     // Description et capacités
     public string Description { get; set; } = string.Empty;

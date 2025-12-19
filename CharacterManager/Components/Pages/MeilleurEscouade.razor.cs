@@ -51,4 +51,29 @@ public partial class MeilleurEscouade
     private string GetFilterForCommandants() => "commandants";
     private string GetFilterForMercenaires() => "mercenaires";
     private string GetFilterForAndroides() => "androides";
+
+    private string GetCommandantHeaderImage()
+    {
+        if (topCommandant != null)
+        {
+            if (!string.IsNullOrEmpty(topCommandant.ImageUrlHeader))
+            {
+                return topCommandant.ImageUrlHeader;
+            }
+            if (!string.IsNullOrEmpty(topCommandant.Nom))
+            {
+                var nomFichier = topCommandant.Nom.ToLower().Replace(" ", "_");
+                return $"/images/personnages/{nomFichier}_header.png";
+            }
+        }
+        return "/images/interface/hunter_header.png";
+    }
+
+    private void NavigateToCommandantDetail()
+    {
+        if (topCommandant != null)
+        {
+            NavigateToDetail(topCommandant.Id, GetFilterForCommandants(), "/meilleur-escouade");
+        }
+    }
 }

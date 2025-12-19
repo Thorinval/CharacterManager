@@ -68,6 +68,11 @@ public class PersonnageService
                GetTopAndroides().Sum(p => p.Puissance);
     }
 
+    public int GetPuissanceSeuilCommandantPourLvlUp()
+    {
+        return 1000 * (GetTopCommandant()?.Niveau + 1 ?? 58000) - 58000;
+    }
+
     public IEnumerable<Personnage> GetTopMercenaires(int count = 8)
     {
         var personnages = _context.Personnages

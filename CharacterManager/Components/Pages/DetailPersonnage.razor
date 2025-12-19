@@ -17,7 +17,7 @@
 @if (currentPerso != null)
 {
     <div class="page-header-banner">
-        <a href="/" class="back-button" aria-label="Retour" title="Back to home"></a>
+        <button @onclick="GoBack" class="back-button" aria-label="Retour" title="Back"></button>
         <h1 class="page-title">@currentPerso.Nom</h1>
     </div>
 

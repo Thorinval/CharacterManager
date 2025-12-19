@@ -264,7 +264,19 @@ using (var scope = app.Services.CreateScope())
         
         // Removed ThumbnailHeightPx column hotfix (unused)
         
-        
+        // Hotfix: Add missing 'ImageUrlHeader' column to Personnages table if it doesn't exist
+        if (TableExists("Personnages") && !ColumnExists("Personnages", "ImageUrlHeader"))
+        {
+            try
+            {
+                db.Database.ExecuteSqlRaw("ALTER TABLE Personnages ADD COLUMN ImageUrlHeader TEXT NOT NULL DEFAULT '';");
+                Console.WriteLine("[DB] Added ImageUrlHeader to Personnages.");
+            }
+            catch (Microsoft.Data.Sqlite.SqliteException ex)
+            {
+                Console.WriteLine($"[DB] Could not add ImageUrlHeader: {ex.Message}");
+            }
+        }
 
         // Removed AppImages category column hotfix (unused)
 

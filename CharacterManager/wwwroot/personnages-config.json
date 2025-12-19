@@ -176,11 +176,6 @@
       "IsAdult": false
     },
     {
-      "CheminImage": "/images/personnages/dragana-small_portrait.png",
-      "NomFichier": "dragana-small_portrait.png",
-      "IsAdult": false
-    },
-    {
       "CheminImage": "/images/personnages/dragana.png",
       "NomFichier": "dragana.png",
       "IsAdult": false
@@ -268,6 +263,21 @@
     {
       "CheminImage": "/images/personnages/verene.png",
       "NomFichier": "verene.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/dragana_small_portrait.png",
+      "NomFichier": "dragana_small_portrait.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/hunter_header.png",
+      "NomFichier": "hunter_header.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/dragana_header.png",
+      "NomFichier": "dragana_header.png",
       "IsAdult": false
     }
   ]

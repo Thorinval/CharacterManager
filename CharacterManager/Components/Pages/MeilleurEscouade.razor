@@ -10,17 +10,16 @@
 @inject PersonnageService PersonnageService
 @inject NavigationManager Navigation
 
-<link rel="stylesheet" href="/Styles/MeilleurEscouade.css" />
+<link rel="stylesheet" href="/Styles/Escouade.css" />
 
-<PageTitle><LocalizedText Key="bestSquad.title" /></PageTitle>
-
-<div class="page-header-banner">
+<div class="page-header-banner escouade-header clickable" @onclick="@(() => NavigateToCommandantDetail())">
+    <div class="header-background-left">
+        <img src="/images/interface/empty_header.png" alt="Background" class="header-bg-image" />
+    </div>
+    <div class="header-background-right">
+        <img src="@GetCommandantHeaderImage()" alt="Commandant Background" class="header-bg-image" />
+    </div>
     <a href="/" class="back-button" aria-label="Retour" title="Back to home"></a>
-    <h1 class="page-title"><LocalizedText Key="bestSquad.title" /></h1>
-</div>
-
-<div class="page-header-banner escouade-header" style="background-image: url('/images/fond_header.png'); background-size: cover; background-position: center;">
-
     <div class="header-center">
         <div class="puissance-header">
             <img src="/images/interface/fond_puissance.png" alt="Puissance" class="puissance-image-header" onerror="this.style.display='none';" />
@@ -46,19 +45,9 @@
                 </div>
             </div>
         }
-
-        <div class="header-right">
-            @if (topCommandant != null)
-            {
-                <img src="@topCommandant.ImageUrlPreview" alt="@topCommandant.Nom" class="commandant-hero" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
-            }
-        </div>
     </div>
 </div>
 
-<div class="section-header commandant-header">
-        <h2><LocalizedText Key="bestSquad.commander" /></h2>
-</div>
 @if (topCommandant != null)
 {
     <div class="personnages-list">
