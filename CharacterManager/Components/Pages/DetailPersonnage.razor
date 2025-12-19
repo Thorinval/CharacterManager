@@ -16,129 +16,23 @@
 
 @if (currentPerso != null)
 {
-    <div class="mb-3">
-        <button class="btn btn-secondary btn-retour" @onclick="GoBack" title="Retour">
-            <img src="/images/btn_retour.png" alt="Retour" class="btn-retour-icon" onerror="this.style.display='none';" />
-        </button>
-    </div>
-
     <div class="page-header-banner">
+        <a href="/" class="back-button" title="Back to home">←</a>
         <img src="/images/interface/menu-icon.png" alt="" class="page-header-icon" />
         <h1 class="page-title">@currentPerso.Nom</h1>
-        <p class="page-subtitle">Détails du personnage</p>
     </div>
 
     <div class="personnage-detail-container">
-
-        <div class="row">
-            <!-- Colonne gauche : Image et infos de base -->
-            <div class="col-md-6">
-                <div class="personnage-card">
-                    <div class="personnage-image-container">
-                        <!-- Bouton Précédent -->
-                        @if (HasNavigation)
-                        {
-                            <button class="btn-nav-prev btn-nav-large" @onclick="NavigateToPrevious" title="Personnage précédent">
-                                <img src="/images/gauche.png" alt="Précédent" class="nav-arrow-icon-large" onerror="this.onerror=null; this.src='/images/btn_retour.png';" />
-                            </button>
-                        }
-
-                        <!-- Image du personnage -->
-                        <div class="personnage-image-wrapper">
-                            @if (!string.IsNullOrEmpty(currentPerso.ImageUrlDetail))
-                            {
-                                <img src="@currentPerso.ImageUrlDetail" alt="@currentPerso.Nom" class="personnage-image @animationClass" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
-                            }
-                            else
-                            {
-                                <img src="/images/interface/default_portrait.png" alt="@currentPerso.Nom" class="personnage-image @animationClass" />
-                            }
-                        </div>
-
-                        <!-- Bouton Suivant -->
-                        @if (HasNavigation)
-                        {
-                            <button class="btn-nav-next btn-nav-large" @onclick="NavigateToNext" title="Personnage suivant">
-                                <img src="/images/droite.png" alt="Suivant" class="nav-arrow-icon-large" onerror="this.onerror=null; this.src='/images/btn_retour.png';" />
-                            </button>
-                        }
-                    </div>
-
-                    <div class="personnage-info">
-                        <h1>@currentPerso.Nom</h1>
-                        <div class="rarete-stars">
-                            @for (int i = 0; i < (int)currentPerso.Rarete + 1; i++)
-                            {
-                                <span class="star">★</span>
-                            }
-                        </div>
-
-                        <div class="faction-role mt-3">
-                            <div class="badge bg-primary">@currentPerso.Faction</div>
-                            <div class="badge bg-info">@currentPerso.Role</div>
-                            <div class="badge bg-warning text-dark">@currentPerso.TypeAttaque</div>
-                        </div>
-
-                        <div class="stats-grid mt-4">
-                            <div class="stat-item">
-                                <span class="stat-label">Niveau</span>
-                                <span class="stat-value">@currentPerso.Niveau</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Rang</span>
-                                <span class="stat-value">@currentPerso.Rang</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Puissance</span>
-                                <span class="stat-value">@currentPerso.Puissance</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Colonne droite : Stats détaillées et capacités -->
-            <div class="col-md-6">
-                <div class="stats-card">
-                    <h3>Statistiques</h3>
-                    
-                    <div class="stat-bar mt-3">
-                        <div class="stat-bar-label">PV (Points de Vie)</div>
-                        <div class="stat-value">@currentPerso.PV</div>
-                    </div>
-
-                    <div class="stat-bar mt-3">
-                        <div class="stat-bar-label">PA (Attaque)</div>
-                        <div class="stat-value">@currentPerso.PA</div>
-                    </div>
-
-                </div>
-
-                @if (currentPerso.Capacites.Any())
+        <div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+            <div style="text-align: center; max-width: 500px;">
+                @if (!string.IsNullOrEmpty(currentPerso.ImageUrlDetail))
                 {
-                    <div class="capacites-card mt-4">
-                        <h3>Capacités</h3>
-                        @foreach (var capacite in currentPerso.Capacites)
-                        {
-                            <div class="capacite-item mt-3">
-                                <div class="capacite-header">
-                                    @if (!string.IsNullOrEmpty(capacite.Icon))
-                                    {
-                                        <span class="capacite-icon">@capacite.Icon</span>
-                                    }
-                                    <span class="capacite-nom">@capacite.Nom</span>
-                                </div>
-                                <p class="capacite-description">@capacite.Description</p>
-                            </div>
-                        }
-                    </div>
+                    <img src="@currentPerso.ImageUrlDetail" alt="@currentPerso.Nom" class="img-fluid" style="max-width: 100%; height: auto; border-radius: 8px;" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
                 }
-
-                <div class="actions-card mt-4">
-                    <button class="btn btn-primary btn-lg w-100 btn-retour" @onclick="GoBack" title="Retour">
-                        <img src="/images/btn_retour.png" alt="Retour" class="btn-retour-icon" onerror="this.style.display='none';" />
-                    </button>
-                </div>
+                else
+                {
+                    <img src="/images/interface/default_portrait.png" alt="@currentPerso.Nom" class="img-fluid" style="max-width: 100%; height: auto; border-radius: 8px;" />
+                }
             </div>
         </div>
     </div>

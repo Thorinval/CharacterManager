@@ -133,6 +133,26 @@ h1:focus {
     object-fit: contain;
 }
 
+.back-button {
+    background: none;
+    border: none;
+    color: #2c3e50;
+    font-size: 1.8rem;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    margin-right: 1rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-button:hover {
+    color: #1a252f;
+    transform: scale(1.1);
+}
+
 .page-title {
     font-size: 2.5rem;
     font-weight: bold;

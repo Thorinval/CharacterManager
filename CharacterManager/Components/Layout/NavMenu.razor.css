@@ -83,6 +83,7 @@
 
 .nav-scrollable {
     display: none;
+    background-color: #888;
 }
 
 .navbar-toggler:checked ~ .nav-scrollable {

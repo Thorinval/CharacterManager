@@ -11,8 +11,12 @@
 
 <AuthorizeView Roles="admin">
     <Authorized Context="auth">
+        <div class="page-header-banner">
+            <a href="/" class="back-button" title="Back to home">←</a>
+            <h1 class="page-title"><LocalizedText Key="manageUsers.title" /></h1>
+        </div>
+
         <div class="container mt-4" style="max-width:720px;">
-            <h2><LocalizedText Key="manageUsers.heading" /></h2>
             <div class="card p-3 mt-3">
                 <EditForm Model="@this" OnValidSubmit="CreateUser" FormName="createUserForm">
                     <div class="row g-2">
