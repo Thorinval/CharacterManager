@@ -1,6 +1,9 @@
 @page "/historique"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components
 @using CharacterManager.Server.Models
 @using CharacterManager.Components
 
@@ -9,8 +12,7 @@
 <PageTitle><LocalizedText Key="history.title" /></PageTitle>
 
 <div class="page-header-banner">
-    <a href="/" class="back-button" title="Back to home">←</a>
-    <img src="/images/interface/menu-icon.png" alt="" class="page-header-icon" />
+    <a href="/" class="back-button" aria-label="Retour" title="Back to home"></a>
     <h1 class="page-title"><LocalizedText Key="history.pageTitle" /></h1>
 </div>
 

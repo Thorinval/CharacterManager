@@ -10,18 +10,26 @@
     min-height: 100vh;
 }
 
+.home-row .row {
+    min-height: 100vh;
+}
+
 .home-image-pane {
     background-image: url('/images/personnages/accueil.png');
-    background-size: contain;
+    background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    min-height: 100vh;
+    height: 100vh;
 }
 
 @media (max-width: 991.98px) {
     .home-image-pane {
-        min-height: 400px;
+        height: 400px;
     }
+}
+
+.home-content-pane {
+    height: 100vh;
 }
 
 .welcome-card {
@@ -29,19 +37,23 @@
     backdrop-filter: blur(10px);
     color: white;
     padding: 32px;
-    border-radius: 15px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-    min-height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
 
 @media (max-width: 991.98px) {
+    .home-content-pane {
+        height: auto;
+    }
+
     .welcome-card {
-        min-height: auto;
-        margin-top: 2rem;
-        margin-bottom: 2rem;
+        height: auto;
+        border-radius: 15px;
+        margin: 0;
     }
 }
 

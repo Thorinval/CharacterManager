@@ -4,6 +4,7 @@
 @using CharacterManager.Server.Models
 @using CharacterManager.Server.Services
 @rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Web
 @using CharacterManager.Components
 
 @inject PersonnageService PersonnageService
@@ -13,11 +14,12 @@
 
 <PageTitle><LocalizedText Key="bestSquad.title" /></PageTitle>
 
-<div class="page-header-banner escouade-header">
-    <div class="header-left">
-        <a href="/" class="back-button" title="Back to home">←</a>
-        <img src="/images/interface/menu-icon.png" alt="" class="page-header-icon" />
-    </div>
+<div class="page-header-banner">
+    <a href="/" class="back-button" aria-label="Retour" title="Back to home"></a>
+    <h1 class="page-title"><LocalizedText Key="bestSquad.title" /></h1>
+</div>
+
+<div class="page-header-banner escouade-header" style="background-image: url('/images/fond_header.png'); background-size: cover; background-position: center;">
 
     <div class="header-center">
         <div class="puissance-header">
@@ -52,8 +54,6 @@
             }
         </div>
     </div>
-
-    <h1 class="page-title"><LocalizedText Key="bestSquad.title" /></h1>
 </div>
 
 <div class="section-header commandant-header">

@@ -92,13 +92,14 @@ h1:focus {
 /* Styles unifiés pour les en-têtes de pages */
 .page-header-banner {
     background: lightblue;
-    padding: 1.5rem 2rem;
+    padding: 0 2rem 0 0;
     margin: -1.1rem -1.5rem 2rem -1.5rem;
     border-bottom: 3px solid #add8e6;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     position: relative;
+    height: 110px;
 }
 
 .header-actions {
@@ -134,22 +135,22 @@ h1:focus {
 }
 
 .back-button {
-    background: none;
+    background: url('/images/interface/btn_retour.png') no-repeat center;
+    background-size: 100% 100%;
     border: none;
-    color: #2c3e50;
-    font-size: 1.8rem;
+    color: transparent;
+    font-size: 0;
     cursor: pointer;
-    padding: 0.5rem 1rem;
+    padding: 0;
     margin-right: 1rem;
     transition: all 0.2s ease;
     text-decoration: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: inline-block;
+    width: 210px;
+    height: 110px;
 }
 
 .back-button:hover {
-    color: #1a252f;
     transform: scale(1.1);
 }
 

@@ -8,27 +8,15 @@
 
 <PageTitle><LocalizedText Key="navigation.home" /></PageTitle>
 
-<div class="page-header-banner">
-    <img src="/images/interface/menu-icon.png" alt="" class="page-header-icon" />
-    <h1 class="page-title"><LocalizedText Key="home.title" /></h1>
-    <div class="header-actions">
-        <a href="/settings" class="settings-link" title="@LocalizationService.T("navigation.settings")">
-            <img src="/images/interface/parametres.png" alt="@LocalizationService.T("navigation.settings")" class="settings-icon" />
-        </a>
-    </div>
-</div>
-
 <div class="home-container">
     <div class="container-fluid home-row g-0">
         <div class="row align-items-stretch g-0">
-            <div class="col-lg-6 home-image-pane"></div>
-            <div class="col-lg-6 d-flex">
+            <div class="col-lg-8 home-image-pane"></div>
+            <div class="col-lg-4 d-flex home-content-pane">
                 <div class="welcome-card flex-fill">
                     <h1>Character Manager</h1>
                     <p class="lead"><LocalizedText Key="home.welcome" /></p>
-                    
-                    <hr />
-                    
+                                        
                     <div class="features-section">
                         <h3><LocalizedText Key="home.features" /></h3>
                         <div class="row">
@@ -51,21 +39,6 @@
                                 </ul>
                             </div>
                         </div>
-                    </div>
-
-                    <hr />
-
-                    <div class="version-info">
-                        <small class="text-muted"><LocalizedText Key="home.versionLabel" /> @VersionService.GetFullVersionString()</small>
-                    </div>
-
-                    <div class="mt-4 text-center">
-                        <a href="/escouade" class="btn btn-primary btn-lg me-2">
-                            <i class="bi bi-people-fill"></i> <LocalizedText Key="home.ctaSquad" />
-                        </a>
-                        <a href="/inventaire" class="btn btn-primary btn-lg">
-                            <i class="bi bi-grid-3x3-gap-fill"></i> <LocalizedText Key="home.ctaInventory" />
-                        </a>
                     </div>
                 </div>
             </div>
