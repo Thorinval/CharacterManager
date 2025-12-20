@@ -4,6 +4,7 @@
 @inject NavigationManager Navigation
 @using CharacterManager.Server.Models
 @using CharacterManager.Server.Services
+@using CharacterManager.Server.Constants
 @using System
 @using System.Linq
 @using Microsoft.AspNetCore.Components
@@ -17,28 +18,358 @@
 @if (currentPerso != null)
 {
     <div class="page-header-banner">
-        <button @onclick="GoBack" class="back-button" aria-label="Retour" title="Back"></button>
+        <button @onclick="GoBack" class="back-button" aria-label="Retour" title="Retour"></button>
         <h1 class="page-title">@currentPerso.Nom</h1>
+        @if (!isEditing)
+        {
+            <button @onclick="EnterEditMode" class="btn btn-primary edit-button">
+                <span class="oi oi-pencil"></span> Éditer
+            </button>
+        }
+        else
+        {
+            <button @onclick="SaveChanges" class="btn btn-success save-button">
+                <span class="oi oi-check"></span> Enregistrer
+            </button>
+            <button @onclick="CancelEdit" class="btn btn-secondary cancel-button">
+                <span class="oi oi-x"></span> Annuler
+            </button>
+        }
     </div>
 
     <div class="personnage-detail-container">
-        <div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh;">
-            <div style="text-align: center; max-width: 500px;">
-                @if (!string.IsNullOrEmpty(currentPerso.ImageUrlDetail))
-                {
-                    <img src="@currentPerso.ImageUrlDetail" alt="@currentPerso.Nom" class="img-fluid" style="max-width: 100%; height: auto; border-radius: 8px;" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
-                }
-                else
-                {
-                    <img src="/images/interface/default_portrait.png" alt="@currentPerso.Nom" class="img-fluid" style="max-width: 100%; height: auto; border-radius: 8px;" />
-                }
+        <div class="container py-4">
+            <div class="card shadow-lg">
+                <div class="card-body">
+                    @if (!isEditing)
+                    {
+                        <!-- Mode Lecture -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="section-title">Informations Générales</h5>
+                                
+                                <div class="detail-item">
+                                    <label>Nom :</label>
+                                    <span class="value">@currentPerso.Nom</span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <label>Rareté :</label>
+                                    <span class="value badge bg-@GetRarityClass(currentPerso.Rarete)">@currentPerso.Rarete</span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <label>Type :</label>
+                                    <span class="value">@currentPerso.Type</span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <label>Rôle :</label>
+                                    <span class="value">@currentPerso.Role</span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <label>Faction :</label>
+                                    <span class="value">@currentPerso.Faction</span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <label>Type d'Attaque :</label>
+                                    <span class="value">@currentPerso.TypeAttaque</span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <label>Rang :</label>
+                                    <div class="stars">@RenderStars(currentPerso.Rang)</div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="section-title">Statistiques</h5>
+                                
+                                <div class="detail-item">
+                                    <label>Niveau :</label>
+                                    <span class="value badge bg-info">@currentPerso.Niveau</span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <label>Puissance :</label>
+                                    <span class="value badge bg-warning">@currentPerso.Puissance</span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <label>PA (Points d'Attaque) :</label>
+                                    <span class="value">@currentPerso.PA</span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <label>PV (Points de Vie) :</label>
+                                    <span class="value">@currentPerso.PV</span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <label>Sélectionné :</label>
+                                    <span class="value">
+                                        @if (currentPerso.Selectionne)
+                                        {
+                                            <span class="badge bg-success">✓ Oui</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Non</span>
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(currentPerso.Description))
+                        {
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <h5 class="section-title">Description</h5>
+                                    <p class="description-text">@currentPerso.Description</p>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <!-- Mode Édition -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="section-title">Informations Générales</h5>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Nom</label>
+                                    <input type="text" class="form-control" @bind="editedPerso.Nom" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Rareté</label>
+                                    <select class="form-select" @bind="editedPerso.Rarete">
+                                        @foreach (Rarete rarete in Enum.GetValues(typeof(Rarete)))
+                                        {
+                                            <option value="@rarete">@rarete</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Type</label>
+                                    <select class="form-select" @bind="editedPerso.Type">
+                                        @foreach (TypePersonnage type in Enum.GetValues(typeof(TypePersonnage)))
+                                        {
+                                            <option value="@type">@type</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Rôle</label>
+                                    <select class="form-select" @bind="editedPerso.Role">
+                                        @foreach (Role role in Enum.GetValues(typeof(Role)))
+                                        {
+                                            <option value="@role">@role</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Faction</label>
+                                    <select class="form-select" @bind="editedPerso.Faction">
+                                        @foreach (Faction faction in Enum.GetValues(typeof(Faction)))
+                                        {
+                                            <option value="@faction">@faction</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Type d'Attaque</label>
+                                    <select class="form-select" @bind="editedPerso.TypeAttaque">
+                                        @foreach (TypeAttaque typeAttaque in Enum.GetValues(typeof(TypeAttaque)))
+                                        {
+                                            <option value="@typeAttaque">@typeAttaque</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Rang (0-7)</label>
+                                    <input type="number" class="form-control" @bind="editedPerso.Rang" min="0" max="7" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="section-title">Statistiques</h5>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Niveau</label>
+                                    <input type="number" class="form-control" @bind="editedPerso.Niveau" min="1" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Puissance</label>
+                                    <input type="number" class="form-control" @bind="editedPerso.Puissance" min="0" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">PA (Points d'Attaque)</label>
+                                    <input type="number" class="form-control" @bind="editedPerso.PA" min="0" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">PV (Points de Vie)</label>
+                                    <input type="number" class="form-control" @bind="editedPerso.PV" min="0" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" @bind="editedPerso.Selectionne" id="selectionneCheck" />
+                                        <label class="form-check-label" for="selectionneCheck">
+                                            Sélectionné
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Description</label>
+                                    <textarea class="form-control" @bind="editedPerso.Description" rows="4"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
 }
 else
 {
-    <div class="alert alert-danger">Personnage non trouvé</div>
+    <div class="container mt-4">
+        <div class="alert alert-danger">Personnage non trouvé</div>
+    </div>
 }
+
+<style>
+    .page-header-banner {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .page-title {
+        flex: 1;
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+    }
+
+    .back-button {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .back-button::before {
+        content: "← ";
+    }
+
+    .back-button:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .edit-button, .save-button, .cancel-button {
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .personnage-detail-container {
+        background: #f5f7fa;
+        min-height: calc(100vh - 100px);
+    }
+
+    .card {
+        border: none;
+        border-radius: 1rem;
+    }
+
+    .section-title {
+        color: #667eea;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .detail-item label {
+        font-weight: 600;
+        color: #495057;
+        min-width: 180px;
+        margin: 0;
+    }
+
+    .detail-item .value {
+        color: #212529;
+    }
+
+    .stars {
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    .star {
+        font-size: 1.2rem;
+    }
+
+    .star.filled {
+        color: #ffc107;
+    }
+
+    .star.empty {
+        color: #dee2e6;
+    }
+
+    .description-text {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border-left: 4px solid #667eea;
+        line-height: 1.6;
+        color: #495057;
+    }
+
+    .badge {
+        font-size: 0.95rem;
+        padding: 0.35rem 0.75rem;
+    }
+
+    .bg-danger { background-color: #dc3545 !important; }
+    .bg-warning { background-color: #ffc107 !important; color: #212529 !important; }
+    .bg-primary { background-color: #667eea !important; }
+</style>
 
 

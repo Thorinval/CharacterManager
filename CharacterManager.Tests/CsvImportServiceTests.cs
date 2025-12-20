@@ -3,6 +3,7 @@ using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using Moq;
 
 namespace CharacterManager.Tests;
 
@@ -20,7 +21,11 @@ public class CsvImportServiceTests : IDisposable
 
         _context = new ApplicationDbContext(options);
         _context.Database.EnsureCreated();
-        _personnageService = new PersonnageService(_context);
+        
+        // Mock PersonnageImageConfigService
+        var mockImageConfigService = new Mock<PersonnageImageConfigService>();
+        
+        _personnageService = new PersonnageService(_context, mockImageConfigService.Object);
         _csvImportService = new CsvImportService(_personnageService, _context);
     }
 

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using CharacterManager.Server.Services;
 using CharacterManager.Server.Models;
+using CharacterManager.Server.Constants;
 
 public partial class Historique
 {
@@ -86,7 +87,7 @@ public partial class Historique
     {
         // Normalize the name: remove spaces, convert to lowercase
         var normalized = nomPersonnage.ToLower().Replace(" ", "_").Replace("'", "");
-        return $"/images/personnages/{normalized}_small_portrait.png";
+        return $"{AppConstants.Paths.ImagesPersonnages}/{normalized}{AppConstants.ImageSuffixes.SmallPortrait}{AppConstants.FileExtensions.Png}";
     }
     
     private Microsoft.AspNetCore.Components.MarkupString RenderStars(int rang)
@@ -114,7 +115,7 @@ public partial class Historique
         try
         {
             var xmlBytes = await HistoriqueService.ExporterHistoriqueXmlAsync();
-            var fileName = $"historique_classements_{DateTime.Now:yyyyMMdd_HHmmss}.xml";
+            var fileName = $"{AppConstants.ExportPrefixes.HistoriqueClassements}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Xml}";
             var base64 = Convert.ToBase64String(xmlBytes);
             await JSRuntime.InvokeVoidAsync("downloadFile", fileName, base64);
         }
@@ -135,7 +136,8 @@ public partial class Historique
         try
         {
             var file = e.File;
-            if (file != null && file.Name.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
+            if (file != null && (file.Name.EndsWith(AppConstants.FileExtensions.Xml, StringComparison.OrdinalIgnoreCase) 
+                              || file.Name.EndsWith(AppConstants.FileExtensions.Pml, StringComparison.OrdinalIgnoreCase)))
             {
                 using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
                 var count = await HistoriqueService.ImporterHistoriqueAsync(stream);
@@ -144,7 +146,7 @@ public partial class Historique
             }
             else
             {
-                await JSRuntime.InvokeVoidAsync("alert", "Veuillez sélectionner un fichier XML.");
+                await JSRuntime.InvokeVoidAsync("alert", "Veuillez sélectionner un fichier XML ou PML.");
             }
         }
         catch (Exception ex)

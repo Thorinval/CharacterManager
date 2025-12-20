@@ -1,0 +1,178 @@
+@page "/import-pml"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using CharacterManager.Server.Services
+@using System.IO
+@rendermode InteractiveServer
+@using CharacterManager.Components
+
+<div class="page-header-banner">
+    <a href="/" class="back-button" aria-label="Retour" title="Back to home"></a>
+    <h1 class="page-title"><LocalizedText Key="importPml.title" /></h1>
+</div>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><LocalizedText Key="importPml.cardTitle" /></h5>
+                </div>
+                <div class="card-body">
+                    @if (importComplete)
+                    {
+                        <div class="alert @(importResult?.IsSuccess == true ? "alert-success" : "alert-danger")" role="alert">
+                            @if (importResult?.IsSuccess == true)
+                            {
+                                <h4 class="alert-heading"><LocalizedText Key="importPml.success" /></h4>
+                                <p>@importResult.SuccessCount <LocalizedText Key="importPml.imported" /></p>
+                                @if (importResult.Errors.Count > 0)
+                                {
+                                    <hr>
+                                    <p><strong><LocalizedText Key="importPml.warnings" /></strong></p>
+                                    <ul>
+                                        @foreach (var error in importResult.Errors)
+                                        {
+                                            <li>@error</li>
+                                        }
+                                    </ul>
+                                }
+                            }
+                            else
+                            {
+                                <h4 class="alert-heading"><LocalizedText Key="importPml.error" /></h4>
+                                <p>@importResult?.Error</p>
+                            }
+                        </div>
+
+                        <button class="btn btn-primary" @onclick="Reset"><LocalizedText Key="importPml.newImport" /></button>
+                        <a href="/inventaire" class="btn btn-secondary btn-retour" title="">
+                            <img src="/images/btn_retour.png" alt="Retour" class="btn-retour-icon" onerror="this.style.display='none';" />
+                        </a>
+                    }
+                    else
+                    {
+                        <form @onsubmit="HandleImport">
+                            @if (!string.IsNullOrEmpty(lastImportedFileName))
+                            {
+                                <div class="alert alert-secondary">
+                                    <strong><LocalizedText Key="importPml.lastFile" /></strong> @lastImportedFileName
+                                    @if (lastImportedFileName != null)
+                                    {
+                                        <small class="d-block text-muted mt-1"><LocalizedText Key="importPml.selectInfo" /></small>
+                                    }
+                                </div>
+                            }
+                            
+                            <div class="mb-3">
+                                <label for="pmlFile" class="form-label"><LocalizedText Key="importPml.selectFile" /></label>
+                                <InputFile 
+                                    class="form-control" 
+                                    id="pmlFile" 
+                                    accept=".pml,.xml" 
+                                    OnChange="@OnFileSelected"
+                                    disabled="@isImporting" />
+                                <small class="text-muted">
+                                    <LocalizedText Key="importPml.expectedFormat" />
+                                </small>
+                            </div>
+
+                            <div class="mb-3">
+                                <p class="text-info">
+                                    <strong><LocalizedText Key="importPml.infoTitle" /></strong>
+                                </p>
+                                <ul>
+                                    <li><LocalizedText Key="importPml.infoInventaire" /></li>
+                                    <li><LocalizedText Key="importPml.infoTemplate" /></li>
+                                    <li><LocalizedText Key="importPml.infoFormat" /></li>
+                                </ul>
+                            </div>
+
+                            @if (selectedFileName != null)
+                            {
+                                <div class="alert alert-info">
+                                    <LocalizedText Key="importPml.selectedFile" /> <strong>@selectedFileName</strong>
+                                </div>
+                            }
+
+                            <button type="submit" class="btn btn-success" disabled="@(selectedFile == null || isImporting)">
+                                @if (isImporting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                }
+                                <LocalizedText Key="importPml.import" />
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject]
+    public PmlImportService PmlImportService { get; set; } = null!;
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = null!;
+
+    private IBrowserFile? selectedFile;
+    private string? selectedFileName;
+    private bool isImporting = false;
+    private bool importComplete = false;
+    private ImportResult? importResult;
+    private string? lastImportedFileName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        lastImportedFileName = await PmlImportService.GetLastImportedFileName();
+    }
+
+    private void OnFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        selectedFileName = e.File.Name;
+    }
+
+    private async Task HandleImport()
+    {
+        if (selectedFile == null)
+            return;
+
+        isImporting = true;
+
+        try
+        {
+            using (var stream = selectedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024)) // 10MB max
+            {
+                importResult = await PmlImportService.ImportPmlAsync(stream, selectedFileName ?? "");
+                importComplete = true;
+                
+                // Rafraîchir le nom du dernier fichier importé
+                lastImportedFileName = await PmlImportService.GetLastImportedFileName();
+            }
+        }
+        catch (Exception ex)
+        {
+            importResult = new ImportResult 
+            { 
+                IsSuccess = false, 
+                Error = $"Erreur: {ex.Message}" 
+            };
+            importComplete = true;
+        }
+        finally
+        {
+            isImporting = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void Reset()
+    {
+        selectedFile = null;
+        selectedFileName = null;
+        importComplete = false;
+        importResult = null;
+    }
+}

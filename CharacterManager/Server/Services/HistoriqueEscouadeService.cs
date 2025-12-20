@@ -129,6 +129,9 @@ public class HistoriqueEscouadeService(ApplicationDbContext dbContext)
         await dbContext.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Exporte l'historique au format PML avec support pour inventaire et templates
+    /// </summary>
     public async Task<byte[]> ExporterHistoriqueXmlAsync()
     {
         var historiques = await GetHistoriqueAsync();
@@ -142,6 +145,11 @@ public class HistoriqueEscouadeService(ApplicationDbContext dbContext)
         using (var writer = System.Xml.XmlWriter.Create(memoryStream, settings))
         {
             writer.WriteStartDocument();
+            writer.WriteStartElement("HistoriqueEscouadePML");
+            writer.WriteAttributeString("version", "1.0");
+            writer.WriteAttributeString("exportDate", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+
+            // Écrire la section HistoriqueClassements
             writer.WriteStartElement("HistoriqueClassements");
 
             foreach (var historique in historiques)
@@ -198,6 +206,58 @@ public class HistoriqueEscouadeService(ApplicationDbContext dbContext)
 
                 writer.WriteEndElement();
             }
+
+            writer.WriteEndElement();
+
+            // Écrire la section inventaire
+            writer.WriteStartElement("inventaire");
+            var personnages = await dbContext.Personnages.AsNoTracking().ToListAsync();
+            foreach (var personnage in personnages)
+            {
+                writer.WriteStartElement("Personnage");
+                writer.WriteElementString("Nom", personnage.Nom);
+                writer.WriteElementString("Rarete", personnage.Rarete.ToString());
+                writer.WriteElementString("Type", personnage.Type.ToString());
+                writer.WriteElementString("Puissance", personnage.Puissance.ToString());
+                writer.WriteElementString("PA", personnage.PA.ToString());
+                writer.WriteElementString("PV", personnage.PV.ToString());
+                writer.WriteElementString("Niveau", personnage.Niveau.ToString());
+                writer.WriteElementString("Rang", personnage.Rang.ToString());
+                writer.WriteElementString("Role", personnage.Role.ToString());
+                writer.WriteElementString("Faction", personnage.Faction.ToString());
+                writer.WriteElementString("Selectionne", personnage.Selectionne.ToString());
+                writer.WriteElementString("Description", personnage.Description ?? "");
+                writer.WriteEndElement();
+            }
+            writer.WriteEndElement();
+
+            // Écrire la section templates
+            writer.WriteStartElement("templates");
+            var templates = await dbContext.Templates.AsNoTracking().ToListAsync();
+            foreach (var template in templates)
+            {
+                writer.WriteStartElement("template");
+                writer.WriteElementString("Nom", template.Nom);
+                writer.WriteElementString("Description", template.Description ?? "");
+
+                var personnageIds = template.GetPersonnageIds();
+                foreach (var personnageId in personnageIds)
+                {
+                    var personnage = await dbContext.Personnages.FirstOrDefaultAsync(p => p.Id == personnageId);
+                    if (personnage != null)
+                    {
+                        writer.WriteStartElement("Personnage");
+                        writer.WriteElementString("Nom", personnage.Nom);
+                        writer.WriteElementString("Rarete", personnage.Rarete.ToString());
+                        writer.WriteElementString("Puissance", personnage.Puissance.ToString());
+                        writer.WriteElementString("Niveau", personnage.Niveau.ToString());
+                        writer.WriteEndElement();
+                    }
+                }
+
+                writer.WriteEndElement();
+            }
+            writer.WriteEndElement();
 
             writer.WriteEndElement();
             writer.WriteEndDocument();

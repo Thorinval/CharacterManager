@@ -3,6 +3,7 @@ namespace CharacterManager.Components.Pages;
 using Microsoft.AspNetCore.Components;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
+using CharacterManager.Server.Constants;
 
 public partial class Escouade
 {
@@ -82,10 +83,10 @@ public partial class Escouade
             if (!string.IsNullOrEmpty(commandant.Nom))
             {
                 var nomFichier = commandant.Nom.ToLower().Replace(" ", "_");
-                return $"/images/personnages/{nomFichier}_header.png";
+                return $"{AppConstants.Paths.ImagesPersonnages}/{nomFichier}{AppConstants.ImageSuffixes.Header}{AppConstants.FileExtensions.Png}";
             }
         }
-        return "/images/interface/hunter_header.png";
+        return AppConstants.Paths.HunterHeader;
     }
 
     private void NavigateToCommandantDetail()

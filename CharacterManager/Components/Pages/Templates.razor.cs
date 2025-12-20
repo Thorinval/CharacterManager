@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
+using CharacterManager.Server.Constants;
 using CharacterManager.Components;
 
 public partial class Templates
@@ -12,7 +13,7 @@ public partial class Templates
     public PersonnageService PersonnageService { get; set; } = null!;
 
     [Inject]
-    public CsvImportService CsvImportService { get; set; } = null!;
+    public PmlImportService PmlImportService { get; set; } = null!;
 
     [Inject]
     public IJSRuntime JSRuntime { get; set; } = null!;
@@ -43,10 +44,9 @@ public partial class Templates
             toastRef?.Show("Template introuvable", "error");
             return;
         }
-        var personnages = PersonnageService.GetTemplatePersonnages(template).ToList();
-        var csvBytes = await CsvImportService.ExportToCsvAsync(personnages);
-        var fileName = $"template_{template.Nom}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
-        await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(csvBytes));
+        var pmlBytes = await PmlImportService.ExporterTemplatesPmlAsync(new[] { template });
+        var fileName = $"{AppConstants.ExportPrefixes.Template}_{template.Nom}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
+        await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pmlBytes));
         toastRef?.Show($"Export de '{template.Nom}' effectué", "success");
     }
 

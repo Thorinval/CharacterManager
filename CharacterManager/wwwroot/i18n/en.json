@@ -28,6 +28,7 @@
     "bestSquad": "Best Squad",
     "settings": "Settings",
     "importCsv": "Import CSV",
+    "importPml": "Import PML",
     "manageUsers": "User Management"
   },
   "login": {
@@ -236,6 +237,28 @@
     "factions": "Factions:",
     "roles": "Roles:",
     "actions": "Action:"
+  },
+  "importPml": {
+    "title": "Import PML files",
+    "subtitle": "Import characters, templates or history from a PML file",
+    "cardTitle": "Import data (PML/XML)",
+    "selectFile": "Select a PML or XML file",
+    "selectInfo": "You can select the same file or another one below",
+    "expectedFormat": "Expected format: Structured XML with inventory, templates and/or HistoriqueClassements sections",
+    "infoTitle": "Information:",
+    "infoInventaire": "Characters from the 'inventory' section will be imported or updated",
+    "infoTemplate": "Templates from the 'templates' section will be imported with their characters",
+    "infoFormat": ".pml and .xml files support all three sections: inventory, templates, and history",
+    "selectedFile": "Selected file:",
+    "import": "Import",
+    "importing": "Importing...",
+    "success": "Import successful! ✓",
+    "imported": "item(s) imported or updated.",
+    "warnings": "Warnings:",
+    "error": "Import error ✗",
+    "newImport": "New import",
+    "lastFile": "Last imported file:",
+    "format": "PML Format (XML)"
   },
   "squad": {
     "title": "Squad",

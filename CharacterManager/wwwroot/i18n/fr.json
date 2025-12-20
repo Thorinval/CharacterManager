@@ -28,6 +28,7 @@
     "bestSquad": "Meilleure Escouade",
     "settings": "Paramètres",
     "importCsv": "Import CSV",
+    "importPml": "Import PML",
     "manageUsers": "Gestion utilisateurs"
   },
   "login": {
@@ -236,6 +237,28 @@
     "factions": "Factions :",
     "roles": "Rôles :",
     "actions": "Action :"
+  },
+  "importPml": {
+    "title": "Import des fichiers PML",
+    "subtitle": "Importer des personnages, templates ou historique depuis un fichier PML",
+    "cardTitle": "Importer des données (PML/XML)",
+    "selectFile": "Sélectionner un fichier PML ou XML",
+    "selectInfo": "Vous pouvez sélectionner le même fichier ou en choisir un autre ci-dessous",
+    "expectedFormat": "Format attendu : XML structuré avec sections inventaire, templates et/ou HistoriqueClassements",
+    "infoTitle": "Information :",
+    "infoInventaire": "Les personnages de la section 'inventaire' seront importés ou mis à jour",
+    "infoTemplate": "Les templates de la section 'templates' seront importés avec leurs personnages",
+    "infoFormat": "Les fichiers .pml et .xml supportent les trois sections : inventaire, templates, et historique",
+    "selectedFile": "Fichier sélectionné :",
+    "import": "Importer",
+    "importing": "Importation en cours...",
+    "success": "Import réussi ! ✓",
+    "imported": "élément(s) importé(s) ou mis à jour.",
+    "warnings": "Avertissements :",
+    "error": "Erreur lors de l'import ✗",
+    "newImport": "Nouvel import",
+    "lastFile": "Dernier fichier importé :",
+    "format": "Format PML (XML)"
   },
   "squad": {
     "title": "Escouade",

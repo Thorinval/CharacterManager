@@ -30,7 +30,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite("Data Source=charactermanager.db"));
 
 builder.Services.AddScoped<PersonnageService>();
-builder.Services.AddScoped<CsvImportService>();
+builder.Services.AddScoped<PmlImportService>();
 builder.Services.AddScoped<HistoriqueEscouadeService>();
 builder.Services.AddScoped<ClientLocalizationService>();
 // AppImageService no longer used for categorization; DI registration removed

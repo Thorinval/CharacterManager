@@ -3,6 +3,7 @@ using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using Moq;
 
 namespace CharacterManager.Tests;
 
@@ -19,7 +20,11 @@ public class PersonnageServiceTests : IDisposable
 
         _context = new ApplicationDbContext(options);
         _context.Database.EnsureCreated();
-        _service = new PersonnageService(_context);
+        
+        // Mock PersonnageImageConfigService
+        var mockImageConfigService = new Mock<PersonnageImageConfigService>();
+        
+        _service = new PersonnageService(_context, mockImageConfigService.Object);
     }
 
     public void Dispose()

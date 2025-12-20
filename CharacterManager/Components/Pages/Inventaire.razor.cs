@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
+using CharacterManager.Server.Constants;
 using CharacterManager.Components;
 
 public partial class Inventaire
@@ -20,7 +21,7 @@ public partial class Inventaire
     public IJSRuntime JSRuntime { get; set; } = null!;
 
     [Inject]
-    public CsvImportService CsvImportService { get; set; } = null!;
+    public PmlImportService PmlImportService { get; set; } = null!;
 
     [Inject]
     public IWebHostEnvironment WebHostEnvironment { get; set; } = null!;
@@ -437,26 +438,26 @@ public partial class Inventaire
             // Sauvegarder l'image portrait
             if (selectedPortraitFile != null)
             {
-                var portraitFileName = $"{currentPersonnage.Nom.ToLower().Replace(" ", "_")}_small_portrait.png";
+                var portraitFileName = $"{currentPersonnage.Nom.ToLower().Replace(" ", "_")}{AppConstants.ImageSuffixes.SmallPortrait}{AppConstants.FileExtensions.Png}";
                 var portraitPath = Path.Combine(personnageFolder, portraitFileName);
 
                 await using var portraitStream = new FileStream(portraitPath, FileMode.Create);
                 await selectedPortraitFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(portraitStream);
 
-                currentPersonnage.ImageUrlPreview = $"/images/personnages/{portraitFileName}";
+                currentPersonnage.ImageUrlPreview = $"{AppConstants.Paths.ImagesPersonnages}/{portraitFileName}";
             }
 
             // Sauvegarder l'image de sélection
             if (selectedSelectionFile != null)
             {
-                var selectionFileName = $"{currentPersonnage.Nom.ToLower().Replace(" ", "_")}_small_select.png";
+                var selectionFileName = $"{currentPersonnage.Nom.ToLower().Replace(" ", "_")}{AppConstants.ImageSuffixes.SmallSelect}{AppConstants.FileExtensions.Png}";
                 var selectionPath = Path.Combine(personnageFolder, selectionFileName);
 
                 await using var selectionStream = new FileStream(selectionPath, FileMode.Create);
                 await selectedSelectionFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(selectionStream);
 
                 // Si vous avez un champ ImageUrlSelect dans le modèle Personnage, mettez-le à jour ici
-                // currentPersonnage.ImageUrlSelect = $"/images/personnages/{selectionFileName}";
+                // currentPersonnage.ImageUrlSelect = $"{AppConstants.Paths.ImagesPersonnages}/{selectionFileName}";
             }
 
             // Mettre à jour le personnage dans la base de données
@@ -518,11 +519,11 @@ public partial class Inventaire
                 ? personnagesFiltres.Where(p => selectedPersonnages.Contains(p.Id))
                 : personnagesFiltres;
                 
-            var csvBytes = await CsvImportService.ExportToCsvAsync(personnagesAExporter);
-            var fileName = $"inventaire_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            var pmlBytes = await PmlImportService.ExporterInventairePmlAsync(personnagesAExporter);
+            var fileName = $"{AppConstants.ExportPrefixes.Inventaire}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
             
             // Utiliser JavaScript pour télécharger le fichier
-            await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(csvBytes));
+            await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pmlBytes));
         }
         catch (Exception ex)
         {
@@ -630,17 +631,24 @@ public partial class Inventaire
         toastRef?.Show($"Template '{template.Nom}' chargé.", "info");
     }
 
-    private async Task ExportTemplateAsCsv()
+    private async Task ExportTemplateAsPml()
     {
         if (templateSelectedIds.Count == 0)
             return;
 
         try
         {
-            var csvBytes = await CsvImportService.ExportToCsvAsync(templatePersonnages.Where(p => p != null).Select(p => p!));
-            var fileName = $"template_{templateNom}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            var template = new Template 
+            { 
+                Nom = templateNom, 
+                Description = templateDescription
+            };
+            template.SetPersonnageIds(templateSelectedIds);
             
-            await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(csvBytes));
+            var pmlBytes = await PmlImportService.ExporterTemplatesPmlAsync(new[] { template });
+            var fileName = $"{AppConstants.ExportPrefixes.Template}_{templateNom}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
+            
+            await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pmlBytes));
         }
         catch (Exception ex)
         {

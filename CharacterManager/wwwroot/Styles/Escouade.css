@@ -54,7 +54,8 @@
     display: flex;
     flex-wrap: nowrap;
     gap: 0.5rem;
-    width: min-content;
+    width: 100%;
+    justify-content: flex-start;
 }
 
 .escouade-member-preview {
@@ -71,11 +72,31 @@
 }
 
 .escouade-image {
-    width: 200px;
-    height: 266px;
+    width: 240px;
+    height: 320px;
     object-fit: cover;
     border-radius: 8px;
     display: block;
+}
+
+/* Style spécifique pour le bouton retour dans l'escouade */
+.escouade-header .back-button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    width: 210px;
+    height: 110px;
+    background: url('/images/interface/btn_retour.png') no-repeat center;
+    background-size: 100% 100%;
+    border: none;
+    color: transparent;
+    font-size: 0;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .escouade-member-name {
@@ -91,7 +112,7 @@
 }
 
 .escouade-header {
-    --commandant-height: 320px;
+    --commandant-height: 500px;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -99,6 +120,13 @@
     padding-top: 170px; /* space for puissance bloc */
     gap: 0.75rem;
     overflow: hidden;
+}
+
+/* Aligner le header avec le contenu principal (annuler les marges négatives globales) */
+.escouade-header.page-header-banner {
+    margin: 0 0 2rem 0;
+    padding-left: 1.5rem;
+    padding-right: 0;
 }
 
 .header-background-left,
@@ -157,7 +185,7 @@
     display: flex;
     align-items: flex-start;
     gap: 1rem;
-    padding: 0 1.5rem 0 1rem;
+    padding: 0;
 }
 
 .escouade-preview-section {

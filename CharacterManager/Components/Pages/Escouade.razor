@@ -18,7 +18,7 @@
     <div class="header-background-right">
         <img src="@GetCommandantHeaderImage()" alt="Commandant Background" class="header-bg-image" />
     </div>
-    <a href="/" class="back-button" aria-label="Retour" title="Back to home"></a>
+    <a href="/" class="back-button" aria-label="Retour" title="Back to home" @onclick="() => {}" @onclick:stopPropagation="true"></a>
     <div class="header-center">
         <div class="puissance-header">
             <img src="/images/interface/fond_puissance.png" alt="Puissance" class="puissance-image-header" onerror="this.style.display='none';" />
@@ -29,13 +29,13 @@
     <div class="header-body">
         @if (personnagesEscouade.Any())
         {
-            <div class="escouade-preview-section mb-0">
+            <div class="escouade-preview-section mb-0" @onclick:stopPropagation="true">
                 <div class="escouade-images">
                     @foreach (var perso in personnagesEscouade.Where(p => p.Type == TypePersonnage.Mercenaire).OrderByDescending(p => p.Puissance))
                     {
                         var currentId = perso.Id;
                         var returnPath = "/escouade";
-                        <div class="escouade-member-preview clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForEscouade(), returnPath))">
+                        <div class="escouade-member-preview clickable" @onclick:stopPropagation="true" @onclick="@(() => NavigateToDetail(currentId, GetFilterForEscouade(), returnPath))">
                             <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
                             <div class="escouade-member-name">@perso.Nom</div>
                             <div class="escouade-member-power">@perso.Puissance</div>

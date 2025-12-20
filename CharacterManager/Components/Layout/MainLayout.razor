@@ -5,9 +5,12 @@
 @* Composants utilisés dans ce layout *@
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu OnAboutClick="ShowAboutModal" />
-    </div>
+    @if (isHomePage)
+    {
+        <div class="sidebar">
+            <NavMenu OnAboutClick="ShowAboutModal" />
+        </div>
+    }
 
     <main>
         <div class="top-row px-4" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
@@ -82,6 +85,7 @@
 
 @code {
     private bool showAboutModal = false;
+    private bool isHomePage = false;
     [CascadingParameter] private Task<Microsoft.AspNetCore.Components.Authorization.AuthenticationState> AuthStateTask { get; set; } = default!;
     [Inject] private Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
@@ -93,6 +97,14 @@
     {
         showAboutModal = true;
         StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Vérifier si on est sur la page d'accueil
+        CheckIfHomePage();
+        Navigation.LocationChanged += OnLocationChanged;
+        await Task.CompletedTask;
     }
 
     protected override async Task OnParametersSetAsync()
@@ -107,6 +119,28 @@
         {
             userName = ""; userRole = "";
         }
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        CheckIfHomePage();
+        StateHasChanged();
+    }
+
+    private void CheckIfHomePage()
+    {
+        // Extraire le chemin de l'URL actuelle
+        var uri = new Uri(Navigation.Uri);
+        var path = uri.AbsolutePath;
+        
+        // Considérer "/" comme la page d'accueil
+        isHomePage = path == "/" || path.EndsWith("/index.html");
+    }
+
+public async ValueTask DisposeAsync()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+        await ValueTask.CompletedTask;
     }
 
     private void Logout()
