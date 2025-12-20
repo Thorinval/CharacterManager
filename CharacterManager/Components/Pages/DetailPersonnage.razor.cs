@@ -27,13 +27,18 @@ public partial class DetailPersonnage
     private bool isEditing = false;
     private bool HasNavigation => tousLesPersonnages.Count > 1;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+
     protected override async Task OnParametersSetAsync()
     {
         // Charger la liste filtrée à chaque navigation
-        tousLesPersonnages = GetListeFiltree();
+        tousLesPersonnages = await GetListeFiltreeAsync();
 
         // Charger le personnage à chaque changement de paramètre (Id)
-        currentPerso = tousLesPersonnages.FirstOrDefault(p => p.Id == Id) ?? PersonnageService.GetById(Id);
+        currentPerso = tousLesPersonnages.FirstOrDefault(p => p.Id == Id) ?? await PersonnageService.GetByIdAsync(Id);
 
         // Trouver l'index du personnage actuel
         if (currentPerso != null)
@@ -117,9 +122,6 @@ public partial class DetailPersonnage
             TypeAttaque = currentPerso.TypeAttaque,
             Selectionne = currentPerso.Selectionne,
             Description = currentPerso.Description,
-            ImageUrlDetail = currentPerso.ImageUrlDetail,
-            ImageUrlPreview = currentPerso.ImageUrlPreview,
-            ImageUrlSelected = currentPerso.ImageUrlSelected,
             ImageUrlHeader = currentPerso.ImageUrlHeader
         };
     }
@@ -189,4 +191,17 @@ public partial class DetailPersonnage
             _ => PersonnageService.GetAll().ToList(),
         };
     }
+
+    private async Task<List<Personnage>> GetListeFiltreeAsync()
+    {
+        return Filter?.ToLower() switch
+        {
+            "escouade" => (await PersonnageService.GetEscouadeAsync()).ToList(),
+            "mercenaires" => (await PersonnageService.GetMercenairesAsync(true)).ToList(),
+            "commandants" => (await PersonnageService.GetCommandantsAsync(true)).ToList(),
+            "androides" => (await PersonnageService.GetAndroïdesAsync(true)).ToList(),
+            _ => (await PersonnageService.GetAllAsync()).ToList(),
+        };
+    }
+
 }

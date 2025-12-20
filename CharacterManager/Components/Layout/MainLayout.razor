@@ -18,7 +18,7 @@
                 <a href="/settings" class="settings-link" title="Paramètres">
                     <img src="/images/interface/parametres.png" alt="Paramètres" class="settings-icon" style="width:24px; height:24px;" />
                 </a>
-                <button class="about-link" @onclick="ShowAboutModal">À propos</button>
+                <button class="about-link" @onclick="ShowAboutModal"><LocalizedText Key="about.link" /></button>
             </div>
             @using Microsoft.AspNetCore.Components.Authorization
             <AuthorizeView>

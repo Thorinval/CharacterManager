@@ -1,10 +1,6 @@
 @using CharacterManager.Server.Data
 @using CharacterManager.Server.Services
 @using Microsoft.EntityFrameworkCore
-@inject ApplicationDbContext DbContext
-@inject ClientLocalizationService LocalizationService
-@inject ProfileService ProfileService
-@inject IHttpContextAccessor HttpContextAccessor
 
 @if (isReady)
 {
@@ -12,12 +8,29 @@
 }
 else
 {
-    <div></div>
+    <div class="loading-container" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+        <div class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
+    </div>
 }
 
 @code {
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
+
+    [Inject]
+    public ApplicationDbContext DbContext { get; set; } = null!;
+
+    [Inject]
+    public ClientLocalizationService LocalizationService { get; set; } = null!;
+
+    [Inject]
+    public ProfileService ProfileService { get; set; } = null!;
+
+    [Inject]
+    public LanguageContextService LanguageContext { get; set; } = null!;
+
+    [Inject]
+    public IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
 
     private bool isReady;
 
@@ -25,6 +38,7 @@ else
     {
         // Charger la langue préférée : priorité au profil utilisateur, sinon réglages globaux
         var language = "fr";
+        var userLanguageSet = false;
 
         var user = HttpContextAccessor.HttpContext?.User;
         if (user?.Identity?.IsAuthenticated == true)
@@ -32,26 +46,51 @@ else
             var username = user.Identity?.Name ?? string.Empty;
             if (!string.IsNullOrWhiteSpace(username))
             {
-                var profile = await ProfileService.GetByUsernameAsync(username);
-                if (profile != null && !string.IsNullOrWhiteSpace(profile.Language))
+                try
                 {
-                    language = profile.Language;
+                    var profile = await ProfileService.GetByUsernameAsync(username);
+                    if (profile != null && !string.IsNullOrWhiteSpace(profile.Language))
+                    {
+                        language = profile.Language;
+                        userLanguageSet = true;
+                    }
+                }
+                catch
+                {
+                    // En cas d'erreur, utiliser la langue par défaut
                 }
             }
         }
 
         // Si aucune langue utilisateur spécifique, utiliser les réglages globaux
-        if (language == "fr")
+        if (!userLanguageSet)
         {
-            var settings = await DbContext.AppSettings.FirstOrDefaultAsync();
-            language = settings?.Language ?? "fr";
+            try
+            {
+                var settings = await DbContext.AppSettings.OrderBy(x => x.Id).FirstOrDefaultAsync();
+                language = settings?.Language ?? "fr";
+            }
+            catch
+            {
+                // En cas d'erreur, utiliser français
+            }
         }
 
-        // Initialiser le service de localisation
-        await LocalizationService.InitializeAsync(language);
+        try
+        {
+            // Stocker la langue dans le contexte (disponible pour ClientLocalizationService)
+            var username2 = user?.Identity?.Name ?? string.Empty;
+            LanguageContext.SetLanguageForUser(username2, language);
 
-        // Rafraîchir l'UI une fois les ressources chargées
+            // Initialiser le service de localisation
+            await LocalizationService.InitializeAsync(language);
+        }
+        catch
+        {
+            // Continuer même en cas d'erreur
+        }
+
+        // Marquer comme prêt et permettre au rendu de continuer
         isReady = true;
-        StateHasChanged();
     }
 }

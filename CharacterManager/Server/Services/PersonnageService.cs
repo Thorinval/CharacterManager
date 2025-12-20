@@ -7,51 +7,20 @@ namespace CharacterManager.Server.Services;
 public class PersonnageService
 {
     private readonly ApplicationDbContext _context;
-    private readonly PersonnageImageConfigService _imageConfigService;
 
-    public PersonnageService(ApplicationDbContext context, PersonnageImageConfigService imageConfigService)
+    public PersonnageService(ApplicationDbContext context)
     {
         _context = context;
-        _imageConfigService = imageConfigService;
     }
 
-    private bool IsAdultModeEnabled()
+    public Task<IEnumerable<Personnage>> GetAllAsync()
     {
-        var settings = _context.AppSettings.FirstOrDefault();
-        return settings?.IsAdultModeEnabled ?? true;
+        return Task.FromResult(_context.Personnages.Include(p => p.Capacites).AsEnumerable());
     }
-
-    private string ApplyAdultModeFilter(string imagePath)
-    {
-        if (string.IsNullOrEmpty(imagePath))
-            return imagePath;
-
-        var isAdultMode = IsAdultModeEnabled();
-        return _imageConfigService.GetDisplayPath(imagePath, isAdultMode);
-    }
-
-    private void ApplyAdultModeToPersonnage(Personnage personnage)
-    {
-        if (personnage == null) return;
-
-        personnage.ImageUrlDetail = ApplyAdultModeFilter(personnage.ImageUrlDetail);
-        personnage.ImageUrlPreview = ApplyAdultModeFilter(personnage.ImageUrlPreview);
-        personnage.ImageUrlSelected = ApplyAdultModeFilter(personnage.ImageUrlSelected);
-    }
-
-    private void ApplyAdultModeToPersonnages(IEnumerable<Personnage> personnages)
-    {
-        foreach (var personnage in personnages)
-        {
-            ApplyAdultModeToPersonnage(personnage);
-        }
-    }
-
+    
     public IEnumerable<Personnage> GetAll()
     {
-        var personnages = _context.Personnages.Include(p => p.Capacites).ToList();
-        ApplyAdultModeToPersonnages(personnages);
-        return personnages;
+        return _context.Personnages.Include(p => p.Capacites).ToList();
     }
 
     public int GetPuissanceEscouade()
@@ -73,50 +42,120 @@ public class PersonnageService
         return 1000 * (GetTopCommandant()?.Niveau + 1 ?? 58000) - 58000;
     }
 
+    public async Task<IEnumerable<Personnage>> GetTopMercenairesAsync(int count = 8)
+    {
+        return await Task.FromResult(_context.Personnages
+            .Include(p => p.Capacites)
+            .Where(p => p.Type == TypePersonnage.Mercenaire)
+            .OrderByDescending(p => p.Puissance)
+            .Take(count)
+            .ToList());
+    }
+    
     public IEnumerable<Personnage> GetTopMercenaires(int count = 8)
     {
-        var personnages = _context.Personnages
+        return _context.Personnages
             .Include(p => p.Capacites)
             .Where(p => p.Type == TypePersonnage.Mercenaire)
             .OrderByDescending(p => p.Puissance)
             .Take(count)
             .ToList();
-        ApplyAdultModeToPersonnages(personnages);
-        return personnages;
     }
 
+    public async Task<Personnage?> GetTopCommandantAsync()
+    {
+        return await Task.FromResult(_context.Personnages
+            .Include(p => p.Capacites)
+            .Where(p => p.Type == TypePersonnage.Commandant)
+            .OrderByDescending(p => p.Puissance)
+            .FirstOrDefault());
+    }
+    
     public Personnage? GetTopCommandant()
     {
-        var personnage = _context.Personnages
+        return _context.Personnages
             .Include(p => p.Capacites)
             .Where(p => p.Type == TypePersonnage.Commandant)
             .OrderByDescending(p => p.Puissance)
             .FirstOrDefault();
-        if (personnage != null)
-            ApplyAdultModeToPersonnage(personnage);
-        return personnage;
     }
 
+    public async Task<IEnumerable<Personnage>> GetTopAndroidesAsync(int count = 3)
+    {
+        return await Task.FromResult(_context.Personnages
+            .Include(p => p.Capacites)
+            .Where(p => p.Type == TypePersonnage.Androïde)
+            .OrderByDescending(p => p.Puissance)
+            .Take(count)
+            .ToList());
+    }
+    
     public IEnumerable<Personnage> GetTopAndroides(int count = 3)
     {
-        var personnages = _context.Personnages
+        return _context.Personnages
             .Include(p => p.Capacites)
             .Where(p => p.Type == TypePersonnage.Androïde)
             .OrderByDescending(p => p.Puissance)
             .Take(count)
             .ToList();
-        ApplyAdultModeToPersonnages(personnages);
-        return personnages;
     }
 
+    public async Task<IEnumerable<Personnage>> GetEscouadeAsync()
+    {
+        return await Task.FromResult(_context.Personnages
+            .Include(p => p.Capacites)
+            .Where(p => p.Selectionne)
+            .ToList());
+    }
+
+    public async Task<IEnumerable<Personnage>> GetMercenairesAsync(bool selectionneOnly = false)
+    {
+        var query = _context.Personnages
+            .Include(p => p.Capacites)
+            .Where(p => p.Type == TypePersonnage.Mercenaire);
+
+        if (selectionneOnly)
+        {
+            query = query.Where(p => p.Selectionne);
+        }
+
+        return await Task.FromResult(query.ToList());
+    }
+
+    public async Task<IEnumerable<Personnage>> GetCommandantsAsync(bool selectionneOnly = false)
+    {
+        var query = _context.Personnages
+            .Include(p => p.Capacites)
+            .Where(p => p.Type == TypePersonnage.Commandant);
+
+        if (selectionneOnly)
+        {
+            query = query.Where(p => p.Selectionne);
+        }
+
+        return await Task.FromResult(query.ToList());
+    }
+
+    public async Task<IEnumerable<Personnage>> GetAndroïdesAsync(bool selectionneOnly = false)
+    {
+        var query = _context.Personnages
+            .Include(p => p.Capacites)
+            .Where(p => p.Type == TypePersonnage.Androïde);
+
+        if (selectionneOnly)
+        {
+            query = query.Where(p => p.Selectionne);
+        }
+
+        return await Task.FromResult(query.ToList());
+    }
+    
     public IEnumerable<Personnage> GetEscouade()
     {
-        var personnages = _context.Personnages
+        return _context.Personnages
             .Include(p => p.Capacites)
             .Where(p => p.Selectionne)
             .ToList();
-        ApplyAdultModeToPersonnages(personnages);
-        return personnages;
     }
     public IEnumerable<Personnage> GetMercenaires(bool selectionneOnly = false)
     {
@@ -129,9 +168,7 @@ public class PersonnageService
             query = query.Where(p => p.Selectionne);
         }
 
-        var personnages = query.ToList();
-        ApplyAdultModeToPersonnages(personnages);
-        return personnages;
+        return query.ToList();
     }
     public IEnumerable<Personnage> GetCommandants(bool selectionneOnly = false)
     {
@@ -144,9 +181,7 @@ public class PersonnageService
             query = query.Where(p => p.Selectionne);
         }
 
-        var personnages = query.ToList();
-        ApplyAdultModeToPersonnages(personnages);
-        return personnages;
+        return query.ToList();
     }
     public IEnumerable<Personnage> GetAndroides(bool selectionneOnly = false)
     {
@@ -159,19 +194,21 @@ public class PersonnageService
             query = query.Where(p => p.Selectionne);
         }
 
-        var personnages = query.ToList();
-        ApplyAdultModeToPersonnages(personnages);
-        return personnages;
+        return query.ToList();
     }
 
     public Personnage? GetById(int id)
     {
-        var personnage = _context.Personnages
+        return _context.Personnages
             .Include(p => p.Capacites)
             .FirstOrDefault(p => p.Id == id);
-        if (personnage != null)
-            ApplyAdultModeToPersonnage(personnage);
-        return personnage;
+    }
+
+    public async Task<Personnage?> GetByIdAsync(int id)
+    {
+        return await _context.Personnages
+            .Include(p => p.Capacites)
+            .FirstOrDefaultAsync(p => p.Id == id);
     }
 
     public void Add(Personnage personnage)
@@ -195,9 +232,6 @@ public class PersonnageService
             existing.PV = personnage.PV;
             existing.Role = personnage.Role;
             existing.Faction = personnage.Faction;
-            existing.ImageUrlDetail = personnage.ImageUrlDetail;
-            existing.ImageUrlPreview = personnage.ImageUrlPreview;
-            existing.ImageUrlSelected = personnage.ImageUrlSelected;
             existing.Description = personnage.Description;
             existing.Selectionne = personnage.Selectionne;
             existing.TypeAttaque = personnage.TypeAttaque;

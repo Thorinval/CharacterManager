@@ -4,6 +4,7 @@ using CharacterManager.Server.Services;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 using Moq;
+using Microsoft.AspNetCore.Http;
 
 namespace CharacterManager.Tests;
 
@@ -21,10 +22,7 @@ public class PersonnageServiceTests : IDisposable
         _context = new ApplicationDbContext(options);
         _context.Database.EnsureCreated();
         
-        // Mock PersonnageImageConfigService
-        var mockImageConfigService = new Mock<PersonnageImageConfigService>();
-        
-        _service = new PersonnageService(_context, mockImageConfigService.Object);
+        _service = new PersonnageService(_context);
     }
 
     public void Dispose()
@@ -48,9 +46,6 @@ public class PersonnageServiceTests : IDisposable
             PV = 20,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            ImageUrlDetail = "old-url.jpg",
-            ImageUrlPreview = "old-url_small_portrait.png",
-            ImageUrlSelected = "old-url_small_select.png",
             Description = "Ancienne description",
             Selectionne = false,
             TypeAttaque = TypeAttaque.Mêlée
@@ -73,9 +68,6 @@ public class PersonnageServiceTests : IDisposable
             PV = 50,
             Role = Role.Combattante,
             Faction = Faction.Pacificateurs,
-            ImageUrlDetail = "new-url.jpg",
-            ImageUrlPreview = "new-url_small_portrait.png",
-            ImageUrlSelected = "new-url_small_select.png",
             Description = "Nouvelle description",
             Selectionne = true,
             TypeAttaque = TypeAttaque.Distance
@@ -97,7 +89,7 @@ public class PersonnageServiceTests : IDisposable
         Assert.Equal(50, result.PV);
         Assert.Equal(Role.Combattante, result.Role);
         Assert.Equal(Faction.Pacificateurs, result.Faction);
-        Assert.Equal("new-url.jpg", result.ImageUrlDetail);
+        Assert.Equal("/images/personnages/nouveau_nom.png", result.ImageUrlDetail);
         Assert.Equal("Nouvelle description", result.Description);
         Assert.True(result.Selectionne);
     }
@@ -136,9 +128,6 @@ public class PersonnageServiceTests : IDisposable
             PV = 20,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            ImageUrlDetail = "url.jpg",
-            ImageUrlPreview = "url_small_portrait.png",
-            ImageUrlSelected = "url_small_select.png",
             Description = "desc",
             Selectionne = false
         };

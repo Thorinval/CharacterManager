@@ -11,7 +11,14 @@
 <div class="home-container">
     <div class="container-fluid home-row g-0">
         <div class="row align-items-stretch g-0">
-            <div class="col-lg-8 home-image-pane"></div>
+            @if (string.IsNullOrEmpty(homeImageUrl))
+            {
+                <div class="col-lg-8 home-image-pane" style="background-color: lightblue;"></div>
+            }
+            else
+            {
+                <div class="col-lg-8 home-image-pane" style="background-image: url('@homeImageUrl');"></div>
+            }
             <div class="col-lg-4 d-flex home-content-pane">
                 <div class="welcome-card flex-fill">
                     <h1>Character Manager</h1>

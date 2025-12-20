@@ -23,13 +23,16 @@ public static class AppConstants
     public static class Paths
     {
         public const string ImagesPersonnages = "/images/personnages";
+        public const string ImagesAdultes = "/images/personnages/adult";
         public const string ImagesInterface = "/images/interface";
         public const string I18nFolder = "i18n";
         public const string WwwRoot = "wwwroot";
         
         // Images par défaut
         public const string DefaultPortrait = "/images/interface/default_portrait.png";
-        public const string HunterHeader = "/images/interface/hunter_header.png";
+        public const string GenericCommandantHeader = "/images/interface/empty_header.png";
+        public const string HunterHeader = "/images/personnages/adult/hunter_header.png";
+        public const string HomeDefaultBackground = "/images/interface/fondheader.png";
     }
 
     /// <summary>
@@ -47,7 +50,8 @@ public static class AppConstants
     /// </summary>
     public static class ConfigFiles
     {
-        public const string PersonnagesConfig = "personnages-config.json";
+        // NOTE: PersonnagesConfig.json removed - now using filesystem-based detection
+        // Images in /adult/ subdirectory are automatically treated as adult content
         public const string Database = "charactermanager.db";
     }
 

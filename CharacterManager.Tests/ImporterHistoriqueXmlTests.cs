@@ -28,18 +28,18 @@ public class ImporterHistoriqueXmlTests : IDisposable
     private void SeedPersonnages()
     {
         // Commandant
-        _context.Personnages.Add(new Personnage { Nom = "HUNTER", Type = TypePersonnage.Commandant, Rarete = Rarete.Inconnu, Niveau = 1, Rang = 0, Puissance = 0, ImageUrlDetail = string.Empty, ImageUrlPreview = string.Empty, ImageUrlSelected = string.Empty, Description = string.Empty });
+        _context.Personnages.Add(new Personnage { Nom = "HUNTER", Type = TypePersonnage.Commandant, Rarete = Rarete.Inconnu, Niveau = 1, Rang = 0, Puissance = 0, Description = string.Empty });
         // Mercenaires
         string[] mercs = new[] { "BELLE", "REGINA", "KITTY", "NATASHA", "NAOMI", "SKYE", "SUNMI", "RAVENNA" };
         foreach (var m in mercs)
         {
-            _context.Personnages.Add(new Personnage { Nom = m, Type = TypePersonnage.Mercenaire, Rarete = Rarete.Inconnu, Niveau = 1, Rang = 0, Puissance = 0, ImageUrlDetail = string.Empty, ImageUrlPreview = string.Empty, ImageUrlSelected = string.Empty, Description = string.Empty });
+            _context.Personnages.Add(new Personnage { Nom = m, Type = TypePersonnage.Mercenaire, Rarete = Rarete.Inconnu, Niveau = 1, Rang = 0, Puissance = 0, Description = string.Empty });
         }
         // Androides
         string[] ands = new[] { "RUBY", "AUDREY", "ISABELLA" };
         foreach (var a in ands)
         {
-            _context.Personnages.Add(new Personnage { Nom = a, Type = TypePersonnage.Androïde, Rarete = Rarete.Inconnu, Niveau = 1, Rang = 0, Puissance = 0, ImageUrlDetail = string.Empty, ImageUrlPreview = string.Empty, ImageUrlSelected = string.Empty, Description = string.Empty });
+            _context.Personnages.Add(new Personnage { Nom = a, Type = TypePersonnage.Androïde, Rarete = Rarete.Inconnu, Niveau = 1, Rang = 0, Puissance = 0, Description = string.Empty });
         }
         _context.SaveChanges();
     }

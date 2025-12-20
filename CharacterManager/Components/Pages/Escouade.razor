@@ -13,7 +13,7 @@
 
 <div class="page-header-banner escouade-header clickable" @onclick="@(() => NavigateToCommandantDetail())">
     <div class="header-background-right" @onclick:stopPropagation="true">
-        <img src="@GetCommandantHeaderImage()" alt="Commandant Background" class="header-bg-image" />
+        <img src="@GetCommandantHeaderImage()" alt="" class="header-bg-image" />
     </div>
     <a href="/" class="back-button" aria-label="Retour" title="Back to home" @onclick="() => {}" @onclick:stopPropagation="true"></a>
     <div class="header-center">
@@ -33,7 +33,7 @@
                         var currentId = perso.Id;
                         var returnPath = "/escouade";
                         <div class="escouade-member-preview clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForEscouade(), returnPath))" @onclick:stopPropagation="true">
-                            <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" @onclick="@(() => NavigateToDetail(currentId, GetFilterForEscouade(), returnPath))" @onclick:stopPropagation="true" />
+                            <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image" @onclick="@(() => NavigateToDetail(currentId, GetFilterForEscouade(), returnPath))" @onclick:stopPropagation="true" />
                             <div class="escouade-member-name">@perso.Nom</div>
                             <div class="escouade-member-power">@perso.Puissance</div>
                         </div>
@@ -62,7 +62,7 @@ else
             var currentId = perso.Id;
             var returnPath = "/escouade";
             <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForCommandants(), returnPath))">
-                <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+                <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
                     <div class="personnage-attribute"><span class="attribute-label">Rareté:</span> @perso.Rarete</div>
@@ -84,7 +84,7 @@ else
             var currentId = perso.Id;
             var returnPath = "/escouade";
             <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForMercenaires(), returnPath))">
-                <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+                <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
                     <div class="personnage-attribute"><span class="attribute-label">Rareté:</span> @perso.Rarete</div>
@@ -106,7 +106,7 @@ else
             var currentId = perso.Id;
             var returnPath = "/escouade";
             <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForAndroides(), returnPath))">
-                <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+                <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
                     <div class="personnage-attribute"><span class="attribute-label">Rareté:</span> @perso.Rarete</div>
@@ -198,16 +198,11 @@ else
                         <input type="number" class="form-control" id="pv" @bind="currentPersonnage.PV" />
                     </div>
                     <div class="mb-3">
-                        <label for="imageSelected" class="form-label">URL Image Sélectionnée</label>
-                        <input type="text" class="form-control" id="imageSelected" @bind="currentPersonnage.ImageUrlSelected" />
-                    </div>
-                    <div class="mb-3">
-                        <label for="imagePreview" class="form-label">URL Image Aperçu</label>
-                        <input type="text" class="form-control" id="imagePreview" @bind="currentPersonnage.ImageUrlPreview" />
-                    </div>
-                    <div class="mb-3">
                         <label for="imageHeader" class="form-label">URL Image Header</label>
                         <input type="text" class="form-control" id="imageHeader" @bind="currentPersonnage.ImageUrlHeader" />
+                    </div>
+                    <div class="mb-3">
+                        <p class="text-muted">Les URLs des images portrait et sélection sont générées automatiquement à partir du nom du personnage.</p>
                     </div>
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>

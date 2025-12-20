@@ -359,9 +359,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
 
         // Gérer les URLs des images
         string nomLower = personnage.Nom.ToLower();
-        personnage.ImageUrlDetail = EnsureImageOrDefault($"{AppConstants.Paths.ImagesPersonnages}/{nomLower}{AppConstants.FileExtensions.Png}");
-        personnage.ImageUrlPreview = EnsureImageOrDefault($"{AppConstants.Paths.ImagesPersonnages}/{nomLower}{AppConstants.ImageSuffixes.SmallPortrait}{AppConstants.FileExtensions.Png}");
-        personnage.ImageUrlSelected = EnsureImageOrDefault($"{AppConstants.Paths.ImagesPersonnages}/{nomLower}{AppConstants.ImageSuffixes.SmallSelect}{AppConstants.FileExtensions.Png}");
+        // Les images sont maintenant calculées automatiquement selon le nom du personnage
 
         return personnage;
     }
@@ -725,13 +723,13 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
 
     public async Task<string?> GetLastImportedFileName()
     {
-        var settings = await _context.AppSettings.FirstOrDefaultAsync();
+        var settings = await _context.AppSettings.OrderBy(x => x.Id).FirstOrDefaultAsync();
         return settings?.LastImportedFileName;
     }
 
     private async Task SaveLastImportedFileName(string fileName)
     {
-        var settings = await _context.AppSettings.FirstOrDefaultAsync();
+        var settings = await _context.AppSettings.OrderBy(x => x.Id).FirstOrDefaultAsync();
         if (settings == null)
         {
             settings = new AppSettings();

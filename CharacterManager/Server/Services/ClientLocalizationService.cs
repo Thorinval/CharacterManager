@@ -12,14 +12,22 @@ public class ClientLocalizationService
 {
     private readonly ILogger<ClientLocalizationService> _logger;
     private readonly IWebHostEnvironment _env;
+    private readonly LanguageContextService _languageContext;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private Dictionary<string, object>? _currentResources;
     private string _currentLanguage = "fr";
     private readonly object _lock = new();
 
-    public ClientLocalizationService(IWebHostEnvironment env, ILogger<ClientLocalizationService> logger)
+    public ClientLocalizationService(
+        IWebHostEnvironment env, 
+        ILogger<ClientLocalizationService> logger,
+        LanguageContextService languageContext,
+        IHttpContextAccessor httpContextAccessor)
     {
         _logger = logger;
         _env = env;
+        _languageContext = languageContext;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     /// <summary>
@@ -144,6 +152,16 @@ public class ClientLocalizationService
 
             try
             {
+                // Déterminer la langue à utiliser : du contexte d'utilisateur si disponible, sinon défaut
+                var username = _httpContextAccessor.HttpContext?.User?.Identity?.Name ?? string.Empty;
+                var languageToUse = _languageContext.GetLanguageForUser(username);
+                
+                // Mettre à jour la langue actuelle si elle a changé
+                if (_currentLanguage != languageToUse)
+                {
+                    _currentLanguage = languageToUse;
+                }
+
                 var path = Path.Combine(_env.WebRootPath, "i18n", $"{_currentLanguage}.json");
                 if (!File.Exists(path))
                 {

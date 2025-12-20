@@ -1,5 +1,7 @@
 namespace CharacterManager.Components.Pages;
 
+using System;
+using System.IO;
 using Microsoft.AspNetCore.Components;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
@@ -24,6 +26,8 @@ public partial class Escouade
     {
         LoadPersonnages();
     }
+
+
 
     private void LoadPersonnages()
     {
@@ -66,27 +70,20 @@ public partial class Escouade
         Navigation.NavigateTo($"/detail-personnage/{id}?filter={filter}&returnUrl={encodedBack}");
     }
 
-    private string GetFilterForEscouade() => "escouade";
-    private string GetFilterForCommandants() => "commandants";
-    private string GetFilterForMercenaires() => "mercenaires";
-    private string GetFilterForAndroides() => "androides";
+    private static string GetFilterForEscouade() => "escouade";
+    private static string GetFilterForCommandants() => "commandants";
+    private static string GetFilterForMercenaires() => "mercenaires";
+    private static string GetFilterForAndroides() => "androides";
 
     private string GetCommandantHeaderImage()
     {
-        if (commandants.Any())
+        if (commandants.Count == 0)
         {
-            var commandant = commandants.First();
-            if (!string.IsNullOrEmpty(commandant.ImageUrlHeader))
-            {
-                return commandant.ImageUrlHeader;
-            }
-            if (!string.IsNullOrEmpty(commandant.Nom))
-            {
-                var nomFichier = commandant.Nom.ToLower().Replace(" ", "_");
-                return $"{AppConstants.Paths.ImagesPersonnages}/{nomFichier}{AppConstants.ImageSuffixes.Header}{AppConstants.FileExtensions.Png}";
-            }
+            return AppConstants.Paths.GenericCommandantHeader;
         }
-        return AppConstants.Paths.HunterHeader;
+
+        var commandant = commandants.First();
+        return ResolveHeaderImage(commandant.ImageUrlHeader, commandant.Nom);
     }
 
     private void NavigateToCommandantDetail()
@@ -110,5 +107,37 @@ public partial class Escouade
         }
         LoadPersonnages();
         CloseModal();
+    }
+
+    /// <summary>
+    /// Résout le chemin d'image header en fonction du nom.
+    /// </summary>
+    private string ResolveHeaderImage(string? imageUrlHeader, string? nom)
+    {
+        if (!string.IsNullOrWhiteSpace(imageUrlHeader))
+        {
+            return imageUrlHeader;
+        }
+
+        if (string.IsNullOrWhiteSpace(nom))
+        {
+            return AppConstants.Paths.GenericCommandantHeader;
+        }
+
+        var nomFichier = nom.ToLower().Replace(" ", "_");
+        var standardCandidate = $"{AppConstants.Paths.ImagesPersonnages}/{nomFichier}{AppConstants.ImageSuffixes.Header}{AppConstants.FileExtensions.Png}";
+
+        if (FileExists(standardCandidate))
+        {
+            return standardCandidate;
+        }
+
+        return AppConstants.Paths.GenericCommandantHeader;
+    }
+
+    private static bool FileExists(string relativePath)
+    {
+        var physicalPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+        return File.Exists(physicalPath);
     }
 }

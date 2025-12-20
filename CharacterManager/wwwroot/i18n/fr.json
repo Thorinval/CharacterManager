@@ -30,6 +30,10 @@
     "importExportPml": "Import / Export PML",
     "manageUsers": "Gestion utilisateurs"
   },
+  "about": {
+    "link": "À propos",
+    "title": "À propos"
+  },
   "login": {
     "title": "Connexion",
     "heading": "Connexion",

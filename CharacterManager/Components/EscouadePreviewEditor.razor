@@ -1,6 +1,8 @@
 @implements IDisposable
 @using CharacterManager.Server.Models
 @using CharacterManager.Server.Services
+@inject PersonnageImageConfigService ImageConfigService
+@inject AdultModeNotificationService AdultModeNotification
 
 <div class="escouade-preview-editor-container">
     <div class="escouade-preview-header">
@@ -22,10 +24,17 @@
                 @if (PersonnagesSelectionnes.Count > 0 && PersonnagesSelectionnes[0] != null)
                 {
                     <div class="preview-card" @onclick="@(() => RemovePersonnage(0))">
-                        <img src="@PersonnagesSelectionnes[0]!.ImageUrlPreview" 
-                             alt="@PersonnagesSelectionnes[0]!.Nom" 
-                             title="Cliquez pour retirer"
-                             onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';">
+                        @{
+                            var displayUrl = GetDisplayImage(PersonnagesSelectionnes[0]!.ImageUrlPreview);
+                        }
+                        @if (IsImageBlocked(displayUrl))
+                        {
+                            <div style="@GetImageStyle(displayUrl)" alt="@PersonnagesSelectionnes[0]!.Nom" title="Cliquez pour retirer"></div>
+                        }
+                        else
+                        {
+                            <img src="@displayUrl" alt="@PersonnagesSelectionnes[0]!.Nom" title="Cliquez pour retirer" />
+                        }
                         <span class="puissance">@PersonnagesSelectionnes[0]!.Puissance</span>
                     </div>
                 }
@@ -54,10 +63,17 @@
                         @if (PersonnagesSelectionnes.Count > index && PersonnagesSelectionnes[index] != null)
                         {
                             <div class="preview-card" @onclick="@(() => RemovePersonnage(index))">
-                                <img src="@PersonnagesSelectionnes[index]!.ImageUrlPreview"
-                                     alt="@PersonnagesSelectionnes[index]!.Nom"
-                                     title="Cliquez pour retirer"
-                                     onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';">
+                                @{
+                                    var displayUrl = GetDisplayImage(PersonnagesSelectionnes[index]!.ImageUrlPreview);
+                                }
+                                @if (IsImageBlocked(displayUrl))
+                                {
+                                    <div style="@GetImageStyle(displayUrl)" alt="@PersonnagesSelectionnes[index]!.Nom" title="Cliquez pour retirer"></div>
+                                }
+                                else
+                                {
+                                    <img src="@displayUrl" alt="@PersonnagesSelectionnes[index]!.Nom" title="Cliquez pour retirer" />
+                                }
                                 <span class="puissance">@PersonnagesSelectionnes[index]!.Puissance</span>
                             </div>
                         }
@@ -87,10 +103,17 @@
                         @if (PersonnagesSelectionnes.Count > index && PersonnagesSelectionnes[index] != null)
                         {
                             <div class="preview-card" @onclick="@(() => RemovePersonnage(index))">
-                                <img src="@PersonnagesSelectionnes[index]!.ImageUrlPreview"
-                                     alt="@PersonnagesSelectionnes[index]!.Nom"
-                                     title="Cliquez pour retirer"
-                                     onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';">
+                                @{
+                                    var displayUrl = GetDisplayImage(PersonnagesSelectionnes[index]!.ImageUrlPreview);
+                                }
+                                @if (IsImageBlocked(displayUrl))
+                                {
+                                    <div style="@GetImageStyle(displayUrl)" alt="@PersonnagesSelectionnes[index]!.Nom" title="Cliquez pour retirer"></div>
+                                }
+                                else
+                                {
+                                    <img src="@displayUrl" alt="@PersonnagesSelectionnes[index]!.Nom" title="Cliquez pour retirer" />
+                                }
                                 <span class="puissance">@PersonnagesSelectionnes[index]!.Puissance</span>
                             </div>
                         }
@@ -276,6 +299,35 @@
     [Parameter]
     public EventCallback<string> OnInvalidDrop { get; set; }
 
+    private bool isAdultModeEnabled = false;
+
+    protected override void OnInitialized()
+    {
+        AdultModeNotification.Subscribe(OnAdultModeChanged);
+        isAdultModeEnabled = AdultModeNotification.IsAdultModeEnabled;
+    }
+
+    private void OnAdultModeChanged(bool newValue)
+    {
+        isAdultModeEnabled = newValue;
+        StateHasChanged();
+    }
+
+    private string GetImageStyle(string imageUrl)
+    {
+        return string.IsNullOrEmpty(imageUrl) ? "background-color: lightblue; display: block;" : "";
+    }
+
+    private bool IsImageBlocked(string imageUrl)
+    {
+        return string.IsNullOrEmpty(imageUrl);
+    }
+
+    private string GetDisplayImage(string originalImageUrl)
+    {
+        return ImageConfigService.GetDisplayPath(originalImageUrl, isAdultModeEnabled);
+    }
+
     public int PuissanceTotal => PersonnagesSelectionnes.Sum(p => p?.Puissance ?? 0);
 
     private string GetSlotStyle(int index)
@@ -359,6 +411,7 @@
 
     public void Dispose()
     {
+        AdultModeNotification.Unsubscribe(OnAdultModeChanged);
         GC.SuppressFinalize(this);
     }
 

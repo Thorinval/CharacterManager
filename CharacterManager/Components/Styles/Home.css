@@ -15,7 +15,6 @@
 }
 
 .home-image-pane {
-    background-image: url('/images/personnages/accueil.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

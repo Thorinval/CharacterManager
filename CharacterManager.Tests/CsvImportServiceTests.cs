@@ -4,6 +4,7 @@ using CharacterManager.Server.Services;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 using Moq;
+using Microsoft.AspNetCore.Http;
 
 namespace CharacterManager.Tests;
 
@@ -22,10 +23,7 @@ public class CsvImportServiceTests : IDisposable
         _context = new ApplicationDbContext(options);
         _context.Database.EnsureCreated();
         
-        // Mock PersonnageImageConfigService
-        var mockImageConfigService = new Mock<PersonnageImageConfigService>();
-        
-        _personnageService = new PersonnageService(_context, mockImageConfigService.Object);
+        _personnageService = new PersonnageService(_context);
         _csvImportService = new CsvImportService(_personnageService, _context);
     }
 
@@ -78,9 +76,6 @@ BELLE;SSR;Mercenaire;3090;143;330;Distance;Sentinelle;8;3;Oui;Syndicat";
             PV = 100,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            ImageUrlDetail = "old-url.jpg",
-            ImageUrlPreview = "old-url_small_portrait.png",
-            ImageUrlSelected = "old-url_small_select.png",
             Description = "Old description",
             Selectionne = false
         };

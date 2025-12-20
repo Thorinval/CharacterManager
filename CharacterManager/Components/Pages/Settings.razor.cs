@@ -28,6 +28,9 @@ public partial class Settings
     [Inject]
     public ProfileService ProfileService { get; set; } = null!;
 
+    [Inject]
+    public AdultModeNotificationService AdultModeNotification { get; set; } = null!;
+
     [CascadingParameter]
     private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
 
@@ -69,6 +72,10 @@ public partial class Settings
         {
             currentProfile.AdultMode = isAdultModeEnabled;
             await ProfileService.UpdateAsync(currentProfile);
+            
+            // Notifier tous les composants que le mode adulte a changé
+            AdultModeNotification.SetAdultMode(isAdultModeEnabled);
+            
             StateHasChanged();
         }
     }
@@ -88,7 +95,7 @@ public partial class Settings
         await LocalizationService.SetLanguageAsync(newLanguage);
 
         // Mettre à jour le réglage global pour les utilisateurs non authentifiés
-        var settings = await AppDb.AppSettings.FirstOrDefaultAsync();
+        var settings = await AppDb.AppSettings.OrderBy(x => x.Id).FirstOrDefaultAsync();
         if (settings == null)
         {
             settings = new CharacterManager.Server.Models.AppSettings

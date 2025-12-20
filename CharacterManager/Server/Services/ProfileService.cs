@@ -35,6 +35,9 @@ public class ProfileService
     public async Task<Profile?> GetByUsernameAsync(string username)
         => await _db.Profiles.FirstOrDefaultAsync(p => p.Username == username);
 
+    public Profile? GetByUsername(string username)
+        => _db.Profiles.FirstOrDefault(p => p.Username == username);
+
     public async Task<bool> CreateUserAsync(string username, string password, string role)
     {
         if (await _db.Profiles.AnyAsync(p => p.Username == username)) return false;

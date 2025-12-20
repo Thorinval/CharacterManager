@@ -63,10 +63,10 @@ public class Personnage
     public Role Role { get; set; }
     public Faction Faction { get; set; }
 
-    // Images du personnage
-    public string ImageUrlDetail { get; set; } = string.Empty;        // Pour la vue détail (grande image)
-    public string ImageUrlPreview { get; set; } = string.Empty;       // Pour les aperçus (escouade, inventaire) - _small_portrait.png
-    public string ImageUrlSelected { get; set; } = string.Empty;      // Quand le personnage est sélectionné - _small_select.png
+    // Images du personnage - calculées dynamiquement selon le nom
+    public string ImageUrlDetail => $"/images/personnages/{Nom.ToLower().Replace(" ", "_")}.png";
+    public string ImageUrlPreview => $"/images/personnages/{Nom.ToLower().Replace(" ", "_")}_small_portrait.png";
+    public string ImageUrlSelected => $"/images/personnages/{Nom.ToLower().Replace(" ", "_")}_small_select.png";
     public string ImageUrlHeader { get; set; } = string.Empty;        // Pour l'image de fond du header
 
     // Description et capacités

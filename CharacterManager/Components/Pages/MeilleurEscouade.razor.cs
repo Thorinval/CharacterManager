@@ -1,5 +1,7 @@
 namespace CharacterManager.Components.Pages;
 
+using System;
+using System.IO;
 using Microsoft.AspNetCore.Components;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
@@ -49,9 +51,9 @@ public partial class MeilleurEscouade
         Navigation.NavigateTo($"/detail-personnage/{id}?filter={filter}&returnUrl={encodedBack}");
     }
 
-    private string GetFilterForCommandants() => "commandants";
-    private string GetFilterForMercenaires() => "mercenaires";
-    private string GetFilterForAndroides() => "androides";
+    private static string GetFilterForCommandants() => "commandants";
+    private static string GetFilterForMercenaires() => "mercenaires";
+    private static string GetFilterForAndroides() => "androides";
 
     private string GetCommandantHeaderImage()
     {
@@ -64,10 +66,15 @@ public partial class MeilleurEscouade
             if (!string.IsNullOrEmpty(topCommandant.Nom))
             {
                 var nomFichier = topCommandant.Nom.ToLower().Replace(" ", "_");
-                return $"{AppConstants.Paths.ImagesPersonnages}/{nomFichier}{AppConstants.ImageSuffixes.Header}{AppConstants.FileExtensions.Png}";
+                var standardCandidate = $"{AppConstants.Paths.ImagesPersonnages}/{nomFichier}{AppConstants.ImageSuffixes.Header}{AppConstants.FileExtensions.Png}";
+
+                if (FileExists(standardCandidate))
+                {
+                    return standardCandidate;
+                }
             }
         }
-        return AppConstants.Paths.HunterHeader;
+        return AppConstants.Paths.GenericCommandantHeader; // Chemin d'image générique pour les commandants
     }
 
     private void NavigateToCommandantDetail()
@@ -76,5 +83,11 @@ public partial class MeilleurEscouade
         {
             NavigateToDetail(topCommandant.Id, GetFilterForCommandants(), "/meilleur-escouade");
         }
+    }
+
+    private static bool FileExists(string relativePath)
+    {
+        var physicalPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+        return File.Exists(physicalPath);
     }
 }

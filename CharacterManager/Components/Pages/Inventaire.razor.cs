@@ -9,7 +9,7 @@ using CharacterManager.Server.Services;
 using CharacterManager.Server.Constants;
 using CharacterManager.Components;
 
-public partial class Inventaire
+public partial class Inventaire : IAsyncDisposable
 {
     [Inject]
     public PersonnageService PersonnageService { get; set; } = null!;
@@ -60,9 +60,9 @@ public partial class Inventaire
     // Mode d'affichage
     private string viewMode = "grid";
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        LoadPersonnages();
+        await LoadPersonnagesAsync();
         // Charger un template si présent dans l'URL
         var uri = new Uri(Navigation.Uri);
         var query = uri.Query.TrimStart('?');
@@ -84,6 +84,11 @@ public partial class Inventaire
                 }
             }
         }
+    }
+
+    ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        return ValueTask.CompletedTask;
     }
 
     private string GetViewModeClass(string mode)
@@ -142,8 +147,11 @@ public partial class Inventaire
             }
 
             PersonnageService.Update(personnage);
-            LoadPersonnages();
-            toastRef?.Show($"{field} mis à jour avec succès", "success");
+            _ = InvokeAsync(async () =>
+            {
+                await LoadPersonnagesAsync();
+                toastRef?.Show($"{field} mis à jour avec succès", "success");
+            });
         }
         catch (Exception ex)
         {
@@ -158,9 +166,9 @@ public partial class Inventaire
         UpdatePersonnageField(personnageId, "Rang", newRank.ToString());
     }
 
-    private void LoadPersonnages()
+    private async Task LoadPersonnagesAsync()
     {
-        personnages = PersonnageService.GetAll().ToList();
+        personnages = (await PersonnageService.GetAllAsync()).ToList();
         ApplyFiltersAndSorting();
     }
 
@@ -296,7 +304,7 @@ public partial class Inventaire
         }
     }
 
-    private void ApplyBulkEdit()
+    private async Task ApplyBulkEdit()
     {
         if (string.IsNullOrEmpty(bulkEditProperty) || selectedPersonnages.Count == 0)
             return;
@@ -313,7 +321,7 @@ public partial class Inventaire
                             personnage.Niveau = niveau;
                         break;
                     case "TypeAttaque":
-                        if (Enum.TryParse<CharacterManager.Server.Models.TypeAttaque>(bulkEditValue, out var typeAttaqueValue))
+                        if (Enum.TryParse<TypeAttaque>(bulkEditValue, out var typeAttaqueValue))
                             personnage.TypeAttaque = typeAttaqueValue;
                         break;
                 }
@@ -321,7 +329,7 @@ public partial class Inventaire
             }
         }
 
-        LoadPersonnages();
+        await LoadPersonnagesAsync();
         selectedPersonnages.Clear();
         showBulkEditModal = false;
         bulkEditProperty = "";
@@ -351,9 +359,6 @@ public partial class Inventaire
             PV = personnage.PV,
             Role = personnage.Role,
             Faction = personnage.Faction,
-            ImageUrlDetail = personnage.ImageUrlDetail,
-            ImageUrlPreview = personnage.ImageUrlPreview,
-            ImageUrlSelected = personnage.ImageUrlSelected,
             Description = personnage.Description,
             Selectionne = personnage.Selectionne,
             TypeAttaque = personnage.TypeAttaque
@@ -366,7 +371,7 @@ public partial class Inventaire
     private void DeletePersonnage(int id)
     {
         PersonnageService.Delete(id);
-        LoadPersonnages();
+        _ = InvokeAsync(async () => await LoadPersonnagesAsync());
     }
 
     private void SavePersonnage()
@@ -386,8 +391,11 @@ public partial class Inventaire
             _ = SaveImagesAsync();
         }
         
-        LoadPersonnages();
-        CloseModal();
+        _ = InvokeAsync(async () =>
+        {
+            await LoadPersonnagesAsync();
+            CloseModal();
+        });
     }
 
     private async Task HandlePortraitUpload(InputFileChangeEventArgs e)
@@ -400,7 +408,7 @@ public partial class Inventaire
             var buffer = new byte[selectedPortraitFile.Size];
             await selectedPortraitFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).ReadExactlyAsync(buffer);
             var imageDataUrl = $"data:{selectedPortraitFile.ContentType};base64,{Convert.ToBase64String(buffer)}";
-            currentPersonnage.ImageUrlPreview = imageDataUrl;
+            // L'aperçu temporaire - l'URL réelle sera calculée automatiquement à partir du nom
             StateHasChanged();
         }
     }
@@ -443,8 +451,7 @@ public partial class Inventaire
 
                 await using var portraitStream = new FileStream(portraitPath, FileMode.Create);
                 await selectedPortraitFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(portraitStream);
-
-                currentPersonnage.ImageUrlPreview = $"{AppConstants.Paths.ImagesPersonnages}/{portraitFileName}";
+                // L'URL sera calculée automatiquement à partir du nom du personnage
             }
 
             // Sauvegarder l'image de sélection
@@ -499,7 +506,7 @@ public partial class Inventaire
                 {
                     PersonnageService.Delete(id);
                 }
-                LoadPersonnages();
+                await LoadPersonnagesAsync();
                 selectedPersonnages.Clear();
             }
         }
@@ -515,7 +522,7 @@ public partial class Inventaire
         try
         {
             // Exporter uniquement les personnages sélectionnés s'il y en a, sinon exporter la liste filtrée
-            var personnagesAExporter = selectedPersonnages.Any()
+            var personnagesAExporter = selectedPersonnages.Count > 0
                 ? personnagesFiltres.Where(p => selectedPersonnages.Contains(p.Id))
                 : personnagesFiltres;
                 
@@ -670,4 +677,9 @@ public partial class Inventaire
         currentlyDraggedId = personnage.Id;
         StateHasChanged();
     }
+
+    /// <summary>
+    /// Retourne le style à appliquer à une image personnage
+    /// Si l'URL est vide, affiche un fond lightblue
+    /// </summary>
 }

@@ -9,6 +9,7 @@ using CharacterManager.Server.Services;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 using Moq;
+using Microsoft.AspNetCore.Http;
 
 namespace CharacterManager.Tests;
 
@@ -27,10 +28,7 @@ public class PmlImportServiceTests : IDisposable
         _context = new ApplicationDbContext(options);
         _context.Database.EnsureCreated();
         
-        // Mock PersonnageImageConfigService
-        var mockImageConfigService = new Mock<PersonnageImageConfigService>();
-        
-        _personnageService = new PersonnageService(_context, mockImageConfigService.Object);
+        _personnageService = new PersonnageService(_context);
         _pmlImportService = new PmlImportService(_personnageService, _context);
 
         SeedPersonnages();

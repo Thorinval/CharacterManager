@@ -29,17 +29,21 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite("Data Source=charactermanager.db"));
 
+// Register ProfileService BEFORE PersonnageService (dependency order)
+builder.Services.AddScoped<ProfileService>();
 builder.Services.AddScoped<PersonnageService>();
 builder.Services.AddScoped<PmlImportService>();
 builder.Services.AddScoped<HistoriqueEscouadeService>();
 builder.Services.AddScoped<ClientLocalizationService>();
+builder.Services.AddScoped<CsvImportService>();
 // AppImageService no longer used for categorization; DI registration removed
 builder.Services.AddSingleton<PersonnageImageConfigService>();
 builder.Services.AddSingleton<AppVersionService>();
 builder.Services.AddSingleton<LocalizationService>();
+builder.Services.AddSingleton<LanguageContextService>();  // Service de contexte de langue
+builder.Services.AddSingleton<AdultModeNotificationService>();  // Service singleton pour notification mode adulte
 builder.Services.AddHttpClient<UpdateService>();
 builder.Services.AddHttpClient();  // Pour les appels HTTP du ClientLocalizationService
-builder.Services.AddScoped<ProfileService>();
 
 var app = builder.Build();
 
@@ -302,24 +306,38 @@ using (var scope = app.Services.CreateScope())
     // Initialize default AppSettings and images
     try
     {
-        var settings = db.AppSettings.FirstOrDefault();
+        var settings = db.AppSettings.OrderBy(x => x.Id).FirstOrDefault();
         if (settings == null)
         {
             var newSettings = new CharacterManager.Server.Models.AppSettings
             {
-                IsAdultModeEnabled = true
+                IsAdultModeEnabled = true,
+                Language = "fr"
             };
             db.AppSettings.Add(newSettings);
             db.SaveChanges();
-            Console.WriteLine("[Init] Created default AppSettings.");
+            Console.WriteLine("[Init] Created default AppSettings - Adult Mode: Enabled, Language: fr");
+        }
+        else
+        {
+            // Appliquer les paramètres existants
+            var adultModeStatus = settings.IsAdultModeEnabled ? "Enabled" : "Disabled";
+            var language = string.IsNullOrEmpty(settings.Language) ? "fr" : settings.Language;
+            
+            // Si la langue n'est pas définie, définir par défaut
+            if (string.IsNullOrEmpty(settings.Language))
+            {
+                settings.Language = "fr";
+                db.SaveChanges();
+                Console.WriteLine("[Init] Updated Language to default: fr");
+            }
+            
+            Console.WriteLine($"[Init] Loaded AppSettings - Adult Mode: {adultModeStatus}, Language: {language}");
         }
 
-        // Initialize default images removed (switch to personnages-config.json)
-
-        // Initialize personnages image configuration
-        var configService = scope.ServiceProvider.GetRequiredService<PersonnageImageConfigService>();
-        configService.LoadConfiguration();
-        Console.WriteLine("[Init] Personnages image configuration loaded.");
+        // NOTE: PersonnageImageConfigService now uses filesystem-based detection
+        // Images in /images/personnages/adult/ are automatically treated as adult content
+        // No JSON configuration file needed
 
         // Admin seeding removed - handled dynamically in Login page
         // If no profiles exist, Login page will create admin/admin by default
