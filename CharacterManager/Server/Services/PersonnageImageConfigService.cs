@@ -28,6 +28,14 @@ public class PersonnageImageConfigService
             _configFilePath = Path.Combine(baseDir, "wwwroot", "personnages-config.json");
             _personnagesDirectoryPath = Path.Combine(baseDir, "wwwroot", "images", "personnages");
         }
+
+        // S'assurer que les répertoires existent pour éviter les erreurs pendant les tests ou en CI
+        var configDir = Path.GetDirectoryName(_configFilePath);
+        if (!string.IsNullOrWhiteSpace(configDir))
+        {
+            Directory.CreateDirectory(configDir);
+        }
+        Directory.CreateDirectory(_personnagesDirectoryPath);
     }
 
     /// <summary>

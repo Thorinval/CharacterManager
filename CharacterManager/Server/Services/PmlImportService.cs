@@ -231,7 +231,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
     /// <summary>
     /// Importe les données de la meilleure escouade
     /// </summary>
-    private async Task<int> ImportBestSquadAsync(IEnumerable<XElement> bestSquadElements, List<string> errors)
+    private Task<int> ImportBestSquadAsync(IEnumerable<XElement> bestSquadElements, List<string> errors)
     {
         int importedCount = 0;
 
@@ -281,7 +281,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             }
         }
 
-        return importedCount;
+        return Task.FromResult(importedCount);
     }
 
     /// <summary>
