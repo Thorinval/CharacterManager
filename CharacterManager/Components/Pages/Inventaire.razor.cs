@@ -510,7 +510,7 @@ public partial class Inventaire
         Navigation.NavigateTo($"/detail-personnage/{id}");
     }
 
-    private async Task ExportToCsv()
+    private async Task ExportToPML()
     {
         try
         {

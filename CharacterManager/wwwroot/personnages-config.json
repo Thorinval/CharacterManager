@@ -279,6 +279,26 @@
       "CheminImage": "/images/personnages/dragana_header.png",
       "NomFichier": "dragana_header.png",
       "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/alexa_header.png",
+      "NomFichier": "alexa_header.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/aurelia_header.png",
+      "NomFichier": "aurelia_header.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/cyrax_header.png",
+      "NomFichier": "cyrax_header.png",
+      "IsAdult": false
+    },
+    {
+      "CheminImage": "/images/personnages/verene_header.png",
+      "NomFichier": "verene_header.png",
+      "IsAdult": false
     }
   ]
 }

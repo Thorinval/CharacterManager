@@ -4,6 +4,7 @@
 @using System.IO
 @rendermode InteractiveServer
 @using CharacterManager.Components
+@using CharacterManager.Server.Models
 
 <div class="page-header-banner">
     <a href="/" class="back-button" aria-label="Retour" title="Back to home"></a>
@@ -24,8 +25,8 @@
                             @if (importResult?.IsSuccess == true)
                             {
                                 <h4 class="alert-heading"><LocalizedText Key="importPml.success" /></h4>
-                                <p>@importResult.SuccessCount <LocalizedText Key="importPml.imported" /></p>
-                                @if (importResult.Errors.Count > 0)
+                                <p>@importResult?.SuccessCount <LocalizedText Key="importPml.imported" /></p>
+                                @if (importResult?.Errors.Count > 0)
                                 {
                                     <hr>
                                     <p><strong><LocalizedText Key="importPml.warnings" /></strong></p>
@@ -154,7 +155,7 @@
         }
         catch (Exception ex)
         {
-            importResult = new ImportResult 
+            importResult = new ImportResult
             { 
                 IsSuccess = false, 
                 Error = $"Erreur: {ex.Message}" 

@@ -97,4 +97,18 @@ public partial class Escouade
             NavigateToDetail(cmd.Id, GetFilterForCommandants(), "/escouade");
         }
     }
+
+    private void SavePersonnage()
+    {
+        if (currentPersonnage.Id > 0)
+        {
+            PersonnageService.Update(currentPersonnage);
+        }
+        else
+        {
+            PersonnageService.Add(currentPersonnage);
+        }
+        LoadPersonnages();
+        CloseModal();
+    }
 }

@@ -116,8 +116,8 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    min-height: calc(var(--commandant-height) + 60px);
-    padding-top: 170px; /* space for puissance bloc */
+    min-height: calc(var(--commandant-height) + 50px);
+    padding-top: 120px; /* space for puissance bloc */
     gap: 0.75rem;
     overflow: hidden;
 }
@@ -143,6 +143,7 @@
 
 .header-background-right {
     right: 0;
+    pointer-events: none;
 }
 
 .header-bg-image {
@@ -186,18 +187,18 @@
     align-items: flex-start;
     gap: 1rem;
     padding: 0;
+    width: 100%;
 }
 
 .escouade-preview-section {
-    flex: 1;
-    background: #f8f9fa;
+    flex: 0 0 auto;
     padding: 0.75rem;
     border-radius: 8px;
     overflow-x: auto;
     overflow-y: hidden;
-    height: var(--commandant-height);
     display: flex;
     align-items: center;
+    margin-right: auto;
 }
 
 .header-right {

@@ -12,10 +12,7 @@
 <link rel="stylesheet" href="/Styles/Escouade.css" />
 
 <div class="page-header-banner escouade-header clickable" @onclick="@(() => NavigateToCommandantDetail())">
-    <div class="header-background-left">
-        <img src="/images/interface/empty_header.png" alt="Background" class="header-bg-image" />
-    </div>
-    <div class="header-background-right">
+    <div class="header-background-right" @onclick:stopPropagation="true">
         <img src="@GetCommandantHeaderImage()" alt="Commandant Background" class="header-bg-image" />
     </div>
     <a href="/" class="back-button" aria-label="Retour" title="Back to home" @onclick="() => {}" @onclick:stopPropagation="true"></a>
@@ -26,7 +23,7 @@
         </div>
     </div>
 
-    <div class="header-body">
+    <div class="header-body" @onclick:stopPropagation="true">
         @if (personnagesEscouade.Any())
         {
             <div class="escouade-preview-section mb-0" @onclick:stopPropagation="true">
@@ -35,8 +32,8 @@
                     {
                         var currentId = perso.Id;
                         var returnPath = "/escouade";
-                        <div class="escouade-member-preview clickable" @onclick:stopPropagation="true" @onclick="@(() => NavigateToDetail(currentId, GetFilterForEscouade(), returnPath))">
-                            <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+                        <div class="escouade-member-preview clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForEscouade(), returnPath))" @onclick:stopPropagation="true">
+                            <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" @onclick="@(() => NavigateToDetail(currentId, GetFilterForEscouade(), returnPath))" @onclick:stopPropagation="true" />
                             <div class="escouade-member-name">@perso.Nom</div>
                             <div class="escouade-member-power">@perso.Puissance</div>
                         </div>
@@ -127,7 +124,7 @@ else
         <div class="modal-dialog-custom" @onclick:stopPropagation="true">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@(isEditing ? "Éditer Personnage" : "Ajouter Personnage")</h5>
+                    <h5 class="modal-title">@(isEditing ? "Éditer Personnage" : "Ajouter")</h5>
                     <button type="button" class="btn-close" @onclick="CloseModal"></button>
                 </div>
                 <div class="modal-body">
@@ -136,7 +133,7 @@ else
                         <input type="text" class="form-control" id="nom" @bind="currentPersonnage.Nom" />
                     </div>
                     <div class="mb-3">
-                        <label for="rarete" class="form-label">Rarete</label>
+                        <label for="rarete" class="form-label">Rareté</label>
                         <select class="form-control" id="rarete" @bind="currentPersonnage.Rarete">
                             @foreach (var rarete in Enum.GetValues(typeof(Rarete)))
                             {
@@ -149,6 +146,10 @@ else
                         <input type="number" class="form-control" id="niveau" @bind="currentPersonnage.Niveau" />
                     </div>
                     <div class="mb-3">
+                        <label for="puissance" class="form-label">Puissance</label>
+                        <input type="number" class="form-control" id="puissance" @bind="currentPersonnage.Puissance" />
+                    </div>
+                    <div class="mb-3">
                         <label for="type" class="form-label">Type</label>
                         <select class="form-control" id="type" @bind="currentPersonnage.Type">
                             @foreach (var type in Enum.GetValues(typeof(TypePersonnage)))
@@ -158,17 +159,64 @@ else
                         </select>
                     </div>
                     <div class="mb-3">
+                        <label for="role" class="form-label">Rôle</label>
+                        <select class="form-control" id="role" @bind="currentPersonnage.Role">
+                            @foreach (var role in Enum.GetValues(typeof(Role)))
+                            {
+                                <option value="@role">@role</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="faction" class="form-label">Faction</label>
+                        <select class="form-control" id="faction" @bind="currentPersonnage.Faction">
+                            @foreach (var faction in Enum.GetValues(typeof(Faction)))
+                            {
+                                <option value="@faction">@faction</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label for="action" class="form-label">Type d'attaque</label>
                         <select class="form-control" id="action" @bind="currentPersonnage.TypeAttaque">
-                            <option value="">Sélectionner un type d'attaque</option>
-                            <option value="Mêlée">Mêlée</option>
-                            <option value="Distance">Distance</option>
-                            <option value="Androïde">Androïde</option>
+                            @foreach (var typeAttaque in Enum.GetValues(typeof(TypeAttaque)))
+                            {
+                                <option value="@typeAttaque">@typeAttaque</option>
+                            }
                         </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="rang" class="form-label">Rang (0-7)</label>
+                        <input type="number" class="form-control" id="rang" @bind="currentPersonnage.Rang" min="0" max="7" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="pa" class="form-label">PA (Points d'Attaque)</label>
+                        <input type="number" class="form-control" id="pa" @bind="currentPersonnage.PA" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="pv" class="form-label">PV (Points de Vie)</label>
+                        <input type="number" class="form-control" id="pv" @bind="currentPersonnage.PV" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="imageSelected" class="form-label">URL Image Sélectionnée</label>
+                        <input type="text" class="form-control" id="imageSelected" @bind="currentPersonnage.ImageUrlSelected" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="imagePreview" class="form-label">URL Image Aperçu</label>
+                        <input type="text" class="form-control" id="imagePreview" @bind="currentPersonnage.ImageUrlPreview" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="imageHeader" class="form-label">URL Image Header</label>
+                        <input type="text" class="form-control" id="imageHeader" @bind="currentPersonnage.ImageUrlHeader" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" @bind="currentPersonnage.Description" rows="2"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="CloseModal">Annuler</button>
+                    <button type="button" class="btn btn-primary" @onclick="SavePersonnage">Enregistrer</button>
                 </div>
             </div>
         </div>

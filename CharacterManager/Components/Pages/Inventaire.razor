@@ -139,8 +139,8 @@ else
         <button class="btn btn-info ms-2" @onclick="() => OpenTemplateEditor()" title="Créer un template d'escouade">
             <i class="bi bi-plus-circle"></i> <LocalizedText Key="inventory.template" />
         </button>
-        <button class="btn btn-success ms-2" @onclick="ExportToCsv" title="Exporter l'inventaire en CSV">
-            <i class="bi bi-download"></i> <LocalizedText Key="inventory.exportCsv" />
+        <button class="btn btn-success ms-2" @onclick="ExportToPML" title="Exporter l'inventaire">
+            <i class="bi bi-download"></i> <LocalizedText Key="inventory.export" />
         </button>
         <button class="btn btn-danger ms-2" @onclick="DeleteSelectedPersonnages" disabled="@(!selectedPersonnages.Any())" title="Supprimer les personnages sélectionnés">
             <i class="bi bi-trash-fill"></i> <LocalizedText Key="inventory.bulkDelete" /> (@selectedPersonnages.Count)
