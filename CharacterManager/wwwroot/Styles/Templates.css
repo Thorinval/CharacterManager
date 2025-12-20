@@ -1,7 +1,25 @@
 .templates-list { display: flex; flex-direction: column; gap: 12px; }
-.template-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 12px; }
+.template-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 .template-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.template-name { font-weight: 700; font-size: 1.1rem; }
-.template-power { font-size: 0.95rem; }
+.template-name { font-weight: 700; font-size: 1.1rem; color: #333; }
+.template-power { font-size: 0.95rem; color: #667eea; font-weight: 600; }
 .template-meta { display: flex; gap: 10px; color: #666; font-size: 0.85rem; margin-bottom: 8px; }
-.template-actions { display: flex; gap: 8px; }
+.template-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Rename button styling for better visibility */
+.btn-outline-secondary {
+    border: 1px solid #667eea;
+    color: #667eea;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.btn-outline-secondary:hover {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.btn-outline-secondary i {
+    font-size: 0.9rem;
+}

@@ -21,7 +21,9 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
     /// <summary>
     /// Importe les données du format PML (inventaire, templates, etc.)
     /// </summary>
-    public async Task<ImportResult> ImportPmlAsync(Stream pmlStream, string fileName = "")
+    public async Task<ImportResult> ImportPmlAsync(Stream pmlStream, string fileName = "", 
+        bool importInventory = true, bool importTemplates = true, 
+        bool importBestSquad = true, bool importHistories = true)
     {
         var result = new ImportResult();
         var errors = new List<string>();
@@ -40,21 +42,61 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             }
 
             // Traiter la section inventaire
-            var inventaireElements = doc.Root.Elements("inventaire");
-            if (inventaireElements.Any())
+            if (importInventory)
             {
-                result.SuccessCount += await ImportInventaireAsync(inventaireElements, errors);
+                var inventaireElements = doc.Root.Elements("inventaire");
+                if (!inventaireElements.Any() && doc.Root.Name.LocalName.Equals("inventaire", StringComparison.OrdinalIgnoreCase))
+                {
+                    inventaireElements = new[] { doc.Root };
+                }
+
+                if (inventaireElements.Any())
+                {
+                    result.SuccessCount += await ImportInventaireAsync(inventaireElements, errors);
+                }
             }
 
-            // Traiter la section templates
-            var templateElements = doc.Root.Elements("template");
-            if (templateElements.Any())
+            // Traiter la section templates (directs ou encapsulés dans <templates>)
+            if (importTemplates)
             {
-                result.SuccessCount += await ImportTemplatesAsync(templateElements, errors);
+                var directTemplates = doc.Root.Elements("template");
+                var nestedTemplates = doc.Root.Element("templates")?.Elements("template") ?? Enumerable.Empty<XElement>();
+                var templateElements = directTemplates.Concat(nestedTemplates);
+
+                if (templateElements.Any())
+                {
+                    result.SuccessCount += await ImportTemplatesAsync(templateElements, errors);
+                }
             }
 
-            result.IsSuccess = result.SuccessCount > 0 || errors.Count == 0;
+            // Traiter la section meilleure escouade
+            if (importBestSquad)
+            {
+                var bestSquadElements = doc.Root.Elements("meilleurEscouade");
+                if (bestSquadElements.Any())
+                {
+                    result.SuccessCount += await ImportBestSquadAsync(bestSquadElements, errors);
+                }
+            }
+
+            // Traiter la section historiques
+            if (importHistories)
+            {
+                var historiqueElements = doc.Root.Elements("HistoriqueEscouade");
+                if (historiqueElements.Any())
+                {
+                    result.SuccessCount += await ImportHistoriquesAsync(historiqueElements, errors);
+                }
+            }
+
             result.Errors = errors;
+
+            if (result.SuccessCount == 0 && string.IsNullOrEmpty(result.Error))
+            {
+                result.Error = "Aucune donnée à importer";
+            }
+
+            result.IsSuccess = result.SuccessCount > 0 && string.IsNullOrEmpty(result.Error);
 
             // Enregistrer le nom du fichier importé
             if (!string.IsNullOrEmpty(fileName))
@@ -81,18 +123,25 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
 
         foreach (var inventaire in inventaireElements)
         {
-            try
+            var personnageElements = inventaire.Name.LocalName.Equals("Personnage", StringComparison.OrdinalIgnoreCase)
+                ? new[] { inventaire }
+                : inventaire.Elements("Personnage");
+
+            foreach (var personnageElement in personnageElements)
             {
-                var personnage = ParsePersonnageFromXml(inventaire);
-                if (personnage != null)
+                try
                 {
-                    ImportOrUpdatePersonnage(personnage);
-                    importedCount++;
+                    var personnage = ParsePersonnageFromXml(personnageElement);
+                    if (personnage != null)
+                    {
+                        ImportOrUpdatePersonnage(personnage);
+                        importedCount++;
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                errors.Add($"Erreur lors de l'import de personnage (inventaire): {ex.Message}");
+                catch (Exception ex)
+                {
+                    errors.Add($"Erreur lors de l'import de personnage (inventaire): {ex.Message}");
+                }
             }
         }
 
@@ -173,6 +222,105 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             catch (Exception ex)
             {
                 errors.Add($"Erreur lors de l'import du template: {ex.Message}");
+            }
+        }
+
+        return importedCount;
+    }
+
+    /// <summary>
+    /// Importe les données de la meilleure escouade
+    /// </summary>
+    private async Task<int> ImportBestSquadAsync(IEnumerable<XElement> bestSquadElements, List<string> errors)
+    {
+        int importedCount = 0;
+
+        foreach (var bestSquad in bestSquadElements)
+        {
+            try
+            {
+                // Import mercenaires
+                var mercenairesElements = bestSquad.Elements("Mercenaire");
+                foreach (var mercElement in mercenairesElements)
+                {
+                    var personnage = ParsePersonnageFromXml(mercElement);
+                    if (personnage != null)
+                    {
+                        ImportOrUpdatePersonnage(personnage);
+                        importedCount++;
+                    }
+                }
+
+                // Import commandant
+                var commandantElement = bestSquad.Element("Commandant");
+                if (commandantElement != null)
+                {
+                    var personnage = ParsePersonnageFromXml(commandantElement);
+                    if (personnage != null)
+                    {
+                        ImportOrUpdatePersonnage(personnage);
+                        importedCount++;
+                    }
+                }
+
+                // Import androides
+                var androidesElements = bestSquad.Elements("Androide");
+                foreach (var androidElement in androidesElements)
+                {
+                    var personnage = ParsePersonnageFromXml(androidElement);
+                    if (personnage != null)
+                    {
+                        ImportOrUpdatePersonnage(personnage);
+                        importedCount++;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"Erreur lors de l'import de la meilleure escouade: {ex.Message}");
+            }
+        }
+
+        return importedCount;
+    }
+
+    /// <summary>
+    /// Importe les données d'historiques
+    /// </summary>
+    private async Task<int> ImportHistoriquesAsync(IEnumerable<XElement> historiqueElements, List<string> errors)
+    {
+        int importedCount = 0;
+
+        foreach (var historiqueElement in historiqueElements)
+        {
+            try
+            {
+                var dateStr = historiqueElement.Element("DateEnregistrement")?.Value;
+                var puissanceStr = historiqueElement.Element("PuissanceTotal")?.Value;
+                var classementStr = historiqueElement.Element("Classement")?.Value;
+                var donneesJson = historiqueElement.Element("DonneesEscouadeJson")?.Value;
+
+                if (string.IsNullOrWhiteSpace(dateStr) || string.IsNullOrWhiteSpace(donneesJson))
+                {
+                    errors.Add("Historique invalide: date ou données manquantes");
+                    continue;
+                }
+
+                var historique = new HistoriqueEscouade
+                {
+                    DateEnregistrement = DateTime.TryParse(dateStr, out var date) ? date : DateTime.UtcNow,
+                    PuissanceTotal = int.TryParse(puissanceStr, out var puissance) ? puissance : 0,
+                    Classement = int.TryParse(classementStr, out var classement) ? classement : null,
+                    DonneesEscouadeJson = donneesJson
+                };
+
+                _context.HistoriquesEscouade.Add(historique);
+                await _context.SaveChangesAsync();
+                importedCount++;
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"Erreur lors de l'import d'un historique: {ex.Message}");
             }
         }
 
@@ -313,6 +461,179 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
         }
 
         return Task.FromResult(memoryStream.ToArray());
+    }
+
+    /// <summary>
+    /// Exporte les données sélectionnées au format PML
+    /// </summary>
+    public async Task<byte[]> ExportPmlAsync(
+        bool exportInventory = true, 
+        bool exportTemplates = true, 
+        bool exportBestSquad = true, 
+        bool exportHistories = true)
+    {
+        var settings = new System.Xml.XmlWriterSettings
+        {
+            Indent = true,
+            Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)
+        };
+
+        using var memoryStream = new MemoryStream();
+        using (var writer = System.Xml.XmlWriter.Create(memoryStream, settings))
+        {
+            writer.WriteStartDocument();
+            writer.WriteStartElement("CharacterManagerPML");
+            writer.WriteAttributeString("version", "1.0");
+            writer.WriteAttributeString("exportDate", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+
+            // Export inventaire
+            if (exportInventory)
+            {
+                writer.WriteStartElement("inventaire");
+                var personnages = await _context.Personnages.ToListAsync();
+                foreach (var personnage in personnages)
+                {
+                    writer.WriteStartElement("Personnage");
+                    writer.WriteElementString("Nom", personnage.Nom);
+                    writer.WriteElementString("Rarete", personnage.Rarete.ToString());
+                    writer.WriteElementString("Type", personnage.Type.ToString());
+                    writer.WriteElementString("Puissance", personnage.Puissance.ToString());
+                    writer.WriteElementString("PA", personnage.PA.ToString());
+                    writer.WriteElementString("PV", personnage.PV.ToString());
+                    writer.WriteElementString("Niveau", personnage.Niveau.ToString());
+                    writer.WriteElementString("Rang", personnage.Rang.ToString());
+                    writer.WriteElementString("Role", personnage.Role.ToString());
+                    writer.WriteElementString("Faction", personnage.Faction.ToString());
+                    writer.WriteElementString("Selectionne", personnage.Selectionne.ToString());
+                    writer.WriteElementString("Description", personnage.Description ?? "");
+                    writer.WriteEndElement();
+                }
+                writer.WriteEndElement();
+            }
+
+            // Export templates
+            if (exportTemplates)
+            {
+                var templates = await _context.Templates.ToListAsync();
+                foreach (var template in templates)
+                {
+                    writer.WriteStartElement("template");
+                    writer.WriteElementString("Nom", template.Nom);
+                    writer.WriteElementString("Description", template.Description ?? "");
+
+                    var personnageIds = template.GetPersonnageIds();
+                    foreach (var personnageId in personnageIds)
+                    {
+                        var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.Id == personnageId);
+                        if (personnage != null)
+                        {
+                            writer.WriteStartElement("Personnage");
+                            writer.WriteElementString("Nom", personnage.Nom);
+                            writer.WriteElementString("Rarete", personnage.Rarete.ToString());
+                            writer.WriteElementString("Puissance", personnage.Puissance.ToString());
+                            writer.WriteElementString("Niveau", personnage.Niveau.ToString());
+                            writer.WriteEndElement();
+                        }
+                    }
+                    writer.WriteEndElement();
+                }
+            }
+
+            // Export meilleure escouade
+            if (exportBestSquad)
+            {
+                writer.WriteStartElement("meilleurEscouade");
+                
+                // Mercenaires (top 10 par puissance)
+                var topMercenaires = await _context.Personnages
+                    .Where(p => p.Type == TypePersonnage.Mercenaire)
+                    .OrderByDescending(p => p.Puissance)
+                    .Take(10)
+                    .ToListAsync();
+                
+                foreach (var merc in topMercenaires)
+                {
+                    writer.WriteStartElement("Mercenaire");
+                    WritePersonnageData(writer, merc);
+                    writer.WriteEndElement();
+                }
+
+                // Commandant (le plus puissant)
+                var topCommandant = await _context.Personnages
+                    .Where(p => p.Type == TypePersonnage.Commandant)
+                    .OrderByDescending(p => p.Puissance)
+                    .FirstOrDefaultAsync();
+                
+                if (topCommandant != null)
+                {
+                    writer.WriteStartElement("Commandant");
+                    WritePersonnageData(writer, topCommandant);
+                    writer.WriteEndElement();
+                }
+
+                // Androides (top 5 par puissance)
+                var topAndroides = await _context.Personnages
+                    .Where(p => p.Type == TypePersonnage.Androïde)
+                    .OrderByDescending(p => p.Puissance)
+                    .Take(5)
+                    .ToListAsync();
+                
+                foreach (var android in topAndroides)
+                {
+                    writer.WriteStartElement("Androide");
+                    WritePersonnageData(writer, android);
+                    writer.WriteEndElement();
+                }
+
+                writer.WriteEndElement();
+            }
+
+            // Export historiques
+            if (exportHistories)
+            {
+                var historiques = await _context.HistoriquesEscouade
+                    .OrderByDescending(h => h.DateEnregistrement)
+                    .Take(50)
+                    .ToListAsync();
+
+                foreach (var historique in historiques)
+                {
+                    writer.WriteStartElement("HistoriqueEscouade");
+                    writer.WriteElementString("DateEnregistrement", historique.DateEnregistrement.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+                    writer.WriteElementString("PuissanceTotal", historique.PuissanceTotal.ToString());
+                    if (historique.Classement.HasValue)
+                    {
+                        writer.WriteElementString("Classement", historique.Classement.Value.ToString());
+                    }
+                    writer.WriteElementString("DonneesEscouadeJson", historique.DonneesEscouadeJson);
+                    writer.WriteEndElement();
+                }
+            }
+
+            writer.WriteEndElement();
+            writer.WriteEndDocument();
+        }
+
+        return memoryStream.ToArray();
+    }
+
+    /// <summary>
+    /// Helper method to write personnage data to XML
+    /// </summary>
+    private static void WritePersonnageData(System.Xml.XmlWriter writer, Personnage personnage)
+    {
+        writer.WriteElementString("Nom", personnage.Nom);
+        writer.WriteElementString("Rarete", personnage.Rarete.ToString());
+        writer.WriteElementString("Type", personnage.Type.ToString());
+        writer.WriteElementString("Puissance", personnage.Puissance.ToString());
+        writer.WriteElementString("PA", personnage.PA.ToString());
+        writer.WriteElementString("PV", personnage.PV.ToString());
+        writer.WriteElementString("Niveau", personnage.Niveau.ToString());
+        writer.WriteElementString("Rang", personnage.Rang.ToString());
+        writer.WriteElementString("Role", personnage.Role.ToString());
+        writer.WriteElementString("Faction", personnage.Faction.ToString());
+        writer.WriteElementString("Selectionne", personnage.Selectionne.ToString());
+        writer.WriteElementString("Description", personnage.Description ?? "");
     }
 
     private void ImportOrUpdatePersonnage(Personnage nouveauPersonnage)

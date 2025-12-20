@@ -20,7 +20,7 @@ public class AppVersionService
 
     public string GetAppVersion()
     {
-        return _configuration["AppInfo:Version"] ?? "Unknown";
+        return _configuration["AppInfo:Version"] ?? "1.0.0";
     }
 
     public string GetAuthor()

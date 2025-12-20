@@ -150,6 +150,52 @@ BELLE;SSR;Mercenaire;3090;143;330;Distance;Sentinelle;8;3;Oui;Syndicat";
     }
 
     [Fact]
+    public async Task ImportCsvAsync_WithBooleanVariants_ShouldParseSelection()
+    {
+        // Arrange
+        var csvContent = @"Personnage;Rareté;Type;Puissance;PA;PV;Action;Role;Niveau;Rang;Selection;Faction
+KAYLEE;SR;Mercenaire;1200;80;200;Distance;Combattante;5;1;True;Pacificateurs";
+
+        var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(csvContent));
+
+        // Act
+        var result = await _csvImportService.ImportCsvAsync(stream);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(1, result.SuccessCount);
+
+        var personnage = _personnageService.GetAll().First();
+        Assert.True(personnage.Selectionne);
+        Assert.Equal(Rarete.SR, personnage.Rarete);
+        Assert.Equal(Faction.Pacificateurs, personnage.Faction);
+    }
+
+    [Fact]
+    public async Task ImportCsvAsync_WithTooFewColumns_ShouldCollectErrors()
+    {
+        // Arrange
+        var csvContent = @"Personnage;Rareté;Type;Puissance;PA;PV;Action;Role;Niveau;Rang;Selection;Faction
+VALID;SR;Mercenaire;800;50;100;Distance;Combattante;3;1;Oui;Syndicat
+INVALID;SSR;Mercenaire"; // Ligne volontairement tronquée
+
+        var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(csvContent));
+
+        // Act
+        var result = await _csvImportService.ImportCsvAsync(stream);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(1, result.SuccessCount);
+        Assert.NotEmpty(result.Errors);
+        Assert.Contains(result.Errors, e => e.Contains("colonnes insuffisantes", StringComparison.OrdinalIgnoreCase));
+
+        var personnages = _personnageService.GetAll();
+        Assert.Single(personnages);
+        Assert.Equal("VALID", personnages.First().Nom);
+    }
+
+    [Fact]
     public async Task ImportCsvAsync_WithDifferentFactions_ShouldMapCorrectly()
     {
         // Arrange

@@ -213,6 +213,133 @@ public class PmlImportServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task ImportPmlAsync_WithBestSquad_ShouldImportAllRoles()
+    {
+        // Arrange
+        var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<CharacterManagerPML version=""1.0"" exportDate=""2025-12-20T15:30:00Z"">
+  <meilleurEscouade>
+    <Mercenaire>
+      <Nom>ALYA</Nom>
+      <Rarete>SR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1500</Puissance>
+      <PA>90</PA>
+      <PV>220</PV>
+      <Niveau>7</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>true</Selectionne>
+    </Mercenaire>
+    <Commandant>
+      <Nom>COMMANDRA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Commandant</Type>
+      <Puissance>4200</Puissance>
+      <PA>200</PA>
+      <PV>800</PV>
+      <Niveau>20</Niveau>
+      <Rang>4</Rang>
+      <Role>Commandant</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>false</Selectionne>
+    </Commandant>
+    <Androide>
+      <Nom>OMEGA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>3100</Puissance>
+      <PA>50</PA>
+      <PV>180</PV>
+      <Niveau>10</Niveau>
+      <Rang>2</Rang>
+      <Role>Androide</Role>
+      <Faction>HommesLibres</Faction>
+      <Selectionne>false</Selectionne>
+    </Androide>
+  </meilleurEscouade>
+</CharacterManagerPML>";
+
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
+
+        // Act
+        var result = await _pmlImportService.ImportPmlAsync(stream);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(3, result.SuccessCount);
+
+        Assert.NotNull(_context.Personnages.FirstOrDefault(p => p.Nom == "ALYA" && p.Type == TypePersonnage.Mercenaire));
+        Assert.NotNull(_context.Personnages.FirstOrDefault(p => p.Nom == "COMMANDRA" && p.Type == TypePersonnage.Commandant));
+        Assert.NotNull(_context.Personnages.FirstOrDefault(p => p.Nom == "OMEGA" && p.Type == TypePersonnage.Androïde));
+    }
+
+    [Fact]
+    public async Task ImportPmlAsync_WithHistories_ShouldPersistEntries()
+    {
+        // Arrange
+        var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<CharacterManagerPML version=""1.0"" exportDate=""2025-12-20T15:30:00Z"">
+  <HistoriqueEscouade>
+    <DateEnregistrement>2025-01-01T10:00:00Z</DateEnregistrement>
+    <PuissanceTotal>5000</PuissanceTotal>
+    <Classement>12</Classement>
+    <DonneesEscouadeJson>{""escouade"":1}</DonneesEscouadeJson>
+  </HistoriqueEscouade>
+  <HistoriqueEscouade>
+    <DateEnregistrement>2025-01-02T11:00:00Z</DateEnregistrement>
+    <PuissanceTotal>6000</PuissanceTotal>
+    <DonneesEscouadeJson>{""escouade"":2}</DonneesEscouadeJson>
+  </HistoriqueEscouade>
+</CharacterManagerPML>";
+
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
+
+        // Act
+        var result = await _pmlImportService.ImportPmlAsync(stream);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(2, result.SuccessCount);
+        Assert.Equal(2, _context.HistoriquesEscouade.Count());
+    }
+
+    [Fact]
+    public async Task ImportPmlAsync_WithFileName_ShouldPersistLastImportedName()
+    {
+        // Arrange
+        var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<InventairePML version=""1.0"" exportDate=""2025-12-20T15:30:00Z"">
+  <inventaire>
+    <Personnage>
+      <Nom>NOVA</Nom>
+      <Rarete>SR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1200</Puissance>
+      <PA>60</PA>
+      <PV>150</PV>
+      <Niveau>6</Niveau>
+      <Rang>2</Rang>
+      <Role>Combattante</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>true</Selectionne>
+    </Personnage>
+  </inventaire>
+</InventairePML>";
+
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
+
+        // Act
+        var result = await _pmlImportService.ImportPmlAsync(stream, fileName: "test-import.pml");
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        var lastFile = await _pmlImportService.GetLastImportedFileName();
+        Assert.Equal("test-import.pml", lastFile);
+    }
+
+    [Fact]
     public async Task ExporterInventairePmlAsync_ShouldExportPersonnages()
     {
         // Arrange
