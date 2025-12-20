@@ -27,7 +27,7 @@
     "history": "Historique",
     "bestSquad": "Meilleure Escouade",
     "settings": "Paramètres",
-    "importPml": "Import PML",
+    "importExportPml": "Import / Export PML",
     "manageUsers": "Gestion utilisateurs"
   },
   "login": {

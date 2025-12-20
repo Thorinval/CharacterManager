@@ -27,7 +27,7 @@
     "history": "History",
     "bestSquad": "Best Squad",
     "settings": "Settings",
-    "importPml": "Import PML",
+    "importExportPml": "Import / Export PML",
     "manageUsers": "User Management"
   },
   "login": {
