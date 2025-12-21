@@ -147,7 +147,11 @@ else
                     </div>
                     <div class="mb-3">
                         <label for="puissance" class="form-label">Puissance</label>
-                        <input type="number" class="form-control" id="puissance" @bind="currentPersonnage.Puissance" />
+                        <div class="input-group input-group-sm">
+                            <button class="btn btn-outline-secondary" type="button" @onclick="() => ChangePuissanceEscouade(-1)" @onclick:stopPropagation="true">-</button>
+                            <input type="number" class="form-control text-center" id="puissance" @bind="currentPersonnage.Puissance" />
+                            <button class="btn btn-outline-secondary" type="button" @onclick="() => ChangePuissanceEscouade(1)" @onclick:stopPropagation="true">+</button>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="type" class="form-label">Type</label>

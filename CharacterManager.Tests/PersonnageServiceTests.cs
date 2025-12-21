@@ -149,9 +149,6 @@ public class PersonnageServiceTests : IDisposable
             PV = 25,
             Role = Role.Combattante,
             Faction = Faction.Pacificateurs,
-            ImageUrlDetail = "new-url.jpg",
-            ImageUrlPreview = "new-url_small_portrait.png",
-            ImageUrlSelected = "new-url_small_select.png",
             Description = "new desc",
             Selectionne = true
         };
@@ -181,9 +178,6 @@ public class PersonnageServiceTests : IDisposable
             PV = 20,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            ImageUrlDetail = "url.jpg",
-            ImageUrlPreview = "url_small_portrait.png",
-            ImageUrlSelected = "url_small_select.png",
             Description = "desc",
             Selectionne = false
         };
@@ -205,9 +199,6 @@ public class PersonnageServiceTests : IDisposable
             PV = 20,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            ImageUrlDetail = "url.jpg",
-            ImageUrlPreview = "url_small_portrait.png",
-            ImageUrlSelected = "url_small_select.png",
             Description = "desc",
             Selectionne = false
         };
@@ -240,9 +231,6 @@ public class PersonnageServiceTests : IDisposable
             PV = 20,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            ImageUrlDetail = "url.jpg",
-            ImageUrlPreview = "url_small_portrait.png",
-            ImageUrlSelected = "url_small_select.png",
             Description = "desc",
             Selectionne = false
         };
@@ -264,9 +252,6 @@ public class PersonnageServiceTests : IDisposable
             PV = 60,
             Role = Role.Combattante,
             Faction = Faction.Pacificateurs,
-            ImageUrlDetail = "new-url.jpg",
-            ImageUrlPreview = "new-url_small_portrait.png",
-            ImageUrlSelected = "new-url_small_select.png",
             Description = "new desc",
             Selectionne = true
         };

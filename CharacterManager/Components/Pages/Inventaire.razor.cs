@@ -31,9 +31,6 @@ public partial class Inventaire : IAsyncDisposable
     private bool showModal = false;
     private bool isEditing = false;
     private Personnage currentPersonnage = new();
-    private IBrowserFile? selectedPortraitFile = null;
-    private IBrowserFile? selectedSelectionFile = null;
-    private string previewSelectionImage = string.Empty;
     
     // Tri
     private string sortColumn = "Nom";
@@ -94,6 +91,16 @@ public partial class Inventaire : IAsyncDisposable
     private string GetViewModeClass(string mode)
     {
         return viewMode == mode ? "btn-primary" : "btn-outline-secondary";
+    }
+
+    private async Task ChangePuissance(int personnageId, int delta)
+    {
+        var personnage = personnagesFiltres.FirstOrDefault(p => p.Id == personnageId);
+        if (personnage != null)
+        {
+            int newValue = Math.Max(0, personnage.Puissance + delta);
+            await Task.Run(() => UpdatePersonnageField(personnageId, "Puissance", newValue.ToString()));
+        }
     }
 
     private string GetContainerClass()
@@ -385,12 +392,6 @@ public partial class Inventaire : IAsyncDisposable
             PersonnageService.Add(currentPersonnage);
         }
         
-        // Sauvegarder les images si elles ont été uploadées
-        if (selectedPortraitFile != null || selectedSelectionFile != null)
-        {
-            _ = SaveImagesAsync();
-        }
-        
         _ = InvokeAsync(async () =>
         {
             await LoadPersonnagesAsync();
@@ -398,94 +399,10 @@ public partial class Inventaire : IAsyncDisposable
         });
     }
 
-    private async Task HandlePortraitUpload(InputFileChangeEventArgs e)
-    {
-        selectedPortraitFile = e.File;
-        
-        // Créer un aperçu temporaire
-        if (selectedPortraitFile != null)
-        {
-            var buffer = new byte[selectedPortraitFile.Size];
-            await selectedPortraitFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).ReadExactlyAsync(buffer);
-            var imageDataUrl = $"data:{selectedPortraitFile.ContentType};base64,{Convert.ToBase64String(buffer)}";
-            // L'aperçu temporaire - l'URL réelle sera calculée automatiquement à partir du nom
-            StateHasChanged();
-        }
-    }
-
-    private async Task HandleSelectionUpload(InputFileChangeEventArgs e)
-    {
-        selectedSelectionFile = e.File;
-        
-        // Créer un aperçu temporaire
-        if (selectedSelectionFile != null)
-        {
-            var buffer = new byte[selectedSelectionFile.Size];
-            await selectedSelectionFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).ReadExactlyAsync(buffer);
-            var imageDataUrl = $"data:{selectedSelectionFile.ContentType};base64,{Convert.ToBase64String(buffer)}";
-            previewSelectionImage = imageDataUrl;
-            StateHasChanged();
-        }
-    }
-
-    private async Task SaveImagesAsync()
-    {
-        if (string.IsNullOrEmpty(currentPersonnage.Nom))
-            return;
-
-        try
-        {
-            var personnageFolder = Path.Combine(WebHostEnvironment.WebRootPath, "images", "personnages");
-            
-            // Créer le dossier s'il n'existe pas
-            if (!Directory.Exists(personnageFolder))
-            {
-                Directory.CreateDirectory(personnageFolder);
-            }
-
-            // Sauvegarder l'image portrait
-            if (selectedPortraitFile != null)
-            {
-                var portraitFileName = $"{currentPersonnage.Nom.ToLower().Replace(" ", "_")}{AppConstants.ImageSuffixes.SmallPortrait}{AppConstants.FileExtensions.Png}";
-                var portraitPath = Path.Combine(personnageFolder, portraitFileName);
-
-                await using var portraitStream = new FileStream(portraitPath, FileMode.Create);
-                await selectedPortraitFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(portraitStream);
-                // L'URL sera calculée automatiquement à partir du nom du personnage
-            }
-
-            // Sauvegarder l'image de sélection
-            if (selectedSelectionFile != null)
-            {
-                var selectionFileName = $"{currentPersonnage.Nom.ToLower().Replace(" ", "_")}{AppConstants.ImageSuffixes.SmallSelect}{AppConstants.FileExtensions.Png}";
-                var selectionPath = Path.Combine(personnageFolder, selectionFileName);
-
-                await using var selectionStream = new FileStream(selectionPath, FileMode.Create);
-                await selectedSelectionFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(selectionStream);
-
-                // Si vous avez un champ ImageUrlSelect dans le modèle Personnage, mettez-le à jour ici
-                // currentPersonnage.ImageUrlSelect = $"{AppConstants.Paths.ImagesPersonnages}/{selectionFileName}";
-            }
-
-            // Mettre à jour le personnage dans la base de données
-            PersonnageService.Update(currentPersonnage);
-            
-            selectedPortraitFile = null;
-            selectedSelectionFile = null;
-        }
-        catch (Exception ex)
-        {
-            await JSRuntime.InvokeVoidAsync("console.error", $"Erreur lors de la sauvegarde des images: {ex.Message}");
-        }
-    }
-
     private void CloseModal()
     {
         showModal = false;
         currentPersonnage = new Personnage();
-        selectedPortraitFile = null;
-        selectedSelectionFile = null;
-        previewSelectionImage = string.Empty;
         StateHasChanged();
     }
 

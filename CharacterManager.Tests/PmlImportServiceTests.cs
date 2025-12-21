@@ -48,9 +48,6 @@ public class PmlImportServiceTests : IDisposable
             PV = 509,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            ImageUrlDetail = "/images/regina.png",
-            ImageUrlPreview = "/images/regina_small_portrait.png",
-            ImageUrlSelected = "/images/regina_small_select.png",
             Description = "SSR Mercenaire"
         });
 
@@ -66,9 +63,6 @@ public class PmlImportServiceTests : IDisposable
             PV = 20,
             Role = Role.Androide,
             Faction = Faction.Inconnu,
-            ImageUrlDetail = "/images/isabella.png",
-            ImageUrlPreview = "/images/isabella_small_portrait.png",
-            ImageUrlSelected = "/images/isabella_small_select.png",
             Description = "SSR Androide"
         });
 

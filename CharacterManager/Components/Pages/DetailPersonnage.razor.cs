@@ -204,4 +204,9 @@ public partial class DetailPersonnage
         };
     }
 
+    private void ChangePuissanceDetail(int delta)
+    {
+        editedPerso.Puissance = Math.Max(0, editedPerso.Puissance + delta);
+    }
+
 }

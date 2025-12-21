@@ -140,4 +140,9 @@ public partial class Escouade
         var physicalPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
         return File.Exists(physicalPath);
     }
+
+    private void ChangePuissanceEscouade(int delta)
+    {
+        currentPersonnage.Puissance = Math.Max(0, currentPersonnage.Puissance + delta);
+    }
 }
