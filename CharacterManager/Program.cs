@@ -88,6 +88,40 @@ using (var scope = app.Services.CreateScope())
         catch { }
         return false;
     }
+
+    void EnsureLuciePieceAspectColumns()
+    {
+        if (!TableExists("Pieces"))
+        {
+            return;
+        }
+
+        // Use empty defaults to avoid braces parsing in EF, then hydrate values explicitly.
+        const string hydratedTactiques = "{\"Nom\":\"Aspects tactiques\",\"Puissance\":0,\"Bonus\":[]}";
+        const string hydratedStrategiques = "{\"Nom\":\"Aspects stratégiques\",\"Puissance\":0,\"Bonus\":[]}";
+
+        try
+        {
+            if (!ColumnExists("Pieces", "AspectsTactiques"))
+            {
+                db.Database.ExecuteSqlRaw("ALTER TABLE Pieces ADD COLUMN AspectsTactiques TEXT NOT NULL DEFAULT '';");
+                Console.WriteLine("[DB] Added AspectsTactiques column to Pieces.");
+            }
+
+            if (!ColumnExists("Pieces", "AspectsStrategiques"))
+            {
+                db.Database.ExecuteSqlRaw("ALTER TABLE Pieces ADD COLUMN AspectsStrategiques TEXT NOT NULL DEFAULT '';");
+                Console.WriteLine("[DB] Added AspectsStrategiques column to Pieces.");
+            }
+
+            db.Database.ExecuteSql($"UPDATE Pieces SET AspectsTactiques = {hydratedTactiques} WHERE AspectsTactiques IS NULL OR AspectsTactiques = '';");
+            db.Database.ExecuteSql($"UPDATE Pieces SET AspectsStrategiques = {hydratedStrategiques} WHERE AspectsStrategiques IS NULL OR AspectsStrategiques = '';");
+        }
+        catch (SqliteException ex)
+        {
+            Console.WriteLine($"[DB] Error ensuring Lucie aspects columns: {ex.Message}");
+        }
+    }
     try
     {
         // Get pending migrations
@@ -96,6 +130,7 @@ using (var scope = app.Services.CreateScope())
         {
             // Apply pending migrations
             db.Database.Migrate();
+            EnsureLuciePieceAspectColumns();
         }
         else
         {
@@ -137,6 +172,31 @@ using (var scope = app.Services.CreateScope())
             );";
             db.Database.ExecuteSqlRaw(createHistoriquesEscouadeSql);
             Console.WriteLine("[DB] Ensured HistoriquesEscouade table exists.");
+
+            // Hotfix: Ensure 'LucieHouses' table exists
+            var createLucieHousesSql = @"CREATE TABLE IF NOT EXISTS LucieHouses (
+                Id INTEGER NOT NULL CONSTRAINT PK_LucieHouses PRIMARY KEY AUTOINCREMENT
+            );";
+            db.Database.ExecuteSqlRaw(createLucieHousesSql);
+            Console.WriteLine("[DB] Ensured LucieHouses table exists.");
+
+            // Hotfix: Ensure 'Pieces' table exists
+            var createPiecesSql = @"CREATE TABLE IF NOT EXISTS Pieces (
+                Id INTEGER NOT NULL CONSTRAINT PK_Pieces PRIMARY KEY AUTOINCREMENT,
+                Nom TEXT NOT NULL,
+                Niveau INTEGER NOT NULL,
+                Puissance INTEGER NOT NULL,
+                Selectionnee INTEGER NOT NULL,
+                BonusTactiques TEXT NOT NULL,
+                BonusStrategiques TEXT NOT NULL,
+                AspectsTactiques TEXT NOT NULL,
+                AspectsStrategiques TEXT NOT NULL,
+                LucieHouseId INTEGER,
+                FOREIGN KEY (LucieHouseId) REFERENCES LucieHouses (Id) ON DELETE CASCADE
+            );";
+            db.Database.ExecuteSqlRaw(createPiecesSql);
+            Console.WriteLine("[DB] Ensured Pieces table exists.");
+            EnsureLuciePieceAspectColumns();
 
                 // Ensure Profiles table exists
                 var createProfilesSql = @"CREATE TABLE IF NOT EXISTS Profiles (

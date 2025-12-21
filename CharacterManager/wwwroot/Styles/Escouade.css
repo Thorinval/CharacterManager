@@ -79,6 +79,17 @@
     display: block;
 }
 
+.lucie-piece-card {
+    background: #fff8e1;
+    border-color: #e0c06b;
+}
+
+.lucie-piece-selected {
+    background: linear-gradient(135deg, #f4d03f 0%, #c39e1d 100%) !important;
+    border: 2px solid #d4af37 !important;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+}
+
 /* Style spécifique pour le bouton retour dans l'escouade */
 .escouade-header .back-button {
     position: absolute;

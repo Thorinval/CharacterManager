@@ -32,12 +32,14 @@ public partial class ImportExportPML
     private bool importTemplates = false;
     private bool importBestSquad = false;
     private bool importHistories = false;
+    private bool importLucieHouse = false;
 
     // Export checkboxes
     private bool exportInventory = true;
     private bool exportTemplates = false;
     private bool exportBestSquad = false;
     private bool exportHistories = false;
+    private bool exportLucieHouse = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -52,12 +54,12 @@ public partial class ImportExportPML
 
     private bool HasSelectedImportTypes()
     {
-        return importInventory || importTemplates || importBestSquad || importHistories;
+        return importInventory || importTemplates || importBestSquad || importHistories || importLucieHouse;
     }
 
     private bool HasSelectedExportTypes()
     {
-        return exportInventory || exportTemplates || exportBestSquad || exportHistories;
+        return exportInventory || exportTemplates || exportBestSquad || exportHistories || exportLucieHouse;
     }
 
     private async Task HandleImport()
@@ -77,7 +79,8 @@ public partial class ImportExportPML
                     importInventory,
                     importTemplates,
                     importBestSquad,
-                    importHistories);
+                    importHistories,
+                    importLucieHouse);
                 importComplete = true;
                 
                 // Rafraîchir le nom du dernier fichier importé
@@ -111,7 +114,8 @@ public partial class ImportExportPML
                 exportInventory,
                 exportTemplates,
                 exportBestSquad,
-                exportHistories);
+                exportHistories,
+                exportLucieHouse);
 
             // Generate filename with timestamp
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");

@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Components;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
 using CharacterManager.Server.Constants;
+using CharacterManager.Server.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.Sqlite;
 
 public partial class MeilleurEscouade
 {
@@ -13,6 +16,10 @@ public partial class MeilleurEscouade
     private Personnage? topCommandant;
     private List<Personnage> topAndroides = new();
     private int puissanceMax = 0;
+    private List<Piece> luciePieces = new();
+
+    [Inject]
+    public ApplicationDbContext DbContext { get; set; } = null!;
 
     protected override void OnInitialized()
     {
@@ -30,6 +37,21 @@ public partial class MeilleurEscouade
         topCommandant = PersonnageService.GetTopCommandant();
         topAndroides = PersonnageService.GetTopAndroides(3).ToList();
         puissanceMax = PersonnageService.GetPuissanceMaxEscouade();
+        try
+        {
+            var lucie = DbContext.LucieHouses
+                .Include(l => l.Pieces)
+                .FirstOrDefault();
+            luciePieces = lucie?.Pieces.Where(p => p.Selectionnee).ToList() ?? new();
+        }
+        catch (SqliteException ex) when (ex.Message.Contains("no such column", StringComparison.OrdinalIgnoreCase))
+        {
+            EnsureLuciePieceAspectColumns();
+            var lucie = DbContext.LucieHouses
+                .Include(l => l.Pieces)
+                .FirstOrDefault();
+            luciePieces = lucie?.Pieces.Where(p => p.Selectionnee).ToList() ?? new();
+        }
         StateHasChanged();
     }
     
@@ -99,5 +121,47 @@ public partial class MeilleurEscouade
     {
         var physicalPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
         return File.Exists(physicalPath);
+    }
+
+    private static int GetPiecePower(Piece piece) => piece.Puissance;
+
+    private void EnsureLuciePieceAspectColumns()
+    {
+        try
+        {
+            const string hydratedTactiques = "{\"Nom\":\"Aspects tactiques\",\"Puissance\":0,\"Bonus\":[]}";
+            const string hydratedStrategiques = "{\"Nom\":\"Aspects stratégiques\",\"Puissance\":0,\"Bonus\":[]}";
+
+            using var conn = (SqliteConnection)DbContext.Database.GetDbConnection();
+            if (conn.State != System.Data.ConnectionState.Open)
+                conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "PRAGMA table_info(Pieces);";
+            using var reader = cmd.ExecuteReader();
+            var hasTactiques = false;
+            var hasStrategiques = false;
+            while (reader.Read())
+            {
+                var name = reader.GetString(1);
+                if (string.Equals(name, "AspectsTactiques", StringComparison.OrdinalIgnoreCase)) hasTactiques = true;
+                if (string.Equals(name, "AspectsStrategiques", StringComparison.OrdinalIgnoreCase)) hasStrategiques = true;
+            }
+
+            if (!hasTactiques)
+            {
+                DbContext.Database.ExecuteSqlRaw("ALTER TABLE Pieces ADD COLUMN AspectsTactiques TEXT NOT NULL DEFAULT '';");
+            }
+            if (!hasStrategiques)
+            {
+                DbContext.Database.ExecuteSqlRaw("ALTER TABLE Pieces ADD COLUMN AspectsStrategiques TEXT NOT NULL DEFAULT '';");
+            }
+
+            DbContext.Database.ExecuteSql($"UPDATE Pieces SET AspectsTactiques = {hydratedTactiques} WHERE AspectsTactiques IS NULL OR AspectsTactiques = '';");
+            DbContext.Database.ExecuteSql($"UPDATE Pieces SET AspectsStrategiques = {hydratedStrategiques} WHERE AspectsStrategiques IS NULL OR AspectsStrategiques = '';");
+        }
+        catch (SqliteException ex)
+        {
+            Console.WriteLine($"[MeilleurEscouade] Failed to ensure aspect columns: {ex.Message}");
+        }
     }
 }

@@ -8,6 +8,10 @@ using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
 using CharacterManager.Server.Constants;
 using CharacterManager.Components;
+using CharacterManager.Server.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.Sqlite;
+using System.Data.Common;
 
 public partial class Inventaire : IAsyncDisposable
 {
@@ -26,8 +30,12 @@ public partial class Inventaire : IAsyncDisposable
     [Inject]
     public IWebHostEnvironment WebHostEnvironment { get; set; } = null!;
 
+    [Inject]
+    public ApplicationDbContext DbContext { get; set; } = null!;
+
     private List<Personnage> personnages = new();
     private List<Personnage> personnagesFiltres = new();
+    private LucieHouse? lucieHouse;
     private bool showModal = false;
     private bool isEditing = false;
     private Personnage currentPersonnage = new();
@@ -60,6 +68,7 @@ public partial class Inventaire : IAsyncDisposable
     protected override async Task OnInitializedAsync()
     {
         await LoadPersonnagesAsync();
+        await LoadLucieHouseAsync();
         // Charger un template si présent dans l'URL
         var uri = new Uri(Navigation.Uri);
         var query = uri.Query.TrimStart('?');
@@ -504,6 +513,227 @@ public partial class Inventaire : IAsyncDisposable
     private Task<Personnage?> GetPersonnageById(int id)
     {
         return Task.FromResult(PersonnageService.GetById(id));
+    }
+
+    private async Task LoadLucieHouseAsync()
+    {
+        await EnsureLuciePieceAspectColumnsAsync(force: false);
+
+        try
+        {
+            lucieHouse = await DbContext.LucieHouses
+                .Include(l => l.Pieces)
+                .FirstOrDefaultAsync();
+        }
+        catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.Message.Contains("no such column", StringComparison.OrdinalIgnoreCase))
+        {
+            Console.WriteLine("[LucieHouse] Missing aspect columns detected at query time; applying hotfix and retrying.");
+            await EnsureLuciePieceAspectColumnsAsync(force: true);
+            DbContext.ChangeTracker.Clear();
+            try
+            {
+                lucieHouse = await DbContext.LucieHouses
+                    .Include(l => l.Pieces)
+                    .FirstOrDefaultAsync();
+            }
+            catch (Microsoft.Data.Sqlite.SqliteException)
+            {
+                // Fallback: raw loader without relying on aspect columns mapping
+                Console.WriteLine("[LucieHouse] Fallback raw loader engaged.");
+                lucieHouse = await LoadLucieHouseFallbackRawAsync();
+            }
+        }
+
+        if (lucieHouse == null)
+        {
+            lucieHouse = LucieHouse.CreerDefaut();
+            DbContext.LucieHouses.Add(lucieHouse);
+            await DbContext.SaveChangesAsync();
+        }
+    }
+
+    private async Task<LucieHouse?> LoadLucieHouseFallbackRawAsync()
+    {
+        await using var conn = DbContext.Database.GetDbConnection();
+        await conn.OpenAsync();
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT Id FROM LucieHouses ORDER BY Id LIMIT 1";
+        var lucieIdObj = await cmd.ExecuteScalarAsync();
+
+        if (lucieIdObj == null)
+        {
+            return null;
+        }
+
+        var lucieId = Convert.ToInt32(lucieIdObj);
+        var result = new LucieHouse { Id = lucieId, Pieces = new List<Piece>() };
+
+        await using var piecesCmd = conn.CreateCommand();
+        piecesCmd.CommandText = "SELECT Id, Nom, Niveau, Puissance, Selectionnee FROM Pieces WHERE LucieHouseId = @id";
+        var p = piecesCmd.CreateParameter();
+        p.ParameterName = "@id";
+        p.Value = lucieId;
+        piecesCmd.Parameters.Add(p);
+
+        await using var reader = await piecesCmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            var piece = new Piece
+            {
+                Id = reader.GetInt32(0),
+                Nom = reader.GetString(1),
+                Niveau = reader.GetInt32(2),
+                Selectionnee = reader.GetInt32(4) != 0,
+            };
+            // Initialize aspects to safe defaults
+            piece.AspectsTactiques.Nom = "Aspects tactiques";
+            piece.AspectsTactiques.Puissance = 0;
+            piece.AspectsStrategiques.Nom = "Aspects stratégiques";
+            piece.AspectsStrategiques.Puissance = 0;
+            result.Pieces.Add(piece);
+        }
+
+        return result;
+    }
+
+    private async Task EnsureLuciePieceAspectColumnsAsync(bool force)
+    {
+        try
+        {
+            // Quick guard in case table does not exist yet.
+            if (!await TableExistsAsync("Pieces"))
+            {
+                return;
+            }
+
+            const string hydratedTactiques = "{\"Nom\":\"Aspects tactiques\",\"Puissance\":0,\"Bonus\":[]}";
+            const string hydratedStrategiques = "{\"Nom\":\"Aspects stratégiques\",\"Puissance\":0,\"Bonus\":[]}";
+
+            if (force || !await ColumnExistsAsync("Pieces", "AspectsTactiques"))
+            {
+                await DbContext.Database.ExecuteSqlRawAsync("ALTER TABLE Pieces ADD COLUMN AspectsTactiques TEXT NOT NULL DEFAULT '';");
+            }
+
+            if (force || !await ColumnExistsAsync("Pieces", "AspectsStrategiques"))
+            {
+                await DbContext.Database.ExecuteSqlRawAsync("ALTER TABLE Pieces ADD COLUMN AspectsStrategiques TEXT NOT NULL DEFAULT '';");
+            }
+
+            // Parameterize values to avoid EF1002 warnings
+            await DbContext.Database.ExecuteSqlAsync($"UPDATE Pieces SET AspectsTactiques = {hydratedTactiques} WHERE AspectsTactiques IS NULL OR AspectsTactiques = '';");
+            await DbContext.Database.ExecuteSqlAsync($"UPDATE Pieces SET AspectsStrategiques = {hydratedStrategiques} WHERE AspectsStrategiques IS NULL OR AspectsStrategiques = '';");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[LucieHouse] Column ensure failed: {ex.Message}");
+        }
+    }
+
+    private async Task<bool> ColumnExistsAsync(string table, string column)
+    {
+        // Skip preliminary EF execution to avoid EF1002; use manual reader below.
+
+        try
+        {
+            await using var conn = DbContext.Database.GetDbConnection();
+            await conn.OpenAsync();
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = $"PRAGMA table_info({table});";
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                var name = reader.GetString(1);
+                if (string.Equals(name, column, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+        }
+        catch
+        {
+        }
+        return false;
+    }
+
+    private async Task<bool> TableExistsAsync(string table)
+    {
+        try
+        {
+            await using var conn = DbContext.Database.GetDbConnection();
+            await conn.OpenAsync();
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name=@name;";
+            var param = cmd.CreateParameter();
+            param.ParameterName = "@name";
+            param.Value = table;
+            cmd.Parameters.Add(param);
+            var result = await cmd.ExecuteScalarAsync();
+            return result != null;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private async Task UpdatePieceNiveau(int pieceId, int delta)
+    {
+        if (lucieHouse == null) return;
+
+        var piece = lucieHouse.Pieces.FirstOrDefault(p => p.Id == pieceId);
+        if (piece != null)
+        {
+            await EnsureLuciePieceAspectColumnsAsync(force: true);
+            piece.Niveau = Math.Max(1, piece.Niveau + delta);
+            DbContext.Pieces.Update(piece);
+            await DbContext.SaveChangesAsync();
+            await InvokeAsync(StateHasChanged);
+            toastRef?.Show($"{piece.Nom} - Niveau mis à jour: {piece.Niveau}", "success");
+        }
+    }
+
+    private async Task UpdatePiecePuissance(int pieceId, string value)
+    {
+        if (lucieHouse == null) return;
+
+        var piece = lucieHouse.Pieces.FirstOrDefault(p => p.Id == pieceId);
+        if (piece != null && int.TryParse(value, out var puissance))
+        {
+            await EnsureLuciePieceAspectColumnsAsync(force: true);
+            DbContext.Pieces.Update(piece);
+            await DbContext.SaveChangesAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task TogglePieceSelection(int pieceId)
+    {
+        if (lucieHouse == null) return;
+
+        var piece = lucieHouse.Pieces.FirstOrDefault(p => p.Id == pieceId);
+        if (piece == null) return;
+
+        if (piece.Selectionnee)
+        {
+            piece.Selectionnee = false;
+        }
+        else
+        {
+            if (lucieHouse.PeutSelectionner())
+            {
+                piece.Selectionnee = true;
+            }
+            else
+            {
+                toastRef?.Show($"Maximum {LucieHouse.MaxPiecesSelectionnees} pièces peuvent être sélectionnées", "warning");
+                return;
+            }
+        }
+
+        await EnsureLuciePieceAspectColumnsAsync(force: true);
+        DbContext.Pieces.Update(piece);
+        await DbContext.SaveChangesAsync();
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task SaveTemplate()

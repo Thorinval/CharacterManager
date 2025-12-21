@@ -23,7 +23,8 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
     /// </summary>
     public async Task<ImportResult> ImportPmlAsync(Stream pmlStream, string fileName = "", 
         bool importInventory = true, bool importTemplates = true, 
-        bool importBestSquad = true, bool importHistories = true)
+        bool importBestSquad = true, bool importHistories = true, 
+        bool importLucieHouse = true)
     {
         var result = new ImportResult();
         var errors = new List<string>();
@@ -86,6 +87,16 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                 if (historiqueElements.Any())
                 {
                     result.SuccessCount += await ImportHistoriquesAsync(historiqueElements, errors);
+                }
+            }
+
+            // Traiter la section Lucie House
+            if (importLucieHouse)
+            {
+                var lucieHouseElement = doc.Root.Element("LucieHouse");
+                if (lucieHouseElement != null)
+                {
+                    result.SuccessCount += await ImportLucieHouseAsync(lucieHouseElement, errors);
                 }
             }
 
@@ -328,6 +339,96 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
     }
 
     /// <summary>
+    /// Importe les données de la Lucie House
+    /// </summary>
+    private async Task<int> ImportLucieHouseAsync(XElement lucieHouseElement, List<string> errors)
+    {
+        int importedCount = 0;
+
+        try
+        {
+            var lucieHouse = new LucieHouse();
+            var piecesElements = lucieHouseElement.Elements("Piece");
+
+            foreach (var pieceElement in piecesElements)
+            {
+                try
+                {
+                    var nom = pieceElement.Element("Nom")?.Value;
+                    if (string.IsNullOrWhiteSpace(nom))
+                        continue;
+
+                    var piece = new Piece
+                    {
+                        Nom = nom,
+                        Niveau = int.TryParse(pieceElement.Element("Niveau")?.Value, out var niveau) ? niveau : 1,
+                        Selectionnee = bool.TryParse(pieceElement.Element("Selectionnee")?.Value, out var sel) && sel
+                    };
+
+                    var puissanceImportee = int.TryParse(pieceElement.Element("Puissance")?.Value, out var puissance) ? puissance : (int?)null;
+
+                    // Parser les bonus tactiques
+                    var bonusTactiquesElement = pieceElement.Element("BonusTactiques");
+                    if (bonusTactiquesElement != null)
+                    {
+                        piece.AspectsTactiques.Bonus = bonusTactiquesElement.Elements("Bonus")
+                            .Select(b => b.Value)
+                            .Where(b => !string.IsNullOrWhiteSpace(b))
+                            .ToList();
+                        piece.AspectsTactiques.Puissance = piece.AspectsTactiques.Bonus.Count;
+                    }
+
+                    // Parser les bonus stratégiques
+                    var bonusStrategiquesElement = pieceElement.Element("BonusStrategiques");
+                    if (bonusStrategiquesElement != null)
+                    {
+                        piece.AspectsStrategiques.Bonus = bonusStrategiquesElement.Elements("Bonus")
+                            .Select(b => b.Value)
+                            .Where(b => !string.IsNullOrWhiteSpace(b))
+                            .ToList();
+                        piece.AspectsStrategiques.Puissance = piece.AspectsStrategiques.Bonus.Count;
+                    }
+
+                    // Si une puissance totale est fournie, conserver la valeur maximale
+                    if (puissanceImportee.HasValue && puissanceImportee.Value > piece.Puissance)
+                    {
+                        piece.AspectsTactiques.Puissance += Math.Max(0, puissanceImportee.Value - piece.Puissance);
+                    }
+
+                    lucieHouse.Pieces.Add(piece);
+                    importedCount++;
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"Erreur lors de l'import d'une pièce Lucie House: {ex.Message}");
+                }
+            }
+
+            // Valider que max 2 pièces sont sélectionnées
+            if (lucieHouse.NombrePiecesSelectionnees > LucieHouse.MaxPiecesSelectionnees)
+            {
+                errors.Add($"Attention: Plus de {LucieHouse.MaxPiecesSelectionnees} pièces sélectionnées dans l'import");
+            }
+
+            // Sauvegarder dans la base de données
+            var existingLucieHouse = await _context.LucieHouses.Include(l => l.Pieces).FirstOrDefaultAsync();
+            if (existingLucieHouse != null)
+            {
+                _context.LucieHouses.Remove(existingLucieHouse);
+            }
+
+            _context.LucieHouses.Add(lucieHouse);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            errors.Add($"Erreur lors de l'import de Lucie House: {ex.Message}");
+        }
+
+        return importedCount;
+    }
+
+    /// <summary>
     /// Parse un personnage depuis un élément XML
     /// </summary>
     private Personnage? ParsePersonnageFromXml(XElement element)
@@ -348,14 +449,10 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             Rang = int.TryParse(element.Element("Rang")?.Value, out var r) ? r : 1,
             Role = ParseRole(element.Element("Role")?.Value),
             Faction = ParseFaction(element.Element("Faction")?.Value),
+            TypeAttaque = ParseTypeAttaque(element.Element("TypeAttaque")?.Value),
             Selectionne = bool.TryParse(element.Element("Selectionne")?.Value, out var sel) && sel,
             Description = element.Element("Description")?.Value ?? $"Personnage {nom}",
         };
-
-        // Déterminer le type d'attaque
-        personnage.TypeAttaque = personnage.Type == TypePersonnage.Androïde
-            ? TypeAttaque.Androïde
-            : (personnage.Type == TypePersonnage.Mercenaire ? TypeAttaque.Inconnu : TypeAttaque.Inconnu);
 
         // Gérer les URLs des images
         string nomLower = personnage.Nom.ToLower();
@@ -398,6 +495,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                 writer.WriteElementString("Rang", personnage.Rang.ToString());
                 writer.WriteElementString("Role", personnage.Role.ToString());
                 writer.WriteElementString("Faction", personnage.Faction.ToString());
+                writer.WriteElementString("TypeAttaque", personnage.TypeAttaque.ToString());
                 writer.WriteElementString("Selectionne", personnage.Selectionne.ToString());
                 writer.WriteElementString("Description", personnage.Description ?? "");
                 writer.WriteEndElement();
@@ -468,7 +566,8 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
         bool exportInventory = true, 
         bool exportTemplates = true, 
         bool exportBestSquad = true, 
-        bool exportHistories = true)
+        bool exportHistories = true,
+        bool exportLucieHouse = true)
     {
         var settings = new System.Xml.XmlWriterSettings
         {
@@ -608,6 +707,51 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                 }
             }
 
+            // Export Lucie House
+            if (exportLucieHouse)
+            {
+                var lucieHouse = await _context.LucieHouses.Include(l => l.Pieces).FirstOrDefaultAsync();
+                if (lucieHouse != null)
+                {
+                    writer.WriteStartElement("LucieHouse");
+
+                    foreach (var piece in lucieHouse.Pieces)
+                    {
+                        writer.WriteStartElement("Piece");
+                        writer.WriteElementString("Nom", piece.Nom);
+                        writer.WriteElementString("Niveau", piece.Niveau.ToString());
+                        writer.WriteElementString("Puissance", piece.Puissance.ToString());
+                        writer.WriteElementString("Selectionnee", piece.Selectionnee.ToString());
+
+                        // Export des bonus tactiques
+                        if (piece.AspectsTactiques.Bonus.Count > 0)
+                        {
+                            writer.WriteStartElement("BonusTactiques");
+                            foreach (var bonus in piece.AspectsTactiques.Bonus)
+                            {
+                                writer.WriteElementString("Bonus", bonus);
+                            }
+                            writer.WriteEndElement();
+                        }
+
+                        // Export des bonus stratégiques
+                        if (piece.AspectsStrategiques.Bonus.Count > 0)
+                        {
+                            writer.WriteStartElement("BonusStrategiques");
+                            foreach (var bonus in piece.AspectsStrategiques.Bonus)
+                            {
+                                writer.WriteElementString("Bonus", bonus);
+                            }
+                            writer.WriteEndElement();
+                        }
+
+                        writer.WriteEndElement();
+                    }
+
+                    writer.WriteEndElement();
+                }
+            }
+
             writer.WriteEndElement();
             writer.WriteEndDocument();
         }
@@ -630,6 +774,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
         writer.WriteElementString("Rang", personnage.Rang.ToString());
         writer.WriteElementString("Role", personnage.Role.ToString());
         writer.WriteElementString("Faction", personnage.Faction.ToString());
+        writer.WriteElementString("TypeAttaque", personnage.TypeAttaque.ToString());
         writer.WriteElementString("Selectionne", personnage.Selectionne.ToString());
         writer.WriteElementString("Description", personnage.Description ?? "");
     }
@@ -708,6 +853,17 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             "Pacificateurs" => Faction.Pacificateurs,
             "HommesLibres" => Faction.HommesLibres,
             _ => Faction.Syndicat
+        };
+    }
+
+    private static TypeAttaque ParseTypeAttaque(string? value)
+    {
+        return value switch
+        {
+            "Mêlée" or "Melee" => TypeAttaque.Mêlée,
+            "Distance" => TypeAttaque.Distance,
+            "Androïde" or "Androide" => TypeAttaque.Androïde,
+            _ => TypeAttaque.Inconnu
         };
     }
 

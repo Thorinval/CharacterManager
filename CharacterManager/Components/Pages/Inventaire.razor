@@ -177,7 +177,6 @@ else
         <input type="checkbox" id="selectAll" checked="@selectAllChecked" @onchange="SelectAll" />
         <label for="selectAll" class="ms-2"><LocalizedText Key="inventory.selectAll" /></label>
     </div>
-
     @foreach (var groupe in GroupedPersonnages)
     {
         <div class="type-group-header">
@@ -288,6 +287,66 @@ else
                         </div>
                     </div>
                 }
+            }
+        </div>
+    }
+
+    <!-- Section Maison de Lucie -->
+    @if (lucieHouse != null)
+    {
+        <div class="type-group-header mt-4">
+            <h4>Maison de Lucie (@lucieHouse.Pieces.Count) - @lucieHouse.NombrePiecesSelectionnees/@LucieHouse.MaxPiecesSelectionnees sélectionnées</h4>
+        </div>
+
+        <div class="@GetContainerClass()">
+            @foreach (var piece in lucieHouse.Pieces)
+            {
+                <div class="personnage-card-editable @(piece.Selectionnee ? "piece-selectionnee" : "")">
+                    <div class="card-checkbox-grid" @onclick:stopPropagation="true">
+                        <input type="checkbox" 
+                               checked="@piece.Selectionnee" 
+                               @onchange="() => TogglePieceSelection(piece.Id)" 
+                               disabled="@(!piece.Selectionnee && !lucieHouse.PeutSelectionner())" />
+                    </div>
+                    
+                    <div class="card-name-header">
+                        <div class="personnage-name-top">@piece.Nom</div>
+                        <div class="card-rarity-text">Niveau @piece.Niveau</div>
+                    </div>
+                    
+                    <div class="personnage-card-info">
+                        <div class="editable-field">
+                            <label>Niveau:</label>
+                            <div class="input-group input-group-sm">
+                                <button class="btn btn-outline-secondary" type="button" @onclick="() => UpdatePieceNiveau(piece.Id, -1)" @onclick:stopPropagation="true">-</button>
+                                <input type="number" 
+                                       min="1" 
+                                       class="form-control form-control-sm text-center" 
+                                       value="@piece.Niveau" 
+                                       readonly
+                                       @onclick:stopPropagation="true" />
+                                <button class="btn btn-outline-secondary" type="button" @onclick="() => UpdatePieceNiveau(piece.Id, 1)" @onclick:stopPropagation="true">+</button>
+                            </div>
+                        </div>
+                        
+                        <div class="editable-field">
+                            <label>Puissance:</label>
+                            <div class="form-control form-control-sm" style="font-weight:600;">
+                                @piece.PuissanceTotale
+                            </div>
+                        </div>
+                        
+                        <div class="editable-field">
+                            <label>Bonus tactiques:</label>
+                            <div class="bonus-count">@piece.BonusTactiques.Count</div>
+                        </div>
+                        
+                        <div class="editable-field">
+                            <label>Bonus stratégiques:</label>
+                            <div class="bonus-count">@piece.BonusStrategiques.Count</div>
+                        </div>
+                    </div>
+                </div>
             }
         </div>
     }

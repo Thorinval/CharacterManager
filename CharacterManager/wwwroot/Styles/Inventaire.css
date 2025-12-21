@@ -52,6 +52,40 @@
     gap: 0.5rem;
 }
 
+/* Styles pour la section Maison de Lucie */
+.piece-selectionnee {
+    background: linear-gradient(135deg, #f4d03f 0%, #c39e1d 100%) !important;
+    border: 2px solid #d4af37 !important;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+}
+
+.piece-icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+.piece-icon {
+    font-size: 5rem;
+    color: white;
+    opacity: 0.9;
+}
+
+.bonus-count {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background-color: #e9ecef;
+    border-radius: 0.25rem;
+    font-weight: bold;
+    color: #495057;
+    text-align: center;
+    min-width: 2rem;
+}
+
 .table-image {
     width: 50px;
     height: 66px;
