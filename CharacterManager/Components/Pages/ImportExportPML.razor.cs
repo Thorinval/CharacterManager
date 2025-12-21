@@ -32,14 +32,12 @@ public partial class ImportExportPML
     private bool importTemplates = false;
     private bool importBestSquad = false;
     private bool importHistories = false;
-    private bool importLucieHouse = false;
 
     // Export checkboxes
     private bool exportInventory = true;
     private bool exportTemplates = false;
     private bool exportBestSquad = false;
     private bool exportHistories = false;
-    private bool exportLucieHouse = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -54,12 +52,12 @@ public partial class ImportExportPML
 
     private bool HasSelectedImportTypes()
     {
-        return importInventory || importTemplates || importBestSquad || importHistories || importLucieHouse;
+        return importInventory || importTemplates || importBestSquad || importHistories;
     }
 
     private bool HasSelectedExportTypes()
     {
-        return exportInventory || exportTemplates || exportBestSquad || exportHistories || exportLucieHouse;
+        return exportInventory || exportTemplates || exportBestSquad || exportHistories;
     }
 
     private async Task HandleImport()
@@ -74,15 +72,15 @@ public partial class ImportExportPML
             using (var stream = selectedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024)) // 10MB max
             {
                 importResult = await PmlImportService.ImportPmlAsync(
-                    stream, 
+                    stream,
                     selectedFileName ?? "",
                     importInventory,
                     importTemplates,
                     importBestSquad,
-                    importHistories,
-                    importLucieHouse);
+                    importHistories
+                );
                 importComplete = true;
-                
+
                 // Rafraîchir le nom du dernier fichier importé
                 lastImportedFileName = await PmlImportService.GetLastImportedFileName();
             }
@@ -90,9 +88,9 @@ public partial class ImportExportPML
         catch (Exception ex)
         {
             importResult = new ImportResult
-            { 
-                IsSuccess = false, 
-                Error = $"Erreur: {ex.Message}" 
+            {
+                IsSuccess = false,
+                Error = $"Erreur: {ex.Message}"
             };
             importComplete = true;
         }
@@ -114,8 +112,7 @@ public partial class ImportExportPML
                 exportInventory,
                 exportTemplates,
                 exportBestSquad,
-                exportHistories,
-                exportLucieHouse);
+                exportHistories);
 
             // Generate filename with timestamp
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");

@@ -424,11 +424,10 @@ public class PmlImportServiceTests : IDisposable
 
         // Act
         var pmlBytes = await _pmlImportService.ExportPmlAsync(
-          exportInventory: false,
+          exportInventory: true,
           exportTemplates: false,
           exportBestSquad: false,
-          exportHistories: false,
-          exportLucieHouse: true);
+          exportHistories: false);
 
         // Assert
         var content = Encoding.UTF8.GetString(pmlBytes);

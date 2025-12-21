@@ -15,26 +15,36 @@ public class PersonnageService
 
     public Task<IEnumerable<Personnage>> GetAllAsync()
     {
-        return Task.FromResult(_context.Personnages.Include(p => p.Capacites).AsEnumerable());
+        return Task.FromResult(_context.Personnages.Include(static p => p.Capacites).AsEnumerable());
     }
-    
+
     public IEnumerable<Personnage> GetAll()
     {
-        return _context.Personnages.Include(p => p.Capacites).ToList();
+        return _context.Personnages.Include(static p => p.Capacites).ToList();
     }
 
     public int GetPuissanceEscouade()
     {
-        return _context.Personnages
+        var puissancePersos = _context.Personnages
             .Where(p => p.Selectionne)
             .Sum(p => p.Puissance);
+
+        // Calculer la puissance Lucie House côté client pour éviter les traductions LINQ non supportées par SQLite
+        var puissanceLucie = _context.Pieces
+            .Where(p => p.Selectionnee)
+            .AsEnumerable()
+            .Sum(p => (p.AspectsTactiques?.Puissance ?? 0) + (p.AspectsStrategiques?.Puissance ?? 0));
+
+        return puissancePersos + puissanceLucie;
     }
 
     public int GetPuissanceMaxEscouade()
     {
-        return GetTopMercenaires().Sum(p => p.Puissance) +
+        return GetTopMercenaires().Sum(static p => p.Puissance) +
                (GetTopCommandant()?.Puissance ?? 0) +
-               GetTopAndroides().Sum(p => p.Puissance);
+               GetTopAndroides().Sum(static p => p.Puissance) +
+               GetTopLucieRooms().Sum(static p => p.PuissanceTotale)
+               ;
     }
 
     public int GetPuissanceSeuilCommandantPourLvlUp()
@@ -45,20 +55,20 @@ public class PersonnageService
     public async Task<IEnumerable<Personnage>> GetTopMercenairesAsync(int count = 8)
     {
         return await Task.FromResult(_context.Personnages
-            .Include(p => p.Capacites)
-            .Where(p => p.Type == TypePersonnage.Mercenaire)
-            .OrderByDescending(p => p.Puissance)
+            .Include(static p => p.Capacites)
+            .Where(static p => p.Type == TypePersonnage.Mercenaire)
+            .OrderByDescending(static p => p.Puissance)
             .Take(count)
             .ToList());
     }
-    
+
     public IEnumerable<Personnage> GetTopMercenaires(int count = 8)
     {
         return _context.Personnages
             .AsNoTracking()
-            .Include(p => p.Capacites)
-            .Where(p => p.Type == TypePersonnage.Mercenaire)
-            .OrderByDescending(p => p.Puissance)
+            .Include(static p => p.Capacites)
+            .Where(static p => p.Type == TypePersonnage.Mercenaire)
+            .OrderByDescending(static p => p.Puissance)
             .Take(count)
             .ToList();
     }
@@ -66,39 +76,50 @@ public class PersonnageService
     public async Task<Personnage?> GetTopCommandantAsync()
     {
         return await Task.FromResult(_context.Personnages
-            .Include(p => p.Capacites)
-            .Where(p => p.Type == TypePersonnage.Commandant)
-            .OrderByDescending(p => p.Puissance)
+            .Include(static p => p.Capacites)
+            .Where(static p => p.Type == TypePersonnage.Commandant)
+            .OrderByDescending(static p => p.Puissance)
             .FirstOrDefault());
     }
-    
+
     public Personnage? GetTopCommandant()
     {
         return _context.Personnages
             .AsNoTracking()
-            .Include(p => p.Capacites)
-            .Where(p => p.Type == TypePersonnage.Commandant)
-            .OrderByDescending(p => p.Puissance)
+            .Include(static p => p.Capacites)
+            .Where(static p => p.Type == TypePersonnage.Commandant)
+            .OrderByDescending(static p => p.Puissance)
             .FirstOrDefault();
+    }
+
+    public IEnumerable<Piece> GetTopLucieRooms(int count = 2)
+    {
+        // PuissanceTotale is a computed [NotMapped] property, so evaluate client-side
+        return _context.Pieces
+            .AsNoTracking()
+            .AsEnumerable()
+            .OrderByDescending(static p => p.PuissanceTotale)
+            .Take(count)
+            .ToList();
     }
 
     public async Task<IEnumerable<Personnage>> GetTopAndroidesAsync(int count = 3)
     {
         return await Task.FromResult(_context.Personnages
-            .Include(p => p.Capacites)
-            .Where(p => p.Type == TypePersonnage.Androïde)
-            .OrderByDescending(p => p.Puissance)
+            .Include(static p => p.Capacites)
+            .Where(static p => p.Type == TypePersonnage.Androïde)
+            .OrderByDescending(static p => p.Puissance)
             .Take(count)
             .ToList());
     }
-    
+
     public IEnumerable<Personnage> GetTopAndroides(int count = 3)
     {
         return _context.Personnages
             .AsNoTracking()
-            .Include(p => p.Capacites)
-            .Where(p => p.Type == TypePersonnage.Androïde)
-            .OrderByDescending(p => p.Puissance)
+            .Include(static p => p.Capacites)
+            .Where(static p => p.Type == TypePersonnage.Androïde)
+            .OrderByDescending(static p => p.Puissance)
             .Take(count)
             .ToList();
     }
@@ -106,20 +127,20 @@ public class PersonnageService
     public async Task<IEnumerable<Personnage>> GetEscouadeAsync()
     {
         return await Task.FromResult(_context.Personnages
-            .Include(p => p.Capacites)
-            .Where(p => p.Selectionne)
+            .Include(static p => p.Capacites)
+            .Where(static p => p.Selectionne)
             .ToList());
     }
 
     public async Task<IEnumerable<Personnage>> GetMercenairesAsync(bool selectionneOnly = false)
     {
         var query = _context.Personnages
-            .Include(p => p.Capacites)
-            .Where(p => p.Type == TypePersonnage.Mercenaire);
+            .Include(static p => p.Capacites)
+            .Where(static p => p.Type == TypePersonnage.Mercenaire);
 
         if (selectionneOnly)
         {
-            query = query.Where(p => p.Selectionne);
+            query = query.Where(static p => p.Selectionne);
         }
 
         return await Task.FromResult(query.ToList());
@@ -128,12 +149,12 @@ public class PersonnageService
     public async Task<IEnumerable<Personnage>> GetCommandantsAsync(bool selectionneOnly = false)
     {
         var query = _context.Personnages
-            .Include(p => p.Capacites)
-            .Where(p => p.Type == TypePersonnage.Commandant);
+            .Include(static p => p.Capacites)
+            .Where(static p => p.Type == TypePersonnage.Commandant);
 
         if (selectionneOnly)
         {
-            query = query.Where(p => p.Selectionne);
+            query = query.Where(static p => p.Selectionne);
         }
 
         return await Task.FromResult(query.ToList());
@@ -142,33 +163,33 @@ public class PersonnageService
     public async Task<IEnumerable<Personnage>> GetAndroïdesAsync(bool selectionneOnly = false)
     {
         var query = _context.Personnages
-            .Include(p => p.Capacites)
-            .Where(p => p.Type == TypePersonnage.Androïde);
+            .Include(static p => p.Capacites)
+            .Where(static p => p.Type == TypePersonnage.Androïde);
 
         if (selectionneOnly)
         {
-            query = query.Where(p => p.Selectionne);
+            query = query.Where(static p => p.Selectionne);
         }
 
         return await Task.FromResult(query.ToList());
     }
-    
+
     public IEnumerable<Personnage> GetEscouade()
     {
         return _context.Personnages
-            .Include(p => p.Capacites)
-            .Where(p => p.Selectionne)
+            .Include(static p => p.Capacites)
+            .Where(static p => p.Selectionne)
             .ToList();
     }
     public IEnumerable<Personnage> GetMercenaires(bool selectionneOnly = false)
     {
         var query = _context.Personnages
-            .Include(p => p.Capacites)
-            .Where(p => p.Type == TypePersonnage.Mercenaire);
+            .Include(static p => p.Capacites)
+            .Where(static p => p.Type == TypePersonnage.Mercenaire);
 
         if (selectionneOnly)
         {
-            query = query.Where(p => p.Selectionne);
+            query = query.Where(static p => p.Selectionne);
         }
 
         return query.ToList();
@@ -176,12 +197,12 @@ public class PersonnageService
     public IEnumerable<Personnage> GetCommandants(bool selectionneOnly = false)
     {
         var query = _context.Personnages
-            .Include(p => p.Capacites)
-            .Where(p => p.Type == TypePersonnage.Commandant);
+            .Include(static p => p.Capacites)
+            .Where(static p => p.Type == TypePersonnage.Commandant);
 
         if (selectionneOnly)
         {
-            query = query.Where(p => p.Selectionne);
+            query = query.Where(static p => p.Selectionne);
         }
 
         return query.ToList();
@@ -189,12 +210,12 @@ public class PersonnageService
     public IEnumerable<Personnage> GetAndroides(bool selectionneOnly = false)
     {
         var query = _context.Personnages
-            .Include(p => p.Capacites)
-            .Where(p => p.Type == TypePersonnage.Androïde);
+            .Include(static p => p.Capacites)
+            .Where(static p => p.Type == TypePersonnage.Androïde);
 
         if (selectionneOnly)
         {
-            query = query.Where(p => p.Selectionne);
+            query = query.Where(static p => p.Selectionne);
         }
 
         return query.ToList();
@@ -294,7 +315,7 @@ public class PersonnageService
 
     public IEnumerable<Template> GetAllTemplates()
     {
-        return [.. _context.Templates.OrderByDescending(t => t.DateModification)];
+        return [.. _context.Templates.OrderByDescending(static t => t.DateModification)];
     }
 
     public async Task<bool> UpdateTemplateAsync(int templateId, string nom, string description, List<int> personnageIds)

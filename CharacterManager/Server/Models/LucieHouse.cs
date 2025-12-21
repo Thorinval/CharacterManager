@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 
 namespace CharacterManager.Server.Models;
 
@@ -24,8 +25,83 @@ public class Piece
     public Aspect AspectsStrategiques { get; set; } = new() { Nom = "Aspects stratégiques", Puissance = 0 };
 
     /// <summary>
+    /// Colonne legacy pour compatibilité avec l'ancien schéma SQLite (obligatoire car NOT NULL).
+    /// </summary>
+    [Column("Puissance")]
+    public int PuissanceLegacy
+    {
+        get => (AspectsTactiques?.Puissance ?? 0) + (AspectsStrategiques?.Puissance ?? 0);
+        set { }
+    }
+
+    /// <summary>
+    /// Sérialisation des bonus tactiques pour compatibilité avec les colonnes héritées.
+    /// </summary>
+    [Column("BonusTactiques")]
+    public string BonusTactiquesSerialized
+    {
+        get => JsonSerializer.Serialize(AspectsTactiques?.Bonus ?? new());
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return;
+            }
+
+            try
+            {
+                var parsed = JsonSerializer.Deserialize<List<string>>(value) ?? new();
+                if (AspectsTactiques.Bonus.Count == 0)
+                {
+                    AspectsTactiques.Bonus = parsed;
+                    if (AspectsTactiques.Puissance < parsed.Count)
+                    {
+                        AspectsTactiques.Puissance = parsed.Count;
+                    }
+                }
+            }
+            catch
+            {
+            }
+        }
+    }
+
+    /// <summary>
+    /// Sérialisation des bonus stratégiques pour compatibilité avec les colonnes héritées.
+    /// </summary>
+    [Column("BonusStrategiques")]
+    public string BonusStrategiquesSerialized
+    {
+        get => JsonSerializer.Serialize(AspectsStrategiques?.Bonus ?? new());
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return;
+            }
+
+            try
+            {
+                var parsed = JsonSerializer.Deserialize<List<string>>(value) ?? new();
+                if (AspectsStrategiques.Bonus.Count == 0)
+                {
+                    AspectsStrategiques.Bonus = parsed;
+                    if (AspectsStrategiques.Puissance < parsed.Count)
+                    {
+                        AspectsStrategiques.Puissance = parsed.Count;
+                    }
+                }
+            }
+            catch
+            {
+            }
+        }
+    }
+
+    /// <summary>
     /// Puissance calculée: somme des puissances tactiques et stratégiques.
     /// </summary>
+    [NotMapped]
     public int Puissance => (AspectsTactiques?.Puissance ?? 0) + (AspectsStrategiques?.Puissance ?? 0);
 
     /// <summary>
