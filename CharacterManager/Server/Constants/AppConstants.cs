@@ -30,7 +30,7 @@ public static class AppConstants
         
         // Images par défaut
         public const string DefaultPortrait = "/images/interface/default_portrait.png";
-        public const string GenericCommandantHeader = "/images/interface/empty_header.png";
+        public const string GenericCommandantHeader = "/images/interface/fondheader.png";
         public const string HunterHeader = "/images/personnages/adult/hunter_header.png";
         public const string HomeDefaultBackground = "/images/interface/fondheader.png";
     }

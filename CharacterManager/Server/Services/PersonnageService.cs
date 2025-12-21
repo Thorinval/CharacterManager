@@ -216,6 +216,11 @@ public class PersonnageService
 
     public void Add(Personnage personnage)
     {
+        // Remplir les colonnes stockées pour compatibilité base de données
+        var slug = personnage.Nom?.ToLower().Replace(" ", "_") ?? string.Empty;
+        personnage.ImageUrlDetailStored = $"/images/personnages/{slug}.png";
+        personnage.ImageUrlPreviewStored = $"/images/personnages/{slug}_small_portrait.png";
+        personnage.ImageUrlSelectedStored = $"/images/personnages/{slug}_small_select.png";
         _context.Personnages.Add(personnage);
         _context.SaveChanges();
     }
@@ -238,6 +243,12 @@ public class PersonnageService
             existing.Description = personnage.Description;
             existing.Selectionne = personnage.Selectionne;
             existing.TypeAttaque = personnage.TypeAttaque;
+
+            // Mettre à jour les colonnes stockées si le nom change
+            var slug = existing.Nom?.ToLower().Replace(" ", "_") ?? string.Empty;
+            existing.ImageUrlDetailStored = $"/images/personnages/{slug}.png";
+            existing.ImageUrlPreviewStored = $"/images/personnages/{slug}_small_portrait.png";
+            existing.ImageUrlSelectedStored = $"/images/personnages/{slug}_small_select.png";
 
             _context.SaveChanges();
         }

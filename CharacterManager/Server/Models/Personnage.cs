@@ -63,10 +63,21 @@ public class Personnage
     public Role Role { get; set; }
     public Faction Faction { get; set; }
 
-    // Images du personnage - calculées dynamiquement selon le nom
+    // Images du personnage - calculées dynamiquement pour l'affichage (non mappées en base)
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
     public string ImageUrlDetail => $"/images/personnages/{Nom.ToLower().Replace(" ", "_")}.png";
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
     public string ImageUrlPreview => $"/images/personnages/{Nom.ToLower().Replace(" ", "_")}_small_portrait.png";
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
     public string ImageUrlSelected => $"/images/personnages/{Nom.ToLower().Replace(" ", "_")}_small_select.png";
+
+    // Colonnes stockées pour compatibilité avec l'ancien schéma (remplies automatiquement au save)
+    [System.ComponentModel.DataAnnotations.Schema.Column("ImageUrlDetail")]
+    public string ImageUrlDetailStored { get; set; } = string.Empty;
+    [System.ComponentModel.DataAnnotations.Schema.Column("ImageUrlPreview")]
+    public string ImageUrlPreviewStored { get; set; } = string.Empty;
+    [System.ComponentModel.DataAnnotations.Schema.Column("ImageUrlSelected")]
+    public string ImageUrlSelectedStored { get; set; } = string.Empty;
     public string ImageUrlHeader { get; set; } = string.Empty;        // Pour l'image de fond du header
 
     /// <summary>

@@ -32,8 +32,8 @@
 .col-score { width: 70px; }
 .col-puissance { width: 80px; }
 .col-classement { width: 120px; }
-.col-lucie { width: 70px; }
-.col-actions { width: 100px; }
+.col-lucie { width: 80px; }
+.col-actions { width: 90px; }
 
 /* Group separators in data rows */
 .historique-table tbody td.group-sep {
@@ -43,6 +43,7 @@
 /* Ranking inline display */
 .ranking-inline {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 6px;
@@ -204,6 +205,13 @@
     height: 100%;
     vertical-align: middle !important;
     text-align: center;
+}
+
+/* Styling spécifique pour la cellule de classement */
+td.ranking-inline.info-cell {
+    padding: 8px 4px;
+    min-height: 190px;
+    height: auto;
 }
 
 .pill {
