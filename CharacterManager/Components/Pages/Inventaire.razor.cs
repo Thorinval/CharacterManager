@@ -39,11 +39,11 @@ public partial class Inventaire : IAsyncDisposable
     private bool showModal = false;
     private bool isEditing = false;
     private Personnage currentPersonnage = new();
-    
+
     // Tri
     private string sortColumn = "Nom";
     private bool sortAscending = true;
-    
+
     // Sélection multiple
     private HashSet<int> selectedPersonnages = new();
     private bool showBulkEditModal = false;
@@ -54,14 +54,14 @@ public partial class Inventaire : IAsyncDisposable
         get => selectedPersonnages.Count == personnagesFiltres.Count && personnagesFiltres.Count > 0;
         set => SelectAll();
     }
-    
+
     private IEnumerable<IGrouping<TypePersonnage, Personnage>> GroupedPersonnages =>
         personnagesFiltres.GroupBy(p => p.Type)
             .OrderBy(g => g.Key == TypePersonnage.Commandant ? 1 : g.Key == TypePersonnage.Mercenaire ? 2 : 3);
-    
+
     // Filtre
     private string searchTerm = "";
-    
+
     // Mode d'affichage
     private string viewMode = "grid";
 
@@ -121,7 +121,7 @@ public partial class Inventaire : IAsyncDisposable
     {
         return "personnages-grid-compact";
     }
-    
+
     private string GetRarityClass(Rarete rarete)
     {
         return rarete switch
@@ -132,7 +132,7 @@ public partial class Inventaire : IAsyncDisposable
             _ => ""
         };
     }
-    
+
     private void UpdatePersonnageField(int personnageId, string field, string value)
     {
         var personnage = personnages.FirstOrDefault(p => p.Id == personnageId);
@@ -158,6 +158,12 @@ public partial class Inventaire : IAsyncDisposable
                     if (int.TryParse(value, out int puissance) && puissance >= 0)
                     {
                         personnage.Puissance = puissance;
+                    }
+                    break;
+                case "Selectionne":
+                    if (bool.TryParse(value, out var selectionne))
+                    {
+                        personnage.Selectionne = selectionne;
                     }
                     break;
             }
@@ -193,18 +199,19 @@ public partial class Inventaire : IAsyncDisposable
         // Appliquer le filtre
         if (string.IsNullOrWhiteSpace(searchTerm))
         {
-            personnagesFiltres = new List<Personnage>(personnages);
+            personnagesFiltres = [.. personnages];
         }
         else
         {
-            personnagesFiltres = personnages.Where(p => 
+            personnagesFiltres = [.. personnages.Where(p =>
                 p.Nom.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
                     || p.Rarete.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
                     || p.Type.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
                     || p.Role.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
                     || p.Faction.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
                     || p.TypeAttaque.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-                ).ToList();
+                    || p.Selectionne.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                )];
         }
 
         // Appliquer le tri par type d'abord (Commandant, Mercenaire, Androïde), puis par colonne sélectionnée
@@ -217,19 +224,19 @@ public partial class Inventaire : IAsyncDisposable
 
         personnagesFiltres = sortColumn switch
         {
-            "Nom" => sortAscending 
-                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Nom).ToList() 
+            "Nom" => sortAscending
+                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Nom).ToList()
                 : personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Nom).ToList(),
-            "Rarete" => sortAscending 
-                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Rarete).ToList() 
+            "Rarete" => sortAscending
+                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Rarete).ToList()
                 : personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Rarete).ToList(),
-            "Niveau" => sortAscending 
-                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Niveau).ToList() 
+            "Niveau" => sortAscending
+                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Niveau).ToList()
                 : personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Niveau).ToList(),
-            "Type" => sortAscending 
-                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Type).ToList() 
+            "Type" => sortAscending
+                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Type).ToList()
                 : personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Type).ToList(),
-            "Rang" => sortAscending 
+            "Rang" => sortAscending
                 ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Rang).ToList()
                 : personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Rang).ToList(),
             _ => personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Nom).ToList()
@@ -271,7 +278,7 @@ public partial class Inventaire : IAsyncDisposable
         ApplyFiltersAndSorting();
     }
 
-    private MarkupString GetRankStars(int rank)
+    private static MarkupString GetRankStars(int rank)
     {
         var stars = "";
         for (int i = 1; i <= 7; i++)
@@ -290,11 +297,7 @@ public partial class Inventaire : IAsyncDisposable
 
     private void ToggleSelection(int id)
     {
-        if (selectedPersonnages.Contains(id))
-        {
-            selectedPersonnages.Remove(id);
-        }
-        else
+        if (!selectedPersonnages.Remove(id))
         {
             selectedPersonnages.Add(id);
         }
@@ -308,7 +311,7 @@ public partial class Inventaire : IAsyncDisposable
         }
         else
         {
-            selectedPersonnages = new HashSet<int>(personnagesFiltres.Select(p => p.Id));
+            selectedPersonnages = [.. personnagesFiltres.Select(p => p.Id)];
         }
     }
 
@@ -340,6 +343,10 @@ public partial class Inventaire : IAsyncDisposable
                         if (Enum.TryParse<TypeAttaque>(bulkEditValue, out var typeAttaqueValue))
                             personnage.TypeAttaque = typeAttaqueValue;
                         break;
+                    case "Selectionne":
+                        if (bool.TryParse(bulkEditValue, out var selectionValue))
+                            personnage.Selectionne = selectionValue;
+                        break;                        
                 }
                 PersonnageService.Update(personnage);
             }
@@ -400,7 +407,7 @@ public partial class Inventaire : IAsyncDisposable
         {
             PersonnageService.Add(currentPersonnage);
         }
-        
+
         _ = InvokeAsync(async () =>
         {
             await LoadPersonnagesAsync();
@@ -418,12 +425,11 @@ public partial class Inventaire : IAsyncDisposable
     private void SortByNom() => SortBy("Nom");
     private void SortByRarete() => SortBy("Rarete");
     private void SortByNiveau() => SortBy("Niveau");
-    private void SortByType() => SortBy("Type");
     private void SortByRang() => SortBy("Rang");
 
     private async Task DeleteSelectedPersonnages()
     {
-        if (selectedPersonnages.Any())
+        if (selectedPersonnages.Count != 0)
         {
             var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Êtes-vous sûr de vouloir supprimer {selectedPersonnages.Count} personnage(s) sélectionné(s) ? Cette action est irréversible.");
             if (confirmed)
@@ -451,10 +457,10 @@ public partial class Inventaire : IAsyncDisposable
             var personnagesAExporter = selectedPersonnages.Count > 0
                 ? personnagesFiltres.Where(p => selectedPersonnages.Contains(p.Id))
                 : personnagesFiltres;
-                
+
             var pmlBytes = await PmlImportService.ExporterInventairePmlAsync(personnagesAExporter);
             var fileName = $"{AppConstants.ExportPrefixes.Inventaire}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
-            
+
             // Utiliser JavaScript pour télécharger le fichier
             await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pmlBytes));
         }
@@ -792,16 +798,16 @@ public partial class Inventaire : IAsyncDisposable
 
         try
         {
-            var template = new Template 
-            { 
-                Nom = templateNom, 
+            var template = new Template
+            {
+                Nom = templateNom,
                 Description = templateDescription
             };
             template.SetPersonnageIds(templateSelectedIds);
-            
+
             var pmlBytes = await PmlImportService.ExporterTemplatesPmlAsync(new[] { template });
             var fileName = $"{AppConstants.ExportPrefixes.Template}_{templateNom}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
-            
+
             await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pmlBytes));
         }
         catch (Exception ex)

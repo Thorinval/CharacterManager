@@ -146,7 +146,8 @@
     "delete": "Delete",
     "view": "View Details",
     "count": "Characters:",
-    "empty": "No characters found."
+    "empty": "No characters found.",
+    "selected": "Selected :"
   },
   "templates": {
     "title": "Templates",

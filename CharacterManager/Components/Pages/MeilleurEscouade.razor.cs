@@ -33,25 +33,12 @@ public partial class MeilleurEscouade
 
     private void LoadTopPersonnages()
     {
-        topMercenaires = PersonnageService.GetTopMercenaires(8).ToList();
+        topMercenaires = [.. PersonnageService.GetTopMercenaires(8)];
         topCommandant = PersonnageService.GetTopCommandant();
-        topAndroides = PersonnageService.GetTopAndroides(3).ToList();
+        topAndroides = [.. PersonnageService.GetTopAndroides(3)];
         puissanceMax = PersonnageService.GetPuissanceMaxEscouade();
-        try
-        {
-            var lucie = DbContext.LucieHouses
-                .Include(l => l.Pieces)
-                .FirstOrDefault();
-            luciePieces = lucie?.Pieces.Where(p => p.Selectionnee).ToList() ?? new();
-        }
-        catch (SqliteException ex) when (ex.Message.Contains("no such column", StringComparison.OrdinalIgnoreCase))
-        {
-            EnsureLuciePieceAspectColumns();
-            var lucie = DbContext.LucieHouses
-                .Include(l => l.Pieces)
-                .FirstOrDefault();
-            luciePieces = lucie?.Pieces.Where(p => p.Selectionnee).ToList() ?? new();
-        }
+        luciePieces= [.. PersonnageService.GetTopLucieRooms(2)];
+        
         StateHasChanged();
     }
     

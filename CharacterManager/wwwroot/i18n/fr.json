@@ -146,7 +146,8 @@
     "delete": "Supprimer",
     "view": "Voir détails",
     "count": "Nombre de personnages :",
-    "empty": "Aucun personnage trouvé."
+    "empty": "Aucun personnage trouvé.",
+    "selected": "Sélectionné :"
   },
   "templates": {
     "title": "Templates",

@@ -9,12 +9,16 @@
 <link rel="stylesheet" href="/Styles/Inventaire.css" />
 
 <head>
-    <title><LocalizedText Key="inventory.title" /></title>
+    <title>
+        <LocalizedText Key="inventory.title" />
+    </title>
 </head>
 
 <div class="page-header-banner">
     <a href="/" class="back-button" aria-label="Retour" title="Back to home"></a>
-    <h1 class="page-title"><LocalizedText Key="inventory.title" /></h1>
+    <h1 class="page-title">
+        <LocalizedText Key="inventory.title" />
+    </h1>
 </div>
 
 <Toast @ref="toastRef" />
@@ -24,49 +28,43 @@
 {
     <div class="template-editor-wrapper">
         <div class="template-editor-section">
-            <EscouadePreviewEditor 
-                PersonnagesSelectionnes="@templatePersonnages"
-                OnSelectionChanged="@HandleTemplateSelectionChanged"
-                OnPersonnageRequested="@GetPersonnageById"
-                DraggedPersonnageId="@currentlyDraggedId"
-                OnInvalidDrop="@HandleInvalidDrop" />
+            <EscouadePreviewEditor PersonnagesSelectionnes="@templatePersonnages"
+                OnSelectionChanged="@HandleTemplateSelectionChanged" OnPersonnageRequested="@GetPersonnageById"
+                DraggedPersonnageId="@currentlyDraggedId" OnInvalidDrop="@HandleInvalidDrop" />
 
             <div class="template-actions mt-2">
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                     <div class="input-group">
-                        <input type="text" 
-                               class="form-control" 
-                               style="font-size: 0.85rem; padding: 0.4rem 0.6rem;"
-                               placeholder="Nom du template" 
-                               @bind="templateNom" />
-                        <input type="text" 
-                               class="form-control" 
-                               style="font-size: 0.85rem; padding: 0.4rem 0.6rem;"
-                               placeholder="Description (optionnel)" 
-                               @bind="templateDescription" />
+                        <input type="text" class="form-control" style="font-size: 0.85rem; padding: 0.4rem 0.6rem;"
+                            placeholder="Nom du template" @bind="templateNom" />
+                        <input type="text" class="form-control" style="font-size: 0.85rem; padding: 0.4rem 0.6rem;"
+                            placeholder="Description (optionnel)" @bind="templateDescription" />
                     </div>
                     <div class="input-group">
-                        <select class="form-select" style="font-size: 0.85rem; padding: 0.4rem 0.6rem;" @bind="selectedTemplateId">
+                        <select class="form-select" style="font-size: 0.85rem; padding: 0.4rem 0.6rem;"
+                            @bind="selectedTemplateId">
                             <option value="0">Charger template</option>
                             @foreach (var t in templates)
                             {
                                 <option value="@t.Id">@t.Nom</option>
                             }
                         </select>
-                        <button class="btn btn-outline-primary btn-sm" style="font-size: 0.75rem;" @onclick="LoadSelectedTemplate" disabled="@(selectedTemplateId == 0)">
+                        <button class="btn btn-outline-primary btn-sm" style="font-size: 0.75rem;"
+                            @onclick="LoadSelectedTemplate" disabled="@(selectedTemplateId == 0)">
                             <i class="bi bi-upload"></i>
                         </button>
                     </div>
                     <div class="input-group" style="gap: 4px;">
-                        <button class="btn btn-success btn-sm" style="flex: 1; font-size: 0.75rem;"
-                                @onclick="SaveTemplate" 
-                                disabled="@(string.IsNullOrEmpty(templateNom) || templateSelectedIds.Count == 0)">
+                        <button class="btn btn-success btn-sm" style="flex: 1; font-size: 0.75rem;" @onclick="SaveTemplate"
+                            disabled="@(string.IsNullOrEmpty(templateNom) || templateSelectedIds.Count == 0)">
                             <i class="bi bi-check-circle"></i> Créer
                         </button>
-                        <button class="btn btn-secondary btn-sm" style="flex: 1; font-size: 0.75rem;" @onclick="() => CancelTemplateCreation()">
+                        <button class="btn btn-secondary btn-sm" style="flex: 1; font-size: 0.75rem;"
+                            @onclick="() => CancelTemplateCreation()">
                             <i class="bi bi-x"></i> Annuler
                         </button>
-                        <button class="btn btn-info btn-sm" style="flex: 1; font-size: 0.75rem;" @onclick="ExportTemplateAsPml">
+                        <button class="btn btn-info btn-sm" style="flex: 1; font-size: 0.75rem;"
+                            @onclick="ExportTemplateAsPml">
                             <i class="bi bi-download"></i>
                         </button>
                     </div>
@@ -77,12 +75,14 @@
         <div class="template-inventory-panel">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <h6 style="margin: 0; font-size: 0.9rem;">Inventaire</h6>
-                <button class="btn btn-sm btn-outline-secondary" @onclick="() => showTemplateEditor = false" title="Fermer l'éditeur" style="padding: 0.2rem 0.4rem;">
+                <button class="btn btn-sm btn-outline-secondary" @onclick="() => showTemplateEditor = false"
+                    title="Fermer l'éditeur" style="padding: 0.2rem 0.4rem;">
                     <i class="bi bi-x"></i>
                 </button>
             </div>
             <div class="input-group" style="margin-bottom: 8px;">
-                <input type="text" class="form-control" style="font-size: 0.85rem; padding: 0.4rem 0.6rem;" placeholder="Rechercher..." @bind="searchTerm" @oninput="HandleSearchInput" />
+                <input type="text" class="form-control" style="font-size: 0.85rem; padding: 0.4rem 0.6rem;"
+                    placeholder="Rechercher..." @bind="searchTerm" @oninput="HandleSearchInput" />
                 <button class="btn btn-outline-secondary btn-sm" type="button" @onclick="ClearSearch" title="Effacer">
                     <i class="bi bi-x-lg"></i>
                 </button>
@@ -98,10 +98,10 @@
                             </div>
                             @foreach (var personnage in groupe)
                             {
-                                <div class="personnage-card-grid-compact" 
-                                     @ondragstart="@(e => HandleDragStart(e, personnage))"
-                                     draggable="true">
-                                    <img src="@personnage.GetImageUrl(true)" alt="@personnage.Nom" class="personnage-card-image-compact" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+                                <div class="personnage-card-grid-compact" @ondragstart="@(e => HandleDragStart(e, personnage))"
+                                    draggable="true">
+                                    <img src="@personnage.GetImageUrl(true)" alt="@personnage.Nom" class="personnage-card-image-compact"
+                                        onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
                                     <div class="card-overlay-compact">
                                         <span class="card-name-compact">@personnage.Nom</span>
                                         <span class="card-puissance-compact">@personnage.Puissance</span>
@@ -117,243 +117,280 @@
 }
 else
 {
-<div class="row mb-3">
-    <div class="col-md-6">
-        <div class="input-group">
-            <input type="text" class="form-control" placeholder="@LocalizationService.T("inventory.searchPlaceholder")" @bind="searchTerm" @oninput="HandleSearchInput" />
-            <button class="btn btn-outline-secondary" type="button" @onclick="ClearSearch" title="@LocalizationService.T("inventory.clearSearch")">
-                <i class="bi bi-x-lg"></i>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="@LocalizationService.T("inventory.searchPlaceholder")"
+                    @bind="searchTerm" @oninput="HandleSearchInput" />
+                <button class="btn btn-outline-secondary" type="button" @onclick="ClearSearch"
+                    title="@LocalizationService.T("inventory.clearSearch")">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+        <div class="col-md-6 text-end">
+            @if (selectedPersonnages.Any())
+            {
+                <button class="btn btn-warning me-2" @onclick="ShowBulkEditModal">
+                    <LocalizedText Key="inventory.bulkEdit" /> (@selectedPersonnages.Count)
+                </button>
+            }
+            <button class="btn btn-primary"
+                @onclick="() => { isEditing = false; currentPersonnage = new Personnage(); showModal = true; }">
+                <LocalizedText Key="inventory.add" />
+            </button>
+            <button class="btn btn-info ms-2" @onclick="() => OpenTemplateEditor()" title="Créer un template d'escouade">
+                <i class="bi bi-plus-circle"></i>
+                <LocalizedText Key="inventory.template" />
+            </button>
+            <button class="btn btn-success ms-2" @onclick="ExportToPML" title="Exporter l'inventaire">
+                <i class="bi bi-download"></i>
+                <LocalizedText Key="inventory.export" />
+            </button>
+            <button class="btn btn-danger ms-2" @onclick="DeleteSelectedPersonnages"
+                disabled="@(!selectedPersonnages.Any())" title="Supprimer les personnages sélectionnés">
+                <i class="bi bi-trash-fill"></i>
+                <LocalizedText Key="inventory.bulkDelete" /> (@selectedPersonnages.Count)
             </button>
         </div>
     </div>
-    <div class="col-md-6 text-end">
-        @if (selectedPersonnages.Any())
-        {
-            <button class="btn btn-warning me-2" @onclick="ShowBulkEditModal">
-                <LocalizedText Key="inventory.bulkEdit" /> (@selectedPersonnages.Count)
-            </button>
-        }
-        <button class="btn btn-primary" @onclick="() => { isEditing = false; currentPersonnage = new Personnage(); showModal = true; }">
-            <LocalizedText Key="inventory.add" />
-        </button>
-        <button class="btn btn-info ms-2" @onclick="() => OpenTemplateEditor()" title="Créer un template d'escouade">
-            <i class="bi bi-plus-circle"></i> <LocalizedText Key="inventory.template" />
-        </button>
-        <button class="btn btn-success ms-2" @onclick="ExportToPML" title="Exporter l'inventaire">
-            <i class="bi bi-download"></i> <LocalizedText Key="inventory.export" />
-        </button>
-        <button class="btn btn-danger ms-2" @onclick="DeleteSelectedPersonnages" disabled="@(!selectedPersonnages.Any())" title="Supprimer les personnages sélectionnés">
-            <i class="bi bi-trash-fill"></i> <LocalizedText Key="inventory.bulkDelete" /> (@selectedPersonnages.Count)
-        </button>
-    </div>
-</div>
 }
 
 @if (!showTemplateEditor)
 {
-    <p><LocalizedText Key="inventory.count" /> @personnagesFiltres.Count</p>
+    <p>
+        <LocalizedText Key="inventory.count" /> @personnagesFiltres.Count
+    </p>
 
     @if (personnagesFiltres.Any())
-{
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="sort-controls">
-            <label><LocalizedText Key="inventory.sort" /></label>
-            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNom"><LocalizedText Key="inventory.name" /></button>
-            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRarete"><LocalizedText Key="inventory.rarity" /></button>
-            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNiveau"><LocalizedText Key="inventory.level" /></button>
-            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRang"><LocalizedText Key="inventory.rank" /></button>
-        </div>
-        <div class="view-mode-controls">
-            <button class="btn btn-sm @GetViewModeClass("grid")" @onclick="@(() => viewMode = "grid")" title="@LocalizationService.T("inventory.grid")">
-                <i class="bi bi-grid-3x3-gap"></i> <LocalizedText Key="inventory.grid" />
-            </button>
-            <button class="btn btn-sm @GetViewModeClass("list")" @onclick="@(() => viewMode = "list")" title="@LocalizationService.T("inventory.list")">
-                <i class="bi bi-list-ul"></i> <LocalizedText Key="inventory.list" />
-            </button>
-        </div>
-    </div>
-
-    <div class="select-all-container mb-3">
-        <input type="checkbox" id="selectAll" checked="@selectAllChecked" @onchange="SelectAll" />
-        <label for="selectAll" class="ms-2"><LocalizedText Key="inventory.selectAll" /></label>
-    </div>
-    @foreach (var groupe in GroupedPersonnages)
     {
-        <div class="type-group-header">
-            <h4>@groupe.Key (@groupe.Count())</h4>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="sort-controls">
+                <label>
+                    <LocalizedText Key="inventory.sort" />
+                </label>
+                <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNom">
+                    <LocalizedText Key="inventory.name" />
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRarete">
+                    <LocalizedText Key="inventory.rarity" />
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNiveau">
+                    <LocalizedText Key="inventory.level" />
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRang">
+                    <LocalizedText Key="inventory.rank" />
+                </button>
+            </div>
+            <div class="view-mode-controls">
+                <button class="btn btn-sm @GetViewModeClass("grid")" @onclick="@(() => viewMode = "grid")"
+                    title="@LocalizationService.T("inventory.grid")">
+                    <i class="bi bi-grid-3x3-gap"></i>
+                    <LocalizedText Key="inventory.grid" />
+                </button>
+                <button class="btn btn-sm @GetViewModeClass("list")" @onclick="@(() => viewMode = "list")"
+                    title="@LocalizationService.T("inventory.list")">
+                    <i class="bi bi-list-ul"></i>
+                    <LocalizedText Key="inventory.list" />
+                </button>
+            </div>
         </div>
 
-        <div class="@GetContainerClass()">
-            @foreach (var personnage in groupe)
-            {
-                @if (viewMode == "grid")
+        <div class="select-all-container mb-3">
+            <input type="checkbox" id="selectAll" checked="@selectAllChecked" @onchange="SelectAll" />
+            <label for="selectAll" class="ms-2">
+                <LocalizedText Key="inventory.selectAll" />
+            </label>
+        </div>
+        @foreach (var groupe in GroupedPersonnages)
+        {
+            <div class="type-group-header">
+                <h4>@groupe.Key (@groupe.Count())</h4>
+            </div>
+
+            <div class="@GetContainerClass()">
+                @foreach (var personnage in groupe)
                 {
-                    <div class="personnage-card-editable @GetRarityClass(personnage.Rarete)" 
-                         draggable="true"
-                         @ondragstart="@(e => HandleDragStart(e, personnage))">
+                    @if (viewMode == "grid")
+                    {
+                        <div class="personnage-card-editable @GetRarityClass(personnage.Rarete)" draggable="true"
+                            @ondragstart="@(e => HandleDragStart(e, personnage))">
+                            <div class="card-checkbox-grid" @onclick:stopPropagation="true">
+                                <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)"
+                                    @onchange="() => ToggleSelection(personnage.Id)" />
+                            </div>
+
+                            <div class="card-name-header">
+                                <div class="personnage-name-top">@personnage.Nom</div>
+                                <div class="card-rarity-text rarity-text-@personnage.Rarete.ToString().ToLower()">@personnage.Rarete</div>
+                            </div>
+
+                            <img src="@personnage.GetImageUrl(true)" alt="@personnage.Nom" class="personnage-card-image-editable"
+                                @onclick="() => ViewPersonnage(personnage.Id)" style="cursor: pointer;"
+                                onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+                            <div class="personnage-card-info">
+                                <div class="editable-field">
+                                    <label>
+                                        <LocalizedText Key="inventory.level" />:
+                                    </label>
+                                    <input type="number" min="1" max="200" class="form-control form-control-sm" value="@personnage.Niveau"
+                                        @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Niveau", e.Value?.ToString() ?? "1"))"
+                                        @onclick:stopPropagation="true" />
+                                </div>
+                                <div class="editable-field">
+                                    <label>
+                                        <LocalizedText Key="inventory.selected" />
+                                    </label>
+                                    <InputCheckbox @bind-Value="@personnage.Selectionne"
+                                        @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Selectionne", e.Value?.ToString() ?? "false"))"
+                                        @onclick:stopPropagation="true" /> 
+                                </div>
+                                <div class="editable-field">
+                                    <label>
+                                        <LocalizedText Key="inventory.rank" />:
+                                    </label>
+                                    <div class="star-selector" @onclick:stopPropagation="true">
+                                        @for (int i = 1; i <= 7; i++)
+                                        {
+                                            var starIndex = i;
+                                            <span class="star-interactive @(starIndex <= personnage.Rang ? "filled" : "empty")"
+                                                @onclick="() => UpdateRankFromStar(personnage.Id, starIndex, personnage.Rang)">
+                                                @(starIndex <= personnage.Rang ? "★" : "☆")
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="editable-field">
+                                    <label>
+                                        <LocalizedText Key="inventory.power" />:
+                                    </label>
+                                    <div class="input-group input-group-sm">
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            @onclick="() => ChangePuissance(personnage.Id, -1)" @onclick:stopPropagation="true">-</button>
+                                        <input type="number" min="0" class="form-control form-control-sm text-center"
+                                            value="@personnage.Puissance"
+                                            @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Puissance", e.Value?.ToString() ?? "0"))"
+                                            @onclick:stopPropagation="true" />
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            @onclick="() => ChangePuissance(personnage.Id, 1)" @onclick:stopPropagation="true">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions-editable" @onclick:stopPropagation="true">
+                                    <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)"
+                                        title="@LocalizationService.T("inventory.edit")">
+                                        <i class="bi bi-pencil"></i>
+                                        <LocalizedText Key="inventory.edit" />
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)"
+                                        title="@LocalizationService.T("inventory.delete")">
+                                        <i class="bi bi-trash"></i>
+                                        <LocalizedText Key="inventory.delete" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="personnage-card-list" @onclick="() => ViewPersonnage(personnage.Id)" style="cursor: pointer;"
+                            draggable="true" @ondragstart="@(e => HandleDragStart(e, personnage))">
+                            <div class="card-checkbox" @onclick:stopPropagation="true">
+                                <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)"
+                                    @onchange="() => ToggleSelection(personnage.Id)" />
+                            </div>
+                            <img src="@personnage.GetImageUrl(true)" alt="@personnage.Nom" class="personnage-card-image-list"
+                                onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+                            <div class="personnage-info-list">
+                                <span class="personnage-name" style="font-weight: 700;">@personnage.Nom</span>
+                                <span class="list-separator">|</span>
+                                <span>Type: @personnage.Type</span>
+                                <span class="list-separator">|</span>
+                                <span>Rareté: @personnage.Rarete</span>
+                                <span class="list-separator">|</span>
+                                <span>Puissance: @personnage.Puissance</span>
+                                <span class="list-separator">|</span>
+                                <span>Niveau: @personnage.Niveau</span>
+                                <span class="list-separator">|</span>
+                                <span>Rang: @GetRankStars(personnage.Rang)</span>
+                            </div>
+                            <div class="card-actions-list" @onclick:stopPropagation="true">
+                                <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)">
+                                    <LocalizedText Key="inventory.edit" />
+                                </button>
+                                <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)">
+                                    <LocalizedText Key="inventory.delete" />
+                                </button>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        }
+
+        <!-- Section Maison de Lucie -->
+        @if (lucieHouse != null)
+        {
+            <div class="type-group-header mt-4">
+                <h4>Maison de Lucie (@lucieHouse.Pieces.Count) -
+                    @lucieHouse.NombrePiecesSelectionnees/@LucieHouse.MaxPiecesSelectionnees sélectionnées</h4>
+            </div>
+
+            <div class="@GetContainerClass()">
+                @foreach (var piece in lucieHouse.Pieces)
+                {
+                    <div class="personnage-card-editable @(piece.Selectionnee ? "piece-selectionnee" : "")">
                         <div class="card-checkbox-grid" @onclick:stopPropagation="true">
-                            <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)" @onchange="() => ToggleSelection(personnage.Id)" />
+                            <input type="checkbox" checked="@piece.Selectionnee" @onchange="() => TogglePieceSelection(piece.Id)"
+                                disabled="@(!piece.Selectionnee && !lucieHouse.PeutSelectionner())" />
                         </div>
-                        
+
                         <div class="card-name-header">
-                            <div class="personnage-name-top">@personnage.Nom</div>
-                            <div class="card-rarity-text rarity-text-@personnage.Rarete.ToString().ToLower()">@personnage.Rarete</div>
+                            <div class="personnage-name-top">@piece.Nom</div>
+                            <div class="card-rarity-text">Niveau @piece.Niveau</div>
                         </div>
-                        
-                        <img src="@personnage.GetImageUrl(true)" 
-                             alt="@personnage.Nom" 
-                             class="personnage-card-image-editable" 
-                             @onclick="() => ViewPersonnage(personnage.Id)"
-                             style="cursor: pointer;"
-                             onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+
                         <div class="personnage-card-info">
                             <div class="editable-field">
-                                <label><LocalizedText Key="inventory.level" />:</label>
-                                <input type="number" 
-                                       min="1" 
-                                       max="200" 
-                                       class="form-control form-control-sm" 
-                                       value="@personnage.Niveau" 
-                                       @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Niveau", e.Value?.ToString() ?? "1"))"
-                                       @onclick:stopPropagation="true" />
-                            </div>
-                            
-                            <div class="editable-field">
-                                <label><LocalizedText Key="inventory.rank" />:</label>
-                                <div class="star-selector" @onclick:stopPropagation="true">
-                                    @for (int i = 1; i <= 7; i++)
-                                    {
-                                        var starIndex = i;
-                                        <span class="star-interactive @(starIndex <= personnage.Rang ? "filled" : "empty")"
-                                              @onclick="() => UpdateRankFromStar(personnage.Id, starIndex, personnage.Rang)">
-                                            @(starIndex <= personnage.Rang ? "★" : "☆")
-                                        </span>
-                                    }
-                                </div>
-                            </div>
-                            
-                            <div class="editable-field">
-                                <label><LocalizedText Key="inventory.power" />:</label>
+                                <label>Niveau:</label>
                                 <div class="input-group input-group-sm">
-                                    <button class="btn btn-outline-secondary" type="button" @onclick="() => ChangePuissance(personnage.Id, -1)" @onclick:stopPropagation="true">-</button>
-                                    <input type="number" 
-                                           min="0" 
-                                           class="form-control form-control-sm text-center" 
-                                           value="@personnage.Puissance" 
-                                           @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Puissance", e.Value?.ToString() ?? "0"))"
-                                       @onclick:stopPropagation="true" />
-                                    <button class="btn btn-outline-secondary" type="button" @onclick="() => ChangePuissance(personnage.Id, 1)" @onclick:stopPropagation="true">+</button>
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        @onclick="() => UpdatePieceNiveau(piece.Id, -1)" @onclick:stopPropagation="true">-</button>
+                                    <input type="number" min="1" class="form-control form-control-sm text-center" value="@piece.Niveau"
+                                        readonly @onclick:stopPropagation="true" />
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        @onclick="() => UpdatePieceNiveau(piece.Id, 1)" @onclick:stopPropagation="true">+</button>
                                 </div>
                             </div>
-                            
-                            <div class="card-actions-editable" @onclick:stopPropagation="true">
-                                <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)" title="@LocalizationService.T("inventory.edit")">
-                                    <i class="bi bi-pencil"></i> <LocalizedText Key="inventory.edit" />
-                                </button>
-                                <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)" title="@LocalizationService.T("inventory.delete")">
-                                    <i class="bi bi-trash"></i> <LocalizedText Key="inventory.delete" />
-                                </button>
+
+                            <div class="editable-field">
+                                <label>Puissance:</label>
+                                <div class="form-control form-control-sm" style="font-weight:600;">
+                                    @piece.PuissanceTotale
+                                </div>
+                            </div>
+
+                            <div class="editable-field">
+                                <label>Bonus tactiques:</label>
+                                <div class="bonus-count">@piece.BonusTactiques.Count</div>
+                            </div>
+
+                            <div class="editable-field">
+                                <label>Bonus stratégiques:</label>
+                                <div class="bonus-count">@piece.BonusStrategiques.Count</div>
                             </div>
                         </div>
                     </div>
                 }
-                else
-                {
-                    <div class="personnage-card-list" 
-                         @onclick="() => ViewPersonnage(personnage.Id)" 
-                         style="cursor: pointer;"
-                         draggable="true"
-                         @ondragstart="@(e => HandleDragStart(e, personnage))">
-                        <div class="card-checkbox" @onclick:stopPropagation="true">
-                            <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)" @onchange="() => ToggleSelection(personnage.Id)" />
-                        </div>
-                        <img src="@personnage.GetImageUrl(true)" alt="@personnage.Nom" class="personnage-card-image-list" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
-                        <div class="personnage-info-list">
-                            <span class="personnage-name" style="font-weight: 700;">@personnage.Nom</span>
-                            <span class="list-separator">|</span>
-                            <span>Type: @personnage.Type</span>
-                            <span class="list-separator">|</span>
-                            <span>Rareté: @personnage.Rarete</span>
-                            <span class="list-separator">|</span>
-                            <span>Puissance: @personnage.Puissance</span>
-                            <span class="list-separator">|</span>
-                            <span>Niveau: @personnage.Niveau</span>
-                            <span class="list-separator">|</span>
-                            <span>Rang: @GetRankStars(personnage.Rang)</span>
-                        </div>
-                        <div class="card-actions-list" @onclick:stopPropagation="true">
-                            <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)"><LocalizedText Key="inventory.edit" /></button>
-                            <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)"><LocalizedText Key="inventory.delete" /></button>
-                        </div>
-                    </div>
-                }
-            }
-        </div>
-    }
-
-    <!-- Section Maison de Lucie -->
-    @if (lucieHouse != null)
-    {
-        <div class="type-group-header mt-4">
-            <h4>Maison de Lucie (@lucieHouse.Pieces.Count) - @lucieHouse.NombrePiecesSelectionnees/@LucieHouse.MaxPiecesSelectionnees sélectionnées</h4>
-        </div>
-
-        <div class="@GetContainerClass()">
-            @foreach (var piece in lucieHouse.Pieces)
-            {
-                <div class="personnage-card-editable @(piece.Selectionnee ? "piece-selectionnee" : "")">
-                    <div class="card-checkbox-grid" @onclick:stopPropagation="true">
-                        <input type="checkbox" 
-                               checked="@piece.Selectionnee" 
-                               @onchange="() => TogglePieceSelection(piece.Id)" 
-                               disabled="@(!piece.Selectionnee && !lucieHouse.PeutSelectionner())" />
-                    </div>
-                    
-                    <div class="card-name-header">
-                        <div class="personnage-name-top">@piece.Nom</div>
-                        <div class="card-rarity-text">Niveau @piece.Niveau</div>
-                    </div>
-                    
-                    <div class="personnage-card-info">
-                        <div class="editable-field">
-                            <label>Niveau:</label>
-                            <div class="input-group input-group-sm">
-                                <button class="btn btn-outline-secondary" type="button" @onclick="() => UpdatePieceNiveau(piece.Id, -1)" @onclick:stopPropagation="true">-</button>
-                                <input type="number" 
-                                       min="1" 
-                                       class="form-control form-control-sm text-center" 
-                                       value="@piece.Niveau" 
-                                       readonly
-                                       @onclick:stopPropagation="true" />
-                                <button class="btn btn-outline-secondary" type="button" @onclick="() => UpdatePieceNiveau(piece.Id, 1)" @onclick:stopPropagation="true">+</button>
-                            </div>
-                        </div>
-                        
-                        <div class="editable-field">
-                            <label>Puissance:</label>
-                            <div class="form-control form-control-sm" style="font-weight:600;">
-                                @piece.PuissanceTotale
-                            </div>
-                        </div>
-                        
-                        <div class="editable-field">
-                            <label>Bonus tactiques:</label>
-                            <div class="bonus-count">@piece.BonusTactiques.Count</div>
-                        </div>
-                        
-                        <div class="editable-field">
-                            <label>Bonus stratégiques:</label>
-                            <div class="bonus-count">@piece.BonusStrategiques.Count</div>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    }
+            </div>
+        }
     }
     else
     {
-        <p><LocalizedText Key="inventory.empty" /></p>
+        <p>
+            <LocalizedText Key="inventory.empty" />
+        </p>
     }
 }
 
@@ -391,15 +428,18 @@ else
                     </div>
                     <div class="mb-3">
                         <label for="niveau" class="form-label">Niveau</label>
-                        <input type="number" class="form-control" id="niveau" @bind="currentPersonnage.Niveau" min="1" max="200" />
+                        <input type="number" class="form-control" id="niveau" @bind="currentPersonnage.Niveau" min="1"
+                            max="200" />
                     </div>
                     <div class="mb-3">
                         <label for="rang" class="form-label">Rang</label>
-                        <input type="number" class="form-control" id="rang" @bind="currentPersonnage.Rang" min="0" max="7" />
+                        <input type="number" class="form-control" id="rang" @bind="currentPersonnage.Rang" min="0"
+                            max="7" />
                     </div>
                     <div class="mb-3">
                         <label for="puissance" class="form-label">Puissance</label>
-                        <input type="number" class="form-control" id="puissance" @bind="currentPersonnage.Puissance" min="0" />
+                        <input type="number" class="form-control" id="puissance" @bind="currentPersonnage.Puissance"
+                            min="0" />
                     </div>
                     <div class="mb-3">
                         <label for="action" class="form-label">Type d'attaque</label>
@@ -413,7 +453,8 @@ else
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="CloseModal">Annuler</button>
-                    <button type="button" class="btn btn-primary" @onclick="SavePersonnage">@(isEditing ? "Sauvegarder" : "Ajouter")</button>
+                    <button type="button" class="btn btn-primary" @onclick="SavePersonnage">@(isEditing ? "Sauvegarder" :
+                                            "Ajouter")</button>
                 </div>
             </div>
         </div>
@@ -437,7 +478,7 @@ else
                             <option value="">Sélectionner une propriété</option>
                             <option value="Niveau">Niveau</option>
                             <option value="TypeAttaque">Type d'attaque</option>
-                            <option value="Localisation">Localisation</option>
+                            <option value="Selectionne">Sélection</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -446,6 +487,23 @@ else
                         {
                             <input type="number" class="form-control" @bind="bulkEditValue" placeholder="Entrez le niveau" />
                         }
+                        else if (bulkEditProperty == "TypeAttaque")
+                        {
+                            <select class="form-select" @bind="bulkEditValue">
+                                <option value="">Sélectionner un type d'attaque</option>
+                                <option value="Mêlée">Mêlée</option>
+                                <option value="Distance">Distance</option>
+                                <option value="Androïde">Androïde</option>
+                            </select>
+                        }
+                        else if (bulkEditProperty == "Selectionne")
+                        {
+                            <select class="form-select" @bind="bulkEditValue">
+                                <option value="">Sélectionner une valeur</option>
+                                <option value="true">Sélectionné</option>
+                                <option value="false">Non sélectionné</option>
+                            </select>
+                        }
                         else
                         {
                             <input type="text" class="form-control" @bind="bulkEditValue" placeholder="Entrez la valeur" />
@@ -453,8 +511,10 @@ else
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="() => showBulkEditModal = false">Annuler</button>
-                    <button type="button" class="btn btn-primary" @onclick="ApplyBulkEdit" disabled="@(string.IsNullOrEmpty(bulkEditProperty) || string.IsNullOrEmpty(bulkEditValue))">Appliquer</button>
+                    <button type="button" class="btn btn-secondary"
+                        @onclick="() => showBulkEditModal = false">Annuler</button>
+                    <button type="button" class="btn btn-primary" @onclick="ApplyBulkEdit"
+                        disabled="@(string.IsNullOrEmpty(bulkEditProperty) || string.IsNullOrEmpty(bulkEditValue))">Appliquer</button>
                 </div>
             </div>
         </div>
