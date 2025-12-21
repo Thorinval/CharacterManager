@@ -365,8 +365,6 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                         Selectionnee = bool.TryParse(pieceElement.Element("Selectionnee")?.Value, out var sel) && sel
                     };
 
-                    var puissanceImportee = int.TryParse(pieceElement.Element("Puissance")?.Value, out var puissance) ? puissance : (int?)null;
-
                     // Parser les bonus tactiques
                     var bonusTactiquesElement = pieceElement.Element("BonusTactiques");
                     if (bonusTactiquesElement != null)
@@ -389,10 +387,19 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                         piece.AspectsStrategiques.Puissance = piece.AspectsStrategiques.Bonus.Count;
                     }
 
-                    // Si une puissance totale est fournie, conserver la valeur maximale
-                    if (puissanceImportee.HasValue && puissanceImportee.Value > piece.Puissance)
+                    // Puissance tactiques et stratégiques (nouveau format). Fallback: ancienne balise "Puissance" alimente les tactiques.
+                    if (int.TryParse(pieceElement.Element("PuissanceTactiques")?.Value, out var pTact))
                     {
-                        piece.AspectsTactiques.Puissance += Math.Max(0, puissanceImportee.Value - piece.Puissance);
+                        piece.AspectsTactiques.Puissance = pTact;
+                    }
+                    else if (int.TryParse(pieceElement.Element("Puissance")?.Value, out var pLegacy))
+                    {
+                        piece.AspectsTactiques.Puissance = pLegacy;
+                    }
+
+                    if (int.TryParse(pieceElement.Element("PuissanceStrategiques")?.Value, out var pStrat))
+                    {
+                        piece.AspectsStrategiques.Puissance = pStrat;
                     }
 
                     lucieHouse.Pieces.Add(piece);
@@ -498,6 +505,47 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                 writer.WriteElementString("TypeAttaque", personnage.TypeAttaque.ToString());
                 writer.WriteElementString("Selectionne", personnage.Selectionne.ToString());
                 writer.WriteElementString("Description", personnage.Description ?? "");
+                writer.WriteEndElement();
+            }
+
+            // Export Lucie House as part of the inventory payload (no extra checkbox/UI toggle)
+            var lucieHouse = _context.LucieHouses.Include(l => l.Pieces).FirstOrDefault();
+            if (lucieHouse != null)
+            {
+                writer.WriteStartElement("LucieHouse");
+
+                foreach (var piece in lucieHouse.Pieces)
+                {
+                    writer.WriteStartElement("Piece");
+                    writer.WriteElementString("Nom", piece.Nom);
+                    writer.WriteElementString("Niveau", piece.Niveau.ToString());
+                    writer.WriteElementString("PuissanceTactiques", piece.AspectsTactiques.Puissance.ToString());
+                    writer.WriteElementString("PuissanceStrategiques", piece.AspectsStrategiques.Puissance.ToString());
+                    writer.WriteElementString("Selectionnee", piece.Selectionnee.ToString());
+
+                    if (piece.AspectsTactiques.Bonus.Count > 0)
+                    {
+                        writer.WriteStartElement("BonusTactiques");
+                        foreach (var bonus in piece.AspectsTactiques.Bonus)
+                        {
+                            writer.WriteElementString("Bonus", bonus);
+                        }
+                        writer.WriteEndElement();
+                    }
+
+                    if (piece.AspectsStrategiques.Bonus.Count > 0)
+                    {
+                        writer.WriteStartElement("BonusStrategiques");
+                        foreach (var bonus in piece.AspectsStrategiques.Bonus)
+                        {
+                            writer.WriteElementString("Bonus", bonus);
+                        }
+                        writer.WriteEndElement();
+                    }
+
+                    writer.WriteEndElement();
+                }
+
                 writer.WriteEndElement();
             }
 
@@ -720,7 +768,8 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                         writer.WriteStartElement("Piece");
                         writer.WriteElementString("Nom", piece.Nom);
                         writer.WriteElementString("Niveau", piece.Niveau.ToString());
-                        writer.WriteElementString("Puissance", piece.Puissance.ToString());
+                        writer.WriteElementString("PuissanceTactiques", piece.AspectsTactiques.Puissance.ToString());
+                        writer.WriteElementString("PuissanceStrategiques", piece.AspectsStrategiques.Puissance.ToString());
                         writer.WriteElementString("Selectionnee", piece.Selectionnee.ToString());
 
                         // Export des bonus tactiques

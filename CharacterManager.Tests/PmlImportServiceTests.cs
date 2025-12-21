@@ -350,6 +350,36 @@ public class PmlImportServiceTests : IDisposable
         Assert.Contains("ISABELLA", content);
     }
 
+      [Fact]
+      public async Task ExporterInventairePmlAsync_ShouldIncludeLucieHouseWhenPresent()
+      {
+        // Arrange
+        var lucieHouse = new LucieHouse();
+        lucieHouse.Pieces.Add(new Piece
+        {
+          Nom = "Salle du Trône",
+          Niveau = 3,
+          Selectionnee = true,
+          AspectsTactiques = new Aspect { Bonus = { "Dégâts" }, Puissance = 12 },
+          AspectsStrategiques = new Aspect { Bonus = { "PV" }, Puissance = 7 }
+        });
+
+        _context.LucieHouses.Add(lucieHouse);
+        await _context.SaveChangesAsync();
+
+        var personnages = _context.Personnages.ToList();
+
+        // Act
+        var pmlBytes = await _pmlImportService.ExporterInventairePmlAsync(personnages);
+
+        // Assert
+        var content = Encoding.UTF8.GetString(pmlBytes);
+        Assert.Contains("<LucieHouse>", content);
+        Assert.Contains("Salle du Trône", content);
+        Assert.Contains("PuissanceTactiques", content);
+        Assert.Contains("PuissanceStrategiques", content);
+      }
+
     [Fact]
     public async Task ExporterTemplatesPmlAsync_ShouldExportTemplates()
     {
@@ -375,6 +405,39 @@ public class PmlImportServiceTests : IDisposable
         Assert.Contains("Template for export", content);
     }
 
+      [Fact]
+      public async Task ExportPmlAsync_ShouldIncludeLucieHouseSection()
+      {
+        // Arrange
+        var lucieHouse = new LucieHouse();
+        lucieHouse.Pieces.Add(new Piece
+        {
+          Nom = "Atelier",
+          Niveau = 2,
+          Selectionnee = false,
+          AspectsTactiques = new Aspect { Bonus = { "Crit" }, Puissance = 5 },
+          AspectsStrategiques = new Aspect { Puissance = 3 }
+        });
+
+        _context.LucieHouses.Add(lucieHouse);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var pmlBytes = await _pmlImportService.ExportPmlAsync(
+          exportInventory: false,
+          exportTemplates: false,
+          exportBestSquad: false,
+          exportHistories: false,
+          exportLucieHouse: true);
+
+        // Assert
+        var content = Encoding.UTF8.GetString(pmlBytes);
+        Assert.Contains("LucieHouse", content);
+        Assert.Contains("Atelier", content);
+        Assert.Contains("PuissanceTactiques", content);
+        Assert.Contains("PuissanceStrategiques", content);
+      }
+
     [Fact]
     public async Task ImportPmlAsync_WithEmptyFile_ShouldReturnError()
     {
@@ -391,5 +454,52 @@ public class PmlImportServiceTests : IDisposable
         // Assert
         Assert.False(result.IsSuccess);
         Assert.Equal(0, result.SuccessCount);
+    }
+
+    [Fact]
+    public async Task ImportPmlAsync_WithLucieHouse_ShouldPersistPieces()
+    {
+        // Arrange
+        var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<CharacterManagerPML version=""1.0"" exportDate=""2025-12-20T15:30:00Z"">
+  <LucieHouse>
+    <Piece>
+      <Nom>Hall</Nom>
+      <Niveau>4</Niveau>
+      <PuissanceTactiques>120</PuissanceTactiques>
+      <PuissanceStrategiques>30</PuissanceStrategiques>
+      <Selectionnee>true</Selectionnee>
+      <BonusTactiques>
+        <Bonus>Dégâts</Bonus>
+        <Bonus>Précision</Bonus>
+      </BonusTactiques>
+    </Piece>
+    <Piece>
+      <Nom>Bibliothèque</Nom>
+      <Niveau>2</Niveau>
+      <PuissanceTactiques>10</PuissanceTactiques>
+      <PuissanceStrategiques>30</PuissanceStrategiques>
+      <Selectionnee>false</Selectionnee>
+      <BonusStrategiques>
+        <Bonus>PV</Bonus>
+      </BonusStrategiques>
+    </Piece>
+  </LucieHouse>
+</CharacterManagerPML>";
+
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
+
+        // Act
+        var result = await _pmlImportService.ImportPmlAsync(stream);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(2, result.SuccessCount);
+
+        var lucieHouse = _context.LucieHouses.Include(l => l.Pieces).FirstOrDefault();
+        Assert.NotNull(lucieHouse);
+        Assert.Equal(2, lucieHouse!.Pieces.Count);
+        Assert.Contains(lucieHouse.Pieces, p => p.Nom == "Hall" && p.AspectsTactiques.Bonus.Contains("Dégâts"));
+        Assert.Contains(lucieHouse.Pieces, p => p.Nom == "Bibliothèque" && p.AspectsStrategiques.Bonus.Contains("PV"));
     }
 }

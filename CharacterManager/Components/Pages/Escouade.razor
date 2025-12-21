@@ -117,12 +117,12 @@ else
         }
     </div>
 
+    <br />
+    <div class="section-header">
+        <h2>Maison de Lucie (@luciePieces.Count)</h2>
+    </div>
     @if (luciePieces.Any())
     {
-        <br />
-        <div class="section-header">
-            <h2>Maison de Lucie (@luciePieces.Count)</h2>
-        </div>
         <div class="personnages-list">
             @foreach (var piece in luciePieces)
             {
@@ -131,12 +131,16 @@ else
                         <div class="personnage-name">@piece.Nom</div>
                         <div class="personnage-attribute"><span class="attribute-label">Niveau:</span> @piece.Niveau</div>
                         <div class="personnage-attribute"><span class="attribute-label">Puissance:</span> @GetPiecePower(piece)</div>
-                                <div class="personnage-attribute"><span class="attribute-label">Bonus tactiques:</span> @piece.AspectsTactiques.Bonus.Count</div>
-                                <div class="personnage-attribute"><span class="attribute-label">Bonus stratégiques:</span> @piece.AspectsStrategiques.Bonus.Count</div>
+                        <div class="personnage-attribute"><span class="attribute-label">Bonus tactiques:</span> @piece.AspectsTactiques.Bonus.Count</div>
+                        <div class="personnage-attribute"><span class="attribute-label">Bonus stratégiques:</span> @piece.AspectsStrategiques.Bonus.Count</div>
                     </div>
                 </div>
             }
         </div>
+    }
+    else
+    {
+        <div class="alert alert-info" role="alert">Aucune pièce sélectionnée</div>
     }
 }
 

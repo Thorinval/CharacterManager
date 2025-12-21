@@ -48,7 +48,7 @@ public class ImporterHistoriqueXmlTests : IDisposable
     public async Task Import_ExempleXml_ShouldCreateOneHistorique_WithExpectedValues()
     {
         var service = new HistoriqueEscouadeService(_context);
-        var path = Path.Combine("d:", "Devs", "CharacterManager", "exemple_export_classement.xml");
+        var path = Path.Combine("d:", "Devs", "CharacterManager","Samples", "exemple_export_classement.xml");
         Assert.True(File.Exists(path));
 
         using var fs = File.OpenRead(path);
