@@ -19,12 +19,18 @@ public partial class MeilleurEscouade
         LoadTopPersonnages();
     }
 
+    protected override void OnParametersSet()
+    {
+        LoadTopPersonnages();
+    }
+
     private void LoadTopPersonnages()
     {
         topMercenaires = PersonnageService.GetTopMercenaires(8).ToList();
         topCommandant = PersonnageService.GetTopCommandant();
         topAndroides = PersonnageService.GetTopAndroides(3).ToList();
         puissanceMax = PersonnageService.GetPuissanceMaxEscouade();
+        StateHasChanged();
     }
     
     private MarkupString GetRankStars(int rank)
@@ -46,6 +52,10 @@ public partial class MeilleurEscouade
 
     private void NavigateToDetail(int id, string filter, string? returnUrl = null)
     {
+        Console.WriteLine($"[MeilleurEscouade] NavigateToDetail appelé avec ID={id}, filter={filter}");
+        var perso = topMercenaires.Concat(topAndroides).FirstOrDefault(p => p.Id == id) ?? topCommandant;
+        Console.WriteLine($"[MeilleurEscouade] Personnage trouvé: {perso?.Nom} (ID={perso?.Id})");
+        
         var back = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
         var encodedBack = Uri.EscapeDataString(back);
         Navigation.NavigateTo($"/detail-personnage/{id}?filter={filter}&returnUrl={encodedBack}");

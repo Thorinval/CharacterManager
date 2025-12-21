@@ -28,12 +28,14 @@
         {
             <div class="escouade-preview-section mb-0" @onclick:stopPropagation="true">
                 <div class="escouade-images">
-                    @foreach (var perso in topMercenaires)
+                    @for (int i = 0; i < topMercenaires.Count; i++)
                     {
-                        var currentId = perso.Id;
+                        var index = i;
+                        var perso = topMercenaires[index];
+                        var personnageId = perso.Id;
                         var returnPath = "/meilleur-escouade";
-                        <div class="escouade-member-preview clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForMercenaires(), returnPath))" @onclick:stopPropagation="true">
-                            <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image" @onclick="@(() => NavigateToDetail(currentId, GetFilterForMercenaires(), returnPath))" @onclick:stopPropagation="true" />
+                        <div class="escouade-member-preview clickable" @onclick="@(() => NavigateToDetail(personnageId, GetFilterForMercenaires(), returnPath))" @onclick:stopPropagation="true">
+                            <img src="@perso.GetImageUrl(true)" alt="@perso.Nom" class="escouade-image" />
                             <div class="escouade-member-name">@perso.Nom</div>
                             <div class="escouade-member-power">@perso.Puissance</div>
                         </div>
@@ -46,13 +48,16 @@
 
 @if (topCommandant != null)
 {
+    <div class="section-header">
+        <h2><LocalizedText Key="bestSquad.commander" /></h2>
+    </div>
     <div class="personnages-list">
         @{
             var currentId = topCommandant.Id;
             var returnPath = "/meilleur-escouade";
         }
         <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForCommandants(), returnPath))">
-            <img src="@topCommandant.ImageUrlPreview" alt="@topCommandant.Nom" class="personnage-card-image" />
+            <img src="@topCommandant.GetImageUrl(true)" alt="@topCommandant.Nom" class="personnage-card-image" />
             <div class="personnage-card-info">
                 <div class="personnage-name">@topCommandant.Nom</div>
                 <div class="personnage-attribute"><span class="attribute-label">Rareté:</span> @topCommandant.Rarete</div>
@@ -75,7 +80,7 @@
         var personnageNom = perso.Nom;
         var returnPath = "/meilleur-escouade";
         <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(personnageId, GetFilterForMercenaires(), returnPath))">
-            <img src="@perso.ImageUrlPreview" alt="@personnageNom" class="personnage-card-image" />
+            <img src="@perso.GetImageUrl(true)" alt="@personnageNom" class="personnage-card-image" />
             <div class="personnage-card-info">
                 <div class="personnage-name">@personnageNom</div>
                 <div class="personnage-attribute"><span class="attribute-label">Rareté:</span> @perso.Rarete</div>
@@ -98,7 +103,7 @@
         var androideNom = perso.Nom;
         var returnPath = "/meilleur-escouade";
         <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(androideId, GetFilterForAndroides(), returnPath))">
-            <img src="@perso.ImageUrlPreview" alt="@androideNom" class="personnage-card-image" />
+            <img src="@perso.GetImageUrl(true)" alt="@androideNom" class="personnage-card-image" />
             <div class="personnage-card-info">
                 <div class="personnage-name">@androideNom</div>
                 <div class="personnage-attribute"><span class="attribute-label">Rareté:</span> @perso.Rarete</div>

@@ -197,9 +197,9 @@ public partial class DetailPersonnage
         return Filter?.ToLower() switch
         {
             "escouade" => (await PersonnageService.GetEscouadeAsync()).ToList(),
-            "mercenaires" => (await PersonnageService.GetMercenairesAsync(true)).ToList(),
-            "commandants" => (await PersonnageService.GetCommandantsAsync(true)).ToList(),
-            "androides" => (await PersonnageService.GetAndroïdesAsync(true)).ToList(),
+            "mercenaires" => (await PersonnageService.GetMercenairesAsync(false)).ToList(),
+            "commandants" => (await PersonnageService.GetCommandantsAsync(false)).ToList(),
+            "androides" => (await PersonnageService.GetAndroïdesAsync(false)).ToList(),
             _ => (await PersonnageService.GetAllAsync()).ToList(),
         };
     }

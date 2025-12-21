@@ -101,7 +101,7 @@
                                 <div class="personnage-card-grid-compact" 
                                      @ondragstart="@(e => HandleDragStart(e, personnage))"
                                      draggable="true">
-                                    <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-compact" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+                                    <img src="@personnage.GetImageUrl(true)" alt="@personnage.Nom" class="personnage-card-image-compact" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
                                     <div class="card-overlay-compact">
                                         <span class="card-name-compact">@personnage.Nom</span>
                                         <span class="card-puissance-compact">@personnage.Puissance</span>
@@ -201,7 +201,7 @@ else
                             <div class="card-rarity-text rarity-text-@personnage.Rarete.ToString().ToLower()">@personnage.Rarete</div>
                         </div>
                         
-                        <img src="@personnage.ImageUrlPreview" 
+                        <img src="@personnage.GetImageUrl(true)" 
                              alt="@personnage.Nom" 
                              class="personnage-card-image-editable" 
                              @onclick="() => ViewPersonnage(personnage.Id)"
@@ -264,7 +264,7 @@ else
                         <div class="card-checkbox" @onclick:stopPropagation="true">
                             <input type="checkbox" checked="@selectedPersonnages.Contains(personnage.Id)" @onchange="() => ToggleSelection(personnage.Id)" />
                         </div>
-                        <img src="@personnage.ImageUrlPreview" alt="@personnage.Nom" class="personnage-card-image-list" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+                        <img src="@personnage.GetImageUrl(true)" alt="@personnage.Nom" class="personnage-card-image-list" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
                         <div class="personnage-info-list">
                             <span class="personnage-name" style="font-weight: 700;">@personnage.Nom</span>
                             <span class="list-separator">|</span>

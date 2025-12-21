@@ -55,6 +55,7 @@ public class PersonnageService
     public IEnumerable<Personnage> GetTopMercenaires(int count = 8)
     {
         return _context.Personnages
+            .AsNoTracking()
             .Include(p => p.Capacites)
             .Where(p => p.Type == TypePersonnage.Mercenaire)
             .OrderByDescending(p => p.Puissance)
@@ -74,6 +75,7 @@ public class PersonnageService
     public Personnage? GetTopCommandant()
     {
         return _context.Personnages
+            .AsNoTracking()
             .Include(p => p.Capacites)
             .Where(p => p.Type == TypePersonnage.Commandant)
             .OrderByDescending(p => p.Puissance)
@@ -93,6 +95,7 @@ public class PersonnageService
     public IEnumerable<Personnage> GetTopAndroides(int count = 3)
     {
         return _context.Personnages
+            .AsNoTracking()
             .Include(p => p.Capacites)
             .Where(p => p.Type == TypePersonnage.Androïde)
             .OrderByDescending(p => p.Puissance)

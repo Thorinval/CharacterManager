@@ -69,6 +69,20 @@ public class Personnage
     public string ImageUrlSelected => $"/images/personnages/{Nom.ToLower().Replace(" ", "_")}_small_select.png";
     public string ImageUrlHeader { get; set; } = string.Empty;        // Pour l'image de fond du header
 
+    /// <summary>
+    /// Retourne l'URL de l'image appropriée selon le contexte.
+    /// - Inventaire: _small_select.png si sélectionné, sinon _small_portrait.png
+    /// - MeilleurEscouade: _small_select.png si sélectionné, sinon _small_portrait.png
+    /// </summary>
+    public string GetImageUrl(bool useSelectionState = false)
+    {
+        if (useSelectionState && Selectionne)
+        {
+            return ImageUrlSelected;
+        }
+        return ImageUrlPreview;
+    }
+
     // Description et capacités
     public string Description { get; set; } = string.Empty;
     public List<Capacite> Capacites { get; set; } = new();
