@@ -4,8 +4,8 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>0.9.3</Version>
-    <InformationalVersion>0.9.3</InformationalVersion>
+    <Version>0.9.4</Version>
+    <InformationalVersion>0.9.4</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>

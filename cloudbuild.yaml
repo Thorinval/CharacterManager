@@ -94,7 +94,7 @@ steps:
       - '-t'
       - 'europe-west1-docker.pkg.dev/$PROJECT_ID/character-manager/app:$BRANCH_NAME'
       - '-f'
-      - 'Dockerfile'
+      - 'docker/Dockerfile'
       - '.'
     waitFor: ['publish']
     timeout: 600s
