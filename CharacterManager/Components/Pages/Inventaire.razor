@@ -243,7 +243,7 @@ else
                                     </label>
                                     <InputCheckbox @bind-Value="@personnage.Selectionne"
                                         @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Selectionne", e.Value?.ToString() ?? "false"))"
-                                        @onclick:stopPropagation="true" /> 
+                                        @onclick:stopPropagation="true" />
                                 </div>
                                 <div class="editable-field">
                                     <label>
@@ -267,13 +267,13 @@ else
                                     </label>
                                     <div class="input-group input-group-sm">
                                         <button class="btn btn-outline-secondary" type="button"
-                                            @onclick="() => ChangePuissance(personnage.Id, -1)" @onclick:stopPropagation="true">-</button>
+                                            @onclick="() => ChangePuissance(personnage.Id, -5)" @onclick:stopPropagation="true">-</button>
                                         <input type="number" min="0" class="form-control form-control-sm text-center"
                                             value="@personnage.Puissance"
                                             @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Puissance", e.Value?.ToString() ?? "0"))"
                                             @onclick:stopPropagation="true" />
                                         <button class="btn btn-outline-secondary" type="button"
-                                            @onclick="() => ChangePuissance(personnage.Id, 1)" @onclick:stopPropagation="true">+</button>
+                                            @onclick="() => ChangePuissance(personnage.Id, 5)" @onclick:stopPropagation="true">+</button>
                                     </div>
                                 </div>
 
@@ -356,11 +356,12 @@ else
                                 <label>Niveau:</label>
                                 <div class="input-group input-group-sm">
                                     <button class="btn btn-outline-secondary" type="button"
-                                        @onclick="() => UpdatePieceNiveau(piece.Id, -1)" @onclick:stopPropagation="true">-</button>
+                                        @onclick="() => ChangeNiveauPiece(piece.Id, -1)" @onclick:stopPropagation="true">-</button>
                                     <input type="number" min="1" class="form-control form-control-sm text-center" value="@piece.Niveau"
-                                        readonly @onclick:stopPropagation="true" />
+                                        @onchange="@((ChangeEventArgs e) => UpdatePieceField(piece.Id, "Niveau", e.Value?.ToString() ?? "0"))"
+                                        @onclick:stopPropagation="true" />
                                     <button class="btn btn-outline-secondary" type="button"
-                                        @onclick="() => UpdatePieceNiveau(piece.Id, 1)" @onclick:stopPropagation="true">+</button>
+                                        @onclick="() => ChangeNiveauPiece(piece.Id, 1)" @onclick:stopPropagation="true">+</button>
                                 </div>
                             </div>
 
@@ -372,13 +373,35 @@ else
                             </div>
 
                             <div class="editable-field">
-                                <label>Bonus tactiques:</label>
-                                <div class="bonus-count">@piece.BonusTactiques.Count</div>
+                                <label>Aspects tactiques:</label>
+                                <div class="input-group input-group-sm">
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        @onclick="() => ChangePuissancePiece(piece.Id, TypeBonus.Tactique, -5)"
+                                        @onclick:stopPropagation="true">-</button>
+                                    <input type="number" min="0" class="form-control form-control-sm text-center"
+                                        value="@piece.AspectsTactiques.Puissance"
+                                        @onchange="@((ChangeEventArgs e) => UpdatePieceField(piece.Id, "PuissanceTactique", e.Value?.ToString() ?? "0"))"
+                                        @onclick:stopPropagation="true" />
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        @onclick="() => ChangePuissancePiece(piece.Id, TypeBonus.Tactique, 5)"
+                                        @onclick:stopPropagation="true">+</button>
+                                </div>
                             </div>
 
                             <div class="editable-field">
-                                <label>Bonus stratégiques:</label>
-                                <div class="bonus-count">@piece.BonusStrategiques.Count</div>
+                                <label>Aspects stratégiques:</label>
+                                <div class="input-group input-group-sm">
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        @onclick="() => ChangePuissancePiece(piece.Id, TypeBonus.Strategique, -5)"
+                                        @onclick:stopPropagation="true">-</button>
+                                    <input type="number" min="0" class="form-control form-control-sm text-center"
+                                        value="@piece.AspectsStrategiques.Puissance"
+                                        @onchange="@((ChangeEventArgs e) => UpdatePieceField(piece.Id, "PuissanceStrategique", e.Value?.ToString() ?? "0"))"
+                                        @onclick:stopPropagation="true" />
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        @onclick="() => ChangePuissancePiece(piece.Id, TypeBonus.Strategique, 5)"
+                                        @onclick:stopPropagation="true">+</button>
+                                </div>
                             </div>
                         </div>
                     </div>

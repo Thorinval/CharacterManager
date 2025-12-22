@@ -122,16 +122,20 @@ public partial class MeilleurEscouade
             using var conn = (SqliteConnection)DbContext.Database.GetDbConnection();
             if (conn.State != System.Data.ConnectionState.Open)
                 conn.Open();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = "PRAGMA table_info(Pieces);";
-            using var reader = cmd.ExecuteReader();
+            
             var hasTactiques = false;
             var hasStrategiques = false;
-            while (reader.Read())
+            
+            using (var cmd = conn.CreateCommand())
             {
-                var name = reader.GetString(1);
-                if (string.Equals(name, "AspectsTactiques", StringComparison.OrdinalIgnoreCase)) hasTactiques = true;
-                if (string.Equals(name, "AspectsStrategiques", StringComparison.OrdinalIgnoreCase)) hasStrategiques = true;
+                cmd.CommandText = "PRAGMA table_info(Pieces);";
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    var name = reader.GetString(1);
+                    if (string.Equals(name, "AspectsTactiques", StringComparison.OrdinalIgnoreCase)) hasTactiques = true;
+                    if (string.Equals(name, "AspectsStrategiques", StringComparison.OrdinalIgnoreCase)) hasStrategiques = true;
+                }
             }
 
             if (!hasTactiques)

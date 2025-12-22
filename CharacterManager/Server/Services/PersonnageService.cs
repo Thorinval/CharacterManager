@@ -20,31 +20,61 @@ public class PersonnageService
 
     public IEnumerable<Personnage> GetAll()
     {
-        return _context.Personnages.Include(static p => p.Capacites).ToList();
+        return [.. _context.Personnages.Include(static p => p.Capacites)];
     }
 
     public int GetPuissanceEscouade()
     {
         var puissancePersos = _context.Personnages
-            .Where(p => p.Selectionne)
+            .Where(p => p.Selectionne && p.Type != TypePersonnage.Commandant)
             .Sum(p => p.Puissance);
 
-        // Calculer la puissance Lucie House côté client pour éviter les traductions LINQ non supportées par SQLite
-        var puissanceLucie = _context.Pieces
+        var puissanceTactiqueLucie = _context.Pieces
             .Where(p => p.Selectionnee)
             .AsEnumerable()
-            .Sum(p => (p.AspectsTactiques?.Puissance ?? 0) + (p.AspectsStrategiques?.Puissance ?? 0));
+            .Sum(p => p.AspectsTactiques?.Puissance ?? 0);
+        
+        var puissanceStrategiqueLucie = GetPuissanceStrategiqueLucie();
 
-        return puissancePersos + puissanceLucie;
+        var puissancecommandantEscouade = GetPuissanceCommandantEscouade();
+
+        return puissancecommandantEscouade + puissancePersos + puissanceTactiqueLucie + puissanceStrategiqueLucie;
+    }
+
+    private int GetPuissanceCommandantEscouade() =>
+        _context.Personnages
+            .Where(p => p.Selectionne && p.Type == TypePersonnage.Commandant)
+            .Select(p => p.Puissance + p.Rang  * 20)            
+            .FirstOrDefault();
+
+
+    private int GetPuissanceTopCommandant()
+    {
+        return _context.Personnages
+            .Where(p => p.Type == TypePersonnage.Commandant)
+            .Select(p => p.Puissance + p.Rang * 20)
+            .Max();
+    }
+
+    private int GetPuissanceStrategiqueLucie()
+    {
+        return _context.Pieces
+            .AsEnumerable()
+            .Sum(p => p.AspectsStrategiques?.Puissance ?? 0);
     }
 
     public int GetPuissanceMaxEscouade()
     {
-        return GetTopMercenaires().Sum(static p => p.Puissance) +
-               (GetTopCommandant()?.Puissance ?? 0) +
-               GetTopAndroides().Sum(static p => p.Puissance) +
-               GetTopLucieRooms().Sum(static p => p.PuissanceTotale)
-               ;
+        var puissanceMax = GetTopMercenaires().Sum(static p => p.Puissance) +
+               GetPuissanceTopCommandant() +
+               GetTopAndroides().Sum(static p => p.Puissance);
+
+        var puissanceLucie = GetTopLucieRooms()
+            .AsEnumerable()
+            .Sum(p => p.AspectsTactiques?.Puissance ?? 0) +
+            GetPuissanceStrategiqueLucie();
+
+        return puissanceMax + puissanceLucie;
     }
 
     public int GetPuissanceSeuilCommandantPourLvlUp()

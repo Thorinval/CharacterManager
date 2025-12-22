@@ -3,6 +3,12 @@ using System.Text.Json;
 
 namespace CharacterManager.Server.Models;
 
+public enum TypeBonus
+{
+    Tactique,
+    Strategique
+}   
+
 public class Aspect
 {
     public string Nom { get; set; } = string.Empty;

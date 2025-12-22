@@ -102,13 +102,45 @@ public partial class Inventaire : IAsyncDisposable
         return viewMode == mode ? "btn-primary" : "btn-outline-secondary";
     }
 
-    private async Task ChangePuissance(int personnageId, int delta)
+    private async Task ChangeNiveauPiece(int pieceId, int delta)
+    {
+        var piece = lucieHouse?.Pieces.FirstOrDefault(p => p.Id == pieceId);
+        if (piece != null)
+        {
+            int newValue = Math.Max(0, piece.Niveau + delta);
+            await Task.Run(() => UpdatePieceField(pieceId, "Niveau", newValue.ToString()));
+        }
+    }
+
+       private async Task ChangePuissance(int personnageId, int delta)
     {
         var personnage = personnagesFiltres.FirstOrDefault(p => p.Id == personnageId);
         if (personnage != null)
         {
             int newValue = Math.Max(0, personnage.Puissance + delta);
             await Task.Run(() => UpdatePersonnageField(personnageId, "Puissance", newValue.ToString()));
+        }
+    }
+ 
+
+    private async Task ChangePuissancePiece(int pieceId, TypeBonus typeBonus, int delta)
+    {
+        var piece = lucieHouse?.Pieces.FirstOrDefault(p => p.Id == pieceId);
+        if (piece != null)
+        {
+            int newValue = 0;
+            string typepuissance = typeBonus == TypeBonus.Tactique ? "PuissanceTactique" : "PuissanceStrategique";
+
+            switch (typeBonus)
+            {
+                case TypeBonus.Tactique:
+                    newValue = Math.Max(0, piece.AspectsTactiques.Puissance + delta);
+                    break;
+                case TypeBonus.Strategique:
+                    newValue = Math.Max(0, piece.AspectsStrategiques.Puissance + delta);
+                    break;
+            }
+            await UpdatePieceField(pieceId, typepuissance, newValue.ToString());
         }
     }
 
@@ -615,19 +647,24 @@ public partial class Inventaire : IAsyncDisposable
             const string hydratedTactiques = "{\"Nom\":\"Aspects tactiques\",\"Puissance\":0,\"Bonus\":[]}";
             const string hydratedStrategiques = "{\"Nom\":\"Aspects stratégiques\",\"Puissance\":0,\"Bonus\":[]}";
 
-            if (force || !await ColumnExistsAsync("Pieces", "AspectsTactiques"))
+            // Always check if column exists before adding it
+            if (!await ColumnExistsAsync("Pieces", "AspectsTactiques"))
             {
                 await DbContext.Database.ExecuteSqlRawAsync("ALTER TABLE Pieces ADD COLUMN AspectsTactiques TEXT NOT NULL DEFAULT '';");
             }
 
-            if (force || !await ColumnExistsAsync("Pieces", "AspectsStrategiques"))
+            if (!await ColumnExistsAsync("Pieces", "AspectsStrategiques"))
             {
                 await DbContext.Database.ExecuteSqlRawAsync("ALTER TABLE Pieces ADD COLUMN AspectsStrategiques TEXT NOT NULL DEFAULT '';");
             }
 
             // Parameterize values to avoid EF1002 warnings
-            await DbContext.Database.ExecuteSqlAsync($"UPDATE Pieces SET AspectsTactiques = {hydratedTactiques} WHERE AspectsTactiques IS NULL OR AspectsTactiques = '';");
-            await DbContext.Database.ExecuteSqlAsync($"UPDATE Pieces SET AspectsStrategiques = {hydratedStrategiques} WHERE AspectsStrategiques IS NULL OR AspectsStrategiques = '';");
+            // Force parameter only affects whether we update existing rows with default values
+            if (force)
+            {
+                await DbContext.Database.ExecuteSqlAsync($"UPDATE Pieces SET AspectsTactiques = {hydratedTactiques} WHERE AspectsTactiques IS NULL OR AspectsTactiques = '';");
+                await DbContext.Database.ExecuteSqlAsync($"UPDATE Pieces SET AspectsStrategiques = {hydratedStrategiques} WHERE AspectsStrategiques IS NULL OR AspectsStrategiques = '';");
+            }
         }
         catch (Exception ex)
         {
@@ -641,22 +678,39 @@ public partial class Inventaire : IAsyncDisposable
 
         try
         {
-            await using var conn = DbContext.Database.GetDbConnection();
-            await conn.OpenAsync();
-            await using var cmd = conn.CreateCommand();
-            cmd.CommandText = $"PRAGMA table_info({table});";
-            await using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            var conn = DbContext.Database.GetDbConnection();
+            var shouldClose = conn.State != System.Data.ConnectionState.Open;
+            
+            if (shouldClose)
             {
-                var name = reader.GetString(1);
-                if (string.Equals(name, column, StringComparison.OrdinalIgnoreCase))
+                await conn.OpenAsync();
+            }
+            
+            try
+            {
+                await using var cmd = conn.CreateCommand();
+                cmd.CommandText = $"PRAGMA table_info({table});";
+                await using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
                 {
-                    return true;
+                    var name = reader.GetString(1);
+                    if (string.Equals(name, column, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+            }
+            finally
+            {
+                if (shouldClose && conn.State == System.Data.ConnectionState.Open)
+                {
+                    await conn.CloseAsync();
                 }
             }
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"[LucieHouse] ColumnExistsAsync error for {table}.{column}: {ex.Message}");
         }
         return false;
     }
@@ -665,37 +719,73 @@ public partial class Inventaire : IAsyncDisposable
     {
         try
         {
-            await using var conn = DbContext.Database.GetDbConnection();
-            await conn.OpenAsync();
-            await using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name=@name;";
-            var param = cmd.CreateParameter();
-            param.ParameterName = "@name";
-            param.Value = table;
-            cmd.Parameters.Add(param);
-            var result = await cmd.ExecuteScalarAsync();
-            return result != null;
+            var conn = DbContext.Database.GetDbConnection();
+            var shouldClose = conn.State != System.Data.ConnectionState.Open;
+            
+            if (shouldClose)
+            {
+                await conn.OpenAsync();
+            }
+            
+            try
+            {
+                await using var cmd = conn.CreateCommand();
+                cmd.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name=@name;";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@name";
+                param.Value = table;
+                cmd.Parameters.Add(param);
+                var result = await cmd.ExecuteScalarAsync();
+                return result != null;
+            }
+            finally
+            {
+                if (shouldClose && conn.State == System.Data.ConnectionState.Open)
+                {
+                    await conn.CloseAsync();
+                }
+            }
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"[LucieHouse] TableExistsAsync error for {table}: {ex.Message}");
             return false;
         }
     }
 
-    private async Task UpdatePieceNiveau(int pieceId, int delta)
+    private async Task UpdatePieceField(int pieceId, string field, string value)
     {
         if (lucieHouse == null) return;
 
         var piece = lucieHouse.Pieces.FirstOrDefault(p => p.Id == pieceId);
-        if (piece != null)
+        if (piece == null) return;
+
+        switch (field)
         {
-            await EnsureLuciePieceAspectColumnsAsync(force: true);
-            piece.Niveau = Math.Max(1, piece.Niveau + delta);
-            DbContext.Pieces.Update(piece);
-            await DbContext.SaveChangesAsync();
-            await InvokeAsync(StateHasChanged);
-            toastRef?.Show($"{piece.Nom} - Niveau mis à jour: {piece.Niveau}", "success");
+            case "Niveau":
+                if (int.TryParse(value, out var niveau))
+                {
+                    piece.Niveau = niveau;
+                }
+                break;
+            case "PuissanceStrategique":
+                if (int.TryParse(value, out var puissance))
+                {
+                    piece.AspectsStrategiques.Puissance = puissance;
+                }
+                break;
+            case "PuissanceTactique":
+                if (int.TryParse(value, out var puissanceTactique))                {
+                    piece.AspectsTactiques.Puissance = puissanceTactique;
+                }
+                break;
         }
+
+        await EnsureLuciePieceAspectColumnsAsync(force: false);
+        DbContext.Pieces.Update(piece);
+        await DbContext.SaveChangesAsync();
+        await InvokeAsync(StateHasChanged);
+        toastRef?.Show($"{piece.Nom} - {field} mis à jour: {value}", "success");
     }
 
     private async Task UpdatePiecePuissance(int pieceId, string value)
@@ -705,7 +795,7 @@ public partial class Inventaire : IAsyncDisposable
         var piece = lucieHouse.Pieces.FirstOrDefault(p => p.Id == pieceId);
         if (piece != null && int.TryParse(value, out var puissance))
         {
-            await EnsureLuciePieceAspectColumnsAsync(force: true);
+            await EnsureLuciePieceAspectColumnsAsync(force: false);
             DbContext.Pieces.Update(piece);
             await DbContext.SaveChangesAsync();
             await InvokeAsync(StateHasChanged);

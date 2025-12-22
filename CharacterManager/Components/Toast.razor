@@ -46,7 +46,7 @@
         message = msg;
         type = t;
         isVisible = true;
-        StateHasChanged();
+        InvokeAsync(StateHasChanged);
 
         timer?.Stop();
         timer = new System.Timers.Timer(durationMs);
