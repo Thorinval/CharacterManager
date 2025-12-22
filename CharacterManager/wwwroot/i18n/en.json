@@ -34,6 +34,10 @@
     "link": "About",
     "title": "About"
   },
+  "roadmap": {
+    "link": "Roadmap",
+    "title": "Roadmap"
+  },
   "login": {
     "title": "Sign In",
     "heading": "Sign In",

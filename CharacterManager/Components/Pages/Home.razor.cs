@@ -26,6 +26,9 @@ public partial class Home : IAsyncDisposable
     [Inject]
     public IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
 
+    [Inject]
+    public RoadmapService RoadmapService { get; set; } = null!;
+
     private string homeImageUrl = AppConstants.Paths.HomeDefaultBackground;
     private bool isAdultModeEnabled;
 

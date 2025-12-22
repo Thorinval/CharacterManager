@@ -1,7 +1,6 @@
 namespace CharacterManager.Components.Pages;
 
 using System;
-using System.IO;
 using Microsoft.AspNetCore.Components;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
@@ -13,16 +12,14 @@ using Microsoft.Data.Sqlite;
 public partial class Escouade
 {
     private List<Personnage> personnagesEscouade = new();
-    private List<Personnage> mercenaires = new();   
-    private List<Personnage> commandants = new();   
+    private List<Personnage> mercenaires = new();
+    private List<Personnage> commandants = new();
     private List<Personnage> androides = new();
     private List<Piece> luciePieces = new();
 
     private bool showModal = false;
     private Personnage currentPersonnage = new();
     private bool isEditing = false;
-
-    private int puissanceMax = 0;
 
     private int puissanceEscouade = 0;
 
@@ -34,8 +31,6 @@ public partial class Escouade
         LoadPersonnages();
     }
 
-
-
     private void LoadPersonnages()
     {
         personnagesEscouade = PersonnageService.GetEscouade().ToList();
@@ -43,7 +38,6 @@ public partial class Escouade
         commandants = PersonnageService.GetCommandants(true).ToList();
         androides = PersonnageService.GetAndroides(true).ToList();
         puissanceEscouade = PersonnageService.GetPuissanceEscouade();
-        puissanceMax = PersonnageService.GetPuissanceMaxEscouade();
 
         try
         {
@@ -61,23 +55,6 @@ public partial class Escouade
             luciePieces = lucie?.Pieces.Where(p => p.Selectionnee).ToList() ?? new();
         }
     }
-    
-    private MarkupString GetRankStars(int rank)
-    {
-        var stars = "";
-        for (int i = 1; i <= 7; i++)
-        {
-            if (i <= rank)
-            {
-                stars += "<span style='color: #FFD700;'>★</span>";
-            }
-            else
-            {
-                stars += "<span style='color: #CCCCCC;'>☆</span>";
-            }
-        }
-        return new MarkupString(stars);
-    }
 
     private void CloseModal()
     {
@@ -93,28 +70,24 @@ public partial class Escouade
         Navigation.NavigateTo($"/detail-personnage/{id}?filter={filter}&returnUrl={encodedBack}");
     }
 
-    private static string GetFilterForEscouade() => "escouade";
-    private static string GetFilterForCommandants() => "commandants";
-    private static string GetFilterForMercenaires() => "mercenaires";
-    private static string GetFilterForAndroides() => "androides";
 
     private string GetCommandantHeaderImage()
     {
-        if (commandants.Count == 0)
+        if (commandants.Count != 0)
         {
-            return AppConstants.Paths.GenericCommandantHeader;
-        }
+            var commandant = commandants.First();
+            return TemplateEscouade.ResolveHeaderImage(commandant.Nom);
 
-        var commandant = commandants.First();
-        return ResolveHeaderImage(commandant.ImageUrlHeader, commandant.Nom);
+        }
+        return AppConstants.Paths.GenericCommandantHeader;
     }
 
     private void NavigateToCommandantDetail()
     {
-        if (commandants.Any())
+        if (commandants.Count != 0)
         {
             var cmd = commandants.First();
-            NavigateToDetail(cmd.Id, GetFilterForCommandants(), "/escouade");
+            NavigateToDetail(cmd.Id, TemplateEscouade.GetFilterForCommandants(), "/escouade");
         }
     }
 
@@ -130,38 +103,6 @@ public partial class Escouade
         }
         LoadPersonnages();
         CloseModal();
-    }
-
-    /// <summary>
-    /// Résout le chemin d'image header en fonction du nom.
-    /// </summary>
-    private string ResolveHeaderImage(string? imageUrlHeader, string? nom)
-    {
-        if (!string.IsNullOrWhiteSpace(imageUrlHeader))
-        {
-            return imageUrlHeader;
-        }
-
-        if (string.IsNullOrWhiteSpace(nom))
-        {
-            return AppConstants.Paths.GenericCommandantHeader;
-        }
-
-        var nomFichier = nom.ToLower().Replace(" ", "_");
-        var standardCandidate = $"{AppConstants.Paths.ImagesPersonnages}/{nomFichier}{AppConstants.ImageSuffixes.Header}{AppConstants.FileExtensions.Png}";
-
-        if (FileExists(standardCandidate))
-        {
-            return standardCandidate;
-        }
-
-        return AppConstants.Paths.GenericCommandantHeader;
-    }
-
-    private static bool FileExists(string relativePath)
-    {
-        var physicalPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
-        return File.Exists(physicalPath);
     }
 
     private void ChangePuissanceEscouade(int delta)
@@ -181,10 +122,10 @@ public partial class Escouade
             using var conn = (SqliteConnection)DbContext.Database.GetDbConnection();
             if (conn.State != System.Data.ConnectionState.Open)
                 conn.Open();
-            
+
             var hasTactiques = false;
             var hasStrategiques = false;
-            
+
             using (var cmd = conn.CreateCommand())
             {
                 cmd.CommandText = "PRAGMA table_info(Pieces);";

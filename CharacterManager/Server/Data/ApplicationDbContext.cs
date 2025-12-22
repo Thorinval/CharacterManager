@@ -16,6 +16,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Profile> Profiles { get; set; }
     public DbSet<LucieHouse> LucieHouses { get; set; }
     public DbSet<Piece> Pieces { get; set; }
+    public DbSet<RoadmapNote> RoadmapNotes => Set<RoadmapNote>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

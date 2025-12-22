@@ -1,6 +1,8 @@
 @page "/escouade"
+
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 
+@using CharacterManager.Server.Constants
 @using CharacterManager.Server.Models
 @using CharacterManager.Server.Services
 @rendermode InteractiveServer
@@ -31,9 +33,9 @@
                     @foreach (var perso in personnagesEscouade.Where(p => p.Type == TypePersonnage.Mercenaire).OrderByDescending(p => p.Puissance))
                     {
                         var currentId = perso.Id;
-                        var returnPath = "/escouade";
-                        <div class="escouade-member-preview clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForEscouade(), returnPath))" @onclick:stopPropagation="true">
-                            <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image" @onclick="@(() => NavigateToDetail(currentId, GetFilterForEscouade(), returnPath))" @onclick:stopPropagation="true" />
+                        var returnPath = AppConstants.Routes.Escouade;
+                        <div class="escouade-member-preview clickable" @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForEscouade(), returnPath))" @onclick:stopPropagation="true">
+                            <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image" @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForEscouade(), returnPath))" @onclick:stopPropagation="true" />
                             <div class="escouade-member-name">@perso.Nom</div>
                             <div class="escouade-member-power">@perso.Puissance</div>
                         </div>
@@ -43,7 +45,6 @@
         }
     </div>
 </div>
-
 
 @if (personnagesEscouade.Count == 0)
 {
@@ -60,15 +61,15 @@ else
         @foreach (var perso in commandants)
         {
             var currentId = perso.Id;
-            var returnPath = "/escouade";
-            <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForCommandants(), returnPath))">
+            var returnPath = AppConstants.Routes.Escouade;
+            <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForCommandants(), returnPath))">
                 <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
                     <div class="personnage-attribute"><span class="attribute-label">Rareté:</span> @perso.Rarete</div>
                     <div class="personnage-attribute"><span class="attribute-label">Puissance:</span> @perso.Puissance</div>
                     <div class="personnage-attribute"><span class="attribute-label">Niveau:</span> @perso.Niveau</div>
-                    <div class="personnage-attribute"><span class="attribute-label">Rang:</span> @GetRankStars(perso.Rang)</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Rang:</span> @TemplateEscouade.GetRankStars(perso.Rang)</div>
                     <div class="personnage-attribute"><span class="attribute-label">Faction:</span> @perso.Faction</div>
                 </div>
             </div>
@@ -82,15 +83,15 @@ else
         @foreach (var perso in mercenaires)
         {
             var currentId = perso.Id;
-            var returnPath = "/escouade";
-            <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForMercenaires(), returnPath))">
+            var returnPath = AppConstants.Routes.Escouade;
+            <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForMercenaires(), returnPath))">
                 <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
                     <div class="personnage-attribute"><span class="attribute-label">Rareté:</span> @perso.Rarete</div>
                     <div class="personnage-attribute"><span class="attribute-label">Puissance:</span> @perso.Puissance</div>
                     <div class="personnage-attribute"><span class="attribute-label">Niveau:</span> @perso.Niveau</div>
-                    <div class="personnage-attribute"><span class="attribute-label">Rang:</span> @GetRankStars(perso.Rang)</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Rang:</span> @TemplateEscouade.GetRankStars(perso.Rang)</div>
                     <div class="personnage-attribute"><span class="attribute-label">Faction:</span> @perso.Faction</div>
                 </div>
             </div>
@@ -104,8 +105,8 @@ else
         @foreach (var perso in androides)
         {
             var currentId = perso.Id;
-            var returnPath = "/escouade";
-            <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, GetFilterForAndroides(), returnPath))">
+            var returnPath = AppConstants.Routes.Escouade;
+            <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForAndroides(), returnPath))">
                 <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>

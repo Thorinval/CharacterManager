@@ -34,6 +34,10 @@
     "link": "À propos",
     "title": "À propos"
   },
+  "roadmap": {
+    "link": "Feuille de route",
+    "title": "Feuille de route"
+  },
   "login": {
     "title": "Connexion",
     "heading": "Connexion",

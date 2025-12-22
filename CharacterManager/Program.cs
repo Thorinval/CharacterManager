@@ -36,12 +36,15 @@ builder.Services.AddScoped<PmlImportService>();
 builder.Services.AddScoped<HistoriqueEscouadeService>();
 builder.Services.AddScoped<ClientLocalizationService>();
 builder.Services.AddScoped<CsvImportService>();
+builder.Services.AddScoped<RoadmapService>();
+
 // AppImageService no longer used for categorization; DI registration removed
 builder.Services.AddSingleton<PersonnageImageConfigService>();
 builder.Services.AddSingleton<AppVersionService>();
 builder.Services.AddSingleton<LocalizationService>();
 builder.Services.AddSingleton<LanguageContextService>();  // Service de contexte de langue
 builder.Services.AddSingleton<AdultModeNotificationService>();  // Service singleton pour notification mode adulte
+
 builder.Services.AddHttpClient<UpdateService>();
 builder.Services.AddHttpClient();  // Pour les appels HTTP du ClientLocalizationService
 

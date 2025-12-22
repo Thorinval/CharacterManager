@@ -1,7 +1,6 @@
 namespace CharacterManager.Components.Pages;
 
 using System;
-using System.IO;
 using Microsoft.AspNetCore.Components;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
@@ -16,7 +15,7 @@ public partial class MeilleurEscouade
     private Personnage? topCommandant;
     private List<Personnage> topAndroides = new();
     private int puissanceMax = 0;
-    private List<Piece> luciePieces = new();
+    private List<Piece> luciePieces = [];
 
     [Inject]
     public ApplicationDbContext DbContext { get; set; } = null!;
@@ -42,23 +41,6 @@ public partial class MeilleurEscouade
         StateHasChanged();
     }
     
-    private MarkupString GetRankStars(int rank)
-    {
-        var stars = "";
-        for (int i = 1; i <= 7; i++)
-        {
-            if (i <= rank)
-            {
-                stars += "<span style='color: #FFD700;'>★</span>";
-            }
-            else
-            {
-                stars += "<span style='color: #CCCCCC;'>☆</span>";
-            }
-        }
-        return new MarkupString(stars);
-    }
-
     private void NavigateToDetail(int id, string filter, string? returnUrl = null)
     {
         Console.WriteLine($"[MeilleurEscouade] NavigateToDetail appelé avec ID={id}, filter={filter}");
@@ -70,44 +52,21 @@ public partial class MeilleurEscouade
         Navigation.NavigateTo($"/detail-personnage/{id}?filter={filter}&returnUrl={encodedBack}");
     }
 
-    private static string GetFilterForCommandants() => "commandants";
-    private static string GetFilterForMercenaires() => "mercenaires";
-    private static string GetFilterForAndroides() => "androides";
-
     private string GetCommandantHeaderImage()
     {
         if (topCommandant != null)
         {
-            if (!string.IsNullOrEmpty(topCommandant.ImageUrlHeader))
-            {
-                return topCommandant.ImageUrlHeader;
-            }
-            if (!string.IsNullOrEmpty(topCommandant.Nom))
-            {
-                var nomFichier = topCommandant.Nom.ToLower().Replace(" ", "_");
-                var standardCandidate = $"{AppConstants.Paths.ImagesPersonnages}/{nomFichier}{AppConstants.ImageSuffixes.Header}{AppConstants.FileExtensions.Png}";
-
-                if (FileExists(standardCandidate))
-                {
-                    return standardCandidate;
-                }
-            }
+            return TemplateEscouade.ResolveHeaderImage(topCommandant.Nom);
         }
-        return AppConstants.Paths.GenericCommandantHeader; // Chemin d'image générique pour les commandants
+        return AppConstants.Paths.GenericCommandantHeader;
     }
 
     private void NavigateToCommandantDetail()
     {
         if (topCommandant != null)
         {
-            NavigateToDetail(topCommandant.Id, GetFilterForCommandants(), "/meilleur-escouade");
+            NavigateToDetail(topCommandant.Id, TemplateEscouade.GetFilterForCommandants(), "/meilleur-escouade");
         }
-    }
-
-    private static bool FileExists(string relativePath)
-    {
-        var physicalPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
-        return File.Exists(physicalPath);
     }
 
     private static int GetPiecePower(Piece piece) => piece.Puissance;

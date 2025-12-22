@@ -9,6 +9,7 @@
     {
         <div class="sidebar">
             <NavMenu OnAboutClick="ShowAboutModal" />
+            <NavMenu OnRoadmapClick="ShowRoadmapModal" />
         </div>
     }
 
@@ -19,6 +20,7 @@
                     <img src="/images/interface/parametres.png" alt="Paramètres" class="settings-icon" style="width:24px; height:24px;" />
                 </a>
                 <button class="about-link" @onclick="ShowAboutModal"><LocalizedText Key="about.link" /></button>
+                <button class="roadmap-link" @onclick="ShowRoadmapModal"><LocalizedText Key="roadmap.link" /></button>              
             </div>
             @using Microsoft.AspNetCore.Components.Authorization
             <AuthorizeView>
@@ -42,6 +44,7 @@
 </div>
 
 <AboutModal @bind-IsVisible="showAboutModal" />
+<RoadmapModal @bind-IsVisible="showRoadmapModal" />
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
@@ -81,10 +84,25 @@
     .settings-icon {
         transition: opacity 0.2s;
     }
+
+    .roadmap-link {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        text-decoration: none;
+        font: inherit;
+    }
+    
+    .roadmap-link:hover {
+        text-decoration: underline;
+    }
+
 </style>
 
 @code {
     private bool showAboutModal = false;
+    private bool showRoadmapModal = false;
     private bool isHomePage = false;
     [CascadingParameter] private Task<Microsoft.AspNetCore.Components.Authorization.AuthenticationState> AuthStateTask { get; set; } = default!;
     [Inject] private Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
@@ -98,7 +116,11 @@
         showAboutModal = true;
         StateHasChanged();
     }
-
+    private void ShowRoadmapModal()
+    {
+        showRoadmapModal = true;
+        StateHasChanged();
+    }
     protected override async Task OnInitializedAsync()
     {
         // Vérifier si on est sur la page d'accueil
