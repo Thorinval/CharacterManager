@@ -115,4 +115,10 @@
         IsVisible = false;
         await IsVisibleChanged.InvokeAsync(IsVisible);
     }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load existing roadmap text if needed
+        RoadmapText = await RoadmapService.LoadRoadmapAsync();
+    }
 }
