@@ -107,7 +107,7 @@ else
             var currentId = perso.Id;
             var returnPath = AppConstants.Routes.Escouade;
             <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForAndroides(), returnPath))">
-                <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" />
+            <img src="@perso.GetImageUrl(true)" alt="@perso.Nom" class="personnage-card-image" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
                     <div class="personnage-attribute"><span class="attribute-label">Rareté:</span> @perso.Rarete</div>
@@ -132,8 +132,8 @@ else
                         <div class="personnage-name">@piece.Nom</div>
                         <div class="personnage-attribute"><span class="attribute-label">Niveau:</span> @piece.Niveau</div>
                         <div class="personnage-attribute"><span class="attribute-label">Puissance:</span> @GetPiecePower(piece)</div>
-                        <div class="personnage-attribute"><span class="attribute-label">Bonus tactiques:</span> @piece.AspectsTactiques.Bonus.Count</div>
-                        <div class="personnage-attribute"><span class="attribute-label">Bonus stratégiques:</span> @piece.AspectsStrategiques.Bonus.Count</div>
+                        <div class="personnage-attribute"><span class="attribute-label">Puissance tactique:</span> @piece.AspectsTactiques.Puissance</div>
+                        <div class="personnage-attribute"><span class="attribute-label">Puissance stratégique:</span> @piece.AspectsStrategiques.Puissance</div>
                     </div>
                 </div>
             }

@@ -118,7 +118,7 @@ public class PersonnageService
             .AsNoTracking()
             .Include(static p => p.Capacites)
             .Where(static p => p.Type == TypePersonnage.Commandant)
-            .OrderByDescending(static p => p.Puissance)
+            .OrderByDescending(p => p.Puissance + p.Rang * 20)
             .FirstOrDefault();
     }
 

@@ -4,11 +4,12 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>0.9.8</Version>
-    <InformationalVersion>0.9.8</InformationalVersion>
+    <Version>0.9.9</Version>
+    <InformationalVersion>0.9.9</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Markdig" Version="0.44.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -19,6 +20,12 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
+    <ItemGroup>
+      <None Include="..\docs\RELEASE_NOTES.md">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Link>RELEASE_NOTES.md</Link>
+      </None>
+    </ItemGroup>
 
   <Target Name="KillCharacterManagerProcess" BeforeTargets="Build" Condition="'$(OS)' == 'Windows_NT'">
     <Exec Command="powershell -NoProfile -Command &quot;Stop-Process -Name CharacterManager -Force -ErrorAction SilentlyContinue; exit 0&quot;" />

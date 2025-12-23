@@ -76,6 +76,9 @@
 
     [Parameter]
     public EventCallback OnRoadmapClick { get; set; }
+
+    [Parameter]
+    public EventCallback OnReleaseClick { get; set; }
     
     private async Task ShowAbout()
     {
@@ -84,6 +87,10 @@
     private async Task ShowRoadmap()
     {
         await OnRoadmapClick.InvokeAsync();
+    }
+    private async Task ShowRelease()
+    {
+        await OnReleaseClick.InvokeAsync();
     }
 
 }

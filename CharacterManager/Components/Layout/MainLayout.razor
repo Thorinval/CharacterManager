@@ -1,4 +1,5 @@
 ﻿@using CharacterManager.Components.Layout
+@using CharacterManager
 @using CharacterManager.Components
 @inherits LayoutComponentBase
 
@@ -10,6 +11,7 @@
         <div class="sidebar">
             <NavMenu OnAboutClick="ShowAboutModal" />
             <NavMenu OnRoadmapClick="ShowRoadmapModal" />
+            <NavMenu OnReleaseClick="ShowChangelogModal" />
         </div>
     }
 
@@ -17,10 +19,18 @@
         <div class="top-row px-4" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
             <div style="display:flex; align-items:center; gap:8px;">
                 <a href="/settings" class="settings-link" title="Paramètres">
-                    <img src="/images/interface/parametres.png" alt="Paramètres" class="settings-icon" style="width:24px; height:24px;" />
+                    <img src="/images/interface/parametres.png" alt="Paramètres" class="settings-icon"
+                        style="width:24px; height:24px;" />
                 </a>
-                <button class="about-link" @onclick="ShowAboutModal"><LocalizedText Key="about.link" /></button>
-                <button class="roadmap-link" @onclick="ShowRoadmapModal"><LocalizedText Key="roadmap.link" /></button>              
+                <button class="about-link" @onclick="ShowAboutModal">
+                    <LocalizedText Key="about.link" />
+                </button>
+                <button class="roadmap-link" @onclick="ShowRoadmapModal">
+                    <LocalizedText Key="roadmap.link" />
+                </button>
+                <button class="changelog-link" @onclick="ShowChangelogModal">
+                    <LocalizedText Key="changelog.link" />
+                </button>
             </div>
             @using Microsoft.AspNetCore.Components.Authorization
             <AuthorizeView>
@@ -44,7 +54,10 @@
 </div>
 
 <AboutModal @bind-IsVisible="showAboutModal" />
+
 <RoadmapModal @bind-IsVisible="showRoadmapModal" />
+
+<ChangelogModal @bind-IsVisible="showChangelogModal" />
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
@@ -61,11 +74,11 @@
         text-decoration: none;
         font: inherit;
     }
-    
+
     .about-link:hover {
         text-decoration: underline;
     }
-    
+
     .settings-link {
         display: inline-flex;
         align-items: center;
@@ -76,11 +89,11 @@
         cursor: pointer;
         text-decoration: none;
     }
-    
+
     .settings-link:hover .settings-icon {
         opacity: 0.7;
     }
-    
+
     .settings-icon {
         transition: opacity 0.2s;
     }
@@ -93,18 +106,38 @@
         text-decoration: none;
         font: inherit;
     }
-    
+
     .roadmap-link:hover {
         text-decoration: underline;
     }
 
+    .changelog-link {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        text-decoration: none;
+        font: inherit;
+    }
+
+    .changelog-link:hover {
+        text-decoration: underline;
+    }
+    
 </style>
 
 @code {
     private bool showAboutModal = false;
     private bool showRoadmapModal = false;
+
+    private bool showChangelogModal = false;
+
     private bool isHomePage = false;
-    [CascadingParameter] private Task<Microsoft.AspNetCore.Components.Authorization.AuthenticationState> AuthStateTask { get; set; } = default!;
+    [CascadingParameter]
+    private Task<Microsoft.AspNetCore.Components.Authorization.AuthenticationState> AuthStateTask
+    {
+        get; set;
+    } = default!;
     [Inject] private Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private Microsoft.AspNetCore.Authentication.IAuthenticationService AuthService { get; set; } = default!;
@@ -119,6 +152,12 @@
     private void ShowRoadmapModal()
     {
         showRoadmapModal = true;
+        StateHasChanged();
+    }
+
+    private void ShowChangelogModal()
+    {
+        showChangelogModal = true;
         StateHasChanged();
     }
     protected override async Task OnInitializedAsync()
@@ -154,12 +193,12 @@
         // Extraire le chemin de l'URL actuelle
         var uri = new Uri(Navigation.Uri);
         var path = uri.AbsolutePath;
-        
+
         // Considérer "/" comme la page d'accueil
         isHomePage = path == "/" || path.EndsWith("/index.html");
     }
 
-public async ValueTask DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         Navigation.LocationChanged -= OnLocationChanged;
         await ValueTask.CompletedTask;

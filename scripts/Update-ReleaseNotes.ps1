@@ -67,101 +67,68 @@ if ($Version -notmatch '^\d+\.\d+\.\d+$') {
 
 # 1. Mettre à jour appsettings.json
 Write-Host "📝 Mise à jour de appsettings.json..." -ForegroundColor Yellow
-try {
-    $appSettings = Get-Content $appSettingsPath | ConvertFrom-Json
-    $appSettings.AppInfo.Version = $Version
-    $appSettings | ConvertTo-Json -Depth 10 | Set-Content $appSettingsPath
-    Write-Host "✅ appsettings.json mis à jour: Version = $Version" -ForegroundColor Green
-} catch {
-    Write-Host "❌ Erreur lors de la mise à jour de appsettings.json: $_" -ForegroundColor Red
-    exit 1
-}
-
-# 2. Mettre à jour le .csproj
-Write-Host "📝 Mise à jour de CharacterManager.csproj..." -ForegroundColor Yellow
-try {
-    $csproj = Get-Content $csprojPath
-    $csproj = $csproj -replace '<Version>[^<]+</Version>', "<Version>$Version</Version>"
-    $csproj = $csproj -replace '<InformationalVersion>[^<]+</InformationalVersion>', "<InformationalVersion>$Version</InformationalVersion>"
-    $csproj | Set-Content $csprojPath
-    Write-Host "✅ CharacterManager.csproj mis à jour: Version = $Version" -ForegroundColor Green
-} catch {
-    Write-Host "❌ Erreur lors de la mise à jour de CharacterManager.csproj: $_" -ForegroundColor Red
-    exit 1
-}
-
-# 3. Ajouter une entrée dans RELEASE_NOTES.md
-Write-Host "📝 Mise à jour de RELEASE_NOTES.md..." -ForegroundColor Yellow
-try {
-    $content = Get-Content $releaseNotesPath -Raw
-    
-    # Créer la nouvelle entrée de version
-    $newEntry = @"
+$newEntry = @"
 ## Version $Version ($Date)
 
-### ✨ Nouvelles Fonctionnalités
+### Nouvelles Fonctionnalites
 
-- [À remplir]
+#- Roadmap integree dans l'application pour suivre les futures fonctionnalites et ameliorations.
+#- Information changelog ajoutee
 
-### 🔧 Améliorations Techniques
+### Ameliorations Techniques
 
-- [À remplir]
+#- aucune
 
-### 🐛 Corrections de Bugs
+### Corrections de Bugs
 
-- [À remplir]
+#- aucun
 
-### 📋 Changements de l'Interface Utilisateur
+### Changements de l'Interface Utilisateur
 
-[À remplir si applicable]
+#- aucun
 
----
+#---
 
 **Date de Release**: $Date  
 **Version**: $Version  
 **Auteur**: $Author
 
----
-
+#---
 "@
-
     # Insérer la nouvelle entrée juste après le premier séparateur ---
     $splitPoint = $content.IndexOf("---")
     if ($splitPoint -eq -1) {
-        Write-Host "❌ Erreur: Impossible de trouver le séparateur --- dans RELEASE_NOTES.md" -ForegroundColor Red
+        Write-Host "ERREUR: Impossible de trouver le separateur --- dans RELEASE_NOTES.md" -ForegroundColor Red
         exit 1
     }
-    
     # Trouver la fin de la ligne du ---
     $endOfLine = $content.IndexOf("`n", $splitPoint)
     if ($endOfLine -eq -1) {
-        $endOfLine = $content.Length
     } else {
-        $endOfLine++ # Inclure la newline
     }
     
     # Insérer la nouvelle entrée
     $newContent = $content.Substring(0, $endOfLine) + "`n$newEntry" + $content.Substring($endOfLine)
     
-    # Mettre à jour aussi le numéro de version en haut
     $newContent = $newContent -replace '> \*\*Version actuelle\*\*: [^\s]+', "> **Version actuelle**: $Version"
-    
-    Set-Content $releaseNotesPath $newContent
-    Write-Host "✅ RELEASE_NOTES.md mis à jour avec une nouvelle entrée pour v$Version" -ForegroundColor Green
-} catch {
+
+    $utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText($releaseNotesPath, $newContent, $utf8NoBomEncoding)
+    Write-Host "RELEASE_NOTES.md mis a jour avec une nouvelle entree pour v$Version" -ForegroundColor Green
+catch {
     Write-Host "❌ Erreur lors de la mise à jour de RELEASE_NOTES.md: $_" -ForegroundColor Red
     exit 1
 }
 
 Write-Host ""
-Write-Host "✅ Tous les fichiers ont été mis à jour avec succès!" -ForegroundColor Green
+Write-Host "Tous les fichiers ont ete mis a jour avec succes!" -ForegroundColor Green
 Write-Host ""
-Write-Host "📋 Prochaines étapes:" -ForegroundColor Cyan
-Write-Host "  1. Complétez les sections '[À remplir]' dans RELEASE_NOTES.md"
-Write-Host "  2. Vérifiez les mises à jour:" -ForegroundColor Cyan
+Write-Host "Prochaines etapes:" -ForegroundColor Cyan
+Write-Host "  1. Completez les sections '[A remplir]' dans RELEASE_NOTES.md"
+Write-Host "  2. Verifiez les mises a jour:" -ForegroundColor Cyan
 Write-Host "     - appsettings.json: Version = $Version"
 Write-Host "     - CharacterManager.csproj: Version = $Version"
-Write-Host "     - RELEASE_NOTES.md: Nouvelle entrée pour v$Version"
-Write-Host "  3. Committez: git add . && git commit -m 'Préparer version $Version'"
+Write-Host "     - RELEASE_NOTES.md: Nouvelle entree pour v$Version"
+Write-Host "  3. Committez: git add . && git commit -m 'Preparer version $Version'"
 Write-Host "  4. Taggez: git tag -a v$Version -m 'Version $Version'"
 Write-Host "  5. Poussez: git push origin v$Version"

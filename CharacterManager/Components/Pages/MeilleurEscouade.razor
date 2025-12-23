@@ -119,7 +119,7 @@
 <div class="section-header">
     <h2>Maison de Lucie (@luciePieces.Count)</h2>
 </div>
-@if (luciePieces.Any())
+@if (luciePieces.Count != 0)
 {
     <div class="personnages-list">
         @foreach (var piece in luciePieces)
@@ -129,8 +129,8 @@
                     <div class="personnage-name">@piece.Nom</div>
                     <div class="personnage-attribute"><span class="attribute-label">Niveau:</span> @piece.Niveau</div>
                     <div class="personnage-attribute"><span class="attribute-label">Puissance:</span> @GetPiecePower(piece)</div>
-                    <div class="personnage-attribute"><span class="attribute-label">Bonus tactiques:</span> @piece.AspectsTactiques.Bonus.Count</div>
-                    <div class="personnage-attribute"><span class="attribute-label">Bonus stratégiques:</span> @piece.AspectsStrategiques.Bonus.Count</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Puissance tactique:</span> @piece.AspectsTactiques.Puissance</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Puissance stratégique:</span> @piece.AspectsStrategiques.Puissance</div>
                 </div>
             </div>
         }
