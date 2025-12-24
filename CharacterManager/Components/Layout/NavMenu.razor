@@ -79,7 +79,10 @@
 
     [Parameter]
     public EventCallback OnReleaseClick { get; set; }
-    
+
+    [Parameter]
+    public EventCallback OnCreerClassementClick { get; set; }
+
     private async Task ShowAbout()
     {
         await OnAboutClick.InvokeAsync();
@@ -93,4 +96,8 @@
         await OnReleaseClick.InvokeAsync();
     }
 
+    private async Task ShowCreerClassement()
+    {
+        await OnCreerClassementClick.InvokeAsync();
+    }
 }

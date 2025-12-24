@@ -1,0 +1,101 @@
+@using CharacterManager.Server.Services
+@rendermode InteractiveServer
+
+@if (IsVisible)
+{
+    <div class="modal-overlay-about" @onclick="Close">
+        <div class="modal-dialog-about" @onclick:stopPropagation="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><LocalizedText Key="creerClassement.title" /></h5>
+                    <button type="button" class="btn-close" @onclick="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="app-icon mb-3">
+                        <i class="bi bi-info-circle" style="font-size: 4rem; color: #0d6efd;"></i>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" @onclick="Close">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .modal-overlay-about {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-dialog-about {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-width: 800px;
+            width: 90%;
+            z-index: 2001;
+            border: 1px solid #e0e0e0;
+        }
+
+        .modal-dialog-about .modal-header {
+            border-bottom: 3px solid #e8e8e8;
+            background-color: #f5f5f5;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .modal-dialog-about .modal-title {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .version-info {
+            background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 100%);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #d0d0d0;
+        }
+
+        .author-info {
+            font-size: 1rem;
+        }
+
+        .app-icon {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+}
+
+
+@code {
+    [Parameter]
+    public bool IsVisible { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsVisibleChanged { get; set; }
+
+    private async Task Close()
+    {
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(IsVisible);
+    }
+}

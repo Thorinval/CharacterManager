@@ -4,7 +4,7 @@ using CharacterManager.Server.Constants;
 using Microsoft.EntityFrameworkCore;
 using System.Xml.Linq;
 using System.Text;
-using System.Text.Json;
+
 
 namespace CharacterManager.Server.Services;
 
@@ -37,17 +37,17 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
 
             if (doc.Root == null)
             {
-                result.Error = "Le fichier PML est vide ou invalide";
+                result.Error = AppConstants.Messages.ErrorFileEmpty + " ou invalide";
                 return result;
             }
 
             // Traiter la section inventaire
             if (importInventory)
             {
-                var inventaireElements = doc.Root.Elements("inventaire");
-                if (!inventaireElements.Any() && doc.Root.Name.LocalName.Equals("inventaire", StringComparison.OrdinalIgnoreCase))
+                var inventaireElements = doc.Root.Elements(AppConstants.XmlElements.Inventaire);
+                if (!inventaireElements.Any() && doc.Root.Name.LocalName.Equals(AppConstants.XmlElements.Inventaire, StringComparison.OrdinalIgnoreCase))
                 {
-                    inventaireElements = new[] { doc.Root };
+                    inventaireElements = [doc.Root];
                 }
 
                 if (inventaireElements.Any())
@@ -56,7 +56,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                 }
 
                 // Traiter la section Lucie House
-                var lucieHouseElement = doc.Root.Element("LucieHouse");
+                var lucieHouseElement = doc.Root.Element(AppConstants.XmlElements.LucieHouse);
                 if (lucieHouseElement != null)
                 {
                     result.SuccessCount += await ImportLucieHouseAsync(lucieHouseElement, errors);
@@ -66,8 +66,8 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             // Traiter la section templates (directs ou encapsulés dans <templates>)
             if (importTemplates)
             {
-                var directTemplates = doc.Root.Elements("template");
-                var nestedTemplates = doc.Root.Element("templates")?.Elements("template") ?? Enumerable.Empty<XElement>();
+                var directTemplates = doc.Root.Elements(AppConstants.XmlElements.Template);
+                var nestedTemplates = doc.Root.Element(AppConstants.XmlElements.Templates)?.Elements(AppConstants.XmlElements.Template) ?? Enumerable.Empty<XElement>();
                 var templateElements = directTemplates.Concat(nestedTemplates);
 
                 if (templateElements.Any())
@@ -79,7 +79,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             // Traiter la section meilleure escouade
             if (importBestSquad)
             {
-                var bestSquadElements = doc.Root.Elements("meilleurEscouade");
+                var bestSquadElements = doc.Root.Elements(AppConstants.XmlElements.MeilleurEscouade);
                 if (bestSquadElements.Any())
                 {
                     result.SuccessCount += await ImportBestSquadAsync(bestSquadElements, errors);
@@ -89,7 +89,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             // Traiter la section historiques
             if (importHistories)
             {
-                var historiqueElements = doc.Root.Elements("HistoriqueEscouade");
+                var historiqueElements = doc.Root.Elements(AppConstants.XmlElements.HistoriqueEscouade);
                 if (historiqueElements.Any())
                 {
                     result.SuccessCount += await ImportHistoriquesAsync(historiqueElements, errors);
@@ -100,7 +100,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
 
             if (result.SuccessCount == 0 && string.IsNullOrEmpty(result.Error))
             {
-                result.Error = "Aucune donnée à importer";
+                result.Error = AppConstants.Messages.ErrorNoSectionsFound;
             }
 
             result.IsSuccess = result.SuccessCount > 0 && string.IsNullOrEmpty(result.Error);
@@ -113,7 +113,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
         }
         catch (Exception ex)
         {
-            result.Error = $"Erreur lors de la lecture du fichier PML: {ex.Message}";
+            result.Error = $"{AppConstants.Messages.ErrorXmlParsing}: {ex.Message}";
             result.IsSuccess = false;
         }
 
@@ -130,9 +130,9 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
 
         foreach (var inventaire in inventaireElements)
         {
-            var personnageElements = inventaire.Name.LocalName.Equals("Personnage", StringComparison.OrdinalIgnoreCase)
+            var personnageElements = inventaire.Name.LocalName.Equals(AppConstants.XmlElements.Personnage, StringComparison.OrdinalIgnoreCase)
                 ? new[] { inventaire }
-                : inventaire.Elements("Personnage");
+                : inventaire.Elements(AppConstants.XmlElements.Personnage);
 
             foreach (var personnageElement in personnageElements)
             {
@@ -147,7 +147,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                 }
                 catch (Exception ex)
                 {
-                    errors.Add($"Erreur lors de l'import de personnage (inventaire): {ex.Message}");
+                    errors.Add($"{AppConstants.Messages.ErrorImportPersonnageInventaire} {ex.Message}");
                 }
             }
         }
@@ -166,12 +166,12 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
         {
             try
             {
-                var templateName = template.Element("Nom")?.Value;
-                var description = template.Element("Description")?.Value;
+                var templateName = template.Element(AppConstants.XmlElements.Nom)?.Value;
+                var description = template.Element(AppConstants.XmlElements.Description)?.Value;
 
                 if (string.IsNullOrWhiteSpace(templateName))
                 {
-                    errors.Add("Un template doit avoir un nom");
+                    errors.Add(AppConstants.Messages.ErrorTemplateNoName);
                     continue;
                 }
 
@@ -194,12 +194,12 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
 
                 // Importer les personnages du template
                 var personnageIds = new List<int>();
-                var personnagesElements = template.Elements("Personnage");
+                var personnagesElements = template.Elements(AppConstants.XmlElements.Personnage);
                 foreach (var personElement in personnagesElements)
                 {
                     try
                     {
-                        var nom = personElement.Element("Nom")?.Value;
+                        var nom = personElement.Element(AppConstants.XmlElements.Nom)?.Value;
                         if (string.IsNullOrWhiteSpace(nom))
                             continue;
 
@@ -214,7 +214,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                     }
                     catch (Exception ex)
                     {
-                        errors.Add($"Erreur lors de l'import du personnage au template '{templateName}': {ex.Message}");
+                        errors.Add($"{AppConstants.Messages.ErrorImportPersonnageTemplate} '{templateName}': {ex.Message}");
                     }
                 }
 
@@ -228,7 +228,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             }
             catch (Exception ex)
             {
-                errors.Add($"Erreur lors de l'import du template: {ex.Message}");
+                errors.Add($"{AppConstants.Messages.ErrorImportTemplate} {ex.Message}");
             }
         }
 
@@ -247,7 +247,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             try
             {
                 // Import mercenaires
-                var mercenairesElements = bestSquad.Elements("Mercenaire");
+                var mercenairesElements = bestSquad.Elements(AppConstants.XmlElements.Mercenaire);
                 foreach (var mercElement in mercenairesElements)
                 {
                     var personnage = ParsePersonnageFromXml(mercElement);
@@ -259,7 +259,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                 }
 
                 // Import commandant
-                var commandantElement = bestSquad.Element("Commandant");
+                var commandantElement = bestSquad.Element(AppConstants.XmlElements.Commandant);
                 if (commandantElement != null)
                 {
                     var personnage = ParsePersonnageFromXml(commandantElement);
@@ -271,7 +271,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                 }
 
                 // Import androides
-                var androidesElements = bestSquad.Elements("Androide");
+                var androidesElements = bestSquad.Elements(AppConstants.XmlElements.Androide);
                 foreach (var androidElement in androidesElements)
                 {
                     var personnage = ParsePersonnageFromXml(androidElement);
@@ -284,7 +284,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             }
             catch (Exception ex)
             {
-                errors.Add($"Erreur lors de l'import de la meilleure escouade: {ex.Message}");
+                errors.Add($"{AppConstants.Messages.ErrorImportBestSquad} {ex.Message}");
             }
         }
 
@@ -302,14 +302,14 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
         {
             try
             {
-                var dateStr = historiqueElement.Element("DateEnregistrement")?.Value;
-                var puissanceStr = historiqueElement.Element("PuissanceTotal")?.Value;
-                var classementStr = historiqueElement.Element("Classement")?.Value;
-                var donneesJson = historiqueElement.Element("DonneesEscouadeJson")?.Value;
+                var dateStr = historiqueElement.Element(AppConstants.XmlElements.DateEnregistrement)?.Value;
+                var puissanceStr = historiqueElement.Element(AppConstants.XmlElements.PuissanceTotal)?.Value;
+                var classementStr = historiqueElement.Element(AppConstants.XmlElements.Classement)?.Value;
+                var donneesJson = historiqueElement.Element(AppConstants.XmlElements.DonneesEscouadeJson)?.Value;
 
                 if (string.IsNullOrWhiteSpace(dateStr) || string.IsNullOrWhiteSpace(donneesJson))
                 {
-                    errors.Add("Historique invalide: date ou données manquantes");
+                    errors.Add(AppConstants.Messages.ErrorHistoriqueInvalide);
                     continue;
                 }
 
@@ -327,7 +327,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             }
             catch (Exception ex)
             {
-                errors.Add($"Erreur lors de l'import d'un historique: {ex.Message}");
+                errors.Add($"{AppConstants.Messages.ErrorImportHistorique} {ex.Message}");
             }
         }
 
@@ -344,39 +344,38 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
         try
         {
             var lucieHouse = new LucieHouse();
-            var piecesElements = lucieHouseElement.Elements("Piece");
+            var piecesElements = lucieHouseElement.Elements(AppConstants.XmlElements.Piece);
 
             foreach (var pieceElement in piecesElements)
             {
                 try
                 {
-                    var nom = pieceElement.Element("Nom")?.Value;
+                    var nom = pieceElement.Element(AppConstants.XmlElements.Nom)?.Value;
                     if (string.IsNullOrWhiteSpace(nom))
                         continue;
 
                     var piece = new Piece
                     {
                         Nom = nom,
-                        Niveau = int.TryParse(pieceElement.Element("Niveau")?.Value, out var niveau) ? niveau : 1,
-                        Selectionnee = bool.TryParse(pieceElement.Element("Selectionnee")?.Value, out var sel) && sel
+                        Niveau = int.TryParse(pieceElement.Element(AppConstants.XmlElements.Niveau)?.Value, out var niveau) ? niveau : 1,
+                        Selectionnee = bool.TryParse(pieceElement.Element(AppConstants.XmlElements.Selectionne)?.Value, out var sel) && sel
                     };
 
                     // Parser les bonus tactiques
-                    var bonusTactiquesElement = pieceElement.Element("BonusTactiques");
+                    var bonusTactiquesElement = pieceElement.Element(AppConstants.XmlElements.BonusTactiques);
                     if (bonusTactiquesElement != null)
                     {
-                        piece.AspectsTactiques.Bonus = bonusTactiquesElement.Elements("Bonus")
+                        piece.AspectsTactiques.Bonus = [.. bonusTactiquesElement.Elements(AppConstants.XmlElements.Bonus)
                             .Select(b => b.Value)
-                            .Where(b => !string.IsNullOrWhiteSpace(b))
-                            .ToList();
+                            .Where(b => !string.IsNullOrWhiteSpace(b))];
                         piece.AspectsTactiques.Puissance = piece.AspectsTactiques.Bonus.Count;
                     }
 
                     // Parser les bonus stratégiques
-                    var bonusStrategiquesElement = pieceElement.Element("BonusStrategiques");
+                    var bonusStrategiquesElement = pieceElement.Element(AppConstants.XmlElements.BonusStrategiques);
                     if (bonusStrategiquesElement != null)
                     {
-                        piece.AspectsStrategiques.Bonus = bonusStrategiquesElement.Elements("Bonus")
+                        piece.AspectsStrategiques.Bonus = bonusStrategiquesElement.Elements(AppConstants.XmlElements.Bonus)
                             .Select(b => b.Value)
                             .Where(b => !string.IsNullOrWhiteSpace(b))
                             .ToList();
@@ -384,16 +383,16 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                     }
 
                     // Puissance tactiques et stratégiques (nouveau format). Fallback: ancienne balise "Puissance" alimente les tactiques.
-                    if (int.TryParse(pieceElement.Element("PuissanceTactiques")?.Value, out var pTact))
+                    if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceTactique)?.Value, out var pTact))
                     {
                         piece.AspectsTactiques.Puissance = pTact;
                     }
-                    else if (int.TryParse(pieceElement.Element("Puissance")?.Value, out var pLegacy))
+                    else if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceLegacy)?.Value, out var pLegacy))
                     {
                         piece.AspectsTactiques.Puissance = pLegacy;
                     }
 
-                    if (int.TryParse(pieceElement.Element("PuissanceStrategiques")?.Value, out var pStrat))
+                    if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceStrategique)?.Value, out var pStrat))
                     {
                         piece.AspectsStrategiques.Puissance = pStrat;
                     }
@@ -403,14 +402,14 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                 }
                 catch (Exception ex)
                 {
-                    errors.Add($"Erreur lors de l'import d'une pièce Lucie House: {ex.Message}");
+                    errors.Add($"{AppConstants.Messages.ErrorImportPieceLucieHouse} {ex.Message}");
                 }
             }
 
             // Valider que max 2 pièces sont sélectionnées
             if (lucieHouse.NombrePiecesSelectionnees > LucieHouse.MaxPiecesSelectionnees)
             {
-                errors.Add($"Attention: Plus de {LucieHouse.MaxPiecesSelectionnees} pièces sélectionnées dans l'import");
+                errors.Add(string.Format(AppConstants.Messages.WarningTooManyLucieHousePieces, LucieHouse.MaxPiecesSelectionnees));
             }
 
             // Sauvegarder dans la base de données
@@ -425,7 +424,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
         }
         catch (Exception ex)
         {
-            errors.Add($"Erreur lors de l'import de Lucie House: {ex.Message}");
+            errors.Add($"{AppConstants.Messages.ErrorImportLucieHouse} {ex.Message}");
         }
 
         return importedCount;
@@ -436,25 +435,25 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
     /// </summary>
     private Personnage? ParsePersonnageFromXml(XElement element)
     {
-        var nom = element.Element("Nom")?.Value;
+        var nom = element.Element(AppConstants.XmlElements.Nom)?.Value;
         if (string.IsNullOrWhiteSpace(nom))
             return null;
 
         var personnage = new Personnage
         {
             Nom = nom.Trim(),
-            Rarete = ParseRarete(element.Element("Rarete")?.Value),
-            Type = ParseType(element.Element("Type")?.Value),
-            Puissance = int.TryParse(element.Element("Puissance")?.Value, out var p) ? p : 0,
-            PA = int.TryParse(element.Element("PA")?.Value, out var pa) ? pa : 0,
-            PV = int.TryParse(element.Element("PV")?.Value, out var pv) ? pv : 0,
-            Niveau = int.TryParse(element.Element("Niveau")?.Value, out var n) ? n : 1,
-            Rang = int.TryParse(element.Element("Rang")?.Value, out var r) ? r : 1,
-            Role = ParseRole(element.Element("Role")?.Value),
-            Faction = ParseFaction(element.Element("Faction")?.Value),
-            TypeAttaque = ParseTypeAttaque(element.Element("TypeAttaque")?.Value),
-            Selectionne = bool.TryParse(element.Element("Selectionne")?.Value, out var sel) && sel,
-            Description = element.Element("Description")?.Value ?? $"Personnage {nom}",
+            Rarete = ParseRarete(element.Element(AppConstants.XmlElements.Rarete)?.Value),
+            Type = ParseType(element.Element(AppConstants.XmlElements.Type)?.Value),
+            Puissance = int.TryParse(element.Element(AppConstants.XmlElements.Puissance)?.Value, out var p) ? p : 0,
+            PA = int.TryParse(element.Element(AppConstants.XmlElements.PA)?.Value, out var pa) ? pa : 0,
+            PV = int.TryParse(element.Element(AppConstants.XmlElements.PV)?.Value, out var pv) ? pv : 0,
+            Niveau = int.TryParse(element.Element(AppConstants.XmlElements.Niveau)?.Value, out var n) ? n : 1,
+            Rang = int.TryParse(element.Element(AppConstants.XmlElements.Rang)?.Value, out var r) ? r : 1,
+            Role = ParseRole(element.Element(AppConstants.XmlElements.Role)?.Value),
+            Faction = ParseFaction(element.Element(AppConstants.XmlElements.Faction)?.Value),
+            TypeAttaque = ParseTypeAttaque(element.Element(AppConstants.XmlElements.TypeAttaque)?.Value),
+            Selectionne = bool.TryParse(element.Element(AppConstants.XmlElements.Selectionne)?.Value, out var sel) && sel,
+            Description = element.Element(AppConstants.XmlElements.Description)?.Value ?? $"Personnage {nom}",
         };
 
         // Gérer les URLs des images
@@ -479,28 +478,28 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
         using (var writer = System.Xml.XmlWriter.Create(memoryStream, settings))
         {
             writer.WriteStartDocument();
-            writer.WriteStartElement("InventairePML");
-            writer.WriteAttributeString("version", "1.0");
-            writer.WriteAttributeString("exportDate", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+            writer.WriteStartElement(AppConstants.XmlElements.InventairePML);
+            writer.WriteAttributeString(AppConstants.XmlElements.Version, "1.0");
+            writer.WriteAttributeString(AppConstants.XmlElements.ExportDate, DateTime.UtcNow.ToString(AppConstants.DateTimeFormats.IsoDateTime));
 
-            writer.WriteStartElement("inventaire");
+            writer.WriteStartElement(AppConstants.XmlElements.Inventaire);
 
             foreach (var personnage in personnages)
             {
-                writer.WriteStartElement("Personnage");
-                writer.WriteElementString("Nom", personnage.Nom);
-                writer.WriteElementString("Rarete", personnage.Rarete.ToString());
-                writer.WriteElementString("Type", personnage.Type.ToString());
-                writer.WriteElementString("Puissance", personnage.Puissance.ToString());
-                writer.WriteElementString("PA", personnage.PA.ToString());
-                writer.WriteElementString("PV", personnage.PV.ToString());
-                writer.WriteElementString("Niveau", personnage.Niveau.ToString());
-                writer.WriteElementString("Rang", personnage.Rang.ToString());
-                writer.WriteElementString("Role", personnage.Role.ToString());
-                writer.WriteElementString("Faction", personnage.Faction.ToString());
-                writer.WriteElementString("TypeAttaque", personnage.TypeAttaque.ToString());
-                writer.WriteElementString("Selectionne", personnage.Selectionne.ToString());
-                writer.WriteElementString("Description", personnage.Description ?? "");
+                writer.WriteStartElement(AppConstants.XmlElements.Personnage);
+                writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
+                writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Type, personnage.Type.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.PA, personnage.PA.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.PV, personnage.PV.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Rang, personnage.Rang.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Role, personnage.Role.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Faction, personnage.Faction.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.TypeAttaque, personnage.TypeAttaque.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Selectionne, personnage.Selectionne.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Description, personnage.Description ?? "");
                 writer.WriteEndElement();
             }
 
@@ -508,33 +507,33 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             var lucieHouse = _context.LucieHouses.Include(l => l.Pieces).FirstOrDefault();
             if (lucieHouse != null)
             {
-                writer.WriteStartElement("LucieHouse");
+                writer.WriteStartElement(AppConstants.XmlElements.LucieHouse);
 
                 foreach (var piece in lucieHouse.Pieces)
                 {
-                    writer.WriteStartElement("Piece");
-                    writer.WriteElementString("Nom", piece.Nom);
-                    writer.WriteElementString("Niveau", piece.Niveau.ToString());
-                    writer.WriteElementString("PuissanceTactiques", piece.AspectsTactiques.Puissance.ToString());
-                    writer.WriteElementString("PuissanceStrategiques", piece.AspectsStrategiques.Puissance.ToString());
-                    writer.WriteElementString("Selectionnee", piece.Selectionnee.ToString());
+                    writer.WriteStartElement(AppConstants.XmlElements.Piece);
+                    writer.WriteElementString(AppConstants.XmlElements.Nom, piece.Nom);
+                    writer.WriteElementString(AppConstants.XmlElements.Niveau, piece.Niveau.ToString());
+                    writer.WriteElementString(AppConstants.XmlElements.PuissanceTactique, piece.AspectsTactiques.Puissance.ToString());
+                    writer.WriteElementString(AppConstants.XmlElements.PuissanceStrategique, piece.AspectsStrategiques.Puissance.ToString());
+                    writer.WriteElementString(AppConstants.XmlElements.Selectionne, piece.Selectionnee.ToString());
 
                     if (piece.AspectsTactiques.Bonus.Count > 0)
                     {
-                        writer.WriteStartElement("BonusTactiques");
+                        writer.WriteStartElement(AppConstants.XmlElements.BonusTactiques);
                         foreach (var bonus in piece.AspectsTactiques.Bonus)
                         {
-                            writer.WriteElementString("Bonus", bonus);
+                            writer.WriteElementString(AppConstants.XmlElements.Bonus, bonus);
                         }
                         writer.WriteEndElement();
                     }
 
                     if (piece.AspectsStrategiques.Bonus.Count > 0)
                     {
-                        writer.WriteStartElement("BonusStrategiques");
+                        writer.WriteStartElement(AppConstants.XmlElements.BonusStrategiques);
                         foreach (var bonus in piece.AspectsStrategiques.Bonus)
                         {
-                            writer.WriteElementString("Bonus", bonus);
+                            writer.WriteElementString(AppConstants.XmlElements.Bonus, bonus);
                         }
                         writer.WriteEndElement();
                     }
@@ -567,15 +566,15 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
         using (var writer = System.Xml.XmlWriter.Create(memoryStream, settings))
         {
             writer.WriteStartDocument();
-            writer.WriteStartElement("TemplatesPML");
-            writer.WriteAttributeString("version", "1.0");
-            writer.WriteAttributeString("exportDate", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+            writer.WriteStartElement(AppConstants.XmlElements.TemplatesPML);
+            writer.WriteAttributeString(AppConstants.XmlElements.Version, "1.0");
+            writer.WriteAttributeString(AppConstants.XmlElements.ExportDate, DateTime.UtcNow.ToString(AppConstants.DateTimeFormats.IsoDateTime));
 
             foreach (var template in templates)
             {
-                writer.WriteStartElement("template");
-                writer.WriteElementString("Nom", template.Nom);
-                writer.WriteElementString("Description", template.Description ?? "");
+                writer.WriteStartElement(AppConstants.XmlElements.Template);
+                writer.WriteElementString(AppConstants.XmlElements.Nom, template.Nom);
+                writer.WriteElementString(AppConstants.XmlElements.Description, template.Description ?? "");
 
                 // Récupérer les personnages du template via les IDs stockés
                 var personnageIds = template.GetPersonnageIds();
@@ -584,11 +583,11 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                     var personnage = _context.Personnages.FirstOrDefault(p => p.Id == personnageId);
                     if (personnage != null)
                     {
-                        writer.WriteStartElement("Personnage");
-                        writer.WriteElementString("Nom", personnage.Nom);
-                        writer.WriteElementString("Rarete", personnage.Rarete.ToString());
-                        writer.WriteElementString("Puissance", personnage.Puissance.ToString());
-                        writer.WriteElementString("Niveau", personnage.Niveau.ToString());
+                        writer.WriteStartElement(AppConstants.XmlElements.Personnage);
+                        writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
+                        writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
+                        writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
+                        writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
                         writer.WriteEndElement();
                     }
                 }
@@ -622,30 +621,30 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
         using (var writer = System.Xml.XmlWriter.Create(memoryStream, settings))
         {
             writer.WriteStartDocument();
-            writer.WriteStartElement("CharacterManagerPML");
-            writer.WriteAttributeString("version", "1.0");
-            writer.WriteAttributeString("exportDate", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+            writer.WriteStartElement(AppConstants.XmlElements.CharacterManagerPML);
+            writer.WriteAttributeString(AppConstants.XmlElements.Version, "1.0");
+            writer.WriteAttributeString(AppConstants.XmlElements.ExportDate, DateTime.UtcNow.ToString(AppConstants.DateTimeFormats.IsoDateTime));
 
             // Export inventaire
             if (exportInventory)
             {
-                writer.WriteStartElement("inventaire");
+                writer.WriteStartElement(AppConstants.XmlElements.Inventaire);
                 var personnages = await _context.Personnages.ToListAsync();
                 foreach (var personnage in personnages)
                 {
-                    writer.WriteStartElement("Personnage");
-                    writer.WriteElementString("Nom", personnage.Nom);
-                    writer.WriteElementString("Rarete", personnage.Rarete.ToString());
-                    writer.WriteElementString("Type", personnage.Type.ToString());
-                    writer.WriteElementString("Puissance", personnage.Puissance.ToString());
-                    writer.WriteElementString("PA", personnage.PA.ToString());
-                    writer.WriteElementString("PV", personnage.PV.ToString());
-                    writer.WriteElementString("Niveau", personnage.Niveau.ToString());
-                    writer.WriteElementString("Rang", personnage.Rang.ToString());
-                    writer.WriteElementString("Role", personnage.Role.ToString());
-                    writer.WriteElementString("Faction", personnage.Faction.ToString());
-                    writer.WriteElementString("Selectionne", personnage.Selectionne.ToString());
-                    writer.WriteElementString("Description", personnage.Description ?? "");
+                    writer.WriteStartElement(AppConstants.XmlElements.Personnage);
+                    writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
+                    writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
+                    writer.WriteElementString(AppConstants.XmlElements.Type, personnage.Type.ToString());
+                    writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
+                    writer.WriteElementString(AppConstants.XmlElements.PA, personnage.PA.ToString());
+                    writer.WriteElementString(AppConstants.XmlElements.PV, personnage.PV.ToString());
+                    writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
+                    writer.WriteElementString(AppConstants.XmlElements.Rang, personnage.Rang.ToString());
+                    writer.WriteElementString(AppConstants.XmlElements.Role, personnage.Role.ToString());
+                    writer.WriteElementString(AppConstants.XmlElements.Faction, personnage.Faction.ToString());
+                    writer.WriteElementString(AppConstants.XmlElements.Selectionne, personnage.Selectionne.ToString());
+                    writer.WriteElementString(AppConstants.XmlElements.Description, personnage.Description ?? "");
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
@@ -654,24 +653,24 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                 var lucieHouse = await _context.LucieHouses.Include(l => l.Pieces).FirstOrDefaultAsync();
                 if (lucieHouse != null)
                 {
-                    writer.WriteStartElement("LucieHouse");
+                    writer.WriteStartElement(AppConstants.XmlElements.LucieHouse);
 
                     foreach (var piece in lucieHouse.Pieces)
                     {
-                        writer.WriteStartElement("Piece");
-                        writer.WriteElementString("Nom", piece.Nom);
-                        writer.WriteElementString("Niveau", piece.Niveau.ToString());
-                        writer.WriteElementString("PuissanceTactiques", piece.AspectsTactiques.Puissance.ToString());
-                        writer.WriteElementString("PuissanceStrategiques", piece.AspectsStrategiques.Puissance.ToString());
-                        writer.WriteElementString("Selectionnee", piece.Selectionnee.ToString());
+                        writer.WriteStartElement(AppConstants.XmlElements.Piece);
+                        writer.WriteElementString(AppConstants.XmlElements.Nom, piece.Nom);
+                        writer.WriteElementString(AppConstants.XmlElements.Niveau, piece.Niveau.ToString());
+                        writer.WriteElementString(AppConstants.XmlElements.PuissanceTactique, piece.AspectsTactiques.Puissance.ToString());
+                        writer.WriteElementString(AppConstants.XmlElements.PuissanceStrategique, piece.AspectsStrategiques.Puissance.ToString());
+                        writer.WriteElementString(AppConstants.XmlElements.Selectionne, piece.Selectionnee.ToString());
 
                         // Export des bonus tactiques
                         if (piece.AspectsTactiques.Bonus.Count > 0)
                         {
-                            writer.WriteStartElement("BonusTactiques");
+                            writer.WriteStartElement(AppConstants.XmlElements.BonusTactiques);
                             foreach (var bonus in piece.AspectsTactiques.Bonus)
                             {
-                                writer.WriteElementString("Bonus", bonus);
+                                writer.WriteElementString(AppConstants.XmlElements.Bonus, bonus);
                             }
                             writer.WriteEndElement();
                         }
@@ -679,10 +678,10 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                         // Export des bonus stratégiques
                         if (piece.AspectsStrategiques.Bonus.Count > 0)
                         {
-                            writer.WriteStartElement("BonusStrategiques");
+                            writer.WriteStartElement(AppConstants.XmlElements.BonusStrategiques);
                             foreach (var bonus in piece.AspectsStrategiques.Bonus)
                             {
-                                writer.WriteElementString("Bonus", bonus);
+                                writer.WriteElementString(AppConstants.XmlElements.Bonus, bonus);
                             }
                             writer.WriteEndElement();
                         }
@@ -700,9 +699,9 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                 var templates = await _context.Templates.ToListAsync();
                 foreach (var template in templates)
                 {
-                    writer.WriteStartElement("template");
-                    writer.WriteElementString("Nom", template.Nom);
-                    writer.WriteElementString("Description", template.Description ?? "");
+                    writer.WriteStartElement(AppConstants.XmlElements.Template);
+                    writer.WriteElementString(AppConstants.XmlElements.Nom, template.Nom);
+                    writer.WriteElementString(AppConstants.XmlElements.Description, template.Description ?? "");
 
                     var personnageIds = template.GetPersonnageIds();
                     foreach (var personnageId in personnageIds)
@@ -710,11 +709,11 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                         var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.Id == personnageId);
                         if (personnage != null)
                         {
-                            writer.WriteStartElement("Personnage");
-                            writer.WriteElementString("Nom", personnage.Nom);
-                            writer.WriteElementString("Rarete", personnage.Rarete.ToString());
-                            writer.WriteElementString("Puissance", personnage.Puissance.ToString());
-                            writer.WriteElementString("Niveau", personnage.Niveau.ToString());
+                            writer.WriteStartElement(AppConstants.XmlElements.Personnage);
+                            writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
+                            writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
+                            writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
+                            writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
                             writer.WriteEndElement();
                         }
                     }
@@ -725,7 +724,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             // Export meilleure escouade
             if (exportBestSquad)
             {
-                writer.WriteStartElement("meilleurEscouade");
+                writer.WriteStartElement(AppConstants.XmlElements.MeilleurEscouade);
 
                 // Mercenaires (top 10 par puissance)
                 var topMercenaires = await _context.Personnages
@@ -736,7 +735,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
 
                 foreach (var merc in topMercenaires)
                 {
-                    writer.WriteStartElement("Mercenaire");
+                    writer.WriteStartElement(AppConstants.XmlElements.Mercenaire);
                     WritePersonnageData(writer, merc);
                     writer.WriteEndElement();
                 }
@@ -749,7 +748,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
 
                 if (topCommandant != null)
                 {
-                    writer.WriteStartElement("Commandant");
+                    writer.WriteStartElement(AppConstants.XmlElements.Commandant);
                     WritePersonnageData(writer, topCommandant);
                     writer.WriteEndElement();
                 }
@@ -763,7 +762,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
 
                 foreach (var android in topAndroides)
                 {
-                    writer.WriteStartElement("Androide");
+                    writer.WriteStartElement(AppConstants.XmlElements.Androide);
                     WritePersonnageData(writer, android);
                     writer.WriteEndElement();
                 }
@@ -781,14 +780,14 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
 
                 foreach (var historique in historiques)
                 {
-                    writer.WriteStartElement("HistoriqueEscouade");
-                    writer.WriteElementString("DateEnregistrement", historique.DateEnregistrement.ToString("yyyy-MM-ddTHH:mm:ssZ"));
-                    writer.WriteElementString("PuissanceTotal", historique.PuissanceTotal.ToString());
+                    writer.WriteStartElement(AppConstants.XmlElements.HistoriqueEscouade);
+                    writer.WriteElementString(AppConstants.XmlElements.DateEnregistrement, historique.DateEnregistrement.ToString(AppConstants.DateTimeFormats.IsoDateTime));
+                    writer.WriteElementString(AppConstants.XmlElements.PuissanceTotal, historique.PuissanceTotal.ToString());
                     if (historique.Classement.HasValue)
                     {
-                        writer.WriteElementString("Classement", historique.Classement.Value.ToString());
+                        writer.WriteElementString(AppConstants.XmlElements.Classement, historique.Classement.Value.ToString());
                     }
-                    writer.WriteElementString("DonneesEscouadeJson", historique.DonneesEscouadeJson);
+                    writer.WriteElementString(AppConstants.XmlElements.DonneesEscouadeJson, historique.DonneesEscouadeJson);
                     writer.WriteEndElement();
                 }
             }
@@ -805,19 +804,19 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
     /// </summary>
     private static void WritePersonnageData(System.Xml.XmlWriter writer, Personnage personnage)
     {
-        writer.WriteElementString("Nom", personnage.Nom);
-        writer.WriteElementString("Rarete", personnage.Rarete.ToString());
-        writer.WriteElementString("Type", personnage.Type.ToString());
-        writer.WriteElementString("Puissance", personnage.Puissance.ToString());
-        writer.WriteElementString("PA", personnage.PA.ToString());
-        writer.WriteElementString("PV", personnage.PV.ToString());
-        writer.WriteElementString("Niveau", personnage.Niveau.ToString());
-        writer.WriteElementString("Rang", personnage.Rang.ToString());
-        writer.WriteElementString("Role", personnage.Role.ToString());
-        writer.WriteElementString("Faction", personnage.Faction.ToString());
-        writer.WriteElementString("TypeAttaque", personnage.TypeAttaque.ToString());
-        writer.WriteElementString("Selectionne", personnage.Selectionne.ToString());
-        writer.WriteElementString("Description", personnage.Description ?? "");
+        writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
+        writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Type, personnage.Type.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.PA, personnage.PA.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.PV, personnage.PV.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Rang, personnage.Rang.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Role, personnage.Role.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Faction, personnage.Faction.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.TypeAttaque, personnage.TypeAttaque.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Selectionne, personnage.Selectionne.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Description, personnage.Description ?? "");
     }
 
     private void ImportOrUpdatePersonnage(Personnage nouveauPersonnage)
@@ -856,9 +855,9 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
     {
         return value switch
         {
-            "SSR" => Rarete.SSR,
-            "SR" => Rarete.SR,
-            "R" => Rarete.R,
+            AppConstants.XmlElements.SSR => Rarete.SSR,
+            AppConstants.XmlElements.SR => Rarete.SR,
+            AppConstants.XmlElements.R => Rarete.R,
             _ => Rarete.R
         };
     }
@@ -867,9 +866,9 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
     {
         return value switch
         {
-            "Mercenaire" => TypePersonnage.Mercenaire,
-            "Androïde" or "Androide" => TypePersonnage.Androïde,
-            "Commandant" => TypePersonnage.Commandant,
+            AppConstants.XmlElements.Mercenaire => TypePersonnage.Mercenaire,
+            AppConstants.XmlElements.Androïde or AppConstants.XmlElements.Androide => TypePersonnage.Androïde,
+            AppConstants.XmlElements.Commandant => TypePersonnage.Commandant,
             _ => TypePersonnage.Mercenaire
         };
     }
@@ -878,10 +877,10 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
     {
         return value switch
         {
-            "Sentinelle" => Role.Sentinelle,
-            "Combattante" => Role.Combattante,
-            "Androide" => Role.Androide,
-            "Commandant" => Role.Commandant,
+            AppConstants.XmlElements.Sentinelle => Role.Sentinelle,
+            AppConstants.XmlElements.Combattante => Role.Combattante,
+            AppConstants.XmlElements.Androide => Role.Androide,
+            AppConstants.XmlElements.Commandant => Role.Commandant,
             _ => Role.Combattante
         };
     }
@@ -890,9 +889,9 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
     {
         return value switch
         {
-            "Syndicat" => Faction.Syndicat,
-            "Pacificateurs" => Faction.Pacificateurs,
-            "HommesLibres" => Faction.HommesLibres,
+            AppConstants.XmlElements.Syndicat => Faction.Syndicat,
+            AppConstants.XmlElements.Pacificateurs => Faction.Pacificateurs,
+            AppConstants.XmlElements.HommesLibres => Faction.HommesLibres,
             _ => Faction.Syndicat
         };
     }
@@ -901,9 +900,9 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
     {
         return value switch
         {
-            "Mêlée" or "Melee" => TypeAttaque.Mêlée,
+            AppConstants.XmlElements.MeleeAccent or AppConstants.XmlElements.Melee => TypeAttaque.Mêlée,
             "Distance" => TypeAttaque.Distance,
-            "Androïde" or "Androide" => TypeAttaque.Androïde,
+            AppConstants.XmlElements.Androïde or AppConstants.XmlElements.Androide => TypeAttaque.Androïde,
             _ => TypeAttaque.Inconnu
         };
     }

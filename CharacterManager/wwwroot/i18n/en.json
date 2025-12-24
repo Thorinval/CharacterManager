@@ -38,6 +38,10 @@
     "link": "Roadmap",
     "title": "Roadmap"
   },
+  "changelog": {
+    "link": "Changelog",
+    "title": "Changelog"
+  },
   "login": {
     "title": "Sign In",
     "heading": "Sign In",
@@ -144,7 +148,7 @@
     "bulkEdit": "Bulk Edit",
     "bulkDelete": "Delete Selection",
     "export": "Export",
-       "add": "Add Character",
+    "add": "Add Character",
     "template": "Template",
     "edit": "Edit",
     "delete": "Delete",
@@ -287,5 +291,8 @@
     "previous": "Previous Character",
     "next": "Next Character",
     "back": "Back"
+  },
+  "creerClassement": {
+    "title": "Create Squad History Entry"
   }
 }

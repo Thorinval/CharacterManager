@@ -9,6 +9,8 @@ using CharacterManager.Server.Constants;
 
 public partial class Historique
 {
+    private bool showCreerClassement = false;
+
     [Inject]
     public HistoriqueEscouadeService HistoriqueService { get; set; } = null!;
 
@@ -22,6 +24,12 @@ public partial class Historique
     private int nbAndroidsMax = 0;
     private InputFile? inputFileRef;
 
+
+    private void ShowCreerClassementModal()
+    {
+        showCreerClassement = true;
+        StateHasChanged();
+    }
     protected override async Task OnInitializedAsync()
     {
         await ChargerHistorique();
@@ -58,7 +66,7 @@ public partial class Historique
         CalculerMaxPersonnages();
     }
 
-    private async Task RinitialiserFiltres()
+    private async Task ReinitialiserFiltres()
     {
         dateDebut = DateTime.Today.AddMonths(-1);
         dateFin = DateTime.Today.AddDays(1);
@@ -90,25 +98,7 @@ public partial class Historique
         return $"{AppConstants.Paths.ImagesPersonnages}/{normalized}{AppConstants.ImageSuffixes.SmallPortrait}{AppConstants.FileExtensions.Png}";
     }
     
-    private Microsoft.AspNetCore.Components.MarkupString RenderStars(int rang)
-    {
-        if (rang < 0 || rang > 7) rang = 0;
-        
-        var stars = "";
-        for (int i = 1; i <= 7; i++)
-        {
-            if (i <= rang)
-            {
-                stars += "<span class=\"star filled\">★</span>";
-            }
-            else
-            {
-                stars += "<span class=\"star empty\">☆</span>";
-            }
-        }
-        
-        return new Microsoft.AspNetCore.Components.MarkupString(stars);
-    }
+    // ...removed duplicate RenderStars, use TemplateEscouade.GetRankStars instead
 
     private async Task ExporterHistorique()
     {

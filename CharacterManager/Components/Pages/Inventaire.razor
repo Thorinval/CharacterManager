@@ -1,4 +1,5 @@
 @page "/inventaire"
+@using CharacterManager.Server.Constants
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @using CharacterManager.Server.Models
 @using CharacterManager.Server.Services
@@ -15,7 +16,7 @@
 </head>
 
 <div class="page-header-banner">
-    <a href="/" class="back-button" aria-label="Retour" title="Back to home"></a>
+    <a href="@AppConstants.Routes.Home" class="back-button" aria-label="Retour" title="Back to home"></a>
     <h1 class="page-title">
         <LocalizedText Key="inventory.title" />
     </h1>

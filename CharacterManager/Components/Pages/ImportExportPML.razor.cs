@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
-using CharacterManager.Server.Constants;
-using CharacterManager.Components;
 
 public partial class ImportExportPML
 {
@@ -69,21 +67,19 @@ public partial class ImportExportPML
 
         try
         {
-            using (var stream = selectedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024)) // 10MB max
-            {
-                importResult = await PmlImportService.ImportPmlAsync(
-                    stream,
-                    selectedFileName ?? "",
-                    importInventory,
-                    importTemplates,
-                    importBestSquad,
-                    importHistories
-                );
-                importComplete = true;
+            using var stream = selectedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10MB max
+            importResult = await PmlImportService.ImportPmlAsync(
+                stream,
+                selectedFileName ?? "",
+                importInventory,
+                importTemplates,
+                importBestSquad,
+                importHistories
+            );
+            importComplete = true;
 
-                // Rafraîchir le nom du dernier fichier importé
-                lastImportedFileName = await PmlImportService.GetLastImportedFileName();
-            }
+            // Rafraîchir le nom du dernier fichier importé
+            lastImportedFileName = await PmlImportService.GetLastImportedFileName();
         }
         catch (Exception ex)
         {

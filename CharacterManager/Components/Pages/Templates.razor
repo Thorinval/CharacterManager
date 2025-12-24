@@ -1,4 +1,5 @@
 @page "/templates"
+@using CharacterManager.Server.Constants
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @rendermode InteractiveServer
 @using CharacterManager.Server.Models
@@ -10,7 +11,7 @@
 <PageTitle><LocalizedText Key="templates.title" /></PageTitle>
 
 <div class="page-header-banner">
-    <a href="/" class="back-button" aria-label="Retour" title="Back to home"></a>
+    <a href="@AppConstants.Routes.Home" class="back-button" aria-label="Retour" title="Back to home"></a>
     <h1 class="page-title"><LocalizedText Key="templates.title" /></h1>
 </div>
 

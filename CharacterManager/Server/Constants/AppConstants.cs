@@ -1,10 +1,25 @@
 namespace CharacterManager.Server.Constants;
-
 /// <summary>
 /// Constantes globales de l'application CharacterManager
 /// </summary>
 public static class AppConstants
 {
+    /// <summary>
+    /// Chemins de routage de l'application
+    /// </summary>
+    public static class Routes
+    {
+        public const string Home = "/";
+        public const string Inventaire = "/inventaire";
+        public const string Templates = "/templates";
+        public const string Historique = "/historique";
+        public const string ImportPml = "/import-pml";
+        public const string Escouade = "/escouade";
+        public const string MeilleurEscouade = "/meilleur-escouade";
+        public const string Login = "/login";
+        public const string Logout = "/api/logout";
+        public const string ChangePassword = "/change-password";
+    }
     /// <summary>
     /// Extensions de fichiers supportées
     /// </summary>
@@ -27,7 +42,7 @@ public static class AppConstants
         public const string ImagesInterface = "/images/interface";
         public const string I18nFolder = "i18n";
         public const string WwwRoot = "wwwroot";
-        
+
         // Images par défaut
         public const string DefaultPortrait = "/images/interface/default_portrait.png";
         public const string GenericCommandantHeader = "/images/interface/fondheader.png";
@@ -78,16 +93,34 @@ public static class AppConstants
     /// </summary>
     public static class XmlElements
     {
+        public const string Androïde = "Androïde";
         // Éléments racine
+        public const string CharacterManagerPML = "CharacterManagerPML";
+        public const string TypeAttaque = "TypeAttaque";
         public const string InventairePML = "InventairePML";
         public const string TemplatesPML = "TemplatesPML";
         public const string HistoriqueClassements = "HistoriqueClassements";
-        
+        public const string LucieHouse = "LucieHouse";
+        public const string MeilleurEscouade = "meilleurEscouade";
+        public const string HistoriqueEscouade = "HistoriqueEscouade";
+
+        // Valeurs pour parsing (switch)
+        public const string SSR = "SSR";
+        public const string SR = "SR";
+        public const string R = "R";
+        public const string Sentinelle = "Sentinelle";
+        public const string Combattante = "Combattante";
+        public const string Syndicat = "Syndicat";
+        public const string Pacificateurs = "Pacificateurs";
+        public const string HommesLibres = "HommesLibres";
+        public const string Melee = "Melee";
+        public const string MeleeAccent = "Mêlée";
+
         // Sections
         public const string Inventaire = "inventaire";
         public const string Templates = "templates";
         public const string Template = "template";
-        
+
         // Éléments de personnage
         public const string Personnage = "Personnage";
         public const string Nom = "Nom";
@@ -102,7 +135,21 @@ public static class AppConstants
         public const string Faction = "Faction";
         public const string Selectionne = "Selectionne";
         public const string Description = "Description";
-        
+        public const string Mercenaire = "Mercenaire";
+        public const string Commandant = "Commandant";
+        public const string Androide = "Androide";
+        public const string DateEnregistrement = "DateEnregistrement";
+        public const string PuissanceTotal = "PuissanceTotal";
+        public const string Classement = "Classement";
+        public const string DonneesEscouadeJson = "DonneesEscouadeJson";
+        public const string Piece = "Piece";
+        public const string Bonus = "Bonus";
+        public const string BonusTactiques = "BonusTactiques";
+        public const string BonusStrategiques = "BonusStrategiques";
+        public const string PuissanceTactique = "PuissanceTactique";
+        public const string PuissanceStrategique = "PuissanceStrategique";
+        public const string PuissanceLegacy = "Puissance";
+
         // Attributs
         public const string Version = "version";
         public const string ExportDate = "exportDate";
@@ -114,15 +161,25 @@ public static class AppConstants
     public static class Messages
     {
         // Messages d'erreur
+        public const string ErrorTemplateNoName = "Un template doit avoir un nom";
+        public const string ErrorHistoriqueInvalide = "Historique invalide: date ou données manquantes";
+        public const string WarningTooManyLucieHousePieces = "Attention: Plus de {0} pièces sélectionnées dans l'import";
+        public const string ErrorImportPersonnageInventaire = "Erreur lors de l'import de personnage (inventaire):";
+        public const string ErrorImportPersonnageTemplate = "Erreur lors de l'import du personnage au template";
+        public const string ErrorImportTemplate = "Erreur lors de l'import du template:";
+        public const string ErrorImportBestSquad = "Erreur lors de l'import de la meilleure escouade:";
+        public const string ErrorImportHistorique = "Erreur lors de l'import d'un historique:";
+        public const string ErrorImportPieceLucieHouse = "Erreur lors de l'import d'une pièce Lucie House:";
+        public const string ErrorImportLucieHouse = "Erreur lors de l'import de Lucie House:";
         public const string ErrorFileEmpty = "Le fichier est vide";
         public const string ErrorFileInvalid = "Le fichier n'est pas valide";
         public const string ErrorXmlParsing = "Erreur lors de l'analyse du fichier XML";
         public const string ErrorNoSectionsFound = "Aucune section reconnue trouvée dans le fichier";
-        
+
         // Messages de succès
         public const string SuccessImport = "Import réussi";
         public const string SuccessExport = "Export réussi";
-        
+
         // Messages d'information
         public const string InfoProcessing = "Traitement en cours...";
     }
@@ -137,54 +194,5 @@ public static class AppConstants
         public const string DefaultRole = "utilisateur";
         public const int ThumbnailHeightPx = 110;
         public const bool IsAdultModeEnabled = true;
-    }
-
-    /// <summary>
-    /// Limites de l'application
-    /// </summary>
-    public static class Limits
-    {
-        public const int MaxCommandants = 1;
-        public const int MaxMercenaires = 8;
-        public const int MaxAndroides = 3;
-        public const int MaxEscouadeTotal = 12;
-        public const int MaxTemplateNameLength = 100;
-        public const int MaxDescriptionLength = 500;
-        public const int MaxPersonnagesJsonLength = 2000;
-    }
-
-    /// <summary>
-    /// Clés de routage
-    /// </summary>
-    public static class Routes
-    {
-        public const string Home = "/";
-        public const string Inventaire = "/inventaire";
-        public const string Templates = "/templates";
-        public const string Historique = "/historique";
-        public const string ImportPml = "/import-pml";
-        public const string Escouade = "/escouade";
-        public const string MeilleurEscouade = "/meilleur-escouade";
-        public const string Login = "/login";
-        public const string Logout = "/api/logout";
-        public const string ChangePassword = "/change-password";
-    }
-
-    /// <summary>
-    /// Encodages
-    /// </summary>
-    public static class Encodings
-    {
-        public const string Utf8 = "UTF-8";
-    }
-
-    /// <summary>
-    /// Types MIME
-    /// </summary>
-    public static class MimeTypes
-    {
-        public const string ApplicationXml = "application/xml";
-        public const string ApplicationJson = "application/json";
-        public const string ApplicationOctetStream = "application/octet-stream";
     }
 }

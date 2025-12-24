@@ -1,4 +1,5 @@
 @page "/settings"
+@using CharacterManager.Server.Constants
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @using CharacterManager.Server.Data
 @using CharacterManager.Server.Models
@@ -12,8 +13,8 @@
 <PageTitle><LocalizedText Key="settings.title" /> - Character Manager</PageTitle>
 
 <div class="page-header-banner">
-    <a href="/" class="back-button" aria-label="Retour" title="Back to home"></a>
-    <img src="/images/interface/parametres.png" alt="" class="page-header-icon" />
+    <a href="@AppConstants.Routes.Home" class="back-button" aria-label="Retour" title="Back to home"></a>
+    <img src="@AppConstants.Paths.ImagesInterface/parametres.png" alt="" class="page-header-icon" />
     <h1 class="page-title"><LocalizedText Key="settings.title" /></h1>
 </div>
 
@@ -78,7 +79,7 @@
     <NotAuthorized>
         <div class="container mt-4">
             <p><LocalizedText Key="settings.signInPrompt" /></p>
-            <a class="btn btn-primary" href="/login"><LocalizedText Key="settings.signIn" /></a>
+            <a class="btn btn-primary" href="@AppConstants.Routes.Login"><LocalizedText Key="settings.signIn" /></a>
         </div>
     </NotAuthorized>
 </AuthorizeView>

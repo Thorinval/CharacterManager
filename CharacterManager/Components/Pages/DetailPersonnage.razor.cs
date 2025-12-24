@@ -5,6 +5,7 @@ using Microsoft.JSInterop;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
 using System.Linq;
+using CharacterManager.Server.Constants;
 
 public partial class DetailPersonnage
 {
@@ -22,7 +23,7 @@ public partial class DetailPersonnage
 
     private Personnage? currentPerso;
     private Personnage editedPerso = new();
-    private List<Personnage> tousLesPersonnages = new();
+    private List<Personnage> tousLesPersonnages = [];
     private int indexActuel = 0;
     private bool isEditing = false;
     private bool HasNavigation => tousLesPersonnages.Count > 1;
@@ -65,10 +66,10 @@ public partial class DetailPersonnage
     private async Task NavigateToPrevious()
     {
         if (tousLesPersonnages.Count == 0) return;
-        
+
         StateHasChanged();
         await Task.Delay(100);
-        
+
         // Aller au personnage précédent (wraparound circulaire)
         indexActuel = (indexActuel - 1 + tousLesPersonnages.Count) % tousLesPersonnages.Count;
 
@@ -81,10 +82,10 @@ public partial class DetailPersonnage
     private async Task NavigateToNext()
     {
         if (tousLesPersonnages.Count == 0) return;
-        
+
         StateHasChanged();
         await Task.Delay(100);
-        
+
         // Aller au personnage suivant (wraparound circulaire)
         indexActuel = (indexActuel + 1) % tousLesPersonnages.Count;
 
@@ -96,14 +97,14 @@ public partial class DetailPersonnage
 
     private void GoBack()
     {
-        var target = string.IsNullOrWhiteSpace(ReturnUrl) ? "/inventaire" : Uri.UnescapeDataString(ReturnUrl);
+        var target = string.IsNullOrWhiteSpace(ReturnUrl) ? AppConstants.Routes.Inventaire : Uri.UnescapeDataString(ReturnUrl);
         Navigation.NavigateTo(target);
     }
 
     private void EnterEditMode()
     {
         if (currentPerso == null) return;
-        
+
         isEditing = true;
         // Créer une copie pour l'édition
         editedPerso = new Personnage
@@ -160,25 +161,7 @@ public partial class DetailPersonnage
         };
     }
 
-    private MarkupString RenderStars(int rang)
-    {
-        if (rang < 0 || rang > 7) rang = 0;
-        
-        var stars = "";
-        for (int i = 1; i <= 7; i++)
-        {
-            if (i <= rang)
-            {
-                stars += "<span class=\"star filled\">★</span>";
-            }
-            else
-            {
-                stars += "<span class=\"star empty\">☆</span>";
-            }
-        }
-        
-        return new MarkupString(stars);
-    }
+    // ...removed duplicate RenderStars, use TemplateEscouade.GetRankStars instead
 
     private List<Personnage> GetListeFiltree()
     {

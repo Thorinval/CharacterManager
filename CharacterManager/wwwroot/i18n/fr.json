@@ -38,6 +38,10 @@
     "link": "Feuille de route",
     "title": "Feuille de route"
   },
+    "changelog": {
+    "link": "Notes de version",
+    "title": "Notes de version"
+  },
   "login": {
     "title": "Connexion",
     "heading": "Connexion",
@@ -287,5 +291,8 @@
     "previous": "Personnage précédent",
     "next": "Personnage suivant",
     "back": "Retour"
-  }
+  },
+  "creerClassement": {
+    "title": "Create Squad History Entry"
+  } 
 }

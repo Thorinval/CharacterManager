@@ -1,4 +1,5 @@
 @page "/admin/users"
+@using CharacterManager.Server.Constants
 @using Microsoft.AspNetCore.Components.Authorization
 @using CharacterManager.Server.Services
 @using Microsoft.JSInterop
@@ -12,7 +13,7 @@
 <AuthorizeView Roles="admin">
     <Authorized Context="auth">
         <div class="page-header-banner">
-            <a href="/" class="back-button" aria-label="Retour" title="Back to home"></a>
+            <a href="@AppConstants.Routes.Home" class="back-button" aria-label="Retour" title="Back to home"></a>
             <h1 class="page-title"><LocalizedText Key="manageUsers.title" /></h1>
         </div>
 
@@ -100,7 +101,7 @@
     <NotAuthorized>
         <div class="container mt-4">
             <p><LocalizedText Key="manageUsers.accessDenied" /></p>
-            <a class="btn btn-primary" href="/login"><LocalizedText Key="manageUsers.signIn" /></a>
+            <a class="btn btn-primary" href="@AppConstants.Routes.Login"><LocalizedText Key="manageUsers.signIn" /></a>
         </div>
     </NotAuthorized>
 </AuthorizeView>

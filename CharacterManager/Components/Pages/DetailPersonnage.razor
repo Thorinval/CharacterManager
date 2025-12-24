@@ -1,13 +1,17 @@
 @page "/detail-personnage/{id:int}"
+
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inject PersonnageService PersonnageService
 @inject NavigationManager Navigation
+
+@using CharacterManager.Server.Constants
 @using CharacterManager.Server.Models
 @using CharacterManager.Server.Services
 @using System
 @using System.Linq
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
+
 @rendermode InteractiveServer
 
 <link rel="stylesheet" href="/Styles/DetailPersonnage.css" />
@@ -18,7 +22,7 @@
 {
     <div class="page-header-banner">
         <a @onclick="GoBack" @onclick:preventDefault="true" class="back-button" aria-label="Retour" title="Retour">
-            <img src="/images/interface/btn_retour.png" alt="Retour" class="btn-retour-icon" />
+            <img src="@AppConstants.Paths.ImagesInterface/btn_retour.png" alt="Retour" class="btn-retour-icon" />
         </a>
         <h1 class="page-title">@currentPerso.Nom</h1>
         @if (!isEditing)
@@ -55,38 +59,38 @@
                                 <h5 class="section-title">Informations Générales</h5>
                                 
                                 <div class="detail-item">
-                                    <label>Nom :</label>
+                                    <label>@AppConstants.XmlElements.Nom :</label>
                                     <span class="value">@currentPerso.Nom</span>
                                 </div>
 
                                 <div class="detail-item">
-                                    <label>Rareté :</label>
+                                    <label>@AppConstants.XmlElements.Rarete :</label>
                                     <span class="value badge bg-@GetRarityClass(currentPerso.Rarete)">@currentPerso.Rarete</span>
                                 </div>
 
                                 <div class="detail-item">
-                                    <label>Type :</label>
+                                    <label>@AppConstants.XmlElements.Type :</label>
                                     <span class="value">@currentPerso.Type</span>
                                 </div>
 
                                 <div class="detail-item">
-                                    <label>Rôle :</label>
+                                    <label>@AppConstants.XmlElements.Role :</label>
                                     <span class="value">@currentPerso.Role</span>
                                 </div>
 
                                 <div class="detail-item">
-                                    <label>Faction :</label>
+                                    <label>@AppConstants.XmlElements.Faction :</label>
                                     <span class="value">@currentPerso.Faction</span>
                                 </div>
 
                                 <div class="detail-item">
-                                    <label>Type d'Attaque :</label>
+                                    <label>@AppConstants.XmlElements.TypeAttaque :</label>
                                     <span class="value">@currentPerso.TypeAttaque</span>
                                 </div>
 
                                 <div class="detail-item">
-                                    <label>Rang :</label>
-                                    <div class="stars">@RenderStars(currentPerso.Rang)</div>
+                                    <label>@AppConstants.XmlElements.Rang :</label>
+                                    <div class="stars">@CharacterManager.Components.Pages.TemplateEscouade.GetRankStars(currentPerso.Rang)</div>
                                 </div>
                             </div>
 
@@ -94,27 +98,27 @@
                                 <h5 class="section-title">Statistiques</h5>
                                 
                                 <div class="detail-item">
-                                    <label>Niveau :</label>
+                                    <label>@AppConstants.XmlElements.Niveau :</label>
                                     <span class="value badge bg-info">@currentPerso.Niveau</span>
                                 </div>
 
                                 <div class="detail-item">
-                                    <label>Puissance :</label>
+                                    <label>@AppConstants.XmlElements.Puissance :</label>
                                     <span class="value badge bg-warning">@currentPerso.Puissance</span>
                                 </div>
 
                                 <div class="detail-item">
-                                    <label>PA (Points d'Attaque) :</label>
+                                    <label>@AppConstants.XmlElements.PA (Points d'Attaque) :</label>
                                     <span class="value">@currentPerso.PA</span>
                                 </div>
 
                                 <div class="detail-item">
-                                    <label>PV (Points de Vie) :</label>
+                                    <label>@AppConstants.XmlElements.PV (Points de Vie) :</label>
                                     <span class="value">@currentPerso.PV</span>
                                 </div>
 
                                 <div class="detail-item">
-                                    <label>Sélectionné :</label>
+                                    <label>@AppConstants.XmlElements.Selectionne :</label>
                                     <span class="value">
                                         @if (currentPerso.Selectionne)
                                         {
@@ -155,7 +159,7 @@
                         {
                             <div class="row mt-4">
                                 <div class="col-12">
-                                    <h5 class="section-title">Description</h5>
+                                    <h5 class="section-title">@AppConstants.XmlElements.Description</h5>
                                     <p class="description-text">@currentPerso.Description</p>
                                 </div>
                             </div>
@@ -169,12 +173,12 @@
                                 <h5 class="section-title">Informations Générales</h5>
                                 
                                 <div class="mb-3">
-                                    <label class="form-label">Nom</label>
+                                    <label class="form-label">@AppConstants.XmlElements.Nom</label>
                                     <input type="text" class="form-control" @bind="editedPerso.Nom" />
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">Rareté</label>
+                                    <label class="form-label">@AppConstants.XmlElements.Rarete</label>
                                     <select class="form-select" @bind="editedPerso.Rarete">
                                         @foreach (Rarete rarete in Enum.GetValues(typeof(Rarete)))
                                         {
@@ -184,7 +188,7 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">Type</label>
+                                    <label class="form-label">@AppConstants.XmlElements.Type</label>
                                     <select class="form-select" @bind="editedPerso.Type">
                                         @foreach (TypePersonnage type in Enum.GetValues(typeof(TypePersonnage)))
                                         {
@@ -194,7 +198,7 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">Rôle</label>
+                                    <label class="form-label">@AppConstants.XmlElements.Role</label>
                                     <select class="form-select" @bind="editedPerso.Role">
                                         @foreach (Role role in Enum.GetValues(typeof(Role)))
                                         {
@@ -204,7 +208,7 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">Faction</label>
+                                    <label class="form-label">@AppConstants.XmlElements.Faction</label>
                                     <select class="form-select" @bind="editedPerso.Faction">
                                         @foreach (Faction faction in Enum.GetValues(typeof(Faction)))
                                         {
@@ -214,7 +218,7 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">Type d'Attaque</label>
+                                    <label class="form-label">@AppConstants.XmlElements.TypeAttaque</label>
                                     <select class="form-select" @bind="editedPerso.TypeAttaque">
                                         @foreach (TypeAttaque typeAttaque in Enum.GetValues(typeof(TypeAttaque)))
                                         {
@@ -224,7 +228,7 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">Rang (0-7)</label>
+                                    <label class="form-label">@AppConstants.XmlElements.Rang (0-7)</label>
                                     <input type="number" class="form-control" @bind="editedPerso.Rang" min="0" max="7" />
                                 </div>
                             </div>
@@ -233,12 +237,12 @@
                                 <h5 class="section-title">Statistiques</h5>
                                 
                                 <div class="mb-3">
-                                    <label class="form-label">Niveau</label>
+                                    <label class="form-label">@AppConstants.XmlElements.Niveau</label>
                                     <input type="number" class="form-control" @bind="editedPerso.Niveau" min="1" />
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">Puissance</label>
+                                    <label class="form-label">@AppConstants.XmlElements.Puissance</label>
                                     <div class="input-group input-group-sm">
                                         <button class="btn btn-outline-secondary" type="button" @onclick="() => ChangePuissanceDetail(-1)" @onclick:stopPropagation="true">-</button>
                                         <input type="number" class="form-control text-center" @bind="editedPerso.Puissance" min="0" />
@@ -247,12 +251,12 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">PA (Points d'Attaque)</label>
+                                    <label class="form-label">@AppConstants.XmlElements.PA (Points d'Attaque)</label>
                                     <input type="number" class="form-control" @bind="editedPerso.PA" min="0" />
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">PV (Points de Vie)</label>
+                                    <label class="form-label">@AppConstants.XmlElements.PV (Points de Vie)</label>
                                     <input type="number" class="form-control" @bind="editedPerso.PV" min="0" />
                                 </div>
 
@@ -260,7 +264,7 @@
                                     <div class="form-check">
                                         <input type="checkbox" class="form-check-input" @bind="editedPerso.Selectionne" id="selectionneCheck" />
                                         <label class="form-check-label" for="selectionneCheck">
-                                            Sélectionné
+                                            @AppConstants.XmlElements.Selectionne
                                         </label>
                                     </div>
                                 </div>
@@ -270,7 +274,7 @@
                         <div class="row mt-3">
                             <div class="col-12">
                                 <div class="mb-3">
-                                    <label class="form-label">Description</label>
+                                    <label class="form-label">@AppConstants.XmlElements.Description</label>
                                     <textarea class="form-control" @bind="editedPerso.Description" rows="4"></textarea>
                                 </div>
                             </div>

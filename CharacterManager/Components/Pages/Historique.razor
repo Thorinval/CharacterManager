@@ -1,4 +1,5 @@
 @page "/historique"
+@using CharacterManager.Server.Constants
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Web
@@ -12,7 +13,7 @@
 <PageTitle><LocalizedText Key="history.title" /></PageTitle>
 
 <div class="page-header-banner">
-    <a href="/" class="back-button" aria-label="Retour" title="Back to home"></a>
+    <a href="@AppConstants.Routes.Home" class="back-button" aria-label="Retour" title="Back to home"></a>
     <h1 class="page-title"><LocalizedText Key="history.pageTitle" /></h1>
 </div>
 
@@ -29,8 +30,9 @@
                     <input type="date" id="dateFin" class="form-control" @bind="dateFin" />
                 </div>
                 <div class="col-md-4 d-flex align-items-end gap-2 flex-wrap">
+                    <button class="btn btn-primary" @onclick="ShowCreerClassementModal"><LocalizedText Key="history.create" /></button>
                     <button class="btn btn-primary" @onclick="FiltrerHistorique"><LocalizedText Key="history.filter" /></button>
-                    <button class="btn btn-secondary" @onclick="RinitialiserFiltres"><LocalizedText Key="history.reset" /></button>
+                    <button class="btn btn-secondary" @onclick="ReinitialiserFiltres"><LocalizedText Key="history.reset" /></button>
                     <button class="btn btn-success" @onclick="ExporterHistorique" title=""><i class="bi bi-download"></i> <LocalizedText Key="history.exportXml" /></button>
                     <button class="btn btn-info" @onclick="ImporterHistorique" title=""><i class="bi bi-upload"></i> <LocalizedText Key="history.importXml" /></button>
                     <button class="btn btn-danger" @onclick="ViderHistorique" title=""><LocalizedText Key="history.clear" /></button>
@@ -90,7 +92,7 @@
                                                 <img src="@GetImageUrl(donnees.Commandant.Nom)" alt="@donnees.Commandant.Nom" class="card-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
                                                 <div class="card-info">
                                                     <div>Niv: @donnees.Commandant.Niveau</div>
-                                                    <div class="card-stars">@RenderStars(donnees.Commandant.Rang)</div>
+                                                    <div class="card-stars">@CharacterManager.Components.Pages.TemplateEscouade.GetRankStars(donnees.Commandant.Rang)</div>
                                                     <div>Puiss: @donnees.Commandant.Puissance</div>
                                                 </div>
                                             </div>
@@ -115,7 +117,7 @@
                                                     <img src="@GetImageUrl(merc.Nom)" alt="@merc.Nom" class="card-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
                                                     <div class="card-info">
                                                         <div>Niv: @merc.Niveau</div>
-                                                        <div class="card-stars">@RenderStars(merc.Rang)</div>
+                                                        <div class="card-stars">@CharacterManager.Components.Pages.TemplateEscouade.GetRankStars(merc.Rang)</div>
                                                         <div>Puiss: @merc.Puissance</div>
                                                     </div>
                                                 </div>
@@ -180,3 +182,4 @@
 
 <InputFile id="historiqueFileInput" @ref="inputFileRef" OnChange="HandleFileSelected" accept=".xml" style="display:none;" />
 
+<CreerClassementModal @bind-IsVisible="showCreerClassement" />
