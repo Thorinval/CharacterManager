@@ -29,14 +29,56 @@ public partial class Home : IAsyncDisposable
     [Inject]
     public RoadmapService RoadmapService { get; set; } = null!;
 
+     [Inject]
+    public PmlImportService PmlImportService { get; set; } = null!;   
+
     private string homeImageUrl = AppConstants.Paths.HomeDefaultBackground;
     private bool isAdultModeEnabled;
-
+    private bool showPmlImportAlert = false;
+    private string? importError = null;
+    
     protected override async Task OnInitializedAsync()
     {
         AdultModeNotification.Subscribe(OnAdultModeChanged);
         isAdultModeEnabled = await GetCurrentAdultModeAsync();
         await UpdateHomeImageAsync(isAdultModeEnabled);
+
+        // Vérifie si la base est vide (aucun personnage, template, historique ou profil)
+        bool dbIsEmpty = !await DbContext.Personnages.AnyAsync()
+            && !await DbContext.Templates.AnyAsync()
+            && !await DbContext.HistoriquesEscouade.AnyAsync();
+
+        if (dbIsEmpty)
+        {
+            string[] possibleFiles = new[] {
+                Path.Combine("wwwroot", "config.pml")
+            };
+
+            string? configFile = possibleFiles.FirstOrDefault(File.Exists);
+            if (configFile != null)
+            {
+                try
+                {
+                    using var stream = File.OpenRead(configFile);
+                    var result = await PmlImportService.ImportPmlAsync(stream, Path.GetFileName(configFile));
+                    if (!result.IsSuccess)
+                    {
+                        importError = $"Erreur lors de l'import automatique du fichier de configuration : {result.Error}";
+                        showPmlImportAlert = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    importError = $"Erreur lors de l'import automatique du fichier de configuration : {ex.Message}";
+                    showPmlImportAlert = true;
+                }
+            }
+            else
+            {
+                importError = "Aucun fichier de configuration PML/XML trouvé pour initialiser la base de données.";
+                showPmlImportAlert = true;
+            }
+        }
     }
 
     private void OnAdultModeChanged(bool isAdultModeEnabled)

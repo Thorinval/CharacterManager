@@ -102,6 +102,11 @@ public partial class ImportExportPML
         if (!HasSelectedExportTypes())
             return;
 
+        await HandleExportInternal(downloadToClient: true);
+    }
+
+    private async Task HandleExportInternal(bool downloadToClient)
+    {
         try
         {
             var exportData = await PmlImportService.ExportPmlAsync(
@@ -110,22 +115,20 @@ public partial class ImportExportPML
                 exportBestSquad,
                 exportHistories);
 
-            // Generate filename with timestamp
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             var fileName = $"export_{timestamp}.pml";
 
-            // Download the file using JavaScript interop would be needed here
-            // For now, we'll show a success message
-            importResult = new ImportResult
+            if (downloadToClient)
             {
-                IsSuccess = true,
-                SuccessCount = 1,
-                Error = $"Export réussi: {fileName} ({exportData.Length} bytes)"
-            };
-            importComplete = true;
-
-            // Trigger download via JavaScript
-            await JS.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(exportData));
+                importResult = new ImportResult
+                {
+                    IsSuccess = true,
+                    SuccessCount = 1,
+                    Error = $"Export réussi: {fileName} ({exportData.Length} bytes)"
+                };
+                importComplete = true;
+                await JS.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(exportData));
+            }
         }
         catch (Exception ex)
         {
@@ -137,7 +140,7 @@ public partial class ImportExportPML
             importComplete = true;
         }
     }
-
+  
     private void Reset()
     {
         selectedFile = null;
@@ -146,5 +149,39 @@ public partial class ImportExportPML
         importResult = null;
         activeTab = "import";
     }
+    private async Task ExportAsConfigPml()
+    {
+        try
+        {
+            var exportData = await PmlImportService.ExportPmlAsync(
+                exportInventory,
+                exportTemplates,
+                exportBestSquad,
+                exportHistories);
+
+            var configPath = Path.Combine("wwwroot", "config.pml");
+            await File.WriteAllBytesAsync(configPath, exportData);
+
+            importResult = new ImportResult
+            {
+                IsSuccess = true,
+                SuccessCount = 1,
+                Error = $"Export serveur réussi : {configPath} ({exportData.Length} bytes)"
+            };
+            importComplete = true;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            importResult = new ImportResult
+            {
+                IsSuccess = false,
+                Error = $"Erreur export serveur : {ex.Message}"
+            };
+            importComplete = true;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
 }
 

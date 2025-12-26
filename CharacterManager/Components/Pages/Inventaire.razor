@@ -153,6 +153,10 @@ else
                 <i class="bi bi-trash-fill"></i>
                 <LocalizedText Key="inventory.bulkDelete" /> (@selectedPersonnages.Count)
             </button>
+            <button class="btn btn-danger ms-2" @onclick="ResetAll" title="Supprimer les données">
+                <i class="bi bi-trash-fill"></i>
+                <LocalizedText Key="inventory.bulkDelete" />
+            </button>        
         </div>
     </div>
 }
@@ -181,12 +185,12 @@ else
             </button>
         </div>
         <div class="view-mode-controls">
-            <button class="btn btn-sm @GetViewModeClass("grid")" @onclick="@(() => viewMode = "grid")"
+            <button class="btn btn-sm @GetViewModeClass(AppConstants.Defaults.ViewModeGrid)" @onclick="@(() => viewMode = AppConstants.Defaults.ViewModeGrid)"
                 title="@LocalizationService.T("inventory.grid")">
                 <i class="bi bi-grid-3x3-gap"></i>
                 <LocalizedText Key="inventory.grid" />
             </button>
-            <button class="btn btn-sm @GetViewModeClass("list")" @onclick="@(() => viewMode = "list")"
+            <button class="btn btn-sm @GetViewModeClass(AppConstants.Defaults.ViewModeList)" @onclick="@(() => viewMode = AppConstants.Defaults.ViewModeList)"
                 title="@LocalizationService.T("inventory.list")">
                 <i class="bi bi-list-ul"></i>
                 <LocalizedText Key="inventory.list" />
@@ -209,15 +213,15 @@ else
             var colorClass = GetBadgeColor(option.Value);
 
             <li class="nav-item">
-                <button
-                    class="nav-link d-flex align-items-center @(SelectedFilter == option.Value ? "active animated-pill" : "")"
+                <button class="nav-link d-flex align-items-center
+                                   @(SelectedFilter == option.Value ? "active glow-active" : "")"
                     @onclick="() => OnFilterClicked(option.Value)">
 
                     <span class="me-2">
                         <LocalizedText Key="@option.LocalizationKey" />
                     </span>
 
-                    <span class="badge @colorClass @(SelectedFilter == option.Value ? "animated-badge" : "")">
+                    <span class="badge @colorClass">
                         @count
                     </span>
 
@@ -238,7 +242,7 @@ else
             <div class="@GetContainerClass()">
                 @foreach (var personnage in groupe)
                 {
-                    @if (viewMode == "grid")
+                    @if (viewMode == AppConstants.Defaults.ViewModeGrid)
                     {
                         <div class="personnage-card-editable @GetRarityClass(personnage.Rarete)" draggable="true"
                             @ondragstart="@(e => HandleDragStart(e, personnage))">

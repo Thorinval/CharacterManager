@@ -179,6 +179,9 @@
                             <button class="btn btn-primary" @onclick="HandleExport" disabled="@(!HasSelectedExportTypes())">
                                 <i class="bi bi-download"></i> <LocalizedText Key="importExportPml.exportButton" />
                             </button>
+                            <button class="btn btn-secondary ms-2" @onclick="ExportAsConfigPml" disabled="@(!HasSelectedExportTypes())">
+                                <i class="bi bi-save"></i> Exporter comme config.pml (serveur)
+                            </button>
                         }
                     }
                 </div>

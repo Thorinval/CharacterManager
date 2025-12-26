@@ -33,7 +33,7 @@ public class PersonnageService
             .Where(p => p.Selectionnee)
             .AsEnumerable()
             .Sum(p => p.AspectsTactiques?.Puissance ?? 0);
-        
+
         var puissanceStrategiqueLucie = GetPuissanceStrategiqueLucie();
 
         var puissancecommandantEscouade = GetPuissanceCommandantEscouade();
@@ -44,7 +44,7 @@ public class PersonnageService
     private int GetPuissanceCommandantEscouade() =>
         _context.Personnages
             .Where(p => p.Selectionne && p.Type == TypePersonnage.Commandant)
-            .Select(p => p.Puissance + p.Rang  * 20)            
+            .Select(p => p.Puissance + p.Rang * 20)
             .FirstOrDefault();
 
 
@@ -53,14 +53,16 @@ public class PersonnageService
         return _context.Personnages
             .Where(p => p.Type == TypePersonnage.Commandant)
             .Select(p => p.Puissance + p.Rang * 20)
+            .ToList()
+            .DefaultIfEmpty(0)
             .Max();
     }
 
     private int GetPuissanceStrategiqueLucie()
     {
-        return _context.Pieces
+        return _context.Pieces?
             .AsEnumerable()
-            .Sum(p => p.AspectsStrategiques?.Puissance ?? 0);
+            .Sum(p => p.AspectsStrategiques?.Puissance ?? 0) ?? 0;
     }
 
     public int GetPuissanceMaxEscouade()
@@ -313,6 +315,13 @@ public class PersonnageService
             _context.Personnages.Remove(personnage);
             _context.SaveChanges();
         }
+    }
+
+    public void DeleteAll()
+    {
+        _context.Personnages.RemoveRange(_context.Personnages);
+        _context.Pieces.RemoveRange(_context.Pieces);
+        _context.SaveChanges();
     }
 
     // ===== Méthodes pour Templates =====

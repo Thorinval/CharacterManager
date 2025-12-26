@@ -1,8 +1,13 @@
 # Release Notes - Character Manager
 
-> **Version actuelle**: 0.9.10
+> **Version actuelle**: 0.9.11
 
 ---
+
+## 0.9.11 (26 Décembre 2025)
+
+✨ - Ajout init par fichier PML par défaut lorsque l'inventaire est vide
+✨ - Ajout Export fichier PML pour config
 
 ## 0.9.10 (26 Décembre 2025)
 

@@ -54,6 +54,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var pmlImportService = scope.ServiceProvider.GetRequiredService<PmlImportService>();
     bool ColumnExists(string table, string column)
     {
         try
@@ -386,7 +387,6 @@ using (var scope = app.Services.CreateScope())
             // Appliquer les paramètres existants
             var adultModeStatus = settings.IsAdultModeEnabled ? "Enabled" : "Disabled";
             var language = string.IsNullOrEmpty(settings.Language) ? "fr" : settings.Language;
-            
             // Si la langue n'est pas définie, définir par défaut
             if (string.IsNullOrEmpty(settings.Language))
             {
@@ -394,8 +394,20 @@ using (var scope = app.Services.CreateScope())
                 db.SaveChanges();
                 Console.WriteLine("[Init] Updated Language to default: fr");
             }
-            
             Console.WriteLine($"[Init] Loaded AppSettings - Adult Mode: {adultModeStatus}, Language: {language}");
+        }
+
+        // Vérification si la base est vide (aucun personnage, template, historique ou profil)
+        bool dbIsEmpty = !db.Personnages.Any()
+            && !db.Templates.Any()
+            && !db.HistoriquesEscouade.Any()
+            && !db.Profiles.Any();
+
+        if (dbIsEmpty)
+        {
+            Console.WriteLine("[Init] La base de données est vide. Préparez l'import d'un fichier .pml pour initialisation.");
+            // TODO: Ajouter ici la logique pour demander à l'utilisateur un fichier .pml et lancer l'import
+            // Exemple d'appel : await pmlImportService.ImportPmlAsync(stream, "import.pml");
         }
 
         // NOTE: PersonnageImageConfigService now uses filesystem-based detection

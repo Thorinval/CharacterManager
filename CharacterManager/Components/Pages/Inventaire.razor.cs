@@ -96,12 +96,14 @@ public partial class Inventaire : IAsyncDisposable
     private string searchTerm = "";
 
     // Mode d'affichage
-    private string viewMode = "grid";
+    private string viewMode = AppConstants.Defaults.ViewModeGrid;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadPersonnagesAsync();
         await LoadLucieHouseAsync();
+
+        ApplyFiltersAndSorting();
         // Charger un template si présent dans l'URL
         var uri = new Uri(Navigation.Uri);
         var query = uri.Query.TrimStart('?');
@@ -141,7 +143,7 @@ public partial class Inventaire : IAsyncDisposable
         if (piece != null)
         {
             int newValue = Math.Max(0, piece.Niveau + delta);
-            await Task.Run(() => UpdatePieceField(pieceId, "Niveau", newValue.ToString()));
+            await Task.Run(() => UpdatePieceField(pieceId, AppConstants.XmlElements.Niveau, newValue.ToString()));
         }
     }
 
@@ -151,7 +153,7 @@ public partial class Inventaire : IAsyncDisposable
         if (personnage != null)
         {
             int newValue = Math.Max(0, personnage.Puissance + delta);
-            await Task.Run(() => UpdatePersonnageField(personnageId, "Puissance", newValue.ToString()));
+            await Task.Run(() => UpdatePersonnageField(personnageId, AppConstants.XmlElements.Puissance, newValue.ToString()));
         }
     }
 
@@ -162,7 +164,7 @@ public partial class Inventaire : IAsyncDisposable
         if (piece != null)
         {
             int newValue = 0;
-            string typepuissance = typeBonus == TypeBonus.Tactique ? "PuissanceTactique" : "PuissanceStrategique";
+            string typepuissance = typeBonus == TypeBonus.Tactique ? AppConstants.XmlElements.PuissanceTactique : AppConstants.XmlElements.PuissanceStrategique;
 
             switch (typeBonus)
             {
@@ -179,7 +181,7 @@ public partial class Inventaire : IAsyncDisposable
 
     private string GetContainerClass()
     {
-        return viewMode == "grid" ? "personnages-grid" : "personnages-list";
+        return viewMode == AppConstants.Defaults.ViewModeGrid ? "personnages-grid" : "personnages-list";
     }
 
     private static string GetContainerClassCompact()
@@ -207,25 +209,25 @@ public partial class Inventaire : IAsyncDisposable
         {
             switch (field)
             {
-                case "Niveau":
+                case AppConstants.XmlElements.Niveau:
                     if (int.TryParse(value, out int niveau) && niveau >= 1 && niveau <= 200)
                     {
                         personnage.Niveau = niveau;
                     }
                     break;
-                case "Rang":
+                case AppConstants.XmlElements.Rang:
                     if (int.TryParse(value, out int rang) && rang >= 0 && rang <= 7)
                     {
                         personnage.Rang = rang;
                     }
                     break;
-                case "Puissance":
+                case AppConstants.XmlElements.Puissance:
                     if (int.TryParse(value, out int puissance) && puissance >= 0)
                     {
                         personnage.Puissance = puissance;
                     }
                     break;
-                case "Selectionne":
+                case AppConstants.XmlElements.Selectionne:
                     if (bool.TryParse(value, out var selectionne))
                     {
                         personnage.Selectionne = selectionne;
@@ -390,27 +392,27 @@ public partial class Inventaire : IAsyncDisposable
 
         personnagesFiltres = sortColumn switch
         {
-            "Puissance" => sortAscending
+            AppConstants.XmlElements.Puissance => sortAscending
                 ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Type == TypePersonnage.Commandant ? p.Puissance + p.Rang * 20 : p.Puissance)]
                 : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Type == TypePersonnage.Commandant ? p.Puissance + p.Rang * 20 : p.Puissance)],
 
-            "Nom" => sortAscending
+            AppConstants.XmlElements.Nom => sortAscending
                 ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Nom)]
                 : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Nom)],
 
-            "Rarete" => sortAscending
+            AppConstants.XmlElements.Rarete => sortAscending
                 ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Rarete)]
                 : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Rarete)],
 
-            "Niveau" => sortAscending
+            AppConstants.XmlElements.Niveau => sortAscending
                 ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Niveau)]
                 : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Niveau)],
 
-            "Type" => sortAscending
+            AppConstants.XmlElements.Type => sortAscending
                 ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Type)]
                 : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Type)],
 
-            "Rang" => sortAscending
+            AppConstants.XmlElements.Rang => sortAscending
                 ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Rang)]
                 : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Rang)],
 
@@ -620,6 +622,21 @@ public partial class Inventaire : IAsyncDisposable
         }
     }
 
+    private async Task ResetAll()
+    {
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Êtes-vous sûr de vouloir supprimer toutes les données ? Cette action est irréversible.");
+        if (confirmed)
+        {
+            PersonnageService.DeleteAll();
+            selectedPersonnages.Clear();
+            LuciePieces.Clear();
+            lucieHouse = null;
+            
+            await LoadPersonnagesAsync();
+            await LoadLucieHouseAsync();
+        }
+    }
+
     private void ViewPersonnage(int id)
     {
         Navigation.NavigateTo($"/detail-personnage/{id}");
@@ -666,7 +683,7 @@ public partial class Inventaire : IAsyncDisposable
         templateSelectedIds.Clear();
         templates = [.. PersonnageService.GetAllTemplates()];
         selectedTemplateId = 0;
-        viewMode = "grid";
+        viewMode = AppConstants.Defaults.ViewModeGrid;
     }
 
     private void CancelTemplateCreation()

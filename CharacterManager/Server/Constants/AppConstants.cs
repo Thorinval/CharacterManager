@@ -194,5 +194,8 @@ public static class AppConstants
         public const string DefaultRole = "utilisateur";
         public const int ThumbnailHeightPx = 110;
         public const bool IsAdultModeEnabled = true;
+
+        public const string ViewModeGrid = "grid";
+        public const string ViewModeList = "list";
     }
 }

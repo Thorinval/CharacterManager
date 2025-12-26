@@ -563,28 +563,37 @@
     margin-bottom: 1.5rem;
 }
 
-/* Animation pill : léger pulse */
-@keyframes pillPulse {
-    0%   { transform: scale(1); }
-    50%  { transform: scale(1.05); }
-    100% { transform: scale(1); }
+/* Glow animé autour de la pill active */
+.glow-active {
+    position: relative;
+    z-index: 1;
+    overflow: visible;
+    transition: box-shadow 0.3s ease;
 }
 
-.animated-pill {
-    animation: pillPulse 0.25s ease-out;
-    transition: background-color 0.3s ease, color 0.3s ease;
+/* Halo lumineux animé */
+.glow-active::after {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+    border-radius: 12px;
+    z-index: -1;
+
+    /* Glow initial */
+    box-shadow: 0 0 12px rgba(0, 150, 255, 0.6);
+
+    /* Animation */
+    animation: glowPulse 2s infinite ease-in-out;
 }
 
-/* Animation badge : petit pop */
-@keyframes badgePop {
-    0%   { transform: scale(1); }
-    40%  { transform: scale(1.25); }
-    100% { transform: scale(1); }
-}
-
-.animated-badge {
-    animation: badgePop 0.3s ease-out;
-    transition: background-color 0.3s ease;
+/* Animation du glow */
+@keyframes glowPulse {
+    0%   { box-shadow: 0 0 10px rgba(0, 150, 255, 0.5); }
+    50%  { box-shadow: 0 0 18px rgba(0, 150, 255, 0.9); }
+    100% { box-shadow: 0 0 10px rgba(0, 150, 255, 0.5); }
 }
 
 /* Couleur SR (violet) */
