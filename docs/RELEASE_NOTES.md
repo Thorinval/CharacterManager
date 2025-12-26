@@ -1,44 +1,32 @@
 # Release Notes - Character Manager
 
-> **Version actuelle**: 0.9.8
+> **Version actuelle**: 0.9.10
 
 ---
 
-## Version 0.9.9 (24 Décembre 2025)
+## 0.9.10 (26 Décembre 2025)
 
-### ✨ Nouvelles Fonctionnalités
+✨ - Ajout portrait Scarlett
+✨ - L'inventaire est triable par puissance également. Tri par défaut puissance décroissante
+✨ - L'inventaire peut filtrer par catégorie (Commandants, Mercenaires, Androides et Lucie rooms)
 
-#### Classements
+🐛 - Fix image du personnage dans l'écran détail n'apparait pas pour les mercenaires non sélectionnés
+🐛 - Fix mineurs
 
-- Renommage pages et menu
-- Création d'un classement via la page classement avec une fenetre modale
+## 0.9.9 (24 Décembre 2025)
 
-### 🐛 Corrections de Bugs
+✨ - Renommage pages et menu
+✨ - Création d'un classement via la page classement avec une fenetre modale
 
-- Fix chargement des puissances dans les pieces de lucy.
+🔧 - Reprise de chaines en dur par des constantes
 
-### 🔧 Améliorations Techniques
+## 0.9.8 (23 Décembre 2025)
 
-- Reprise de chaines en dur par des constantes
+✨ - Ajout Roadmap
+✨ - Ajout Releases notes
+✨ - Ajout localisation notes de versions
+✨ - Script d'automatisation
 
-#### Notes de versions
-
-- Ajout localisation notes de versions
-
-- Script d'automatisation
-
-## Version 0.9.8 (23 Décembre 2025)
-
-### ✨ Nouvelles Fonctionnalités (0.9.8)
-
-- Ajout Roadmap
-
-- Ajout Releases notes
-
-### 🔧 Améliorations Techniques (0.9.8)
-
-### 🐛 Corrections de Bugs (0.9.8)
-
-- Top commandant ne tenait pas compte du rang
-
-- Meilleure escouade, le commandant affiché est Alexa au lieu de Dragana qui est la meilleure. le score est bien calculé
+🐛 - Fix chargement des puissances dans les pieces de lucy
+🐛 - Top commandant ne tenait pas compte du rang
+🐛 - Meilleure escouade, le commandant affiché est Alexa au lieu de Dragana qui est la meilleure. le score est bien calculé

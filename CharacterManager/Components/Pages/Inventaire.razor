@@ -159,50 +159,76 @@ else
 
 @if (!showTemplateEditor)
 {
-    <p>
-        <LocalizedText Key="inventory.count" /> @personnagesFiltres.Count
-    </p>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="sort-controls">
+            <label>
+                <LocalizedText Key="inventory.sort" />
+            </label>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByPuissance">
+                <LocalizedText Key="inventory.power" />
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNom">
+                <LocalizedText Key="inventory.name" />
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRarete">
+                <LocalizedText Key="inventory.rarity" />
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNiveau">
+                <LocalizedText Key="inventory.level" />
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRang">
+                <LocalizedText Key="inventory.rank" />
+            </button>
+        </div>
+        <div class="view-mode-controls">
+            <button class="btn btn-sm @GetViewModeClass("grid")" @onclick="@(() => viewMode = "grid")"
+                title="@LocalizationService.T("inventory.grid")">
+                <i class="bi bi-grid-3x3-gap"></i>
+                <LocalizedText Key="inventory.grid" />
+            </button>
+            <button class="btn btn-sm @GetViewModeClass("list")" @onclick="@(() => viewMode = "list")"
+                title="@LocalizationService.T("inventory.list")">
+                <i class="bi bi-list-ul"></i>
+                <LocalizedText Key="inventory.list" />
+            </button>
+        </div>
+    </div>
+
+    <div class="select-all-container mb-3">
+        <input type="checkbox" id="selectAll" checked="@SelectAllChecked" @onchange="SelectAll" />
+        <label for="selectAll" class="ms-2">
+            <LocalizedText Key="inventory.selectAll" />
+        </label>
+    </div>
+
+    <ul class="nav nav-pills mb-3">
+
+        @foreach (var option in FilterOptions)
+        {
+            var count = GetCount(option.Value);
+            var colorClass = GetBadgeColor(option.Value);
+
+            <li class="nav-item">
+                <button
+                    class="nav-link d-flex align-items-center @(SelectedFilter == option.Value ? "active animated-pill" : "")"
+                    @onclick="() => OnFilterClicked(option.Value)">
+
+                    <span class="me-2">
+                        <LocalizedText Key="@option.LocalizationKey" />
+                    </span>
+
+                    <span class="badge @colorClass @(SelectedFilter == option.Value ? "animated-badge" : "")">
+                        @count
+                    </span>
+
+                </button>
+            </li>
+        }
+
+    </ul>
 
     @if (personnagesFiltres.Any())
     {
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="sort-controls">
-                <label>
-                    <LocalizedText Key="inventory.sort" />
-                </label>
-                <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNom">
-                    <LocalizedText Key="inventory.name" />
-                </button>
-                <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRarete">
-                    <LocalizedText Key="inventory.rarity" />
-                </button>
-                <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNiveau">
-                    <LocalizedText Key="inventory.level" />
-                </button>
-                <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRang">
-                    <LocalizedText Key="inventory.rank" />
-                </button>
-            </div>
-            <div class="view-mode-controls">
-                <button class="btn btn-sm @GetViewModeClass("grid")" @onclick="@(() => viewMode = "grid")"
-                    title="@LocalizationService.T("inventory.grid")">
-                    <i class="bi bi-grid-3x3-gap"></i>
-                    <LocalizedText Key="inventory.grid" />
-                </button>
-                <button class="btn btn-sm @GetViewModeClass("list")" @onclick="@(() => viewMode = "list")"
-                    title="@LocalizationService.T("inventory.list")">
-                    <i class="bi bi-list-ul"></i>
-                    <LocalizedText Key="inventory.list" />
-                </button>
-            </div>
-        </div>
-
-        <div class="select-all-container mb-3">
-            <input type="checkbox" id="selectAll" checked="@selectAllChecked" @onchange="SelectAll" />
-            <label for="selectAll" class="ms-2">
-                <LocalizedText Key="inventory.selectAll" />
-            </label>
-        </div>
         @foreach (var groupe in GroupedPersonnages)
         {
             <div class="type-group-header">
@@ -329,88 +355,89 @@ else
                 }
             </div>
         }
+    }
+    <!-- Section Maison de Lucie -->
+    @if (lucieHouse != null && luciePiecesFiltres.Count > 0)
+    {
+        <div class="type-group-header mt-4">
+            <h4>Maison de Lucie (@lucieHouse.Pieces.Count) -
+                @lucieHouse.NombrePiecesSelectionnees/@LucieHouse.MaxPiecesSelectionnees sélectionnées</h4>
+        </div>
 
-        <!-- Section Maison de Lucie -->
-        @if (lucieHouse != null)
-        {
-            <div class="type-group-header mt-4">
-                <h4>Maison de Lucie (@lucieHouse.Pieces.Count) -
-                    @lucieHouse.NombrePiecesSelectionnees/@LucieHouse.MaxPiecesSelectionnees sélectionnées</h4>
-            </div>
+        <div class="@GetContainerClass()">
+            @foreach (var piece in lucieHouse.Pieces)
+            {
+                <div class="personnage-card-editable @(piece.Selectionnee ? "piece-selectionnee" : "piece-non-selectionnee")">
+                    <div class="card-checkbox-grid" @onclick:stopPropagation="true">
+                        <input type="checkbox" checked="@piece.Selectionnee" @onchange="() => TogglePieceSelection(piece.Id)"
+                            disabled="@(!piece.Selectionnee && !lucieHouse.PeutSelectionner())" />
+                    </div>
 
-            <div class="@GetContainerClass()">
-                @foreach (var piece in lucieHouse.Pieces)
-                {
-                    <div class="personnage-card-editable @(piece.Selectionnee ? "piece-selectionnee" : "")">
-                        <div class="card-checkbox-grid" @onclick:stopPropagation="true">
-                            <input type="checkbox" checked="@piece.Selectionnee" @onchange="() => TogglePieceSelection(piece.Id)"
-                                disabled="@(!piece.Selectionnee && !lucieHouse.PeutSelectionner())" />
+                    <div class="card-name-header">
+                        <div class="personnage-name-top">@piece.Nom</div>
+                        <div class="card-rarity-text">Niveau @piece.Niveau</div>
+                    </div>
+
+                    <div class="personnage-card-info">
+                        <div class="editable-field">
+                            <label>Niveau:</label>
+                            <div class="input-group input-group-sm">
+                                <button class="btn btn-outline-secondary" type="button"
+                                    @onclick="() => ChangeNiveauPiece(piece.Id, -1)" @onclick:stopPropagation="true">-</button>
+                                <input type="number" min="1" class="form-control form-control-sm text-center" value="@piece.Niveau"
+                                    @onchange="@((ChangeEventArgs e) => UpdatePieceField(piece.Id, "Niveau", e.Value?.ToString() ?? "0"))"
+                                    @onclick:stopPropagation="true" />
+                                <button class="btn btn-outline-secondary" type="button"
+                                    @onclick="() => ChangeNiveauPiece(piece.Id, 1)" @onclick:stopPropagation="true">+</button>
+                            </div>
                         </div>
 
-                        <div class="card-name-header">
-                            <div class="personnage-name-top">@piece.Nom</div>
-                            <div class="card-rarity-text">Niveau @piece.Niveau</div>
+                        <div class="editable-field">
+                            <label>Puissance:</label>
+                            <div class="form-control form-control-sm" style="font-weight:600;">
+                                @piece.PuissanceTotale
+                            </div>
                         </div>
 
-                        <div class="personnage-card-info">
-                            <div class="editable-field">
-                                <label>Niveau:</label>
-                                <div class="input-group input-group-sm">
-                                    <button class="btn btn-outline-secondary" type="button"
-                                        @onclick="() => ChangeNiveauPiece(piece.Id, -1)" @onclick:stopPropagation="true">-</button>
-                                    <input type="number" min="1" class="form-control form-control-sm text-center" value="@piece.Niveau"
-                                        @onchange="@((ChangeEventArgs e) => UpdatePieceField(piece.Id, "Niveau", e.Value?.ToString() ?? "0"))"
-                                        @onclick:stopPropagation="true" />
-                                    <button class="btn btn-outline-secondary" type="button"
-                                        @onclick="() => ChangeNiveauPiece(piece.Id, 1)" @onclick:stopPropagation="true">+</button>
-                                </div>
+                        <div class="editable-field">
+                            <label>Aspects tactiques:</label>
+                            <div class="input-group input-group-sm">
+                                <button class="btn btn-outline-secondary" type="button"
+                                    @onclick="() => ChangePuissancePiece(piece.Id, TypeBonus.Tactique, -5)"
+                                    @onclick:stopPropagation="true">-</button>
+                                <input type="number" min="0" class="form-control form-control-sm text-center"
+                                    value="@piece.AspectsTactiques.Puissance"
+                                    @onchange="@((ChangeEventArgs e) => UpdatePieceField(piece.Id, "PuissanceTactique", e.Value?.ToString() ?? "0"))"
+                                    @onclick:stopPropagation="true" />
+                                <button class="btn btn-outline-secondary" type="button"
+                                    @onclick="() => ChangePuissancePiece(piece.Id, TypeBonus.Tactique, 5)"
+                                    @onclick:stopPropagation="true">+</button>
                             </div>
+                        </div>
 
-                            <div class="editable-field">
-                                <label>Puissance:</label>
-                                <div class="form-control form-control-sm" style="font-weight:600;">
-                                    @piece.PuissanceTotale
-                                </div>
-                            </div>
-
-                            <div class="editable-field">
-                                <label>Aspects tactiques:</label>
-                                <div class="input-group input-group-sm">
-                                    <button class="btn btn-outline-secondary" type="button"
-                                        @onclick="() => ChangePuissancePiece(piece.Id, TypeBonus.Tactique, -5)"
-                                        @onclick:stopPropagation="true">-</button>
-                                    <input type="number" min="0" class="form-control form-control-sm text-center"
-                                        value="@piece.AspectsTactiques.Puissance"
-                                        @onchange="@((ChangeEventArgs e) => UpdatePieceField(piece.Id, "PuissanceTactique", e.Value?.ToString() ?? "0"))"
-                                        @onclick:stopPropagation="true" />
-                                    <button class="btn btn-outline-secondary" type="button"
-                                        @onclick="() => ChangePuissancePiece(piece.Id, TypeBonus.Tactique, 5)"
-                                        @onclick:stopPropagation="true">+</button>
-                                </div>
-                            </div>
-
-                            <div class="editable-field">
-                                <label>Aspects stratégiques:</label>
-                                <div class="input-group input-group-sm">
-                                    <button class="btn btn-outline-secondary" type="button"
-                                        @onclick="() => ChangePuissancePiece(piece.Id, TypeBonus.Strategique, -5)"
-                                        @onclick:stopPropagation="true">-</button>
-                                    <input type="number" min="0" class="form-control form-control-sm text-center"
-                                        value="@piece.AspectsStrategiques.Puissance"
-                                        @onchange="@((ChangeEventArgs e) => UpdatePieceField(piece.Id, "PuissanceStrategique", e.Value?.ToString() ?? "0"))"
-                                        @onclick:stopPropagation="true" />
-                                    <button class="btn btn-outline-secondary" type="button"
-                                        @onclick="() => ChangePuissancePiece(piece.Id, TypeBonus.Strategique, 5)"
-                                        @onclick:stopPropagation="true">+</button>
-                                </div>
+                        <div class="editable-field">
+                            <label>Aspects stratégiques:</label>
+                            <div class="input-group input-group-sm">
+                                <button class="btn btn-outline-secondary" type="button"
+                                    @onclick="() => ChangePuissancePiece(piece.Id, TypeBonus.Strategique, -5)"
+                                    @onclick:stopPropagation="true">-</button>
+                                <input type="number" min="0" class="form-control form-control-sm text-center"
+                                    value="@piece.AspectsStrategiques.Puissance"
+                                    @onchange="@((ChangeEventArgs e) => UpdatePieceField(piece.Id, "PuissanceStrategique", e.Value?.ToString() ?? "0"))"
+                                    @onclick:stopPropagation="true" />
+                                <button class="btn btn-outline-secondary" type="button"
+                                    @onclick="() => ChangePuissancePiece(piece.Id, TypeBonus.Strategique, 5)"
+                                    @onclick:stopPropagation="true">+</button>
                             </div>
                         </div>
                     </div>
-                }
-            </div>
-        }
+                </div>
+            }
+        </div>
     }
-    else
+
+
+    @if (personnagesFiltres.Count == 0 && lucieHouse == null)
     {
         <p>
             <LocalizedText Key="inventory.empty" />

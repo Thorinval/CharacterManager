@@ -24,11 +24,11 @@
     "squad": "Squad",
     "inventory": "Inventory",
     "templates": "Templates",
-    "history": "History",
-    "bestSquad": "Best Squad",
+    "history": "Rankings",
+    "bestSquad": "Best squad",
     "settings": "Settings",
-    "importExportPml": "Import / Export PML",
-    "manageUsers": "User Management"
+    "importExportPml": "Import / export PML",
+    "manageUsers": "User management"
   },
   "about": {
     "link": "About",
@@ -145,6 +145,11 @@
     "rank": "Rank",
     "power": "Power",
     "selectAll": "Select All",
+    "showAll": "All",
+    "showOnlyCommanders": "Commanders",
+    "showOnlyMercenaries": "Mercenaries",
+    "showOnlyAndroids": "Androids",
+    "showOnlyLucyRooms": "Lucie Rooms",
     "bulkEdit": "Bulk Edit",
     "bulkDelete": "Delete Selection",
     "export": "Export",
@@ -206,10 +211,10 @@
     "messageDeleted": "User deleted"
   },
   "history": {
-    "title": "History",
-    "subtitle": "Squad History",
+    "title": "Rankings",
+    "subtitle": "Ranking History",
     "filters": "Filters",
-    "pageTitle": "HISTORY",
+    "pageTitle": "Ranking history",
     "startDate": "Start Date",
     "endDate": "End Date",
     "filter": "Filter",
@@ -232,7 +237,8 @@
       "lucie": "Lucie",
       "actions": "Actions"
     },
-    "empty": "No history found. Create squads to populate history."
+    "empty": "No history found. Create squads to populate history.",
+    "create": "Create ranking"
   },
   "importExportPml": {
     "title": "Import / Export PML",

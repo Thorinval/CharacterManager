@@ -24,10 +24,10 @@
     "squad": "Escouade",
     "inventory": "Inventaire",
     "templates": "Templates",
-    "history": "Historique",
-    "bestSquad": "Meilleure Escouade",
+    "history": "Classements",
+    "bestSquad": "Meilleure escouade",
     "settings": "Paramètres",
-    "importExportPml": "Import / Export PML",
+    "importExportPml": "Import / export PML",
     "manageUsers": "Gestion utilisateurs"
   },
   "about": {
@@ -145,6 +145,11 @@
     "rank": "Rang",
     "power": "Puissance",
     "selectAll": "Tout sélectionner",
+    "showAll": "Tous",
+    "showOnlyCommandants": "Commandants",
+    "showOnlyMercenaires": "Mercenaires",
+    "showOnlyAndroides": "Androïdes",
+    "showOnlyLucyRooms": "Pièces Lucie",
     "bulkEdit": "Édition en masse",
     "bulkDelete": "Supprimer sélection",
     "export": "Exporter",
@@ -206,7 +211,7 @@
     "messageDeleted": "Utilisateur supprimé"
   },
   "history": {
-    "title": "Historique",
+    "title": "Classements",
     "subtitle": "Historique des escouades",
     "filters": "Filtres",
     "pageTitle": "Historique des classements",
@@ -232,7 +237,8 @@
       "lucie": "Lucie",
       "actions": "Actions"
     },
-    "empty": "Aucun historique trouvé. Commencez à créer des escouades pour remplir l'historique."
+    "empty": "Aucun historique trouvé. Commencez à créer des escouades pour remplir l'historique.",
+    "create": "Créer un nouveau classement"
   },
   "importExportPml": {
     "title": "Import / Export PML",

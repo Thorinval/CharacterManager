@@ -86,7 +86,7 @@ else
             var currentId = perso.Id;
             var returnPath = AppConstants.Routes.Escouade;
             <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForMercenaires(), returnPath))">
-                <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" />
+                <img src="@perso.GetImageUrl(true)" alt="@perso.Nom" class="personnage-card-image" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
                     <div class="personnage-attribute"><span class="attribute-label">Rareté:</span> @perso.Rarete</div>

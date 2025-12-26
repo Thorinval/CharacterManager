@@ -59,6 +59,12 @@
     box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
 }
 
+.piece-non-selectionnee {
+    background: linear-gradient(135deg, #b3e0ff 0%, #3498db 100%) !important; /* light blue to medium blue */
+    border: 2px solid #d4af37 !important;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+}
+
 .piece-icon-container {
     display: flex;
     align-items: center;
@@ -555,6 +561,35 @@
     font-size: 1.2rem;
     color: #666;
     margin-bottom: 1.5rem;
+}
+
+/* Animation pill : léger pulse */
+@keyframes pillPulse {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.animated-pill {
+    animation: pillPulse 0.25s ease-out;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Animation badge : petit pop */
+@keyframes badgePop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.25); }
+    100% { transform: scale(1); }
+}
+
+.animated-badge {
+    animation: badgePop 0.3s ease-out;
+    transition: background-color 0.3s ease;
+}
+
+/* Couleur SR (violet) */
+.bg-purple {
+    background-color: #6f42c1 !important;
 }
 
 /* Styles pour le Template Editor */

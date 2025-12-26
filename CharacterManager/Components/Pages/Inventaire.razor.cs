@@ -33,23 +33,56 @@ public partial class Inventaire : IAsyncDisposable
     [Inject]
     public ApplicationDbContext DbContext { get; set; } = null!;
 
-    private List<Personnage> personnages = new();
-    private List<Personnage> personnagesFiltres = new();
+    private List<Personnage> personnages = [];
+    private List<Personnage> personnagesFiltres = [];
     private LucieHouse? lucieHouse;
+    private List<Piece> LuciePieces => lucieHouse?.Pieces ?? [];
+    private List<Piece> luciePiecesFiltres = [];
     private bool showModal = false;
     private bool isEditing = false;
     private Personnage currentPersonnage = new();
 
     // Tri
-    private string sortColumn = "Nom";
-    private bool sortAscending = true;
+    private string sortColumn = AppConstants.XmlElements.Puissance;
+    private bool sortAscending = false;
 
     // Sélection multiple
-    private HashSet<int> selectedPersonnages = new();
+    private HashSet<int> selectedPersonnages = [];
     private bool showBulkEditModal = false;
     private string bulkEditProperty = "";
     private string bulkEditValue = "";
-    private bool selectAllChecked
+
+    // Filtre Commandants
+    private bool ShowOnlyCommandants = false;
+    private bool ShowOnlyMercenaires = false;
+    private bool ShowOnlyAndroides = false;
+    private bool ShowOnlyLucyRooms = false;
+
+    private void ToggleShowOnlyCommandants(ChangeEventArgs e)
+    {
+        ShowOnlyCommandants = (bool?)e.Value == true;
+        ApplyFiltersAndSorting();
+    }
+
+    private void ToggleShowOnlyMercenaires(ChangeEventArgs e)
+    {
+        ShowOnlyMercenaires = (bool?)e.Value == true;
+        ApplyFiltersAndSorting();
+    }
+
+    private void ToggleShowOnlyAndroides(ChangeEventArgs e)
+    {
+        ShowOnlyAndroides = (bool?)e.Value == true;
+        ApplyFiltersAndSorting();
+    }
+
+    private void ToggleShowOnlyLucyRooms(ChangeEventArgs e)
+    {
+        ShowOnlyLucyRooms = (bool?)e.Value == true;
+        ApplyFiltersAndSorting();
+    }
+
+    private bool SelectAllChecked
     {
         get => selectedPersonnages.Count == personnagesFiltres.Count && personnagesFiltres.Count > 0;
         set => SelectAll();
@@ -83,7 +116,7 @@ public partial class Inventaire : IAsyncDisposable
                     if (int.TryParse(Uri.UnescapeDataString(kv[1]), out var templateId))
                     {
                         showTemplateEditor = true;
-                        templates = PersonnageService.GetAllTemplates().ToList();
+                        templates = [.. PersonnageService.GetAllTemplates()];
                         selectedTemplateId = templateId;
                         _ = InvokeAsync(async () => await LoadSelectedTemplate());
                     }
@@ -112,7 +145,7 @@ public partial class Inventaire : IAsyncDisposable
         }
     }
 
-       private async Task ChangePuissance(int personnageId, int delta)
+    private async Task ChangePuissance(int personnageId, int delta)
     {
         var personnage = personnagesFiltres.FirstOrDefault(p => p.Id == personnageId);
         if (personnage != null)
@@ -121,7 +154,7 @@ public partial class Inventaire : IAsyncDisposable
             await Task.Run(() => UpdatePersonnageField(personnageId, "Puissance", newValue.ToString()));
         }
     }
- 
+
 
     private async Task ChangePuissancePiece(int pieceId, TypeBonus typeBonus, int delta)
     {
@@ -149,12 +182,12 @@ public partial class Inventaire : IAsyncDisposable
         return viewMode == "grid" ? "personnages-grid" : "personnages-list";
     }
 
-    private string GetContainerClassCompact()
+    private static string GetContainerClassCompact()
     {
         return "personnages-grid-compact";
     }
 
-    private string GetRarityClass(Rarete rarete)
+    private static string GetRarityClass(Rarete rarete)
     {
         return rarete switch
         {
@@ -222,56 +255,166 @@ public partial class Inventaire : IAsyncDisposable
 
     private async Task LoadPersonnagesAsync()
     {
-        personnages = (await PersonnageService.GetAllAsync()).ToList();
+        personnages = [.. (await PersonnageService.GetAllAsync())];
         ApplyFiltersAndSorting();
     }
 
+    public enum InventoryFilter
+    {
+        Tous,
+        Commandants,
+        Mercenaires,
+        Androides,
+        LucyRooms
+    }
+
+    private InventoryFilter SelectedFilter = InventoryFilter.Tous;
+
+    private record FilterOption(InventoryFilter Value, string LocalizationKey);
+
+    private readonly List<FilterOption> FilterOptions =
+    [
+        new(InventoryFilter.Tous, "inventory.showAll"),
+        new(InventoryFilter.Commandants, "inventory.showOnlyCommandants"),
+        new(InventoryFilter.Mercenaires, "inventory.showOnlyMercenaires"),
+        new(InventoryFilter.Androides, "inventory.showOnlyAndroides"),
+        new(InventoryFilter.LucyRooms, "inventory.showOnlyLucyRooms")
+    ];
+
+    private void OnFilterClicked(InventoryFilter clicked)
+    {
+        if (SelectedFilter == clicked)
+            return;
+
+        SelectedFilter = clicked;
+        ApplyFiltersAndSorting();
+    }
+
+    // 🔢 Compteur dynamique pour les badges
+    private int GetCount(InventoryFilter filter)
+    {
+        return filter switch
+        {
+            InventoryFilter.Tous => personnages.Count + LuciePieces.Count,
+            InventoryFilter.Commandants => personnages.Count(p => p.Type == TypePersonnage.Commandant),
+            InventoryFilter.Mercenaires => personnages.Count(p => p.Type == TypePersonnage.Mercenaire),
+            InventoryFilter.Androides => personnages.Count(p => p.Type == TypePersonnage.Androïde),
+            InventoryFilter.LucyRooms => LuciePieces.Count,
+            _ => 0
+        };
+    }
+
+    private string GetBadgeColor(InventoryFilter filter)
+    {
+        IEnumerable<Personnage> list = filter switch
+        {
+            InventoryFilter.Tous => personnages,
+            InventoryFilter.Commandants => personnages.Where(p => p.Type == TypePersonnage.Commandant),
+            InventoryFilter.Mercenaires => personnages.Where(p => p.Type == TypePersonnage.Mercenaire),
+            InventoryFilter.Androides => personnages.Where(p => p.Type == TypePersonnage.Androïde),
+            InventoryFilter.LucyRooms => [], // LucyRooms has no Personnage
+            _ => []
+        };
+
+        if (!list.Any())
+            return "bg-secondary"; // vide → gris
+
+        // Trouver la rareté dominante
+        var dominant = list
+            .GroupBy(p => p.Rarete)
+            .OrderByDescending(g => g.Count())
+            .First().Key;
+
+        return dominant switch
+        {
+            Rarete.SSR => "bg-warning text-dark", // or
+            Rarete.SR => "bg-purple text-white", // violet (custom)
+            Rarete.R => "bg-primary",           // bleu
+            Rarete.Inconnu => "bg-secondary",         // gris
+            _ => "bg-secondary"
+        };
+    }
     private void ApplyFiltersAndSorting()
     {
-        // Appliquer le filtre
-        if (string.IsNullOrWhiteSpace(searchTerm))
+        IEnumerable<Personnage> filtered = personnages;
+
+        IEnumerable<Piece> filteredPieces = LuciePieces ?? [];
+
+        // 🔍 Filtre de recherche
+        if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            personnagesFiltres = [.. personnages];
-        }
-        else
-        {
-            personnagesFiltres = [.. personnages.Where(p =>
+            filtered = filtered.Where(p =>
                 p.Nom.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-                    || p.Rarete.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-                    || p.Type.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-                    || p.Role.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-                    || p.Faction.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-                    || p.TypeAttaque.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-                    || p.Selectionne.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-                )];
+                || p.Rarete.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                || p.Type.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                || p.Role.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                || p.Faction.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                || p.TypeAttaque.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                || p.Selectionne.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            );
+
+            filteredPieces = filteredPieces.Where(p =>
+                p.Nom.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            );
         }
 
-        // Appliquer le tri par type d'abord (Commandant, Mercenaire, Androïde), puis par colonne sélectionnée
-        var typeOrder = new Dictionary<TypePersonnage, int>
+        filtered = SelectedFilter switch
         {
-            { TypePersonnage.Commandant, 1 },
-            { TypePersonnage.Mercenaire, 2 },
-            { TypePersonnage.Androïde, 3 }
+            InventoryFilter.Tous => filtered,
+            InventoryFilter.Commandants => filtered.Where(p => p.Type == TypePersonnage.Commandant),
+            InventoryFilter.Mercenaires => filtered.Where(p => p.Type == TypePersonnage.Mercenaire),
+            InventoryFilter.Androides => filtered.Where(p => p.Type == TypePersonnage.Androïde),
+            InventoryFilter.LucyRooms => filtered.Where(p => p.Type == TypePersonnage.Inconnu),
+            _ => filtered
         };
+
+        filteredPieces = SelectedFilter switch
+        {
+            InventoryFilter.Tous => filteredPieces,
+            InventoryFilter.LucyRooms => filteredPieces,
+            _ => filteredPieces.Where(p => false) // Empty
+        };
+
+        // On matérialise la liste
+        personnagesFiltres = [.. filtered];
+
+        luciePiecesFiltres = [.. filteredPieces];
+
+        // 📊 Tri : ordre par type puis par colonne
+        var typeOrder = new Dictionary<TypePersonnage, int>
+    {
+        { TypePersonnage.Commandant, 1 },
+        { TypePersonnage.Mercenaire, 2 },
+        { TypePersonnage.Androïde, 3 }
+    };
 
         personnagesFiltres = sortColumn switch
         {
+            "Puissance" => sortAscending
+                ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Type == TypePersonnage.Commandant ? p.Puissance + p.Rang * 20 : p.Puissance)]
+                : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Type == TypePersonnage.Commandant ? p.Puissance + p.Rang * 20 : p.Puissance)],
+
             "Nom" => sortAscending
-                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Nom).ToList()
-                : personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Nom).ToList(),
+                ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Nom)]
+                : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Nom)],
+
             "Rarete" => sortAscending
-                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Rarete).ToList()
-                : personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Rarete).ToList(),
+                ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Rarete)]
+                : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Rarete)],
+
             "Niveau" => sortAscending
-                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Niveau).ToList()
-                : personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Niveau).ToList(),
+                ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Niveau)]
+                : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Niveau)],
+
             "Type" => sortAscending
-                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Type).ToList()
-                : personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Type).ToList(),
+                ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Type)]
+                : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Type)],
+
             "Rang" => sortAscending
-                ? personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Rang).ToList()
-                : personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Rang).ToList(),
-            _ => personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Nom).ToList()
+                ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Rang)]
+                : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Rang)],
+
+            _ => [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Nom)]
         };
     }
 
@@ -378,7 +521,7 @@ public partial class Inventaire : IAsyncDisposable
                     case "Selectionne":
                         if (bool.TryParse(bulkEditValue, out var selectionValue))
                             personnage.Selectionne = selectionValue;
-                        break;                        
+                        break;
                 }
                 PersonnageService.Update(personnage);
             }
@@ -458,6 +601,7 @@ public partial class Inventaire : IAsyncDisposable
     private void SortByRarete() => SortBy("Rarete");
     private void SortByNiveau() => SortBy("Niveau");
     private void SortByRang() => SortBy("Rang");
+    private void SortByPuissance() => SortBy("Puissance");
 
     private async Task DeleteSelectedPersonnages()
     {
@@ -508,9 +652,9 @@ public partial class Inventaire : IAsyncDisposable
     private Toast? toastRef;
     private string templateNom = string.Empty;
     private string templateDescription = string.Empty;
-    private List<Personnage?> templatePersonnages = new();
-    private List<int> templateSelectedIds = new();
-    private List<Template> templates = new();
+    private List<Personnage?> templatePersonnages = [];
+    private List<int> templateSelectedIds = [];
+    private List<Template> templates = [];
     private int selectedTemplateId = 0;
 
     private void OpenTemplateEditor()
@@ -520,7 +664,7 @@ public partial class Inventaire : IAsyncDisposable
         templateDescription = string.Empty;
         templatePersonnages.Clear();
         templateSelectedIds.Clear();
-        templates = PersonnageService.GetAllTemplates().ToList();
+        templates = [.. PersonnageService.GetAllTemplates()];
         selectedTemplateId = 0;
         viewMode = "grid";
     }
@@ -680,12 +824,12 @@ public partial class Inventaire : IAsyncDisposable
         {
             var conn = DbContext.Database.GetDbConnection();
             var shouldClose = conn.State != System.Data.ConnectionState.Open;
-            
+
             if (shouldClose)
             {
                 await conn.OpenAsync();
             }
-            
+
             try
             {
                 await using var cmd = conn.CreateCommand();
@@ -721,12 +865,12 @@ public partial class Inventaire : IAsyncDisposable
         {
             var conn = DbContext.Database.GetDbConnection();
             var shouldClose = conn.State != System.Data.ConnectionState.Open;
-            
+
             if (shouldClose)
             {
                 await conn.OpenAsync();
             }
-            
+
             try
             {
                 await using var cmd = conn.CreateCommand();
@@ -775,7 +919,8 @@ public partial class Inventaire : IAsyncDisposable
                 }
                 break;
             case "PuissanceTactique":
-                if (int.TryParse(value, out var puissanceTactique))                {
+                if (int.TryParse(value, out var puissanceTactique))
+                {
                     piece.AspectsTactiques.Puissance = puissanceTactique;
                 }
                 break;
@@ -847,7 +992,7 @@ public partial class Inventaire : IAsyncDisposable
 
             toastRef?.Show($"Template '{template.Nom}' créé avec succès!", "success");
             CancelTemplateCreation();
-            templates = PersonnageService.GetAllTemplates().ToList();
+            templates = [.. PersonnageService.GetAllTemplates()];
         }
         catch (Exception ex)
         {
@@ -869,7 +1014,7 @@ public partial class Inventaire : IAsyncDisposable
 
         var ids = template.GetPersonnageIds();
         templateSelectedIds = ids;
-        templatePersonnages = new List<Personnage?>();
+        templatePersonnages = [];
         foreach (var id in ids)
         {
             var p = PersonnageService.GetById(id);
