@@ -1,8 +1,15 @@
 # Release Notes - Character Manager
 
-> **Version actuelle**: 0.10.0
+> **Version actuelle**: 0.10.1
 
 ---
+
+## 0.10.1 (28 Décembre 2025)
+
+✨ - Refonte fenetres modales
+
+🔨 - En cours - historique de classement
+🔨 - En cours - page d'accueil
 
 ## 0.10.0 (28 Décembre 2025)
 

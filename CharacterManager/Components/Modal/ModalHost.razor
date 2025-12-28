@@ -1,0 +1,59 @@
+@using CharacterManager.Server.Services
+@using Microsoft.AspNetCore.Components
+
+@inject IModalService ModalService
+
+@if (currentComponent != null)
+{
+    <div class="modal-backdrop" @onclick="Close">
+        <div class="modal-container @GetSizeClass()" @onclick:stopPropagation="true">
+
+            <button class="modal-close" @onclick="Close">×</button>
+
+            <DynamicComponent Type="currentComponent" Parameters="currentParameters" />
+        </div>
+    </div>
+}
+
+@code {
+    private Type? currentComponent;
+    private Dictionary<string, object>? currentParameters;
+    private ModalSize modalSize = ModalSize.Medium;
+
+    protected override void OnInitialized()
+    {
+        Console.WriteLine("ModalHost initialized");
+        ModalService.OnShow += ShowModal;
+        ModalService.OnClose += Close;
+    }
+
+    private void ShowModal(Type componentType, Dictionary<string, object>? parameters, ModalSize size)
+    {
+        _ = InvokeAsync(() =>
+        {
+            currentComponent = componentType;
+            currentParameters = parameters;
+            modalSize = size;
+            StateHasChanged();
+        });
+    }
+
+    private void Close()
+    {
+        _ = InvokeAsync(() =>
+        {
+            currentComponent = null;
+            currentParameters = null;
+            StateHasChanged();
+        });
+    }
+    private string GetSizeClass() => modalSize switch
+    {
+        ModalSize.Auto => "modal-auto",
+        ModalSize.Small => "modal-sm",
+        ModalSize.Medium => "modal-md",
+        ModalSize.Large => "modal-lg",
+        ModalSize.XL => "modal-xl",
+        _ => "modal-md"
+    };
+}

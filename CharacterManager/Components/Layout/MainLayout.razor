@@ -4,11 +4,14 @@
 @using CharacterManager.Server.Services
 @using CharacterManager.Server.Constants
 @using Microsoft.AspNetCore.Components.Authorization
+@using CharacterManager.Components.Modal
+
 
 @inherits LayoutComponentBase
 
 @inject AppVersionService VersionService
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IModalService ModalService
 
 <div class="layout-container @(railExpanded ? "rail-expanded" : "")">
 
@@ -90,6 +93,7 @@
             <!-- ZONE GAUCHE -->
             <div class="top-left">
                 <span class="msr" @onclick="ShowAboutModal" title="À propos">info</span>
+
                 <span class="msr" @onclick="ShowRoadmapModal" title="Feuille de route">flag</span>
                 <span class="msr" @onclick="ShowChangelogModal" title="Notes de version">update</span>
                 <span class="msr" @onclick="GoSettings" title="Paramètres">settings</span>
@@ -129,18 +133,10 @@
 
 </div>
 
-<AboutModal @bind-IsVisible="showAboutModal" />
-
-<RoadmapModal @bind-IsVisible="showRoadmapModal" />
-
-<ChangelogModal @bind-IsVisible="showChangelogModal" />
+<ModalHost />
 
 @code {
     private bool railExpanded = false;
-
-    private bool showAboutModal = false;
-    private bool showRoadmapModal = false;
-    private bool showChangelogModal = false;
 
     private bool isHomePage = false;
 
@@ -158,45 +154,22 @@
     private string userRole = "";
 
     [Parameter]
-    public EventCallback OnAboutClick { get; set; }
-
-    [Parameter]
-    public EventCallback OnRoadmapClick { get; set; }
-
-    [Parameter]
-    public EventCallback OnReleaseClick { get; set; }
-
-    [Parameter]
     public EventCallback OnCreerClassementClick { get; set; }
+
 
     private void ShowAboutModal()
     {
-        showAboutModal = true;
-        StateHasChanged();
+        ModalService.Open<AboutModal>(size: ModalSize.Medium);
     }
+
     private void ShowRoadmapModal()
     {
-        showRoadmapModal = true;
-        StateHasChanged();
+        ModalService.Open<RoadmapModal>(size: ModalSize.XL);
     }
 
     private void ShowChangelogModal()
     {
-        showChangelogModal = true;
-        StateHasChanged();
-    }
-
-    private async Task ShowAbout()
-    {
-        await OnAboutClick.InvokeAsync();
-    }
-    private async Task ShowRoadmap()
-    {
-        await OnRoadmapClick.InvokeAsync();
-    }
-    private async Task ShowRelease()
-    {
-        await OnReleaseClick.InvokeAsync();
+        ModalService.Open<ChangelogModal>(size: ModalSize.Auto);
     }
 
     private async Task ShowCreerClassement()

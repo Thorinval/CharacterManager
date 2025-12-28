@@ -1,108 +1,30 @@
 @using CharacterManager.Server.Services
-@rendermode InteractiveServer
+@inject IModalService ModalService
 @inject RoadmapService RoadmapService
 
-@if (IsVisible)
-{
-    <div class="modal-overlay-roadmap" @onclick="Close">
-        <div class="modal-dialog-roadmap" @onclick:stopPropagation="true">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <LocalizedText Key="roadmap.title" />
-                    </h5>
-                    <button type="button" class="btn-close" @onclick="Close"></button>
-                </div>
+<div class="modal-body text-center">
 
-                <div class="modal-body text-center">
-                    <div class="app-icon mb-3">
-                        <i class="bi bi-info-circle" style="font-size: 4rem; color: #0d6efd;"></i>
-                    </div>
-                    <h3>ROADMAP</h3>
-                    <textarea class="form-control" style="min-height: 200px;" @bind="RoadmapText"></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" @onclick="Close">Fermer</button>
-                <button type="button" class="btn btn-primary" @onclick="Save">Sauvegarder</button>
-            </div>
-        </div>
+    <div class="app-icon mb-3">
+        <i class="bi bi-info-circle" style="font-size: 4rem; color: #0d6efd;"></i>
     </div>
-
-    <style>
-        .modal-overlay-roadmap {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .modal-dialog-roadmap {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            max-width: 900px;
-            min-width: 600px;
-            width: 95%;
-            z-index: 2001;
-            border: 1px solid #e0e0e0;
-        }
-
-        .modal-dialog-roadmap .modal-header {
-            border-bottom: 3px solid #e8e8e8;
-            background-color: #f5f5f5;
-            border-radius: 8px 8px 0 0;
-        }
-
-        .modal-dialog-roadmap .modal-title {
-            color: #2c3e50;
-            font-weight: 600;
-        }
-
-        .app-icon {
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        @@keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-    </style>
-}
+    <div class="modal-content">
+        <h3>ROADMAP</h3>
+        <textarea class="form-control" style="min-height: 200px;" @bind="RoadmapText"></textarea>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary" @onclick="Save">Sauvegarder</button>
+</div>
 
 @code {
-    [Parameter]
-    public bool IsVisible { get; set; }
 
-    [Parameter]
-    public EventCallback<bool> IsVisibleChanged { get; set; }
     private string RoadmapText { get; set; } = string.Empty;
 
     private async Task Save()
     {
         await RoadmapService.SaveRoadmapAsync(RoadmapText);
-        await Close();
+        ModalService.Close();
     }
-
-    private async Task Close()
-    {
-        IsVisible = false;
-        await IsVisibleChanged.InvokeAsync(IsVisible);
-    }
-
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

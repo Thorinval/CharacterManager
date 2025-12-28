@@ -1,98 +1,24 @@
 @using Markdig
-@rendermode InteractiveServer
+@using CharacterManager.Server.Services
+@inject AppVersionService VersionService
+@inject IModalService ModalService
 
-@if (IsVisible)
-{
-    <div class="modal-overlay-changelog" @onclick="Close">
-        <div class="modal-dialog-changelog" @onclick:stopPropagation="true">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Historique des modifications</h5>
-                    <button type="button" class="btn-close" @onclick="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <div class="app-icon mb-3">
-                        <i class="bi bi-journal-text" style="font-size: 4rem; color: #0d6efd;"></i>
-                    </div>
-                    <div class="form-control changelog-content">
-                        @((MarkupString)ChangeLogHtml)
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" @onclick="Close">Fermer</button>
-            </div>
-        </div>
+<div class="modal-body text-center">
+
+    <div class="app-icon mb-3">
+        <i class="bi bi-info-circle" style="font-size: 4rem; color: #0d6efd;"></i>
     </div>
-
-    <style>
-        .modal-overlay-changelog {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-        .modal-dialog-changelog {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            max-width: 1100px;
-            min-width: 700px;
-            width: 98%;
-            z-index: 2001;
-            border: 1px solid #e0e0e0;
-        }
-        .changelog-content {
-            font-size: 0.92rem;
-            min-height: 200px;
-            max-height: 500px;
-            overflow: auto;
-            background: #f8f9fa;
-            text-align: left;
-        }
-        .modal-dialog-changelog .modal-header {
-            border-bottom: 3px solid #e8e8e8;
-            background-color: #f5f5f5;
-            border-radius: 8px 8px 0 0;
-        }
-        .modal-dialog-changelog .modal-title {
-            color: #2c3e50;
-            font-weight: 600;
-        }
-        .app-icon {
-            animation: fadeIn 0.5s ease-in;
-        }
-        @@keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-    </style>
-}
+    <div class="form-control changelog-content">
+        @((MarkupString)ChangeLogHtml)
+    </div>
+</div>
 
 @code {
-    [Parameter]
-    public bool IsVisible { get; set; }
-    [Parameter]
-    public EventCallback<bool> IsVisibleChanged { get; set; }
     private string ChangeLogText { get; set; } = string.Empty;
     private string ChangeLogHtml { get; set; } = string.Empty;
-    private async Task Close()
-    {
-        IsVisible = false;
-        await IsVisibleChanged.InvokeAsync(IsVisible);
-    }
+
+    private void Close() => ModalService.Close();
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)

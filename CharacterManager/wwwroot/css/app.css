@@ -408,3 +408,85 @@ body {
     color: #60a5fa;
     /* bleu accent */
 }
+
+/* ============================================================
+   MODAL STYLES
+   ============================================================ */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+}
+
+.modal-container {
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(12px);
+    border-radius: 14px;
+    padding: 28px;
+    color: white;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    animation: modal-pop 0.25s ease;
+}
+
+
+@keyframes modal-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.92) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.modal-close:hover {
+    color: white;
+}
+
+.modal-sm {
+    width: 300px;
+    max-width: 90vw;
+}
+
+.modal-md {
+    width: 500px;
+    max-width: 90vw;
+}
+
+.modal-lg {
+    width: 800px;
+    max-width: 95vw;
+}
+
+.modal-xl {
+    width: 1100px;
+    max-width: 98vw;
+}
+
+.modal-auto {
+    width: auto;
+    max-width: 95vw;   /* sécurité responsive */
+    display: inline-block;
+    margin: 0 auto;
+}
+
