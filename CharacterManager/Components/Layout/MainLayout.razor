@@ -1,56 +1,132 @@
 ﻿@using CharacterManager.Components.Layout
 @using CharacterManager
 @using CharacterManager.Components
+@using CharacterManager.Server.Services
+@using CharacterManager.Server.Constants
+@using Microsoft.AspNetCore.Components.Authorization
+
 @inherits LayoutComponentBase
 
-@* Composants utilisés dans ce layout *@
+@inject AppVersionService VersionService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
-<div class="page">
-    @if (isHomePage)
-    {
-        <div class="sidebar">
-            <NavMenu OnAboutClick="ShowAboutModal" />
-            <NavMenu OnRoadmapClick="ShowRoadmapModal" />
-            <NavMenu OnReleaseClick="ShowChangelogModal" />
+<div class="layout-container @(railExpanded ? "rail-expanded" : "")">
+
+    <!-- Navigation Rail -->
+    <div class="nav-rail" @onmouseenter="() => railExpanded = true" @onmouseleave="() => railExpanded = false">
+
+        <div class="nav-rail-header">
+            <NavLink class="nav-rail-item nav-rail-home" href="/" Match="NavLinkMatch.All">
+                <i class="bi bi-house-fill"></i>
+                <span>
+                    <LocalizedText Key="navigation.home" />
+                </span>
+            </NavLink>
         </div>
-    }
 
-    <main>
-        <div class="top-row px-4" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-            <div style="display:flex; align-items:center; gap:8px;">
-                <a href="/settings" class="settings-link" title="Paramètres">
-                    <img src="/images/interface/parametres.png" alt="Paramètres" class="settings-icon"
-                        style="width:24px; height:24px;" />
-                </a>
-                <button class="about-link" @onclick="ShowAboutModal">
-                    <LocalizedText Key="about.link" />
-                </button>
-                <button class="roadmap-link" @onclick="ShowRoadmapModal">
-                    <LocalizedText Key="roadmap.link" />
-                </button>
-                <button class="changelog-link" @onclick="ShowChangelogModal">
-                    <LocalizedText Key="changelog.link" />
-                </button>
-            </div>
-            @using Microsoft.AspNetCore.Components.Authorization
-            <AuthorizeView>
+        <nav class="nav-rail-items">
+
+            <NavLink class="nav-rail-item" href="escouade">
+                <i class="bi bi-people-fill"></i>
+                <span>
+                    <LocalizedText Key="navigation.squad" />
+                </span>
+            </NavLink>
+
+            <NavLink class="nav-rail-item" href="meilleur-escouade">
+                <i class="bi bi-trophy-fill"></i>
+                <span>
+                    <LocalizedText Key="navigation.bestSquad" />
+                </span>
+            </NavLink>
+
+            <NavLink class="nav-rail-item" href="inventaire">
+                <i class="bi bi-collection-fill"></i>
+                <span>
+                    <LocalizedText Key="navigation.inventory" />
+                </span>
+            </NavLink>
+
+            <NavLink class="nav-rail-item" href="templates">
+                <i class="bi bi-layers-fill"></i>
+                <span>
+                    <LocalizedText Key="navigation.templates" />
+                </span>
+            </NavLink>
+
+            <NavLink class="nav-rail-item" href="import-export-pml">
+                <i class="bi bi-upload"></i>
+                <span>
+                    <LocalizedText Key="navigation.importExportPml" />
+                </span>
+            </NavLink>
+
+            <NavLink class="nav-rail-item" href="historique">
+                <i class="bi bi-clock-history"></i>
+                <span>
+                    <LocalizedText Key="navigation.history" />
+                </span>
+            </NavLink>
+
+            <AuthorizeView Roles="admin">
                 <Authorized>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span class="text-muted">Connecté: @userName (@userRole)</span>
-                        <button class="btn btn-sm btn-outline-secondary" @onclick="Logout">Logout</button>
-                    </div>
+                    <NavLink class="nav-rail-item" href="admin/users">
+                        <i class="bi bi-shield-lock-fill"></i>
+                        <span>
+                            <LocalizedText Key="navigation.manageUsers" />
+                        </span>
+                    </NavLink>
                 </Authorized>
-                <NotAuthorized>
-                    <a class="btn btn-sm btn-primary" href="/login">Se connecter</a>
-                </NotAuthorized>
             </AuthorizeView>
+
+        </nav>
+    </div>
+
+    <!-- Main content -->
+    <main class="main-content">
+
+        <div class="top-row">
+
+            <!-- ZONE GAUCHE -->
+            <div class="top-left">
+                <span class="msr" @onclick="ShowAboutModal" title="À propos">info</span>
+                <span class="msr" @onclick="ShowRoadmapModal" title="Feuille de route">flag</span>
+                <span class="msr" @onclick="ShowChangelogModal" title="Notes de version">update</span>
+                <span class="msr" @onclick="GoSettings" title="Paramètres">settings</span>
+
+                <span class="badge">v @VersionService.GetAppVersion()</span>
+            </div>
+
+            <!-- ZONE DROITE -->
+            <div class="top-right">
+                <AuthorizeView>
+                    <Authorized>
+                        <span class="user-label">@userName</span>
+                        @if (userRole == "admin")
+                        {
+                            <span class="role-badge admin">ADMIN</span>
+                        }
+                        <button class="logout-btn" @onclick="Logout">Logout</button>
+                        <span class="lang-badge">@currentLanguage</span>
+                    </Authorized>
+
+                    <NotAuthorized>
+                        <a class="login-btn" href="/login">Se connecter</a>
+                    </NotAuthorized>
+                </AuthorizeView>
+
+            </div>
+
         </div>
 
         <article class="content px-4">
             <UpdateNotification />
             @Body
         </article>
+
+
     </main>
+
 </div>
 
 <AboutModal @bind-IsVisible="showAboutModal" />
@@ -59,90 +135,39 @@
 
 <ChangelogModal @bind-IsVisible="showChangelogModal" />
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
-
-<style>
-    .about-link {
-        background: none;
-        border: none;
-        color: inherit;
-        cursor: pointer;
-        text-decoration: none;
-        font: inherit;
-    }
-
-    .about-link:hover {
-        text-decoration: underline;
-    }
-
-    .settings-link {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: none;
-        border: none;
-        padding: 0;
-        cursor: pointer;
-        text-decoration: none;
-    }
-
-    .settings-link:hover .settings-icon {
-        opacity: 0.7;
-    }
-
-    .settings-icon {
-        transition: opacity 0.2s;
-    }
-
-    .roadmap-link {
-        background: none;
-        border: none;
-        color: inherit;
-        cursor: pointer;
-        text-decoration: none;
-        font: inherit;
-    }
-
-    .roadmap-link:hover {
-        text-decoration: underline;
-    }
-
-    .changelog-link {
-        background: none;
-        border: none;
-        color: inherit;
-        cursor: pointer;
-        text-decoration: none;
-        font: inherit;
-    }
-
-    .changelog-link:hover {
-        text-decoration: underline;
-    }
-    
-</style>
-
 @code {
+    private bool railExpanded = false;
+
     private bool showAboutModal = false;
     private bool showRoadmapModal = false;
-
     private bool showChangelogModal = false;
 
     private bool isHomePage = false;
+
     [CascadingParameter]
-    private Task<Microsoft.AspNetCore.Components.Authorization.AuthenticationState> AuthStateTask
-    {
-        get; set;
-    } = default!;
+    private Task<Microsoft.AspNetCore.Components.Authorization.AuthenticationState> AuthStateTask { get; set; } = default!;
+
     [Inject] private Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private Microsoft.AspNetCore.Authentication.IAuthenticationService AuthService { get; set; } = default!;
+
+    [Inject]
+    public ProfileService ProfileService { get; set; } = null!;
+
     private string userName = "";
     private string userRole = "";
+
+    [Parameter]
+    public EventCallback OnAboutClick { get; set; }
+
+    [Parameter]
+    public EventCallback OnRoadmapClick { get; set; }
+
+    [Parameter]
+    public EventCallback OnReleaseClick { get; set; }
+
+    [Parameter]
+    public EventCallback OnCreerClassementClick { get; set; }
 
     private void ShowAboutModal()
     {
@@ -160,11 +185,43 @@
         showChangelogModal = true;
         StateHasChanged();
     }
+
+    private async Task ShowAbout()
+    {
+        await OnAboutClick.InvokeAsync();
+    }
+    private async Task ShowRoadmap()
+    {
+        await OnRoadmapClick.InvokeAsync();
+    }
+    private async Task ShowRelease()
+    {
+        await OnReleaseClick.InvokeAsync();
+    }
+
+    private async Task ShowCreerClassement()
+    {
+        await OnCreerClassementClick.InvokeAsync();
+    }
+
+    private Profile? currentProfile;
+    private string currentLanguage = AppConstants.Defaults.DefaultLanguage.ToUpper();
+
     protected override async Task OnInitializedAsync()
     {
-        // Vérifier si on est sur la page d'accueil
         CheckIfHomePage();
         Navigation.LocationChanged += OnLocationChanged;
+
+        // Load profile if authenticated
+        var authState = await AuthStateTask;
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            var username = authState.User.Identity!.Name ?? "";
+            currentProfile = await ProfileService.GetOrCreateAsync(username);
+            currentLanguage = currentProfile.Language.ToUpper() ?? AppConstants.Defaults.DefaultLanguage.ToUpper();
+            userRole = authState.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "utilisateur";
+        }
+
         await Task.CompletedTask;
     }
 
@@ -178,7 +235,8 @@
         }
         else
         {
-            userName = ""; userRole = "";
+            userName = "";
+            userRole = "";
         }
     }
 
@@ -190,11 +248,8 @@
 
     private void CheckIfHomePage()
     {
-        // Extraire le chemin de l'URL actuelle
         var uri = new Uri(Navigation.Uri);
         var path = uri.AbsolutePath;
-
-        // Considérer "/" comme la page d'accueil
         isHomePage = path == "/" || path.EndsWith("/index.html");
     }
 
@@ -206,7 +261,11 @@
 
     private void Logout()
     {
-        // Use dedicated HTTP endpoint to sign out to avoid SignalR response conflicts
         Navigation.NavigateTo("/api/logout", forceLoad: true);
+    }
+
+    private void GoSettings()
+    {
+        Navigation.NavigateTo("settings");
     }
 }

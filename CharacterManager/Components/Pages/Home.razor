@@ -1,15 +1,21 @@
 ﻿@page "/"
+@layout CharacterManager.Components.Layout.MainLayout
+
 @using CharacterManager.Server.Constants
+@using CharacterManager.Server.Services
+
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inject AppVersionService VersionService
 @inject ClientLocalizationService LocalizationService
-@using CharacterManager.Server.Services
 
-<link rel="stylesheet" href="/Styles/Home.css" />
+<PageTitle>
+    <LocalizedText Key="navigation.home" />
+</PageTitle>
 
-<PageTitle><LocalizedText Key="navigation.home" /></PageTitle>
+<link rel="stylesheet" href="/css/Home.css" />
 
 <div class="home-container">
+
     @if (showPmlImportAlert)
     {
         <div class="alert alert-warning mt-4" role="alert">
@@ -20,57 +26,144 @@
             }
             else
             {
-                <p>La base de données est vide. Veuillez <a href="/import-export-pml">importer un fichier PML</a> pour initialiser l'application.</p>
+                <p>La base de données est vide. Veuillez <a href="/import-export-pml">importer un fichier PML</a> pour
+                    initialiser l'application.</p>
                 <a class="btn btn-primary" href="/import-export-pml">Importer un fichier PML</a>
             }
         </div>
     }
-    <div class="container-fluid home-row g-0">
-        <div class="row align-items-stretch g-0">
-            @if (string.IsNullOrEmpty(homeImageUrl))
-            {
-                <div class="col-lg-8 home-image-pane" style="background-color: lightblue;"></div>
-            }
-            else
-            {
-                <div class="col-lg-8 home-image-pane" style="background-image: url('@homeImageUrl');"></div>
-            }
-            <div class="col-lg-4 d-flex home-content-pane">
-                <div class="welcome-card flex-fill">
-                    <h1>Character Manager</h1>
-                    <p class="lead"><LocalizedText Key="home.welcome" /></p>
-                                        
-                    <div class="features-section">
-                        <h3><LocalizedText Key="home.features" /></h3>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <ul class="features-list">
-                                    <li><strong><LocalizedText Key="navigation.squad" /> :</strong> <LocalizedText Key="home.squad" /></li>
-                                    <li><strong><LocalizedText Key="navigation.inventory" /> :</strong> <LocalizedText Key="home.inventory" /></li>
-                                    <li><strong><LocalizedText Key="home.bulkLabel" /> :</strong> <LocalizedText Key="home.bulk" /></li>
-                                    <li><strong><LocalizedText Key="home.detailsLabel" /> :</strong> <LocalizedText Key="home.details" /></li>
-                                    <li><strong><LocalizedText Key="home.csvLabel" /> :</strong> <LocalizedText Key="home.csvImport" /></li>
-                                    <li><strong><LocalizedText Key="home.pmlLabel" /> :</strong> <LocalizedText Key="home.pml" /></li>
-                                    <li><strong><LocalizedText Key="home.templatesLabel" /> :</strong> <LocalizedText Key="home.templates" /></li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <ul class="features-list">
-                                    <li><strong><LocalizedText Key="home.dynamicLabel" /> :</strong> <LocalizedText Key="home.dynamicImages" /></li>
-                                    <li><strong><LocalizedText Key="home.ranksLabel" /> :</strong> <LocalizedText Key="home.ranks" /></li>
-                                    <li><strong><LocalizedText Key="home.powerLabel" /> :</strong> <LocalizedText Key="home.power" /></li>
-                                    <li><strong><LocalizedText Key="home.filtersLabel" /> :</strong> <LocalizedText Key="home.filters" /></li>
-                                    <li><strong><LocalizedText Key="home.bestSquadLabel" /> :</strong> <LocalizedText Key="home.bestSquad" /></li>
-                                    <li><strong><LocalizedText Key="home.historyLabel" /> :</strong> <LocalizedText Key="home.history" /></li>
-                                    <li><strong><LocalizedText Key="home.lucieLabel" /> :</strong> <LocalizedText Key="home.lucie" /></li>
-                                    <li><strong><LocalizedText Key="home.localizationLabel" /> :</strong> <LocalizedText Key="home.localization" /></li>
-                                    <li><strong><LocalizedText Key="home.sqliteLabel" /> :</strong> <LocalizedText Key="home.sqlite" /></li>
-                                </ul>
-                            </div>
-                        </div>
+
+    <div class="hub-container">
+
+        <div class="hub-header">
+            <h1 tabindex="-1" >Character Manager</h1>
+            <p>
+                <LocalizedText Key="home.welcome" />
+            </p>
+        </div>
+
+        <div class="hub-grid">
+
+            <div class="hub-card" @onclick="@(() => GoTo("escouade"))">
+                <i class="hub-icon bi bi-people-fill"></i>
+
+                <span class="msr hub-icon">groups</span>
+                <h3>
+                    <LocalizedText Key="navigation.squad" />
+                </h3>
+                <p>
+                    <LocalizedText Key="home.squad" />
+                </p>
+
+                <div class="hub-metric">
+                    <div class="metric-icon">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                    <div class="metric-text">
+                        <span class="metric-label">Puissance</span>
+                        <span class="metric-value">@puissanceEscouade</span>
                     </div>
                 </div>
             </div>
+
+            <div class="hub-card" @onclick="@(() => GoTo(url: "meilleur-escouade"))">
+                <span class="msr hub-icon">military_tech</span>
+                <h3>
+                    <LocalizedText Key="navigation.bestSquad" />
+                </h3>
+                <p>
+                    <LocalizedText Key="home.bestSquad" />
+                </p>
+
+                <div class="hub-metric">
+                    <div class="metric-icon">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                    <div class="metric-text">
+                        <span class="metric-label">Puissance</span>
+                        <span class="metric-value">@puissanceMeilleureEscouade</span>
+                    </div>
+                </div>                
+            </div>
+
+            <div class="hub-card" @onclick="@(() => GoTo(url: "inventaire"))">
+                <span class="msr hub-icon">inventory_2</span>
+                <h3>
+                    <LocalizedText Key="navigation.inventory" />
+                </h3>
+                <p>
+                    <LocalizedText Key="home.inventory" />
+                </p>
+            </div>
+
+            <div class="hub-card" @onclick="@(() => GoTo(url: "templates"))">
+                <span class="msr hub-icon">layers</span>
+                <h3>
+                    <LocalizedText Key="navigation.templates" />
+                </h3>
+                <p>
+                    <LocalizedText Key="home.templates" />
+                </p>
+            </div>
+
+            <div class="hub-card" @onclick="@(() => GoTo(url: "import-export-pml"))">
+                <span class="msr hub-icon">sync_alt</span>
+                <h3>
+                    <LocalizedText Key="navigation.importExportPml" />
+                </h3>
+                <p>
+                    <LocalizedText Key="home.pml" />
+                </p>
+            </div>
+
+            <div class="hub-card" @onclick="@(() => GoTo(url: "historique"))">
+                <span class="msr hub-icon">history</span>
+                <h3>
+                    <LocalizedText Key="navigation.history" />
+                </h3>
+                <p>
+                    <LocalizedText Key="home.history" />
+                </p>
+            </div>
+
+            <div class="hub-card" @onclick="@(() => GoTo(url: "maison-lucie"))">
+                <span class="msr hub-icon">home</span>
+                <h3>
+                    <LocalizedText Key="home.lucieLabel" />
+                </h3>
+                <p>
+                    <LocalizedText Key="home.lucie" />
+                </p>
+                <div class="hub-metric">
+                    <div class="metric-icon">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                    <div class="metric-text">
+                        <span class="metric-label">Puissance</span>
+                        <span class="metric-value">@puissanceLucieEscouade</span>
+                    </div>
+                </div>   
+            </div>
+
+            <div class="hub-card" @onclick="@(() => GoTo(url: "classements"))">
+                <span class="msr hub-icon">leaderboard</span>
+                <h3>
+                    <LocalizedText Key="navigation.rankings" />
+                </h3>
+                <p>
+                    <LocalizedText Key="home.history" />
+                </p>
+            </div>
+
         </div>
+
     </div>
+
 </div>
+
+@code {
+    [Inject] NavigationManager Nav { get; set; } = default!;
+
+    void GoTo(string url)
+    => Nav.NavigateTo(url);
+}

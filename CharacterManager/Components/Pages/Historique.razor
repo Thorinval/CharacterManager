@@ -8,7 +8,7 @@
 @using CharacterManager.Server.Models
 @using CharacterManager.Components
 
-<link rel="stylesheet" href="/Styles/Historique.css" />
+<link rel="stylesheet" href="/css/Historique.css" />
 
 <PageTitle><LocalizedText Key="history.title" /></PageTitle>
 
@@ -183,3 +183,4 @@
 <InputFile id="historiqueFileInput" @ref="inputFileRef" OnChange="HandleFileSelected" accept=".xml" style="display:none;" />
 
 <CreerClassementModal @bind-IsVisible="showCreerClassement" />
+

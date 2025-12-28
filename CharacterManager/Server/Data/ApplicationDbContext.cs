@@ -18,11 +18,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Piece> Pieces { get; set; }
     public DbSet<RoadmapNote> RoadmapNotes => Set<RoadmapNote>();
 
+    public DbSet<HistoriqueClassement> HistoriquesClassement { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         var jsonOptions = new JsonSerializerOptions { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull };
+
         var aspectConverter = new ValueConverter<Aspect, string>(
             v => JsonSerializer.Serialize(v, jsonOptions),
             v => string.IsNullOrWhiteSpace(v) ? new Aspect() : JsonSerializer.Deserialize<Aspect>(v, jsonOptions) ?? new Aspect());
@@ -51,5 +54,31 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .Property(p => p.AspectsStrategiques)
             .HasConversion(aspectConverter)
             .Metadata.SetValueComparer(aspectComparer);
+
+        modelBuilder.Entity<Classement>().HasKey(c => c.Id);
+
+        modelBuilder.Entity<HistoriqueClassement>()
+            .HasMany(h => h.Classements)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // HistoriqueClassement - Mercenaires
+        modelBuilder.Entity<HistoriqueClassement>()
+            .HasMany(h => h.Mercenaires)
+            .WithMany()
+            .UsingEntity(j => j.ToTable("HistoriqueClassementMercenaires"));
+
+        // HistoriqueClassement - Androides
+        modelBuilder.Entity<HistoriqueClassement>()
+            .HasMany(h => h.Androides)
+            .WithMany()
+            .UsingEntity(j => j.ToTable("HistoriqueClassementAndroides"));
+
+        // HistoriqueClassement - Commandant (relation 1-1 optionnelle)
+        modelBuilder.Entity<HistoriqueClassement>()
+            .HasOne(h => h.Commandant)
+            .WithMany()
+            .HasForeignKey(h => h.CommandantId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

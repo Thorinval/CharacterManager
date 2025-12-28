@@ -41,7 +41,7 @@ public partial class Settings
     private bool isAdultModeEnabled = true;
     private string currentLanguage = "fr";
     private string appVersion = "Unknown";
-    private List<LanguageOption> availableLanguages = new();
+    private List<LanguageOption> availableLanguages = [];
 
     protected override async Task OnInitializedAsync()
     {

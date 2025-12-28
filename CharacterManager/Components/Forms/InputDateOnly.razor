@@ -1,0 +1,44 @@
+@namespace CharacterManager.Components.Forms
+@inherits InputBase<DateOnly>
+
+<input @attributes="AdditionalAttributes"
+       type="date"
+       class="@CssClass"
+       value="@BindConverter.FormatValue(CurrentValue)"
+       @onchange="OnChange" />
+
+@code {
+    public new DateOnly Value
+    {
+        get => CurrentValue;
+        set => CurrentValue = value;
+    }
+
+    public new EventCallback<DateOnly> ValueChanged { get; set; }
+
+    private async Task OnChange(ChangeEventArgs e)
+    {
+        if (DateOnly.TryParse(e.Value?.ToString(), out var date))
+        {
+            CurrentValue = date;
+            await ValueChanged.InvokeAsync(date);
+        }
+    }
+
+#nullable disable
+    protected override bool TryParseValueFromString(
+        string value,
+        out DateOnly result,
+        out string validationErrorMessage)
+    {
+        if (DateOnly.TryParse(value, out result))
+        {
+            validationErrorMessage = null;
+            return true;
+        }
+
+        validationErrorMessage = "Date invalide";
+        return false;
+    }
+#nullable restore
+}

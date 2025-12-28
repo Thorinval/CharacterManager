@@ -24,6 +24,9 @@ public partial class Historique
     private int nbAndroidsMax = 0;
     private InputFile? inputFileRef;
 
+    private Personnage Commandant => historique.Commandant ?? new Personnage { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
+
+    private HistoriqueClassement historique = new();
 
     private void ShowCreerClassementModal()
     {
@@ -90,14 +93,14 @@ public partial class Historique
             await ChargerHistorique();
         }
     }
-    
+
     private string GetImageUrl(string nomPersonnage)
     {
         // Normalize the name: remove spaces, convert to lowercase
         var normalized = nomPersonnage.ToLower().Replace(" ", "_").Replace("'", "");
         return $"{AppConstants.Paths.ImagesPersonnages}/{normalized}{AppConstants.ImageSuffixes.SmallPortrait}{AppConstants.FileExtensions.Png}";
     }
-    
+
     // ...removed duplicate RenderStars, use TemplateEscouade.GetRankStars instead
 
     private async Task ExporterHistorique()
@@ -126,7 +129,7 @@ public partial class Historique
         try
         {
             var file = e.File;
-            if (file != null && (file.Name.EndsWith(AppConstants.FileExtensions.Xml, StringComparison.OrdinalIgnoreCase) 
+            if (file != null && (file.Name.EndsWith(AppConstants.FileExtensions.Xml, StringComparison.OrdinalIgnoreCase)
                               || file.Name.EndsWith(AppConstants.FileExtensions.Pml, StringComparison.OrdinalIgnoreCase)))
             {
                 using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
@@ -143,5 +146,12 @@ public partial class Historique
         {
             await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de l'import: {ex.Message}");
         }
+    }
+
+    private async Task AjouterClassement(HistoriqueClassement nouveauHistorique)
+    {
+        historique.Classements.AddRange(nouveauHistorique.Classements);
+        showCreerClassement = false;
+        await InvokeAsync(StateHasChanged);
     }
 }

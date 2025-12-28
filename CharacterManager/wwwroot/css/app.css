@@ -1,0 +1,410 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded');
+
+/* ============================================================
+ FOND GLOBAL — BLEU CLAIR
+  ============================================================ */
+
+body {
+    margin: 0;
+    background: #e6f0ff;
+    /* bleu clair doux */
+    color: #1e293b;
+    font-family: system-ui, sans-serif;
+}
+
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* ============================================================
+   LAYOUT GLOBAL
+   ============================================================ */
+
+.layout-container {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    overflow-y: none;
+    /* permet le scroll si le contenu dépasse */
+}
+
+/* Rail étendu (piloté par Blazor) */
+.layout-container.rail-expanded .nav-rail {
+    width: 200px;
+}
+
+/* Labels visibles quand rail étendu */
+.layout-container.rail-expanded .nav-rail-item span {
+    opacity: 1;
+}
+
+.layout-container.rail-expanded .top-row {
+    margin-left: 1px;
+}
+
+/* ============================================================
+   NAVIGATION RAIL — GLASSMORPHISM
+   ============================================================ */
+
+.nav-rail {
+    width: 72px;
+    /* Compact par défaut */
+    background: #334155;
+    /* gris bleu foncé */
+    color: white;
+
+    display: flex;
+    flex-direction: column;
+    padding-top: 12px;
+    flex-shrink: 0;
+
+    transition: width 0.25s ease;
+    overflow: hidden;
+
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+/* Conteneur des items */
+.nav-rail-items {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Items du rail */
+.nav-rail-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    color: #d1d5db;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+
+.nav-rail-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+}
+
+.nav-rail-item.active {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    border-left: 3px solid #60a5fa;
+}
+
+.nav-rail-item span {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+/* Icônes */
+.nav-rail-item i {
+    font-size: 1.4rem;
+    min-width: 24px;
+    text-align: center;
+}
+
+/* ============================================================
+   TOP ROW — FIXE
+   ============================================================ */
+
+.top-row {
+    height: 56px;
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    flex-shrink: 0;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    margin-left: 1px;
+    transition: background 0.25s ease, box-shadow 0.25s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* Le conteneur global occupe toute la hauteur */
+html,
+body {
+    height: 100%;
+    margin: 0;
+    overflow: auto;
+}
+
+/* Layout principal : rail + contenu */
+.layout-container {
+    display: flex;
+    height: 100%;
+}
+
+/* Contenu scrollable */
+.content {
+    flex: 1;
+    overflow-y: auto;
+    /* le scroll se fait ici */
+    padding: 40px;
+}
+
+.top-left,
+.top-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* ============================================================
+   BOUTONS TOP ROW
+   ============================================================ */
+
+.msr {
+    font-family: "Material Symbols Rounded";
+    font-size: 22px;
+    font-weight: 300;
+    color: #d1d5db;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.msr:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+}
+
+.badge {
+    background: #3b82f6;
+    color: white;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    border-radius: 999px;
+    font-weight: 500;
+}
+
+.badge-secondary {
+    background: #6b7280;
+}
+
+.badge-success {
+    background: #10b981;
+}
+
+
+.user-label {
+    color: #d1d5db;
+    font-size: 0.9rem;
+}
+
+.logout-btn {
+    background: none;
+    border: 1px solid #6b7280;
+    color: #d1d5db;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    border-color: white;
+}
+
+.login-btn {
+    background: #3b82f6;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.login-btn:hover {
+    background: #2563eb;
+}
+
+/* --- BADGE ADMIN PREMIUM --- */
+
+.role-badge {
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 999px;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+/* Style spécifique ADMIN */
+.role-badge.admin {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    color: white;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* --- BADGE LANGUE PREMIUM --- */
+
+.lang-badge {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    /* Bleu premium */
+    color: white;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 999px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lang-badge:hover {
+    background: linear-gradient(135deg, #60a5fa, #2563eb);
+    box-shadow: 0 0 8px rgba(96, 165, 250, 0.4);
+    transform: translateY(-1px);
+}
+
+.top-row button,
+.top-row .settings-link {
+    background: none;
+    border: none;
+    color: #d1d5db;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.top-row button:hover,
+.top-row .settings-link:hover {
+    background: #1f2937;
+    color: white;
+}
+
+/* ============================================================
+   CONTENU PRINCIPAL — GLASSMORPHISM
+   ============================================================ */
+
+.main-content {
+    margin-left: 72px;
+    /* Décalage en mode compact */
+    padding-top: 0px;
+    padding-left: 2px;
+    transition: margin-left 0.25s ease;
+    width: 100%;
+    max-width: none;
+    overflow: auto;
+}
+
+.layout-container.rail-expanded .main-content {
+    margin-left: 200px;
+    /* Décalage quand rail étendu */
+}
+
+.content {
+    background: transparent;
+    border-radius: 12px;
+    padding: 40px;
+    border: none;
+    box-shadow: none;
+    width: 100%;
+    max-width: none;
+    /* ← augmente la largeur max */
+    margin: 0 auto;
+    /* ← centre le contenu */
+    flex: 1;
+    overflow-y: auto;
+    /* scroll interne si nécessaire */
+}
+
+/* ============================================================
+   HUB STYLES
+   ============================================================ */
+
+/* --- HUB CONTAINER --- */
+.hub-container {
+    padding: 40px;
+    color: #1e293b;
+}
+
+/* --- HEADER --- */
+.hub-header h1 {
+    font-size: 2.2rem;
+    margin: 0;
+}
+
+.hub-header p {
+    margin-top: 6px;
+    color: #475569;
+}
+
+/* --- GRID --- */
+.hub-grid {
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+/* --- CARDS --- */
+.hub-card {
+    background: #273449;
+    /* plus clair que le top-row (#1e293b) */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+    color: white;
+    /* texte lisible sur fond sombre */
+}
+
+.hub-card:hover {
+    background: #2f3e52;
+    /* éclaircissement subtil au hover */
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.hub-card p {
+    color: #cbd5e1;
+    /* gris clair lisible */
+}
+
+.hub-icon {
+    font-size: 32px;
+    color: #60a5fa;
+    /* bleu accent */
+}

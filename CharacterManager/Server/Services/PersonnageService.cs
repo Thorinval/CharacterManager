@@ -29,6 +29,13 @@ public class PersonnageService
             .Where(p => p.Selectionne && p.Type != TypePersonnage.Commandant)
             .Sum(p => p.Puissance);
 
+        var puissancecommandantEscouade = GetPuissanceCommandantEscouade();
+
+        return puissancecommandantEscouade + puissancePersos + GetPuissanceLucieEscouade();
+    }
+
+    public int GetPuissanceLucieEscouade()
+    {
         var puissanceTactiqueLucie = _context.Pieces
             .Where(p => p.Selectionnee)
             .AsEnumerable()
@@ -36,9 +43,7 @@ public class PersonnageService
 
         var puissanceStrategiqueLucie = GetPuissanceStrategiqueLucie();
 
-        var puissancecommandantEscouade = GetPuissanceCommandantEscouade();
-
-        return puissancecommandantEscouade + puissancePersos + puissanceTactiqueLucie + puissanceStrategiqueLucie;
+        return puissanceTactiqueLucie + puissanceStrategiqueLucie;
     }
 
     private int GetPuissanceCommandantEscouade() =>
@@ -248,6 +253,19 @@ public class PersonnageService
         if (selectionneOnly)
         {
             query = query.Where(static p => p.Selectionne);
+        }
+
+        return query.ToList();
+    }
+
+    public IEnumerable<Piece> GetPieces(bool selectionneOnly = false)
+    {
+        var query = _context.Pieces.AsNoTracking()
+            .AsEnumerable();
+
+        if (selectionneOnly)
+        {
+            query = query.Where(static p => p.Selectionnee);
         }
 
         return query.ToList();

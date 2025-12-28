@@ -1,4 +1,5 @@
 @page "/meilleur-escouade"
+@layout CharacterManager.Components.Layout.MainLayout
 
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 
@@ -12,13 +13,12 @@
 @inject PersonnageService PersonnageService
 @inject NavigationManager Navigation
 
-<link rel="stylesheet" href="/Styles/Escouade.css" />
+<link rel="stylesheet" href="/css/Escouade.css" />
 
 <div class="page-header-banner escouade-header clickable" @onclick="@(() => NavigateToCommandantDetail())">
     <div class="header-background-right" @onclick:stopPropagation="true">
         <img src="@GetCommandantHeaderImage()" alt="" class="header-bg-image" />
     </div>
-    <a href="@AppConstants.Routes.Home" class="back-button" aria-label="Retour" title="Back to home" @onclick="() => {}" @onclick:stopPropagation="true"></a>
      <div class="header-center">
         <div class="puissance-header">
             <img src="@AppConstants.Paths.ImagesInterface/fond_puissance.png" alt="Puissance" class="puissance-image-header" onerror="this.style.display='none';" />

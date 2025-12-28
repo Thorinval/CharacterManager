@@ -29,30 +29,37 @@ public partial class Home : IAsyncDisposable
     [Inject]
     public RoadmapService RoadmapService { get; set; } = null!;
 
-     [Inject]
-    public PmlImportService PmlImportService { get; set; } = null!;   
+    [Inject]
+    public PmlImportService PmlImportService { get; set; } = null!;
 
     private string homeImageUrl = AppConstants.Paths.HomeDefaultBackground;
     private bool isAdultModeEnabled;
     private bool showPmlImportAlert = false;
     private string? importError = null;
-    
+    private int puissanceEscouade;
+    private int puissanceMeilleureEscouade;
+    private int puissanceLucieEscouade;
+
     protected override async Task OnInitializedAsync()
     {
         AdultModeNotification.Subscribe(OnAdultModeChanged);
         isAdultModeEnabled = await GetCurrentAdultModeAsync();
         await UpdateHomeImageAsync(isAdultModeEnabled);
+        puissanceEscouade = PersonnageService.GetPuissanceEscouade();
+        puissanceMeilleureEscouade = PersonnageService.GetPuissanceMaxEscouade();
+        puissanceLucieEscouade = PersonnageService.GetPuissanceLucieEscouade();
 
         // Vérifie si la base est vide (aucun personnage, template, historique ou profil)
         bool dbIsEmpty = !await DbContext.Personnages.AnyAsync()
             && !await DbContext.Templates.AnyAsync()
-            && !await DbContext.HistoriquesEscouade.AnyAsync();
+            && !await DbContext.HistoriquesEscouade.AnyAsync()
+            && !await DbContext.Profiles.AnyAsync();
 
         if (dbIsEmpty)
         {
-            string[] possibleFiles = new[] {
+            string[] possibleFiles = [
                 Path.Combine("wwwroot", "config.pml")
-            };
+            ];
 
             string? configFile = possibleFiles.FirstOrDefault(File.Exists);
             if (configFile != null)

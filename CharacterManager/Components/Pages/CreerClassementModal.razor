@@ -1,5 +1,11 @@
+@using CharacterManager.Server.Models
 @using CharacterManager.Server.Services
+@using CharacterManager.Components.Forms
+@using Microsoft.AspNetCore.Components.Forms
+
 @rendermode InteractiveServer
+
+@inject PersonnageService PersonnageService
 
 @if (IsVisible)
 {
@@ -7,16 +13,171 @@
         <div class="modal-dialog-about" @onclick:stopPropagation="true">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><LocalizedText Key="creerClassement.title" /></h5>
+                    <h5 class="modal-title">
+                        <LocalizedText Key="creerClassement.title" />
+                    </h5>
                     <button type="button" class="btn-close" @onclick="Close"></button>
                 </div>
                 <div class="modal-body text-center">
                     <div class="app-icon mb-3">
                         <i class="bi bi-info-circle" style="font-size: 4rem; color: #0d6efd;"></i>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" @onclick="Close">Fermer</button>
+                    <EditForm EditContext="@editContext" OnValidSubmit="CreateClassement">
+                        <div class="editable-field">
+                            <label>
+                                <LocalizedText Key="Classement.DateEnregistrement" />:
+                            </label>
+                            <InputDateOnly @bind-value="form.DateEnregistrement"
+                                class="@($"form-control form-control-sm {GetValidationClass(nameof(form.DateEnregistrement))}")" />
+
+                            <ValidationMessage For="@(() => form.DateEnregistrement)" />
+                        </div>
+
+                        <div class="editable-field">
+                            <label>Commandant :</label>
+
+                            <div class="personnage-card">
+                                <div class="card-header-row">
+                                    <div class="card-rarity rarity-@Commandant.Rarete.ToString().ToLower()">
+                                        @Commandant.Rarete</div>
+                                    <div class="card-name">@Commandant.Nom</div>
+                                </div>
+
+                                <img src="@Commandant.GetImageUrl(true)" alt="@Commandant.Nom" class="card-image"
+                                    onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+
+                                <div class="card-info">
+                                    <div>Niv: @Commandant.Niveau</div>
+                                    <div class="card-stars">@TemplateEscouade.GetRankStars(Commandant.Rang)</div>
+                                    <div>Puiss: @Commandant.Puissance</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="editable-field">
+                            <label>Mercenaires :</label>
+
+                            <div class="mercenaires-grid">
+                                @foreach (var m in Mercenaires)
+                                {
+                                    <div class="personnage-card personnage-card-small">
+                                        <div class="card-header-row">
+                                            <div class="card-rarity rarity-@m.Rarete.ToString().ToLower()">@m.Rarete</div>
+                                            <div class="card-name">@m.Nom</div>
+                                        </div>
+
+                                        <img src="@m.GetImageUrl(true)" alt="@m.Nom" class="card-image"
+                                            onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+
+                                        <div class="card-info">
+                                            <div>Niv: @m.Niveau</div>
+                                            <div class="card-stars">@TemplateEscouade.GetRankStars(m.Rang)</div>
+                                            <div>Puiss: @m.Puissance</div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="editable-field">
+                            <label>Androïdes :</label>
+
+                            <div class="androides-grid">
+                                @foreach (var a in Androides)
+                                {
+                                    <div class="personnage-card personnage-card-small">
+                                        <div class="card-header-row">
+                                            <div class="card-rarity rarity-@a.Rarete.ToString().ToLower()">@a.Rarete</div>
+                                            <div class="card-name">@a.Nom</div>
+                                        </div>
+
+                                        <img src="@a.GetImageUrl(true)" alt="@a.Nom" class="card-image"
+                                            onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+
+                                        <div class="card-info">
+                                            <div>Niv: @a.Niveau</div>
+                                            <div class="card-stars">@TemplateEscouade.GetRankStars(a.Rang)</div>
+                                            <div>Puiss: @a.Puissance</div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="editable-field">
+                            <label>Pièces :</label>
+
+                            <div class="pieces-pills">
+                                @foreach (var p in Pieces)
+                                {
+                                    <span class="pill pill-piece">
+                                        @p.Nom (Niv @p.Niveau)
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                        <div class="editable-field">
+                            <label>Puissance totale :</label>
+
+                            <span class="pill pill-puissance">
+                                @PuissanceTotale
+                            </span>
+                        </div>
+                        <div class="editable-field">
+                            <label class="chip-label chip-nutaku">
+                                <i class="bi bi-globe"></i>
+
+                                <LocalizedText Key="Classement Nutaku" />:
+                            </label>
+                            <InputNumber @bind-Value="form.Nutaku"
+                                class="@($"form-control form-control-sm {GetValidationClass(nameof(form.Nutaku))}")" />
+                            <ValidationMessage For="@(() => form.Nutaku)" />
+
+                        </div>
+
+                        <div class="editable-field">
+                            <label class="chip-label chip-top">
+                                <i class="bi bi-bar-chart"></i>
+
+                                <LocalizedText Key="Classement.Top150" />:
+                            </label>
+                            <InputNumber @bind-Value="form.Top150"
+                                class="@($"form-control form-control-sm {GetValidationClass(nameof(form.Top150))}")" />
+                            <ValidationMessage For="@(() => form.Top150)" />
+
+                        </div>
+
+                        <div class="editable-field">
+                            <label class="chip-label chip-pays">
+                                <i class="bi bi-flag"></i>
+                                <LocalizedText Key="Classement.France" />:
+                            </label>
+                            <InputNumber @bind-Value="form.France"
+                                class="@($"form-control form-control-sm {GetValidationClass(nameof(form.France))}")" />
+                            <ValidationMessage For="@(() => form.France)" />
+
+                        </div>
+
+                        <div class="editable-field">
+                            <label>
+                                <LocalizedText Key="Classement.Ligue" />:
+                            </label>
+                            <InputNumber @bind-Value="form.Ligue"
+                                class="@($"form-control form-control-sm {GetValidationClass(nameof(form.Ligue))}")" />
+                            <ValidationMessage For="@(() => form.Ligue)" />
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success" disabled="@( !isValid )">
+                                Créer
+                            </button>
+
+                            <button type="button" class="btn btn-primary" @onclick="Close">
+                                Fermer
+                            </button>
+                        </div>
+                    </EditForm>
+
                 </div>
             </div>
         </div>
@@ -77,25 +238,227 @@
                 opacity: 0;
                 transform: scale(0.8);
             }
+
             to {
                 opacity: 1;
                 transform: scale(1);
             }
         }
+
+        .chip-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .chip-label i {
+            opacity: 0.85;
+        }
+
+        .chip-nutaku {
+            background: rgba(66, 153, 225, 0.2);
+            border: 1px solid rgba(66, 153, 225, 0.4);
+            color: #2c5282;
+        }
+
+        .chip-top {
+            background: rgba(237, 137, 54, 0.2);
+            border: 1px solid rgba(237, 137, 54, 0.4);
+            color: #c05621;
+        }
+
+        .chip-pays {
+            background: rgba(72, 187, 120, 0.2);
+            border: 1px solid rgba(72, 187, 120, 0.4);
+            color: #2f855a;
+        }
+
+        .editable-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .editable-field.horizontal {
+            flex-direction: row;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .personnage-card {
+            max-width: 120px;
+            padding: 0.3rem;
+        }
+
+        .card-image {
+            width: 50px;
+            height: 60px;
+        }
+
+        .card-info {
+            font-size: 0.65rem;
+        }
+
+        .mercenaires-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .personnage-card-small {
+            transform: scale(0.85);
+            transform-origin: top left;
+        }
+
+        .androides-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .personnage-card-small {
+            transform: scale(0.85);
+            transform-origin: top left;
+        }
+
+        .pieces-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .pill-piece {
+            background: rgba(155, 89, 182, 0.12);
+            border: 1px solid rgba(155, 89, 182, 0.35);
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .pill-puissance {
+            background: rgba(155, 89, 182, 0.12);
+            border-color: rgba(155, 89, 182, 0.35);
+        }
     </style>
 }
 
-
 @code {
-    [Parameter]
-    public bool IsVisible { get; set; }
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    private Personnage Commandant { get; set; } = default!;
 
-    [Parameter]
-    public EventCallback<bool> IsVisibleChanged { get; set; }
+    private List<Personnage> Mercenaires { get; set; } = new();
+
+    private List<Personnage> Androides { get; set; } = new();
+
+    private List<Piece> Pieces { get; set; } = new();
+
+    private ClassementFormModel form = new();
+    private EditContext? editContext;
+    private bool isValid;
+
+    private int PuissanceTotale => PersonnageService.GetPuissanceEscouade();
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(form);
+        isValid = editContext.Validate(); // initialisation
+
+        editContext.OnFieldChanged += (_, __) =>
+        {
+            isValid = editContext.Validate();
+            InvokeAsync(StateHasChanged);
+        };
+
+        Commandant = PersonnageService.GetCommandants(true).FirstOrDefault() ?? new Personnage
+        {
+            Nom = "Aucun",
+            Type =
+        Server.Models.TypePersonnage.Commandant
+        };
+
+        Mercenaires = PersonnageService.GetMercenaires(true)?.ToList() ?? new List<Personnage>();
+
+        Androides = PersonnageService.GetAndroides(true)?.ToList() ?? new List<Personnage>();
+
+        Pieces = PersonnageService.GetPieces(true)?.ToList() ?? new List<Piece>();
+    }
 
     private async Task Close()
     {
         IsVisible = false;
         await IsVisibleChanged.InvokeAsync(IsVisible);
+    }
+
+    private void Reset()
+    {
+        form = new ClassementFormModel();
+        editContext = new EditContext(form);
+        isValid = false;
+    }
+
+    private async Task CreateClassement()
+    {
+        if (!isValid)
+            return;
+
+        var historique = new HistoriqueClassement
+        {
+            DateEnregistrement = form.DateEnregistrement,
+            Ligue = form.Ligue ?? 0,
+            Classements = new List<Classement>(),
+            Mercenaires = Mercenaires,
+            Androides = Androides,
+            Pieces = Pieces,
+            Commandant = Commandant,
+            PuissanceTotal = PersonnageService.GetPuissanceEscouade()
+        };
+
+        historique.Classements.Add(new Classement
+        {
+            Nom = "Classement Nutaku",
+            Type = TypeClassement.Nutaku,
+            Valeur = form.Nutaku ?? 0
+        });
+
+        historique.Classements.Add(new Classement
+        {
+            Nom = "Classement Top150",
+            Type = TypeClassement.Top150,
+            Valeur = form.Top150 ?? 0
+        });
+
+        historique.Classements.Add(new Classement
+        {
+            Nom = "Classement France",
+            Type = TypeClassement.France,
+            Valeur = form.France ?? 0
+        });
+
+        Reset();
+        await Close();
+    }
+    private string GetValidationClass(string fieldName)
+    {
+        if (editContext == null)
+            return "";
+
+        var fieldIdentifier = new FieldIdentifier(form, fieldName);
+        bool hasErrors = editContext.GetValidationMessages(fieldIdentifier).Any();
+
+        // Champ touché ?
+        bool isModified = editContext.IsModified(fieldIdentifier);
+
+        if (!isModified)
+            return ""; // pas encore touché → neutre
+
+        return hasErrors ? "is-invalid" : "is-valid";
     }
 }

@@ -1,0 +1,126 @@
+/* ============================================================
+   CONTENEUR PRINCIPAL
+   ============================================================ */
+.home-container {
+    width: 100%;
+    max-width: none;
+    margin: 0 auto;
+}
+
+/* ============================================================
+   HEADER DU HUB
+   ============================================================ */
+
+.hub-header h1 {
+    font-size: 2.2rem;
+    margin: 0;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.hub-header p {
+    margin-top: 6px;
+    color: #475569;
+    font-size: 1.1rem;
+}
+
+/* ============================================================
+   GRILLE DES CARTES
+   ============================================================ */
+
+.hub-grid {
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+/* ============================================================
+   HUB CARDS — VERSION CLAIRE + TOP-ROW STYLE
+   ============================================================ */
+
+.hub-card {
+    background: #273449; /* plus clair que le top-row (#1e293b) */
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+    color: white;
+}
+
+.hub-card:hover {
+    background: #2f3e52; /* éclaircissement subtil */
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.hub-card h3 {
+    margin: 10px 0 6px 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+}
+
+.hub-card p {
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* ============================================================
+   ICONES DES CARTES
+   ============================================================ */
+
+.hub-icon {
+    font-size: 32px;
+    color: #60a5fa; /* bleu accent cohérent */
+    margin-bottom: 10px;
+}
+
+/* ============================================================
+   METRIQUES AVEC ICÔNES — STYLE DASHBOARD
+   ============================================================ */
+
+.hub-metric {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* Icône du chiffre */
+.metric-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.metric-icon i {
+    font-size: 24px;
+    color: #60a5fa; /* bleu accent */
+}
+
+/* Texte du chiffre */
+.metric-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.metric-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+}
+
+.metric-label {
+    font-size: 0.85rem;
+    color: #cbd5e1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
