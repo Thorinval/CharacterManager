@@ -1,53 +1,57 @@
 
-namespace CharacterManager.Server.Models
+namespace CharacterManager.Server.Models;
+
+using System.ComponentModel.DataAnnotations;
+
+/// <summary>
+/// Représente un enregistrement historique du classement à une date donnée
+/// </summary>
+public class HistoriqueClassement
 {
-    using System.ComponentModel.DataAnnotations;
+    public int Id { get; set; }
 
     /// <summary>
-    /// Représente un enregistrement historique du classement à une date donnée
+    /// Date de l'enregistrement
     /// </summary>
-    public class HistoriqueClassement
-    {
-        public int Id { get; set; }
+    public DateOnly DateEnregistrement { get; set; } = DateOnly.FromDateTime(DateTime.Now);
 
-        /// <summary>
-        /// Date de l'enregistrement
-        /// </summary>
-        public DateOnly DateEnregistrement { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+    /// <summary>
+    /// Score classement
+    /// </summary>
+    public int Score { get; set; }
 
-        /// <summary>
-        /// Classement Ligue
-        /// </summary>
-        public int Ligue { get; set; }
+    /// <summary>
+    /// Classement Ligue
+    /// </summary>
+    public int Ligue { get; set; }
 
-        /// <summary>
-        /// Classement global
-        /// </summary>
-        public List<Classement> Classements { get; set; } = [];
+    /// <summary>
+    /// Classement global
+    /// </summary>
+    public List<Classement> Classements { get; set; } = [];
 
-        public List<Personnage> Mercenaires { get; set; } = [];
-        public int? CommandantId { get; set; }
-        public Personnage? Commandant { get; set; }
-        public List<Personnage> Androides { get; set; } = [];
+    public List<PersonnageHistorique> Mercenaires { get; set; } = [];
+    public int? CommandantId { get; set; }
+    public PersonnageHistorique? Commandant { get; set; }
+    public List<PersonnageHistorique> Androides { get; set; } = [];
 
-        public int PuissanceTotal { get; set; }
+    public int PuissanceTotal { get; set; }
 
-        public List<Piece> Pieces { get; set; } = [];
-    }
+    public List<PieceHistorique> Pieces { get; set; } = [];
+}
 
-    public enum TypeClassement
-    {
-        Nutaku,
-        Top150,
-        France
-    }
+public enum TypeClassement
+{
+    Nutaku,
+    Top150,
+    France
+}
 
-    public class Classement
-    {
-        [Key]
-        public int Id { get; set; }
-        public string Nom { get; set; } = string.Empty;
-        public TypeClassement Type { get; set; }
-        public int Valeur { get; set; } = 0;
-    }
+public class Classement
+{
+    [Key]
+    public int Id { get; set; }
+    public string Nom { get; set; } = string.Empty;
+    public TypeClassement Type { get; set; }
+    public int Valeur { get; set; } = 0;
 }

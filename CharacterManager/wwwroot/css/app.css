@@ -34,7 +34,6 @@ body {
     position: relative;
     z-index: 1;
     overflow-y: none;
-    /* permet le scroll si le contenu dépasse */
 }
 
 /* Rail étendu (piloté par Blazor) */
@@ -424,16 +423,24 @@ body {
 }
 
 .modal-container {
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
     background: rgba(30, 41, 59, 0.85);
     backdrop-filter: blur(12px);
-    border-radius: 14px;
-    padding: 28px;
+    border-radius: 10px;
+    padding: 20px;
     color: white;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
     border: 1px solid rgba(255, 255, 255, 0.08);
     animation: modal-pop 0.25s ease;
 }
 
+.modal-body {
+    flex: 1;
+    overflow-y: hidden;
+}
 
 @keyframes modal-pop {
     from {
@@ -479,14 +486,26 @@ body {
 }
 
 .modal-xl {
-    width: 1100px;
-    max-width: 98vw;
+    width: 1015px;
+    max-width: 90vw;
+    max-height: 95vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-auto {
     width: auto;
-    max-width: 95vw;   /* sécurité responsive */
+    max-width: 95vw;
+    /* sécurité responsive */
     display: inline-block;
     margin: 0 auto;
+    height: auto;
 }
 
+/* --- FOOTER --- */
+.modal-footer {
+    flex-shrink: 0;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: right;
+}

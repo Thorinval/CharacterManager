@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Identity;
-
 namespace CharacterManager.Server.Models;
+
+using Microsoft.AspNetCore.Identity;
 
 public enum Rarete
 {
@@ -37,9 +37,10 @@ public enum Faction
 
 public enum TypeAttaque
 {
-    Mêlée, 
-    Distance, 
+    Mêlée,
+    Distance,
     Androïde,
+    Commandant,
     Inconnu
 }
 
@@ -51,7 +52,7 @@ public class Personnage
     public int Niveau { get; set; }
     public TypePersonnage Type { get; set; }
     public int Rang { get; set; }
-    public int Puissance { get; set; }  
+    public int Puissance { get; set; }
     public bool Selectionne { get; set; }
 
     // points d'attaque

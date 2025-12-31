@@ -3,6 +3,7 @@ using System;
 using CharacterManager.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CharacterManager.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251228184514_Profiles")]
+    partial class Profiles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -169,11 +172,6 @@ namespace CharacterManager.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("Faction")
                         .HasColumnType("INTEGER");
 
@@ -233,10 +231,6 @@ namespace CharacterManager.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Personnages");
-
-                    b.HasDiscriminator().HasValue("Personnage");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("CharacterManager.Server.Models.Piece", b =>
@@ -263,10 +257,8 @@ namespace CharacterManager.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("BonusTactiques");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("HistoriqueClassementId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("LucieHouseId")
                         .HasColumnType("INTEGER");
@@ -287,13 +279,11 @@ namespace CharacterManager.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("HistoriqueClassementId");
+
                     b.HasIndex("LucieHouseId");
 
                     b.ToTable("Pieces");
-
-                    b.HasDiscriminator().HasValue("Piece");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("CharacterManager.Server.Models.Profile", b =>
@@ -390,7 +380,7 @@ namespace CharacterManager.Migrations
                     b.ToTable("Templates");
                 });
 
-            modelBuilder.Entity("HistoriqueClassementPersonnageHistorique", b =>
+            modelBuilder.Entity("HistoriqueClassementPersonnage", b =>
                 {
                     b.Property<int>("HistoriqueClassementId")
                         .HasColumnType("INTEGER");
@@ -405,7 +395,7 @@ namespace CharacterManager.Migrations
                     b.ToTable("HistoriqueClassementMercenaires", (string)null);
                 });
 
-            modelBuilder.Entity("HistoriqueClassementPersonnageHistorique1", b =>
+            modelBuilder.Entity("HistoriqueClassementPersonnage1", b =>
                 {
                     b.Property<int>("AndroidesId")
                         .HasColumnType("INTEGER");
@@ -418,34 +408,6 @@ namespace CharacterManager.Migrations
                     b.HasIndex("HistoriqueClassement1Id");
 
                     b.ToTable("HistoriqueClassementAndroides", (string)null);
-                });
-
-            modelBuilder.Entity("CharacterManager.Server.Models.PersonnageHistorique", b =>
-                {
-                    b.HasBaseType("CharacterManager.Server.Models.Personnage");
-
-                    b.Property<int>("HistoriqueClassementId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("IdOrigine")
-                        .HasColumnType("INTEGER");
-
-                    b.HasDiscriminator().HasValue("PersonnageHistorique");
-                });
-
-            modelBuilder.Entity("CharacterManager.Server.Models.PieceHistorique", b =>
-                {
-                    b.HasBaseType("CharacterManager.Server.Models.Piece");
-
-                    b.Property<int>("HistoriqueClassementId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("IdOrigine")
-                        .HasColumnType("INTEGER");
-
-                    b.HasIndex("HistoriqueClassementId");
-
-                    b.HasDiscriminator().HasValue("PieceHistorique");
                 });
 
             modelBuilder.Entity("CharacterManager.Server.Models.Capacite", b =>
@@ -466,7 +428,7 @@ namespace CharacterManager.Migrations
 
             modelBuilder.Entity("CharacterManager.Server.Models.HistoriqueClassement", b =>
                 {
-                    b.HasOne("CharacterManager.Server.Models.PersonnageHistorique", "Commandant")
+                    b.HasOne("CharacterManager.Server.Models.Personnage", "Commandant")
                         .WithMany()
                         .HasForeignKey("CommandantId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -476,13 +438,17 @@ namespace CharacterManager.Migrations
 
             modelBuilder.Entity("CharacterManager.Server.Models.Piece", b =>
                 {
+                    b.HasOne("CharacterManager.Server.Models.HistoriqueClassement", null)
+                        .WithMany("Pieces")
+                        .HasForeignKey("HistoriqueClassementId");
+
                     b.HasOne("CharacterManager.Server.Models.LucieHouse", null)
                         .WithMany("Pieces")
                         .HasForeignKey("LucieHouseId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("HistoriqueClassementPersonnageHistorique", b =>
+            modelBuilder.Entity("HistoriqueClassementPersonnage", b =>
                 {
                     b.HasOne("CharacterManager.Server.Models.HistoriqueClassement", null)
                         .WithMany()
@@ -490,16 +456,16 @@ namespace CharacterManager.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CharacterManager.Server.Models.PersonnageHistorique", null)
+                    b.HasOne("CharacterManager.Server.Models.Personnage", null)
                         .WithMany()
                         .HasForeignKey("MercenairesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("HistoriqueClassementPersonnageHistorique1", b =>
+            modelBuilder.Entity("HistoriqueClassementPersonnage1", b =>
                 {
-                    b.HasOne("CharacterManager.Server.Models.PersonnageHistorique", null)
+                    b.HasOne("CharacterManager.Server.Models.Personnage", null)
                         .WithMany()
                         .HasForeignKey("AndroidesId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -508,15 +474,6 @@ namespace CharacterManager.Migrations
                     b.HasOne("CharacterManager.Server.Models.HistoriqueClassement", null)
                         .WithMany()
                         .HasForeignKey("HistoriqueClassement1Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("CharacterManager.Server.Models.PieceHistorique", b =>
-                {
-                    b.HasOne("CharacterManager.Server.Models.HistoriqueClassement", null)
-                        .WithMany("Pieces")
-                        .HasForeignKey("HistoriqueClassementId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

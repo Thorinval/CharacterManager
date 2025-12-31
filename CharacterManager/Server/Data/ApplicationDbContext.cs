@@ -24,6 +24,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     {
         base.OnModelCreating(modelBuilder);
 
+        // Héritage TPH pour Personnage
+        modelBuilder.Entity<Personnage>()
+            .HasDiscriminator<string>("Discriminator")
+            .HasValue<Personnage>("Personnage")
+            .HasValue<PersonnageHistorique>("PersonnageHistorique");
+
+        // Héritage TPH pour Piece
+        modelBuilder.Entity<Piece>()
+            .HasDiscriminator<string>("Discriminator")
+            .HasValue<Piece>("Piece")
+            .HasValue<PieceHistorique>("PieceHistorique");
+
         var jsonOptions = new JsonSerializerOptions { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull };
 
         var aspectConverter = new ValueConverter<Aspect, string>(

@@ -1,3 +1,5 @@
+namespace CharacterManager.Tests;
+
 using System;
 using System.IO;
 using System.Linq;
@@ -7,8 +9,6 @@ using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
-
-namespace CharacterManager.Tests;
 
 public class ImporterHistoriqueXmlTests : IDisposable
 {
@@ -47,8 +47,8 @@ public class ImporterHistoriqueXmlTests : IDisposable
     [Fact]
     public async Task Import_ExempleXml_ShouldCreateOneHistorique_WithExpectedValues()
     {
-        var service = new HistoriqueEscouadeService(_context);
-        var path = Path.Combine("d:", "Devs", "CharacterManager","Samples", "exemple_export_classement.xml");
+        var service = new HistoriqueClassementService(_context);
+        var path = Path.Combine("d:", "Devs", "CharacterManager", "Samples", "exemple_export_classement.xml");
         Assert.True(File.Exists(path));
 
         using var fs = File.OpenRead(path);

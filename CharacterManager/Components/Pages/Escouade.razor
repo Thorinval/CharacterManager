@@ -21,7 +21,8 @@
     </div>
     <div class="header-center">
         <div class="puissance-header">
-            <img src="@AppConstants.Paths.ImagesInterface/fond_puissance.png" alt="Puissance" class="puissance-image-header" onerror="this.style.display='none';" />
+            <img src="@AppConstants.Paths.ImagesInterface/fond_puissance.png" alt="Puissance"
+                class="puissance-image-header" onerror="this.style.display='none';" />
             <span class="puissance-number-header">@puissanceEscouade</span>
         </div>
     </div>
@@ -31,12 +32,17 @@
         {
             <div class="escouade-preview-section mb-0" @onclick:stopPropagation="true">
                 <div class="escouade-images">
-                    @foreach (var perso in personnagesEscouade.Where(p => p.Type == TypePersonnage.Mercenaire).OrderByDescending(p => p.Puissance))
+                    @foreach (var perso in personnagesEscouade.Where(p => p.Type ==
+                                    TypePersonnage.Mercenaire).OrderByDescending(p => p.Puissance))
                     {
                         var currentId = perso.Id;
                         var returnPath = AppConstants.Routes.Escouade;
-                        <div class="escouade-member-preview clickable" @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForEscouade(), returnPath))" @onclick:stopPropagation="true">
-                            <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image" @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForEscouade(), returnPath))" @onclick:stopPropagation="true" />
+                        <div class="escouade-member-preview clickable"
+                            @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForEscouade(), returnPath))"
+                            @onclick:stopPropagation="true">
+                            <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image"
+                                @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForEscouade(), returnPath))"
+                                @onclick:stopPropagation="true" />
                             <div class="escouade-member-name">@perso.Nom</div>
                             <div class="escouade-member-power">@perso.Puissance</div>
                         </div>
@@ -50,27 +56,31 @@
 @if (personnagesEscouade.Count == 0)
 {
     <div class="alert alert-info" role="alert">
-            <LocalizedText Key="squad.noMercenary" />
+        <LocalizedText Key="squad.noMercenary" />
     </div>
 }
 else
 {
-<div class="section-header commandant-header">
-        <h2><LocalizedText Key="squad.commander" /></h2>
-</div>
+    <div class="section-header commandant-header">
+        <h2>
+            <LocalizedText Key="squad.commander" />
+        </h2>
+    </div>
     <div class="personnages-list">
         @foreach (var perso in commandants)
         {
             var currentId = perso.Id;
             var returnPath = AppConstants.Routes.Escouade;
-            <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForCommandants(), returnPath))">
+            <div class="personnage-card clickable"
+                @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForCommandants(), returnPath))">
                 <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
                     <div class="personnage-attribute"><span class="attribute-label">Rareté:</span> @perso.Rarete</div>
                     <div class="personnage-attribute"><span class="attribute-label">Puissance:</span> @perso.Puissance</div>
                     <div class="personnage-attribute"><span class="attribute-label">Niveau:</span> @perso.Niveau</div>
-                    <div class="personnage-attribute"><span class="attribute-label">Rang:</span> @TemplateEscouade.GetRankStars(perso.Rang)</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Rang:</span>
+                        @TemplateEscouade.GetRankStars(perso.Rang)</div>
                     <div class="personnage-attribute"><span class="attribute-label">Faction:</span> @perso.Faction</div>
                 </div>
             </div>
@@ -78,21 +88,25 @@ else
     </div>
     <br />
     <div class="section-header">
-        <h2><LocalizedText Key="squad.mercenaries" /> (@mercenaires.Count)</h2>
+        <h2>
+            <LocalizedText Key="squad.mercenaries" /> (@mercenaires.Count)
+        </h2>
     </div>
     <div class="personnages-list">
         @foreach (var perso in mercenaires)
         {
             var currentId = perso.Id;
             var returnPath = AppConstants.Routes.Escouade;
-            <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForMercenaires(), returnPath))">
+            <div class="personnage-card clickable"
+                @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForMercenaires(), returnPath))">
                 <img src="@perso.GetImageUrl(true)" alt="@perso.Nom" class="personnage-card-image" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
                     <div class="personnage-attribute"><span class="attribute-label">Rareté:</span> @perso.Rarete</div>
                     <div class="personnage-attribute"><span class="attribute-label">Puissance:</span> @perso.Puissance</div>
                     <div class="personnage-attribute"><span class="attribute-label">Niveau:</span> @perso.Niveau</div>
-                    <div class="personnage-attribute"><span class="attribute-label">Rang:</span> @TemplateEscouade.GetRankStars(perso.Rang)</div>
+                    <div class="personnage-attribute"><span class="attribute-label">Rang:</span>
+                        @TemplateEscouade.GetRankStars(perso.Rang)</div>
                     <div class="personnage-attribute"><span class="attribute-label">Faction:</span> @perso.Faction</div>
                 </div>
             </div>
@@ -100,15 +114,18 @@ else
     </div>
     <br />
     <div class="section-header">
-        <h2><LocalizedText Key="squad.androids" /></h2>
+        <h2>
+            <LocalizedText Key="squad.androids" />
+        </h2>
     </div>
     <div class="personnages-list">
         @foreach (var perso in androides)
         {
             var currentId = perso.Id;
             var returnPath = AppConstants.Routes.Escouade;
-            <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForAndroides(), returnPath))">
-            <img src="@perso.GetImageUrl(true)" alt="@perso.Nom" class="personnage-card-image" />
+            <div class="personnage-card clickable"
+                @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForAndroides(), returnPath))">
+                <img src="@perso.GetImageUrl(true)" alt="@perso.Nom" class="personnage-card-image" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
                     <div class="personnage-attribute"><span class="attribute-label">Rareté:</span> @perso.Rarete</div>
@@ -132,9 +149,12 @@ else
                     <div class="personnage-card-info">
                         <div class="personnage-name">@piece.Nom</div>
                         <div class="personnage-attribute"><span class="attribute-label">Niveau:</span> @piece.Niveau</div>
-                        <div class="personnage-attribute"><span class="attribute-label">Puissance:</span> @GetPiecePower(piece)</div>
-                        <div class="personnage-attribute"><span class="attribute-label">Puissance tactique:</span> @piece.AspectsTactiques.Puissance</div>
-                        <div class="personnage-attribute"><span class="attribute-label">Puissance stratégique:</span> @piece.AspectsStrategiques.Puissance</div>
+                        <div class="personnage-attribute"><span class="attribute-label">Puissance:</span> @GetPiecePower(piece)
+                        </div>
+                        <div class="personnage-attribute"><span class="attribute-label">Puissance tactique:</span>
+                            @piece.AspectsTactiques.Puissance</div>
+                        <div class="personnage-attribute"><span class="attribute-label">Puissance stratégique:</span>
+                            @piece.AspectsStrategiques.Puissance</div>
                     </div>
                 </div>
             }
@@ -176,9 +196,12 @@ else
                     <div class="mb-3">
                         <label for="puissance" class="form-label">Puissance</label>
                         <div class="input-group input-group-sm">
-                            <button class="btn btn-outline-secondary" type="button" @onclick="() => ChangePuissanceEscouade(-1)" @onclick:stopPropagation="true">-</button>
-                            <input type="number" class="form-control text-center" id="puissance" @bind="currentPersonnage.Puissance" />
-                            <button class="btn btn-outline-secondary" type="button" @onclick="() => ChangePuissanceEscouade(1)" @onclick:stopPropagation="true">+</button>
+                            <button class="btn btn-outline-secondary" type="button"
+                                @onclick="() => ChangePuissanceEscouade(-1)" @onclick:stopPropagation="true">-</button>
+                            <input type="number" class="form-control text-center" id="puissance"
+                                @bind="currentPersonnage.Puissance" />
+                            <button class="btn btn-outline-secondary" type="button"
+                                @onclick="() => ChangePuissanceEscouade(1)" @onclick:stopPropagation="true">+</button>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -219,7 +242,8 @@ else
                     </div>
                     <div class="mb-3">
                         <label for="rang" class="form-label">Rang (0-7)</label>
-                        <input type="number" class="form-control" id="rang" @bind="currentPersonnage.Rang" min="0" max="7" />
+                        <input type="number" class="form-control" id="rang" @bind="currentPersonnage.Rang" min="0"
+                            max="7" />
                     </div>
                     <div class="mb-3">
                         <label for="pa" class="form-label">PA (Points d'Attaque)</label>
@@ -234,11 +258,13 @@ else
                         <input type="text" class="form-control" id="imageHeader" @bind="currentPersonnage.ImageUrlHeader" />
                     </div>
                     <div class="mb-3">
-                        <p class="text-muted">Les URLs des images portrait et sélection sont générées automatiquement à partir du nom du personnage.</p>
+                        <p class="text-muted">Les URLs des images portrait et sélection sont générées automatiquement à
+                            partir du nom du personnage.</p>
                     </div>
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" @bind="currentPersonnage.Description" rows="2"></textarea>
+                        <textarea class="form-control" id="description" @bind="currentPersonnage.Description"
+                            rows="2"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -249,5 +275,3 @@ else
         </div>
     </div>
 }
-
-

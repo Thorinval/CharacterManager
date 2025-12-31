@@ -7,6 +7,7 @@
 @using Microsoft.AspNetCore.Components
 @using CharacterManager.Server.Models
 @using CharacterManager.Components
+@using CharacterManager.Components.Modal
 
 <link rel="stylesheet" href="/css/Historique.css" />
 
@@ -30,7 +31,7 @@
                     <input type="date" id="dateFin" class="form-control" @bind="dateFin" />
                 </div>
                 <div class="col-md-4 d-flex align-items-end gap-2 flex-wrap">
-                    <button class="btn btn-primary" @onclick="ShowCreerClassementModal"><LocalizedText Key="history.create" /></button>
+                    <button class="btn btn-primary" @onclick="ShowCreerClassementModalAsync"><LocalizedText Key="history.create" /></button>
                     <button class="btn btn-primary" @onclick="FiltrerHistorique"><LocalizedText Key="history.filter" /></button>
                     <button class="btn btn-secondary" @onclick="ReinitialiserFiltres"><LocalizedText Key="history.reset" /></button>
                     <button class="btn btn-success" @onclick="ExporterHistorique" title=""><i class="bi bi-download"></i> <LocalizedText Key="history.exportXml" /></button>
@@ -67,51 +68,41 @@
                     <tbody>
                         @foreach (var historique in historiques)
                         {
-                            var donnees = HistoriqueService.DeserializerEscouade(historique.DonneesEscouadeJson);
-                            if (donnees != null)
-                            {
                                 <tr>
                                     <td class="info-cell date-cell"><span class="pill pill-date">@historique.DateEnregistrement.ToString("dd/MM/yyyy")</span></td>
-                                    <td class="info-cell ligue-cell"><span class="pill pill-ligue">@donnees.Ligue</span></td>
-                                    <td class="info-cell score-cell"><span class="pill pill-score">@donnees.Score</span></td>
+                                    <td class="info-cell ligue-cell"><span class="pill pill-ligue">@historique.Ligue</span></td>
+                                    <td class="info-cell score-cell"><span class="pill pill-score">@historique.Score</span></td>
                                     <td class="info-cell puissance-cell"><span class="pill pill-puissance">@historique.PuissanceTotal</span></td>
                                     <td class="ranking-inline info-cell">
-                                        <div class="chip chip-nutaku" title="Classement Nutaku (global)"><i class="bi bi-globe"></i><strong>Nutaku</strong> : @donnees.Nutaku</div>
-                                        <div class="chip chip-top" title="Classement Top 150"><i class="bi bi-trophy"></i><strong>Top 150</strong> : @donnees.Top150</div>
-                                        <div class="chip chip-pays" title="Classement par pays"><i class="bi bi-flag"></i><strong>Pays</strong> : @donnees.Pays</div>
+                                        <div class="chip chip-nutaku" title="Classement Nutaku (global)"><i class="bi bi-globe"></i><strong>Nutaku</strong> : @historique.Classements.FirstOrDefault(c => c.Type == TypeClassement.Nutaku)?.Valeur</div>
+                                        <div class="chip chip-top" title="Classement Top 150"><i class="bi bi-trophy"></i><strong>Top 150</strong> : @historique.Classements.FirstOrDefault(c => c.Type == TypeClassement.Top150)?.Valeur</div>
+                                        <div class="chip chip-pays" title="Classement par pays"><i class="bi bi-flag"></i><strong>Pays</strong> : @historique.Classements.FirstOrDefault(c => c.Type == TypeClassement.France)?.Valeur</div>
                                     </td>
 
-                                    @if (donnees.Commandant != null)
-                                    {
                                         <td>
                                             <div class="personnage-card">
                                                 <div class="card-header-row">
-                                                    <div class="card-rarity rarity-@donnees.Commandant.Rarete.ToLower()">@donnees.Commandant.Rarete</div>
-                                                    <div class="card-name">@donnees.Commandant.Nom</div>
+                                                    <div class="card-rarity rarity-@historique.Commandant?.Rarete.ToString().ToLower()">@historique.Commandant?.Rarete</div>
+                                                    <div class="card-name">@historique.Commandant?.Nom</div>
                                                 </div>
-                                                <img src="@GetImageUrl(donnees.Commandant.Nom)" alt="@donnees.Commandant.Nom" class="card-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+                                                <img src="@GetImageUrl(historique.Commandant?.Nom ?? string.Empty)" alt="@historique.Commandant?.Nom" class="card-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
                                                 <div class="card-info">
-                                                    <div>Niv: @donnees.Commandant.Niveau</div>
-                                                    <div class="card-stars">@CharacterManager.Components.Pages.TemplateEscouade.GetRankStars(donnees.Commandant.Rang)</div>
-                                                    <div>Puiss: @donnees.Commandant.Puissance</div>
+                                                    <div>Niv: @historique.Commandant?.Niveau</div>
+                                                    <div class="card-stars">@CharacterManager.Components.Pages.TemplateEscouade.GetRankStars(historique.Commandant?.Rang ?? 0)</div>
+                                                    <div>Puiss: @historique.Commandant?.Puissance</div>
                                                 </div>
                                             </div>
                                         </td>
-                                    }
-                                    else
-                                    {
-                                        <td>-</td>
-                                    }
 
                                     @for (int i = 0; i < nbMercenairesMax; i++)
                                     {
-                                        if (i < donnees.Mercenaires.Count)
+                                        if (i < historique.Mercenaires.Count)
                                         {
-                                            var merc = donnees.Mercenaires[i];
+                                            var merc = historique.Mercenaires[i];
                                             <td>
                                                 <div class="personnage-card">
                                                     <div class="card-header-row">
-                                                        <div class="card-rarity rarity-@merc.Rarete.ToLower()">@merc.Rarete</div>
+                                                        <div class="card-rarity rarity-@merc.Rarete.ToString().ToLower()">@merc.Rarete</div>
                                                         <div class="card-name">@merc.Nom</div>
                                                     </div>
                                                     <img src="@GetImageUrl(merc.Nom)" alt="@merc.Nom" class="card-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
@@ -131,13 +122,13 @@
 
                                     @for (int i = 0; i < nbAndroidsMax; i++)
                                     {
-                                        if (i < donnees.Androides.Count)
+                                        if (i < historique.Androides.Count)
                                         {
-                                            var android = donnees.Androides[i];
+                                            var android = historique.Androides[i];
                                             <td>
                                                 <div class="personnage-card">
                                                     <div class="card-header-row">
-                                                        <div class="card-rarity rarity-@android.Rarete.ToLower()">@android.Rarete</div>
+                                                        <div class="card-rarity rarity-@android.Rarete.ToString().ToLower()">@android.Rarete</div>
                                                         <div class="card-name">@android.Nom</div>
                                                     </div>
                                                     <img src="@GetImageUrl(android.Nom)" alt="@android.Nom" class="card-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
@@ -155,7 +146,7 @@
                                     }
 
                                     <td>
-                                        <span class="label">Puiss:</span> @donnees.LuciePuissance
+                                        <span class="label">Puiss:</span> @historique.Pieces.Sum(p => p.PuissanceLegacy)
                                     </td>
                                     <td>
                                         <div class="action-buttons">
@@ -165,7 +156,6 @@
                                         </div>
                                     </td>
                                 </tr>
-                            }
                         }
                     </tbody>
                 </table>
@@ -182,5 +172,4 @@
 
 <InputFile id="historiqueFileInput" @ref="inputFileRef" OnChange="HandleFileSelected" accept=".xml" style="display:none;" />
 
-<CreerClassementModal @bind-IsVisible="showCreerClassement" />
 

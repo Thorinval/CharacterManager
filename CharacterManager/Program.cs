@@ -33,7 +33,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<ProfileService>();
 builder.Services.AddScoped<PersonnageService>();
 builder.Services.AddScoped<PmlImportService>();
-builder.Services.AddScoped<HistoriqueEscouadeService>();
+builder.Services.AddScoped<HistoriqueClassementService>();
 builder.Services.AddScoped<ClientLocalizationService>();
 builder.Services.AddScoped<CsvImportService>();
 builder.Services.AddScoped<RoadmapService>();

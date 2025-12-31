@@ -376,8 +376,8 @@ public class PmlImportServiceTests : IDisposable
         var content = Encoding.UTF8.GetString(pmlBytes);
         Assert.Contains("<LucieHouse>", content);
         Assert.Contains("Salle du Trône", content);
-        Assert.Contains("PuissanceTactiques", content);
-        Assert.Contains("PuissanceStrategiques", content);
+        Assert.Contains("PuissanceTactique", content);
+        Assert.Contains("PuissanceStrategique", content);
       }
 
     [Fact]
@@ -433,8 +433,8 @@ public class PmlImportServiceTests : IDisposable
         var content = Encoding.UTF8.GetString(pmlBytes);
         Assert.Contains("LucieHouse", content);
         Assert.Contains("Atelier", content);
-        Assert.Contains("PuissanceTactiques", content);
-        Assert.Contains("PuissanceStrategiques", content);
+        Assert.Contains("PuissanceTactique", content);
+        Assert.Contains("PuissanceStrategique", content);
       }
 
     [Fact]

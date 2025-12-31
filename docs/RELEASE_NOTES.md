@@ -4,11 +4,20 @@
 
 ---
 
+## 0.10.2 (31 Décembre 2025)
+
+✨ - Suppression d'un classement
+
+🔨 - En cours - historique de classement
+
+🔨 - En cours - page d'accueil
+
 ## 0.10.1 (28 Décembre 2025)
 
 ✨ - Refonte fenetres modales
 
 🔨 - En cours - historique de classement
+
 🔨 - En cours - page d'accueil
 
 ## 0.10.0 (28 Décembre 2025)

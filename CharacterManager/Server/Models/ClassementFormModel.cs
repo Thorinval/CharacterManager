@@ -18,5 +18,9 @@ namespace CharacterManager.Server.Models
 
         [Range(1, int.MaxValue, ErrorMessage = "Valeur obligatoire")]
         public int? Ligue { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "Valeur obligatoire")]
+        public int? Score { get; set; }
+
     }
 }

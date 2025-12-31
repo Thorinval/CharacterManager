@@ -1,12 +1,13 @@
 using CharacterManager.Server.Data;
 using CharacterManager.Server.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Text.Json;
 using System.Xml.Linq;
 
 namespace CharacterManager.Server.Services;
 
-public class HistoriqueEscouadeService(ApplicationDbContext dbContext)
+public class HistoriqueClassementService(ApplicationDbContext dbContext)
 {
     /// <summary>
     /// Enregistre l'état actuel de l'escouade dans l'historique
@@ -74,28 +75,30 @@ public class HistoriqueEscouadeService(ApplicationDbContext dbContext)
         }
         catch (Exception ex)
         {
-            System.Console.WriteLine($"Erreur lors de l'enregistrement de l'escouade: {ex.Message}");
+            Console.WriteLine($"Erreur lors de l'enregistrement de l'escouade: {ex.Message}");
         }
     }
 
-    public async Task<List<HistoriqueEscouade>> GetHistoriqueAsync()
+    public async Task<List<HistoriqueClassement>> GetHistoriqueAsync()
     {
-        return await dbContext.HistoriquesEscouade
+        return await dbContext.HistoriquesClassement
             .OrderByDescending(h => h.DateEnregistrement)
             .ToListAsync();
     }
 
-    public async Task<List<HistoriqueEscouade>> GetHistoriqueAsync(DateTime dateDebut, DateTime dateFin)
+    public async Task<List<HistoriqueClassement>> GetHistoriqueAsync(DateTime dateDebut, DateTime dateFin)
     {
-        return await dbContext.HistoriquesEscouade
-            .Where(h => h.DateEnregistrement >= dateDebut && h.DateEnregistrement <= dateFin)
+        return await dbContext.HistoriquesClassement
+            .Where(h =>
+                h.DateEnregistrement.ToDateTime(TimeOnly.MinValue) >= dateDebut.Date &&
+                h.DateEnregistrement.ToDateTime(TimeOnly.MinValue) <= dateFin.Date)
             .OrderByDescending(h => h.DateEnregistrement)
             .ToListAsync();
     }
 
-    public async Task<List<HistoriqueEscouade>> GetHistoriqueRecentAsync(int nombre = 50)
+    public async Task<List<HistoriqueClassement>> GetHistoriqueRecentAsync(int nombre = 50)
     {
-        return await dbContext.HistoriquesEscouade
+        return await dbContext.HistoriquesClassement
             .OrderByDescending(h => h.DateEnregistrement)
             .Take(nombre)
             .ToListAsync();
@@ -115,17 +118,17 @@ public class HistoriqueEscouadeService(ApplicationDbContext dbContext)
 
     public async Task SupprimerEnregistrementAsync(int id)
     {
-        var historique = await dbContext.HistoriquesEscouade.FindAsync(id);
+        var historique = await dbContext.HistoriquesClassement.FindAsync(id);
         if (historique != null)
         {
-            dbContext.HistoriquesEscouade.Remove(historique);
+            dbContext.HistoriquesClassement.Remove(historique);
             await dbContext.SaveChangesAsync();
         }
     }
 
     public async Task ViderHistoriqueAsync()
     {
-        dbContext.HistoriquesEscouade.RemoveRange(dbContext.HistoriquesEscouade);
+        dbContext.HistoriquesClassement.RemoveRange(dbContext.HistoriquesClassement);
         await dbContext.SaveChangesAsync();
     }
 
@@ -157,29 +160,27 @@ public class HistoriqueEscouadeService(ApplicationDbContext dbContext)
                 writer.WriteStartElement("Enregistrement");
                 writer.WriteAttributeString("ID", historique.Id.ToString());
 
-                var donnees = DeserializerEscouade(historique.DonneesEscouadeJson);
-
                 writer.WriteStartElement("informations");
                 writer.WriteElementString("Date", historique.DateEnregistrement.ToString("yyyy-MM-ddTHH:mm:ssZ"));
-                writer.WriteElementString("Ligue", (donnees?.Ligue ?? 0).ToString());
-                writer.WriteElementString("Score", (donnees?.Score ?? 0).ToString());
+                writer.WriteElementString("Ligue", historique.Ligue.ToString());
+                writer.WriteElementString("Score", historique.Score.ToString());
                 writer.WriteElementString("Puissance", historique.PuissanceTotal.ToString());
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("Classement");
-                writer.WriteElementString("Nutaku", (donnees?.Nutaku ?? 0).ToString());
-                writer.WriteElementString("Top150", (donnees?.Top150 ?? 0).ToString());
-                writer.WriteElementString("Pays", (donnees?.Pays ?? 0).ToString());
+                writer.WriteElementString("Nutaku", historique.Classements.First(c => c.Type == TypeClassement.Nutaku).Valeur.ToString());
+                writer.WriteElementString("Top150", historique.Classements.First(c => c.Type == TypeClassement.Top150).Valeur.ToString());
+                writer.WriteElementString("Pays", historique.Classements.First(c => c.Type == TypeClassement.France).Valeur.ToString());
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("Commandant");
-                WritePerson(writer, donnees?.Commandant);
+                WritePerson(writer, historique.Commandant);
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("Escouade");
-                if (donnees?.Mercenaires != null)
+                if (historique.Mercenaires != null)
                 {
-                    foreach (var mercenaire in donnees.Mercenaires.Take(8))
+                    foreach (var mercenaire in historique.Mercenaires.Take(8))
                     {
                         writer.WriteStartElement("Mercenaire");
                         WritePerson(writer, mercenaire);
@@ -189,9 +190,9 @@ public class HistoriqueEscouadeService(ApplicationDbContext dbContext)
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("Androides");
-                if (donnees?.Androides != null)
+                if (historique.Androides != null)
                 {
-                    foreach (var androide in donnees.Androides.Take(3))
+                    foreach (var androide in historique.Androides.Take(3))
                     {
                         writer.WriteStartElement("Androide");
                         WritePerson(writer, androide);
@@ -201,7 +202,7 @@ public class HistoriqueEscouadeService(ApplicationDbContext dbContext)
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("Lucie");
-                writer.WriteElementString("Puissance", (donnees?.LuciePuissance ?? 0).ToString());
+                writer.WriteElementString("Puissance", historique.Pieces.Sum(p => p.PuissanceLegacy).ToString());
                 writer.WriteEndElement();
 
                 writer.WriteEndElement();
@@ -266,7 +267,7 @@ public class HistoriqueEscouadeService(ApplicationDbContext dbContext)
         return memoryStream.ToArray();
     }
 
-    private static void WritePerson(System.Xml.XmlWriter writer, PersonnelHistorique? p)
+    private static void WritePerson(System.Xml.XmlWriter writer, Personnage? p)
     {
         if (p == null)
         {

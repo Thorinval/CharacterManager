@@ -153,10 +153,6 @@
     private string userName = "";
     private string userRole = "";
 
-    [Parameter]
-    public EventCallback OnCreerClassementClick { get; set; }
-
-
     private void ShowAboutModal()
     {
         ModalService.Open<AboutModal>(size: ModalSize.Medium);
@@ -170,11 +166,6 @@
     private void ShowChangelogModal()
     {
         ModalService.Open<ChangelogModal>(size: ModalSize.Auto);
-    }
-
-    private async Task ShowCreerClassement()
-    {
-        await OnCreerClassementClick.InvokeAsync();
     }
 
     private Profile? currentProfile;

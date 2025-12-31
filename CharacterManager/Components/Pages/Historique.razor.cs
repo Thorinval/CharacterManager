@@ -6,18 +6,19 @@ using Microsoft.JSInterop;
 using CharacterManager.Server.Services;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Constants;
-
+using CharacterManager.Components.Modal;
 public partial class Historique
 {
-    private bool showCreerClassement = false;
-
     [Inject]
-    public HistoriqueEscouadeService HistoriqueService { get; set; } = null!;
+    public HistoriqueClassementService HistoriqueService { get; set; } = null!;
 
     [Inject]
     public IJSRuntime JSRuntime { get; set; } = null!;
 
-    private List<HistoriqueEscouade>? historiques;
+    [Inject]
+    public IModalService ModalService { get; set; } = null!;
+
+    private List<HistoriqueClassement>? historiques;
     private DateTime dateDebut = DateTime.Today.AddMonths(-1);
     private DateTime dateFin = DateTime.Today.AddDays(1);
     private int nbMercenairesMax = 0;
@@ -28,11 +29,6 @@ public partial class Historique
 
     private HistoriqueClassement historique = new();
 
-    private void ShowCreerClassementModal()
-    {
-        showCreerClassement = true;
-        StateHasChanged();
-    }
     protected override async Task OnInitializedAsync()
     {
         await ChargerHistorique();
@@ -41,32 +37,11 @@ public partial class Historique
     private async Task ChargerHistorique()
     {
         historiques = await HistoriqueService.GetHistoriqueAsync();
-        CalculerMaxPersonnages();
-    }
-
-    private void CalculerMaxPersonnages()
-    {
-        if (historiques == null || historiques.Count == 0)
-            return;
-
-        nbMercenairesMax = 0;
-        nbAndroidsMax = 0;
-
-        foreach (var historique in historiques)
-        {
-            var donnees = HistoriqueService.DeserializerEscouade(historique.DonneesEscouadeJson);
-            if (donnees != null)
-            {
-                nbMercenairesMax = Math.Max(nbMercenairesMax, donnees.Mercenaires.Count);
-                nbAndroidsMax = Math.Max(nbAndroidsMax, donnees.Androides.Count);
-            }
-        }
     }
 
     private async Task FiltrerHistorique()
     {
         historiques = await HistoriqueService.GetHistoriqueAsync(dateDebut, dateFin.AddDays(1));
-        CalculerMaxPersonnages();
     }
 
     private async Task ReinitialiserFiltres()
@@ -78,11 +53,8 @@ public partial class Historique
 
     private async Task SupprimerEnregistrement(int id)
     {
-        if (await JSRuntime.InvokeAsync<bool>("confirm", "Êtes-vous sûr de vouloir supprimer cet enregistrement?"))
-        {
-            await HistoriqueService.SupprimerEnregistrementAsync(id);
-            await ChargerHistorique();
-        }
+        await HistoriqueService.SupprimerEnregistrementAsync(id);
+        await ChargerHistorique();
     }
 
     private async Task ViderHistorique()
@@ -94,7 +66,7 @@ public partial class Historique
         }
     }
 
-    private string GetImageUrl(string nomPersonnage)
+    private static string GetImageUrl(string nomPersonnage)
     {
         // Normalize the name: remove spaces, convert to lowercase
         var normalized = nomPersonnage.ToLower().Replace(" ", "_").Replace("'", "");
@@ -148,10 +120,9 @@ public partial class Historique
         }
     }
 
-    private async Task AjouterClassement(HistoriqueClassement nouveauHistorique)
+    private async Task ShowCreerClassementModalAsync()
     {
-        historique.Classements.AddRange(nouveauHistorique.Classements);
-        showCreerClassement = false;
-        await InvokeAsync(StateHasChanged);
+        ModalService.Open<CreerClassementModal>(size: ModalSize.XL);
+        await ChargerHistorique();
     }
 }

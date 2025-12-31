@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<CharacterManagerPML version="1.0" exportDate="2025-12-26T17:30:41Z">
+<CharacterManagerPML version="1.0" exportDate="2025-12-28T19:57:28Z">
   <inventaire>
     <Personnage>
       <Nom>ALEXA</Nom>
@@ -103,10 +103,10 @@
       <Nom>AMY</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>1270</Puissance>
+      <Puissance>1340</Puissance>
       <PA>161</PA>
       <PV>192</PV>
-      <Niveau>8</Niveau>
+      <Niveau>9</Niveau>
       <Rang>2</Rang>
       <Role>Combattante</Role>
       <Faction>Syndicat</Faction>
@@ -117,10 +117,10 @@
       <Nom>ARACHNE</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>1530</Puissance>
+      <Puissance>2040</Puissance>
       <PA>93</PA>
       <PV>105</PV>
-      <Niveau>10</Niveau>
+      <Niveau>15</Niveau>
       <Rang>2</Rang>
       <Role>Combattante</Role>
       <Faction>Syndicat</Faction>
@@ -173,10 +173,10 @@
       <Nom>BECK</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>1260</Puissance>
+      <Puissance>1370</Puissance>
       <PA>84</PA>
       <PV>315</PV>
-      <Niveau>5</Niveau>
+      <Niveau>7</Niveau>
       <Rang>2</Rang>
       <Role>Sentinelle</Role>
       <Faction>Syndicat</Faction>
@@ -285,7 +285,7 @@
       <Nom>DOMINIQUE</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>1905</Puissance>
+      <Puissance>2040</Puissance>
       <PA>94</PA>
       <PV>319</PV>
       <Niveau>14</Niveau>
@@ -299,10 +299,10 @@
       <Nom>EVE</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>1990</Puissance>
+      <Puissance>2060</Puissance>
       <PA>98</PA>
       <PV>358</PV>
-      <Niveau>9</Niveau>
+      <Niveau>10</Niveau>
       <Rang>3</Rang>
       <Role>Sentinelle</Role>
       <Faction>Syndicat</Faction>
@@ -327,11 +327,11 @@
       <Nom>FLORENCE</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>2015</Puissance>
+      <Puissance>2410</Puissance>
       <PA>130</PA>
       <PV>157</PV>
-      <Niveau>15</Niveau>
-      <Rang>2</Rang>
+      <Niveau>12</Niveau>
+      <Rang>3</Rang>
       <Role>Sentinelle</Role>
       <Faction>Pacificateurs</Faction>
       <Selectionne>False</Selectionne>
@@ -467,10 +467,10 @@
       <Nom>KITTY</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>2620</Puissance>
+      <Puissance>2690</Puissance>
       <PA>157</PA>
       <PV>201</PV>
-      <Niveau>8</Niveau>
+      <Niveau>9</Niveau>
       <Rang>2</Rang>
       <Role>Sentinelle</Role>
       <Faction>Pacificateurs</Faction>
@@ -621,7 +621,7 @@
       <Nom>NAOMI</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>2825</Puissance>
+      <Puissance>2970</Puissance>
       <PA>154</PA>
       <PV>143</PV>
       <Niveau>14</Niveau>
@@ -761,10 +761,10 @@
       <Nom>ROSE</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>2310</Puissance>
+      <Puissance>2380</Puissance>
       <PA>152</PA>
       <PV>215</PV>
-      <Niveau>10</Niveau>
+      <Niveau>11</Niveau>
       <Rang>3</Rang>
       <Role>Combattante</Role>
       <Faction>HommesLibres</Faction>
@@ -859,10 +859,10 @@
       <Nom>THORA</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>1280</Puissance>
+      <Puissance>1350</Puissance>
       <PA>97</PA>
       <PV>292</PV>
-      <Niveau>7</Niveau>
+      <Niveau>8</Niveau>
       <Rang>2</Rang>
       <Role>Sentinelle</Role>
       <Faction>HommesLibres</Faction>
@@ -985,7 +985,7 @@
       <Nom>ZOE ET CHLOE</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>1790</Puissance>
+      <Puissance>1820</Puissance>
       <PA>206</PA>
       <PV>168</PV>
       <Niveau>13</Niveau>
@@ -1093,15 +1093,22 @@
       <Selectionne>False</Selectionne>
       <Description />
     </Personnage>
+    <Personnage>
+      <Nom>VESPINA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1390</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>9</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
   </inventaire>
   <LucieHouse>
-    <Piece>
-      <Nom>Salon</Nom>
-      <Niveau>60</Niveau>
-      <PuissanceTactique>770</PuissanceTactique>
-      <PuissanceStrategique>1055</PuissanceStrategique>
-      <Selectionne>False</Selectionne>
-    </Piece>
     <Piece>
       <Nom>Bar</Nom>
       <Niveau>60</Niveau>
@@ -1111,10 +1118,17 @@
     </Piece>
     <Piece>
       <Nom>Café</Nom>
-      <Niveau>55</Niveau>
-      <PuissanceTactique>695</PuissanceTactique>
-      <PuissanceStrategique>945</PuissanceStrategique>
+      <Niveau>57</Niveau>
+      <PuissanceTactique>735</PuissanceTactique>
+      <PuissanceStrategique>1025</PuissanceStrategique>
       <Selectionne>True</Selectionne>
+    </Piece>
+    <Piece>
+      <Nom>Salon</Nom>
+      <Niveau>60</Niveau>
+      <PuissanceTactique>770</PuissanceTactique>
+      <PuissanceStrategique>1055</PuissanceStrategique>
+      <Selectionne>False</Selectionne>
     </Piece>
     <Piece>
       <Nom>Gymnase</Nom>

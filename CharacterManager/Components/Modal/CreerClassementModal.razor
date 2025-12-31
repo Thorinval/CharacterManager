@@ -1,0 +1,710 @@
+@using CharacterManager.Server.Models
+@using CharacterManager.Server.Services
+@using CharacterManager.Components.Forms
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.EntityFrameworkCore
+@using CharacterManager.Server.Data;
+
+@inject IModalService ModalService
+@inject PersonnageService PersonnageService
+
+<div class="modal-header-premium sticky-header">
+    <i class="bi bi-clipboard-plus header-icon"></i>
+
+    <div class="header-text">
+        <h2 class="modal-title-premium">Créer un classement</h2>
+        <p class="modal-subtitle-premium">Enregistrer une nouvelle entrée dans l’historique</p>
+    </div>
+</div>
+
+<div class="modal-body">
+    <EditForm id="classementForm" EditContext="@editContext" OnValidSubmit="CreateClassement">
+
+        <h4 class="section-title">Informations générales</h4>
+
+        <div class="bloc-infos-premium">
+
+            <div class="info-item">
+                <label for="dateEnregistrementInput">
+                    <i class="bi bi-calendar3"></i>
+                    Date
+                </label>
+                <InputDateOnly id="dateEnregistrementInput" @bind-value="form.DateEnregistrement"
+                    class="@($"form-control form-control-sm {GetValidationClass(nameof(form.DateEnregistrement))}")" />
+                <ValidationMessage For="@(() => form.DateEnregistrement)" />
+            </div>
+
+            <div class="info-item">
+                <label for="ligueInput">
+                    <i class="bi bi-shield-check"></i>
+                    Ligue
+                </label>
+                <InputNumber id="ligueInput" @bind-Value="form.Ligue"
+                    class="@($"form-control form-control-sm {GetValidationClass(nameof(form.Ligue))}")" />
+                <ValidationMessage For="@(() => form.Ligue)" />
+            </div>
+
+            <div class="info-item">
+                <label for="scoreInput">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    Score
+                </label>
+                <InputNumber id="scoreInput" @bind-Value="form.Score"
+                    class="@($"form-control form-control-sm {GetValidationClass(nameof(form.Score))}")" />
+                <ValidationMessage For="@(() => form.Score)" />
+            </div>
+
+        </div>
+
+        <h4 class="section-title">Classements</h4>
+
+        <div class="bloc-classements-premium">
+
+            <div class="classement-item">
+                <label for="nutakuInput" class="chip-label chip-nutaku">
+                    <i class="bi bi-globe"></i> Nutaku
+                </label>
+                <InputNumber id="nutakuInput" @bind-Value="form.Nutaku"
+                    class="@($"form-control form-control-sm {GetValidationClass(nameof(form.Nutaku))}")" />
+                <ValidationMessage For="@(() => form.Nutaku)" />
+            </div>
+
+            <div class="classement-item">
+                <label for="top150Input" class="chip-label chip-top">
+                    <i class="bi bi-bar-chart"></i> Top 150
+                </label>
+                <InputNumber id="top150Input" @bind-Value="form.Top150"
+                    class="@($"form-control form-control-sm {GetValidationClass(nameof(form.Top150))}")" />
+                <ValidationMessage For="@(() => form.Top150)" />
+            </div>
+
+            <div class="classement-item">
+                <label for="franceInput" class="chip-label chip-pays">
+                    <i class="bi bi-flag"></i> France
+                </label>
+                <InputNumber id="franceInput" @bind-Value="form.France"
+                    class="@($"form-control form-control-sm {GetValidationClass(nameof(form.France))}")" />
+                <ValidationMessage For="@(() => form.France)" />
+            </div>
+
+        </div>
+    </EditForm>
+
+    <h4 class="section-title">Équipement & Puissance</h4>
+
+    <div class="bloc-pieces-puissance-premium">
+
+        <div class="pieces-zone">
+            <div class="label-premium">
+                <i class="bi bi-nut"></i> Pièces
+            </div>
+
+            <div class="pieces-pills">
+                @foreach (var p in Pieces)
+                {
+                    <span class="pill-piece">@p.Nom (Niv @p.Niveau)</span>
+                }
+            </div>
+        </div>
+
+        <div class="puissance-zone">
+            <div class="label-premium">
+                <i class="bi bi-lightning-charge"></i> Puissance totale
+            </div>
+
+            <span class="pill-puissance">@PuissanceTotale</span>
+        </div>
+
+    </div>
+
+    <h4 class="section-title">Personnages</h4>
+
+    <div class="bloc-personnages-premium">
+
+        <div class="collapse-toggle" @onclick="() => showPersonnages = !showPersonnages">
+            <i class="bi bi-people-fill"></i>
+            <span>Commandant, Mercenaires & Androïdes</span>
+            <i class="bi @(showPersonnages ? "bi-chevron-up" : "bi-chevron-down")" style="margin-left:auto;"></i>
+        </div>
+
+        @if (showPersonnages)
+        {
+            <div class="collapse-content">
+                <div class="ligne-commandant-mercenaires">
+
+                    <!-- Bloc Commandant -->
+                    <div class="bloc-personnage-type bloc-commandant">
+                        <h5 class="subsection-title">Commandant</h5>
+                        <div class="mercenaires-grid">
+                            <div class="personnage-card personnage-card-small">
+                                <div class="card-header-row">
+                                    <div class="card-rarity rarity-@Commandant.Rarete.ToString().ToLower()">
+                                        @Commandant.Rarete
+                                    </div>
+                                    <div class="card-name">@Commandant.Nom</div>
+                                </div>
+
+                                <img src="@Commandant.GetImageUrl(true)" alt="@Commandant.Nom" class="card-image"
+                                    onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+
+                                <div class="card-info">
+                                    <div>Niv: @Commandant.Niveau</div>
+                                    <div class="card-stars">@TemplateEscouade.GetRankStars(Commandant.Rang)</div>
+                                    <div>Puiss: @Commandant.Puissance</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bloc Mercenaires -->
+                    <div class="bloc-personnage-type bloc-mercenaires">
+                        <h5 class="subsection-title">Mercenaires</h5>
+                        <div class="mercenaires-grid">
+                            @foreach (var m in Mercenaires)
+                            {
+                                <div class="personnage-card personnage-card-small">
+                                    <div class="card-header-row">
+                                        <div class="card-rarity rarity-@m.Rarete.ToString().ToLower()">@m.Rarete</div>
+                                        <div class="card-name">@m.Nom</div>
+                                    </div>
+
+                                    <img src="@m.GetImageUrl(true)" alt="@m.Nom" class="card-image"
+                                        onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+
+                                    <div class="card-info">
+                                        <div>Niv: @m.Niveau</div>
+                                        <div class="card-stars">@TemplateEscouade.GetRankStars(m.Rang)</div>
+                                        <div>Puiss: @m.Puissance</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Androïdes -->
+                <div class="bloc-personnage-type bloc-androides">
+                    <h5 class="subsection-title">Androïdes</h5>
+                    <div class="androides-grid">
+                        @foreach (var a in Androides)
+                        {
+                            <div class="personnage-card personnage-card-small">
+                                <div class="card-header-row">
+                                    <div class="card-rarity rarity-@a.Rarete.ToString().ToLower()">@a.Rarete</div>
+                                    <div class="card-name">@a.Nom</div>
+                                </div>
+
+                                <img src="@a.GetImageUrl(true)" alt="@a.Nom" class="card-image"
+                                    onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+
+                                <div class="card-info">
+                                    <div>Niv: @a.Niveau</div>
+                                    <div class="card-stars">@TemplateEscouade.GetRankStars(a.Rang)</div>
+                                    <div>Puiss: @a.Puissance</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- FOOTER -->
+<div class="modal-footer">
+    <button type="submit" class="btn btn-success" disabled="@( !isValid )" onsubmit="CreateClassement"
+        form="classementForm">
+        Créer
+    </button>
+</div>
+
+<style>
+    /* ============================================================
+   MODALE CREER CLASSEMENT — STYLE PREMIUM (VERSION FINALE)
+   ============================================================ */
+    /* --- HEADER PREMIUM STICKY --- */
+    .modal-header-premium {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 4px 18px 4px;
+        margin: 10px;
+        background: rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(6px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .sticky-header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+    }
+
+    .header-icon {
+        font-size: 2rem;
+        color: #4da3ff;
+        opacity: 0.9;
+    }
+
+    .header-text .modal-title-premium {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #e2e8f0;
+    }
+
+    .header-text .modal-subtitle-premium {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #94a3b8;
+    }
+
+    .section-title {
+        text-align: left;
+        margin: 16px 0 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #d1d5db;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        padding-bottom: 3px;
+    }
+
+    /* --- CHIPS --- */
+    .chip-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .chip-label i {
+        opacity: 0.85;
+    }
+
+    .chip-nutaku {
+        background: rgba(66, 153, 225, 0.15);
+        border: 1px solid rgba(66, 153, 225, 0.35);
+        color: #4da3ff;
+    }
+
+    .chip-top {
+        background: rgba(237, 137, 54, 0.15);
+        border: 1px solid rgba(237, 137, 54, 0.35);
+        color: #ffb26b;
+    }
+
+    .chip-pays {
+        background: rgba(72, 187, 120, 0.15);
+        border: 1px solid rgba(72, 187, 120, 0.35);
+        color: #5cd68d;
+    }
+
+    /* --- BLOC PREMIUM : Informations générales (Date + Ligue + Score) --- */
+    .bloc-infos-premium {
+        display: flex;
+        gap: 20px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        margin-bottom: 16px;
+    }
+
+    .bloc-infos-premium .info-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .bloc-infos-premium label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+        color: #cbd5e1;
+    }
+
+    .bloc-infos-premium label i {
+        opacity: 0.85;
+        font-size: 1rem;
+    }
+
+    /* --- BLOC PREMIUM : Classements (Nutaku + Top150 + France) --- */
+    .bloc-classements-premium {
+        display: flex;
+        gap: 20px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        margin-bottom: 24px;
+    }
+
+    .bloc-classements-premium .classement-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    /* --- BLOC PREMIUM : Pièces + Puissance totale --- */
+    .bloc-pieces-puissance-premium {
+        display: flex;
+        gap: 20px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        margin-bottom: 16px;
+    }
+
+    .pieces-zone,
+    .puissance-zone {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .label-premium {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+        color: #cbd5e1;
+    }
+
+    .label-premium i {
+        opacity: 0.85;
+        font-size: 1rem;
+    }
+
+    /* --- PILLS --- */
+    .pieces-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .pill-piece {
+        background: rgba(155, 89, 182, 0.12);
+        border: 1px solid rgba(155, 89, 182, 0.35);
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .pill-puissance {
+        background: rgba(0, 255, 170, 0.15);
+        border: 1px solid rgba(0, 255, 170, 0.35);
+        color: #00ffaa;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    /* --- Cartes compactes --- */
+    .personnage-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 6px;
+        padding: 4px;
+        width: 90px;
+        text-align: center;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .personnage-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    .personnage-card-small {
+        transform: scale(0.90);
+        transform-origin: top left;
+    }
+
+    .card-name {
+        font-weight: bold;
+        font-size: 0.80rem;
+        text-align: left;
+        color: #cbd5e1;
+        line-height: 1.2;
+        flex: 1;
+    }
+
+    .card-image {
+        width: 60px;
+        height: 72px;
+        /* slightly reduced */
+        object-fit: cover;
+        border-radius: 4px;
+        margin-bottom: 0.25rem;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .card-info {
+        font-size: 0.65rem;
+        color: #cbd5e1;
+        line-height: 1.1;
+    }
+
+    /* --- Grilles compactes --- */
+    .mercenaires-grid,
+    .androides-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        gap: 6px;
+        margin-top: 6px;
+    }
+
+    /* Bouton d’ouverture */
+    .collapse-toggle {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.25);
+        backdrop-filter: blur(6px);
+        border: none;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #e2e8f0;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .collapse-toggle:hover {
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .collapse-toggle i {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+
+    /* Contenu interne */
+    .collapse-content {
+        flex: 1;
+        padding: 6px;
+        min-height: 0;
+        max-height: 34vh;
+        overflow: auto;
+    }
+
+    .bloc-personnages-premium {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        max-height: 45vh;
+        overflow: hidden;
+    }
+
+    /* Sous-titres internes */
+    .subsection-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #cbd5e1;
+        margin: 0 0 6px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        padding-bottom: 3px;
+    }
+
+    /* Ligne Commandant + Mercenaires */
+    .ligne-commandant-mercenaires {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 16px;
+        flex-wrap: nowrap;
+    }
+
+    /* Bloc Commandant : largeur fixe */
+    .bloc-commandant {
+        width: 115px;
+        /* parfait pour 1 carte */
+        flex-shrink: 0;
+        /* empêche l'écrasement */
+        padding: 6px;
+    }
+
+    /* Bloc Mercenaires : prend tout l'espace restant */
+    .bloc-mercenaires {
+        flex: 1;
+    }
+
+    /* Bloc interne premium (style uniquement) */
+    .bloc-personnage-type {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .bloc-androides {
+        margin-top: -5px;
+        /* rapproche du bloc du dessus */
+    }
+
+    EditForm {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+</style>
+
+@code {
+    private PersonnageHistorique Commandant { get; set; } = default!;
+
+    private List<PersonnageHistorique> Mercenaires { get; set; } = new();
+
+    private List<PersonnageHistorique> Androides { get; set; } = new();
+    private List<PieceHistorique> Pieces { get; set; } = new();
+
+    private ClassementFormModel form = new();
+    private EditContext? editContext;
+    private bool isValid;
+    private bool showPersonnages = true;
+    private int PuissanceTotale => PersonnageService.GetPuissanceEscouade();
+
+    [Inject]
+    public ApplicationDbContext DbContext { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(form);
+        isValid = editContext.Validate(); // initialisation
+
+        editContext.OnFieldChanged += (_, __) =>
+        {
+            isValid = editContext.Validate();
+            InvokeAsync(StateHasChanged);
+        };
+
+
+
+        var cmd = PersonnageService.GetCommandants(true).FirstOrDefault();
+        Commandant = cmd != null ? new PersonnageHistorique
+        {
+            IdOrigine = cmd.Id,
+            Nom = cmd.Nom,
+            Niveau = cmd.Niveau,
+            Rang = cmd.Rang,
+            Rarete = cmd.Rarete,
+            Puissance = cmd.Puissance,
+            Type = cmd.Type,
+            Capacites = cmd.Capacites,
+        } : new PersonnageHistorique { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
+
+        Mercenaires = PersonnageService.GetMercenaires(true)?.Select(m => new PersonnageHistorique
+        {
+            IdOrigine = m.Id,
+            Nom = m.Nom,
+            Niveau = m.Niveau,
+            Rang = m.Rang,
+            Rarete = m.Rarete,
+            Puissance = m.Puissance,
+            Type = m.Type,
+            Capacites = m.Capacites,
+        }).ToList() ?? new List<PersonnageHistorique>();
+
+        Androides = PersonnageService.GetAndroides(true)?.Select(a => new PersonnageHistorique
+        {
+            IdOrigine = a.Id,
+            Nom = a.Nom,
+            Niveau = a.Niveau,
+            Rang = a.Rang,
+            Rarete = a.Rarete,
+            Puissance = a.Puissance,
+            Type = a.Type,
+            Capacites = a.Capacites,
+        }).ToList() ?? new List<PersonnageHistorique>();
+
+        Pieces = PersonnageService.GetPieces(true)?.Select(p => new PieceHistorique
+        {
+            IdOrigine = p.Id,
+            Nom = p.Nom,
+            Niveau = p.Niveau,
+            Selectionnee = p.Selectionnee,
+        }).ToList() ?? new List<PieceHistorique>();
+    }
+
+    private void Reset()
+    {
+        form = new ClassementFormModel();
+        editContext = new EditContext(form);
+        isValid = false;
+    }
+
+    private void CreateClassement()
+    {
+        if (!isValid)
+            return;
+
+        HistoriqueClassement? historique = new HistoriqueClassement
+        {
+            DateEnregistrement = form.DateEnregistrement,
+            Ligue = form.Ligue ?? 0,
+            Score = form.Score ?? 0,
+            Classements = new List<Classement>(),
+            Mercenaires = Mercenaires,
+            Androides = Androides,
+            Pieces = Pieces,
+            Commandant = Commandant,
+            PuissanceTotal = PersonnageService.GetPuissanceEscouade()
+        };
+
+        historique.Classements.Add(new Classement
+        {
+            Nom = "Classement Nutaku",
+            Type = TypeClassement.Nutaku,
+            Valeur = form.Nutaku ?? 0
+        });
+
+        historique.Classements.Add(new Classement
+        {
+            Nom = "Classement Top150",
+            Type = TypeClassement.Top150,
+            Valeur = form.Top150 ?? 0
+        });
+
+        historique.Classements.Add(new Classement
+        {
+            Nom = "Classement France",
+            Type = TypeClassement.France,
+            Valeur = form.France ?? 0
+        });
+
+        DbContext.HistoriquesClassement.Add(historique);
+        DbContext.SaveChangesAsync();
+
+        Reset();
+        ModalService.Close();
+    }
+    private string GetValidationClass(string fieldName)
+    {
+        if (editContext == null)
+            return "";
+
+        var fieldIdentifier = new FieldIdentifier(form, fieldName);
+        bool hasErrors = editContext.GetValidationMessages(fieldIdentifier).Any();
+
+        // Champ touché ?
+        bool isModified = editContext.IsModified(fieldIdentifier);
+
+        if (!isModified)
+            return ""; // pas encore touché → neutre
+
+        return hasErrors ? "is-invalid" : "is-valid";
+    }
+}
