@@ -8,15 +8,81 @@ public class UpdateService
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
     private readonly string _currentVersion;
+    private readonly string _releasesPath;
 
     public UpdateService(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
         _configuration = configuration;
         _currentVersion = configuration["AppInfo:Version"] ?? "1.0.0";
+        
+        // Chemin relatif au répertoire de travail de l'application
+        _releasesPath = Path.Combine(AppContext.BaseDirectory, "..", "Releases", "versions.json");
     }
 
     public async Task<UpdateInfo?> CheckForUpdatesAsync()
+    {
+        try
+        {
+            // Essayer d'abord le fichier local
+            if (File.Exists(_releasesPath))
+            {
+                return await CheckLocalUpdatesAsync();
+            }
+
+            // Fallback sur GitHub si le fichier local n'existe pas
+            return await CheckGitHubUpdatesAsync();
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    private async Task<UpdateInfo?> CheckLocalUpdatesAsync()
+    {
+        try
+        {
+            var json = await File.ReadAllTextAsync(_releasesPath);
+            var versionsList = JsonSerializer.Deserialize<VersionsList>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (versionsList?.Versions == null || versionsList.Versions.Count == 0)
+                return null;
+
+            var latestRelease = versionsList.Versions.FirstOrDefault();
+            if (latestRelease == null)
+                return null;
+
+            var latestVersion = latestRelease.Version;
+            if (string.IsNullOrEmpty(latestVersion))
+                return null;
+
+            var isNewer = IsNewerVersion(latestVersion, _currentVersion);
+
+            // Résoudre les URLs relatives
+            var baseUrl = Path.Combine(AppContext.BaseDirectory, "..", "Releases");
+            var downloadUrl = Path.Combine(baseUrl, latestRelease.DownloadUrl ?? "");
+
+            return new UpdateInfo
+            {
+                CurrentVersion = _currentVersion,
+                LatestVersion = latestVersion,
+                IsUpdateAvailable = isNewer,
+                ReleaseNotes = latestRelease.ReleaseNotes ?? "",
+                DownloadUrl = downloadUrl,
+                PublishedAt = DateTime.Parse(latestRelease.ReleaseDate ?? DateTime.Now.ToString("yyyy-MM-dd"))
+            };
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    private async Task<UpdateInfo?> CheckGitHubUpdatesAsync()
     {
         try
         {
@@ -122,4 +188,19 @@ public class GitHubAsset
     public string? Name { get; set; }
     public string? BrowserDownloadUrl { get; set; }
     public long Size { get; set; }
+}
+
+public class VersionsList
+{
+    public List<ReleaseVersion>? Versions { get; set; }
+    public string? LatestVersion { get; set; }
+}
+
+public class ReleaseVersion
+{
+    public string? Version { get; set; }
+    public string? ReleaseDate { get; set; }
+    public string? ReleaseNotes { get; set; }
+    public string? DownloadUrl { get; set; }
+    public string? ChecksumUrl { get; set; }
 }
