@@ -34,9 +34,9 @@ builder.Services.AddScoped<ProfileService>();
 builder.Services.AddScoped<PersonnageService>();
 builder.Services.AddScoped<PmlImportService>();
 builder.Services.AddScoped<HistoriqueClassementService>();
+builder.Services.AddScoped<HistoriqueLigueService>();
 builder.Services.AddScoped<ClientLocalizationService>();
 builder.Services.AddScoped<CsvImportService>();
-builder.Services.AddScoped<RoadmapService>();
 
 // AppImageService no longer used for categorization; DI registration removed
 builder.Services.AddSingleton<PersonnageImageConfigService>();
@@ -148,11 +148,21 @@ using (var scope = app.Services.CreateScope())
                 Id INTEGER NOT NULL CONSTRAINT PK_AppSettings PRIMARY KEY AUTOINCREMENT,
                 LastImportedFileName TEXT NOT NULL DEFAULT '',
                 LastImportedDate TEXT NULL,
+                LastExportDate TEXT NULL,
                 IsAdultModeEnabled INTEGER NOT NULL DEFAULT 1,
                 ThumbnailHeightPx INTEGER NOT NULL DEFAULT 110
             );";
             db.Database.ExecuteSqlRaw(createAppSettingsSql);
             Console.WriteLine("[DB] Ensured AppSettings table exists.");
+
+            try
+            {
+                db.Database.ExecuteSqlRaw("ALTER TABLE AppSettings ADD COLUMN LastExportDate TEXT NULL;");
+            }
+            catch
+            {
+                // Column already exists
+            }
 
             // Hotfix: Ensure 'Templates' table exists in existing SQLite DBs without migrations
             // This avoids 'no such table: Templates' when upgrading from versions without the Templates entity.
@@ -402,7 +412,6 @@ using (var scope = app.Services.CreateScope())
         // Vérification si la base est vide (aucun personnage, template, historique ou profil)
         bool dbIsEmpty = !db.Personnages.Any()
             && !db.Templates.Any()
-            && !db.HistoriquesEscouade.Any()
             && !db.Profiles.Any();
 
         if (dbIsEmpty)

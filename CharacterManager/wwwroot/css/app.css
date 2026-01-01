@@ -163,7 +163,7 @@ body {
     flex: 1;
     overflow-y: auto;
     /* le scroll se fait ici */
-    padding: 40px;
+    padding: 0 40px 40px 40px;
 }
 
 .top-left,
@@ -335,7 +335,7 @@ body {
 .content {
     background: transparent;
     border-radius: 12px;
-    padding: 40px;
+    padding: 0 40px 40px 40px;
     border: none;
     box-shadow: none;
     width: 100%;
@@ -427,6 +427,7 @@ body {
     flex-direction: column;
     max-height: 90vh;
     overflow: hidden;
+    position: relative;
     background: rgba(30, 41, 59, 0.85);
     backdrop-filter: blur(12px);
     border-radius: 10px;
@@ -454,20 +455,39 @@ body {
     }
 }
 
-.modal-close {
+.modal-header-actions {
     position: absolute;
-    top: 12px;
-    right: 12px;
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 20px;
-    cursor: pointer;
-    transition: color 0.2s ease;
+    top: 16px;
+    right: 16px;
+    z-index: 120;
 }
 
-.modal-close:hover {
+.modal-close-btn {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #dc3545;
+    border: 1px solid #b02a37;
     color: white;
+    font-size: 18px;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    border-radius: 6px;
+}
+
+.modal-close-btn:hover {
+    background-color: #c12733;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.28);
+}
+
+.modal-close-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.22);
 }
 
 .modal-sm {

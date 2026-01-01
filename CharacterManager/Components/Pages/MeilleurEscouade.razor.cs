@@ -20,6 +20,9 @@ public partial class MeilleurEscouade
     [Inject]
     public ApplicationDbContext DbContext { get; set; } = null!;
 
+    [Inject]
+    public IModalService ModalService { get; set; } = null!;
+
     protected override void OnInitialized()
     {
         LoadTopPersonnages();
@@ -47,9 +50,10 @@ public partial class MeilleurEscouade
         var perso = topMercenaires.Concat(topAndroides).FirstOrDefault(p => p.Id == id) ?? topCommandant;
         Console.WriteLine($"[MeilleurEscouade] Personnage trouvé: {perso?.Nom} (ID={perso?.Id})");
         
-        var back = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
-        var encodedBack = Uri.EscapeDataString(back);
-        Navigation.NavigateTo($"/detail-personnage/{id}?filter={filter}&returnUrl={encodedBack}");
+        ModalService.Open<CharacterManager.Components.Modal.DetailPersonnageModal>(
+            new Dictionary<string, object> { { "PersonnageId", id } },
+            ModalSize.XL
+        );
     }
 
     private string GetCommandantHeaderImage()

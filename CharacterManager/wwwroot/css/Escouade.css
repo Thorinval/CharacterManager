@@ -123,12 +123,11 @@
 }
 
 .escouade-header {
-    --commandant-height: 500px;
     position: relative;
     display: flex;
     flex-direction: column;
     min-height: calc(var(--commandant-height) + 50px);
-    padding-top: 120px; /* space for puissance bloc */
+    padding-top: 80px; /* space for puissance bloc */
     gap: 0.75rem;
     overflow: hidden;
 }
@@ -136,7 +135,7 @@
 /* Aligner le header avec le contenu principal (annuler les marges négatives globales) */
 .escouade-header.page-header-banner {
     margin: 0 0 2rem 0;
-    padding-left: 1.5rem;
+    padding-left: 0;
     padding-right: 0;
 }
 

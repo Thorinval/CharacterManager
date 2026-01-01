@@ -102,7 +102,7 @@ public static class AppConstants
         public const string HistoriqueClassements = "HistoriqueClassements";
         public const string LucieHouse = "LucieHouse";
         public const string MeilleurEscouade = "meilleurEscouade";
-        public const string HistoriqueEscouade = "HistoriqueEscouade";
+        // Note: HistoriqueEscouade est obsolète, remplacé par HistoriqueClassement
 
         // Valeurs pour parsing (switch)
         public const string SSR = "SSR";
@@ -149,6 +149,27 @@ public static class AppConstants
         public const string PuissanceTactique = "PuissanceTactique";
         public const string PuissanceStrategique = "PuissanceStrategique";
         public const string PuissanceLegacy = "Puissance";
+        public const string Affection = "Affection";
+
+        // Éléments d'historique de ligue
+        public const string HistoriqueLigue = "HistoriqueLigue";
+        public const string DatePassage = "DatePassage";
+        public const string Ligue = "Ligue";
+        public const string Notes = "Notes";
+
+        // Éléments d'historique de classement
+        public const string HistoriqueClassement = "HistoriqueClassement";
+        public const string Score = "Score";
+        public const string PuissanceCommandant = "PuissanceCommandant";
+        public const string PuissanceMercenaires = "PuissanceMercenaires";
+        public const string PuissanceLucie = "PuissanceLucie";
+        public const string Classements = "Classements";
+        public const string ClassementItem = "ClassementItem";
+        public const string TypeClassement = "TypeClassement";
+        public const string Valeur = "Valeur";
+        public const string Mercenaires = "Mercenaires";
+        public const string Androides = "Androides";
+        public const string Pieces = "Pieces";
 
         // Attributs
         public const string Version = "version";

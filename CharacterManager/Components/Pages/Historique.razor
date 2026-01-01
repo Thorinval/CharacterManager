@@ -145,11 +145,32 @@
                                         }
                                     }
 
-                                    <td>
-                                        <span class="label">Puiss:</span> @historique.Pieces.Sum(p => p.PuissanceLegacy)
+                                    <td class="lucie-cell">
+                                        @if (historique.Pieces?.Any() == true)
+                                        {
+                                            <div class="lucie-pills">
+                                                @foreach (var piece in historique.Pieces)
+                                                {
+                                                    <div class="lucie-pill" title="Puissance @piece.PuissanceLegacy">
+                                                        <div class="lucie-pill-header">
+                                                            <span class="lucie-pill-name">@piece.Nom</span>
+                                                            <span class="lucie-pill-level">Niv @piece.Niveau</span>
+                                                        </div>
+                                                        <span class="lucie-pill-power">@piece.PuissanceLegacy</span>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="pill pill-puissance">Aucune pièce</span>
+                                        }
                                     </td>
                                     <td>
                                         <div class="action-buttons">
+                                            <button class="btn btn-sm btn-warning" @onclick="@(() => EditEnregistrement(historique))" title="">
+                                                <i class="bi bi-pencil-square"></i> Éditer
+                                            </button>
                                             <button class="btn btn-sm btn-danger" @onclick="@(() => SupprimerEnregistrement(historique.Id))" title="">
                                                 <i class="bi bi-trash"></i> <LocalizedText Key="common.delete" />
                                             </button>

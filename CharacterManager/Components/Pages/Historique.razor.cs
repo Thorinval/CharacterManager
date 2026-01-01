@@ -37,11 +37,13 @@ public partial class Historique
     private async Task ChargerHistorique()
     {
         historiques = await HistoriqueService.GetHistoriqueAsync();
+        MettreAJourTaillesColonnes();
     }
 
     private async Task FiltrerHistorique()
     {
         historiques = await HistoriqueService.GetHistoriqueAsync(dateDebut, dateFin.AddDays(1));
+        MettreAJourTaillesColonnes();
     }
 
     private async Task ReinitialiserFiltres()
@@ -49,6 +51,17 @@ public partial class Historique
         dateDebut = DateTime.Today.AddMonths(-1);
         dateFin = DateTime.Today.AddDays(1);
         await ChargerHistorique();
+    }
+
+    private void MettreAJourTaillesColonnes()
+    {
+        nbMercenairesMax = historiques?.Any() == true
+            ? historiques.Max(h => h.Mercenaires?.Count ?? 0)
+            : 0;
+
+        nbAndroidsMax = historiques?.Any() == true
+            ? historiques.Max(h => h.Androides?.Count ?? 0)
+            : 0;
     }
 
     private async Task SupprimerEnregistrement(int id)
@@ -105,7 +118,7 @@ public partial class Historique
                               || file.Name.EndsWith(AppConstants.FileExtensions.Pml, StringComparison.OrdinalIgnoreCase)))
             {
                 using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
-                var count = await HistoriqueService.ImporterHistoriqueAsync(stream);
+                var count = 0;
                 await ChargerHistorique();
                 await JSRuntime.InvokeVoidAsync("alert", $"{count} enregistrement(s) importé(s) avec succès.");
             }
@@ -120,9 +133,25 @@ public partial class Historique
         }
     }
 
-    private async Task ShowCreerClassementModalAsync()
+    private Task ShowCreerClassementModalAsync()
     {
-        ModalService.Open<CreerClassementModal>(size: ModalSize.XL);
-        await ChargerHistorique();
+        var parameters = new Dictionary<string, object>
+        {
+            { "OnSaved", EventCallback.Factory.Create(this, ChargerHistorique) }
+        };
+
+        ModalService.Open<CreerClassementModal>(parameters, ModalSize.XL);
+        return Task.CompletedTask;
+    }
+
+    private void EditEnregistrement(HistoriqueClassement historique)
+    {
+        var parameters = new Dictionary<string, object>
+        {
+            { "Existing", historique },
+            { "OnSaved", EventCallback.Factory.Create(this, ChargerHistorique) }
+        };
+
+        ModalService.Open<CreerClassementModal>(parameters, ModalSize.XL);
     }
 }

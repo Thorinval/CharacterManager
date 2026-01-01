@@ -9,8 +9,6 @@
 @using CharacterManager.Server.Models
 
 <div class="page-header-banner">
-    <a href="@AppConstants.Routes.Home" class="back-button" aria-label="Retour" title="Back to home"></a>
-    <h1 class="page-title"><LocalizedText Key="importExportPml.title" /></h1>
 </div>
 
 <div class="container mt-4">
@@ -18,20 +16,29 @@
         <div class="col-md-10">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><LocalizedText Key="importExportPml.cardTitle" /></h5>
+                    <h5 class="mb-0">
+                        <LocalizedText Key="importExportPml.cardTitle" />
+                    </h5>
                 </div>
                 <div class="card-body">
                     @if (importComplete)
                     {
-                        <div class="alert @(importResult?.IsSuccess == true ? "alert-success" : "alert-danger")" role="alert">
+                        <div class="alert @(importResult?.IsSuccess == true ? "alert-success" : "alert-danger")"
+                            role="alert">
                             @if (importResult?.IsSuccess == true)
                             {
-                                <h4 class="alert-heading"><LocalizedText Key="importExportPml.success" /></h4>
-                                <p>@importResult?.SuccessCount <LocalizedText Key="importExportPml.imported" /></p>
+                                <h4 class="alert-heading">
+                                    <LocalizedText Key="importExportPml.success" />
+                                </h4>
+                                <p>@importResult?.SuccessCount
+                                    <LocalizedText Key="importExportPml.imported" />
+                                </p>
                                 @if (importResult?.Errors.Count > 0)
                                 {
                                     <hr>
-                                    <p><strong><LocalizedText Key="importExportPml.warnings" /></strong></p>
+                                    <p><strong>
+                                            <LocalizedText Key="importExportPml.warnings" />
+                                        </strong></p>
                                     <ul>
                                         @foreach (var error in importResult.Errors)
                                         {
@@ -42,24 +49,32 @@
                             }
                             else
                             {
-                                <h4 class="alert-heading"><LocalizedText Key="importExportPml.error" /></h4>
+                                <h4 class="alert-heading">
+                                    <LocalizedText Key="importExportPml.error" />
+                                </h4>
                                 <p>@importResult?.Error</p>
                             }
                         </div>
 
-                        <button class="btn btn-primary" @onclick="Reset"><LocalizedText Key="importExportPml.newOperation" /></button>
+                        <button class="btn btn-primary" @onclick="Reset">
+                            <LocalizedText Key="importExportPml.newOperation" />
+                        </button>
                     }
                     else
                     {
                         <ul class="nav nav-tabs mb-3" role="tablist">
                             <li class="nav-item">
-                                <button class="nav-link @(activeTab == "import" ? "active" : "")" @onclick='() => activeTab = "import"'>
-                                    <i class="bi bi-upload"></i> <LocalizedText Key="importExportPml.import" />
+                                <button class="nav-link @(activeTab == "import" ? "active" : "")"
+                                    @onclick='() => activeTab = "import"'>
+                                    <i class="bi bi-upload"></i>
+                                    <LocalizedText Key="importExportPml.import" />
                                 </button>
                             </li>
                             <li class="nav-item">
-                                <button class="nav-link @(activeTab == "export" ? "active" : "")" @onclick='() => activeTab = "export"'>
-                                    <i class="bi bi-download"></i> <LocalizedText Key="importExportPml.export" />
+                                <button class="nav-link @(activeTab == "export" ? "active" : "")"
+                                    @onclick='() => activeTab = "export"'>
+                                    <i class="bi bi-download"></i>
+                                    <LocalizedText Key="importExportPml.export" />
                                 </button>
                             </li>
                         </ul>
@@ -70,49 +85,64 @@
                                 @if (!string.IsNullOrEmpty(lastImportedFileName))
                                 {
                                     <div class="alert alert-secondary">
-                                        <strong><LocalizedText Key="importExportPml.lastFile" /></strong> @lastImportedFileName
+                                        <strong>
+                                            <LocalizedText Key="importExportPml.lastFile" />
+                                        </strong> @lastImportedFileName
                                         @if (lastImportedFileName != null)
                                         {
-                                            <small class="d-block text-muted mt-1"><LocalizedText Key="importExportPml.selectInfo" /></small>
+                                            <small class="d-block text-muted mt-1">
+                                                <LocalizedText Key="importExportPml.selectInfo" />
+                                            </small>
                                         }
                                     </div>
                                 }
-                                
+
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold"><LocalizedText Key="importExportPml.selectTypes" /></label>
+                                    <label class="form-label fw-bold">
+                                        <LocalizedText Key="importExportPml.selectTypes" />
+                                    </label>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" @bind="importInventory" id="importInventory">
+                                        <input class="form-check-input" type="checkbox" @bind="importInventory"
+                                            id="importInventory">
                                         <label class="form-check-label" for="importInventory">
                                             <LocalizedText Key="importExportPml.inventory" />
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" @bind="importTemplates" id="importTemplates">
+                                        <input class="form-check-input" type="checkbox" @bind="importTemplates"
+                                            id="importTemplates">
                                         <label class="form-check-label" for="importTemplates">
                                             <LocalizedText Key="importExportPml.templates" />
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" @bind="importBestSquad" id="importBestSquad">
+                                        <input class="form-check-input" type="checkbox" @bind="importBestSquad"
+                                            id="importBestSquad">
                                         <label class="form-check-label" for="importBestSquad">
                                             <LocalizedText Key="importExportPml.bestSquad" />
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" @bind="importHistories" id="importHistories">
+                                        <input class="form-check-input" type="checkbox" @bind="importHistories"
+                                            id="importHistories">
                                         <label class="form-check-label" for="importHistories">
-                                            <LocalizedText Key="importExportPml.histories" />
+                                            <LocalizedText Key="importExportPml.rankings" />
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" @bind="importLeagueHistory"
+                                            id="importLeagueHistory">
+                                        <label class="form-check-label" for="importLeagueHistory">
+                                            <LocalizedText Key="importExportPml.leagueHistory" />
                                         </label>
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="pmlFile" class="form-label"><LocalizedText Key="importExportPml.selectFile" /></label>
-                                    <InputFile 
-                                        class="form-control" 
-                                        id="pmlFile" 
-                                        accept=".pml,.xml" 
-                                        OnChange="@OnFileSelected"
+                                    <label for="pmlFile" class="form-label">
+                                        <LocalizedText Key="importExportPml.selectFile" />
+                                    </label>
+                                    <InputFile class="form-control" id="pmlFile" accept=".pml,.xml" OnChange="@OnFileSelected"
                                         disabled="@isImporting" />
                                     <small class="text-muted">
                                         <LocalizedText Key="importExportPml.expectedFormat" />
@@ -121,12 +151,20 @@
 
                                 <div class="mb-3">
                                     <p class="text-info">
-                                        <strong><LocalizedText Key="importExportPml.infoTitle" /></strong>
+                                        <strong>
+                                            <LocalizedText Key="importExportPml.infoTitle" />
+                                        </strong>
                                     </p>
                                     <ul>
-                                        <li><LocalizedText Key="importExportPml.infoInventaire" /></li>
-                                        <li><LocalizedText Key="importExportPml.infoTemplate" /></li>
-                                        <li><LocalizedText Key="importExportPml.infoFormat" /></li>
+                                        <li>
+                                            <LocalizedText Key="importExportPml.infoInventaire" />
+                                        </li>
+                                        <li>
+                                            <LocalizedText Key="importExportPml.infoTemplate" />
+                                        </li>
+                                        <li>
+                                            <LocalizedText Key="importExportPml.infoFormat" />
+                                        </li>
                                     </ul>
                                 </div>
 
@@ -137,7 +175,8 @@
                                     </div>
                                 }
 
-                                <button type="submit" class="btn btn-success" disabled="@(selectedFile == null || isImporting || !HasSelectedImportTypes())">
+                                <button type="submit" class="btn btn-success"
+                                    disabled="@(selectedFile == null || isImporting || !HasSelectedImportTypes())">
                                     @if (isImporting)
                                     {
                                         <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -149,37 +188,52 @@
                         else
                         {
                             <div class="mb-3">
-                                <label class="form-label fw-bold"><LocalizedText Key="importExportPml.selectTypes" /></label>
+                                <label class="form-label fw-bold">
+                                    <LocalizedText Key="importExportPml.selectTypes" />
+                                </label>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" @bind="exportInventory" id="exportInventory">
+                                    <input class="form-check-input" type="checkbox" @bind="exportInventory"
+                                        id="exportInventory">
                                     <label class="form-check-label" for="exportInventory">
                                         <LocalizedText Key="importExportPml.inventory" />
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" @bind="exportTemplates" id="exportTemplates">
+                                    <input class="form-check-input" type="checkbox" @bind="exportTemplates"
+                                        id="exportTemplates">
                                     <label class="form-check-label" for="exportTemplates">
                                         <LocalizedText Key="importExportPml.templates" />
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" @bind="exportBestSquad" id="exportBestSquad">
+                                    <input class="form-check-input" type="checkbox" @bind="exportBestSquad"
+                                        id="exportBestSquad">
                                     <label class="form-check-label" for="exportBestSquad">
                                         <LocalizedText Key="importExportPml.bestSquad" />
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" @bind="exportHistories" id="exportHistories">
+                                    <input class="form-check-input" type="checkbox" @bind="exportHistories"
+                                        id="exportHistories">
                                     <label class="form-check-label" for="exportHistories">
-                                        <LocalizedText Key="importExportPml.histories" />
+                                        <LocalizedText Key="importExportPml.rankings" />
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" @bind="exportLeagueHistory"
+                                        id="exportLeagueHistory">
+                                    <label class="form-check-label" for="exportLeagueHistory">
+                                        <LocalizedText Key="importExportPml.leagueHistory" />
                                     </label>
                                 </div>
                             </div>
 
                             <button class="btn btn-primary" @onclick="HandleExport" disabled="@(!HasSelectedExportTypes())">
-                                <i class="bi bi-download"></i> <LocalizedText Key="importExportPml.exportButton" />
+                                <i class="bi bi-download"></i>
+                                <LocalizedText Key="importExportPml.exportButton" />
                             </button>
-                            <button class="btn btn-secondary ms-2" @onclick="ExportAsConfigPml" disabled="@(!HasSelectedExportTypes())">
+                            <button class="btn btn-secondary ms-2" @onclick="ExportAsConfigPml"
+                                disabled="@(!HasSelectedExportTypes())">
                                 <i class="bi bi-save"></i> Exporter comme config.pml (serveur)
                             </button>
                         }

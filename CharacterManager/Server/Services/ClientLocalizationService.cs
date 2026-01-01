@@ -111,7 +111,15 @@ public class ClientLocalizationService
         // Convertir le résultat final en string
         if (current is JsonElement finalElement)
         {
-            return finalElement.GetString() ?? key;
+            return finalElement.ValueKind switch
+            {
+                JsonValueKind.String => finalElement.GetString() ?? key,
+                JsonValueKind.Number => finalElement.ToString(),
+                JsonValueKind.True => "true",
+                JsonValueKind.False => "false",
+                JsonValueKind.Null => key,
+                _ => key
+            };
         }
 
         return current?.ToString() ?? key;

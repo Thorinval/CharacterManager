@@ -26,6 +26,21 @@ public class HistoriqueClassement
     public int Ligue { get; set; }
 
     /// <summary>
+    /// Puissance du commandant au moment de l'enregistrement
+    /// </summary>
+    public int PuissanceCommandant { get; set; }
+
+    /// <summary>
+    /// Puissance des mercenaires et androïdes au moment de l'enregistrement
+    /// </summary>
+    public int PuissanceMercenaires { get; set; }
+
+    /// <summary>
+    /// Puissance des pièces Lucie au moment de l'enregistrement
+    /// </summary>
+    public int PuissanceLucie { get; set; }
+
+    /// <summary>
     /// Classement global
     /// </summary>
     public List<Classement> Classements { get; set; } = [];

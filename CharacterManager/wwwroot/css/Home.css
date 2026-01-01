@@ -7,6 +7,25 @@
     margin: 0 auto;
 }
 
+.hub-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.hub-sections-wrapper {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    margin-top: 20px;
+}
+
+@media (max-width: 1200px) {
+    .hub-sections-wrapper {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* ============================================================
    HEADER DU HUB
    ============================================================ */
@@ -28,11 +47,42 @@
    GRILLE DES CARTES
    ============================================================ */
 
+.hub-section {
+    margin-top: 0;
+}
+
+.hub-section-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(96, 165, 250, 0.3);
+}
+
+.hub-section-title .msr {
+    font-size: 24px;
+    color: #60a5fa;
+}
+
 .hub-grid {
-    margin-top: 30px;
+    margin-top: 15px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(600px, calc(33.333% - 14px)));
+    grid-auto-rows: 360px;
+    gap: 20px;
+    max-width: 1900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (max-width: 768px) {
+    .hub-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ============================================================
@@ -47,6 +97,17 @@
     cursor: pointer;
     transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
     color: white;
+    min-width: 0;
+    overflow: hidden;
+    height: 360px;
+    display: flex;
+    flex-direction: column;
+}
+
+.hub-card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .hub-card:hover {
@@ -56,7 +117,7 @@
 }
 
 .hub-card h3 {
-    margin: 10px 0 6px 0;
+    margin: 0;
     font-size: 1.2rem;
     font-weight: 600;
     color: white;
@@ -83,10 +144,242 @@
    ============================================================ */
 
 .hub-metric {
-    margin-top: 16px;
+    margin-top: 12px;
     display: flex;
     align-items: center;
     gap: 14px;
+}
+
+.hub-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.hub-meta-grid.two-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.hub-meta-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.hub-meta-block.full-span {
+    grid-column: 1 / -1;
+}
+
+.metric-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.metric-chips.inline {
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.metric-chips.nowrap {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+
+.metric-chip {
+    background: rgba(255,255,255,0.08);
+    color: #e2e8f0;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    line-height: 1.2;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.metric-chip i {
+    font-size: 1rem;
+    color: #60a5fa;
+}
+
+.metric-chip.lucie-piece-chip i {
+    color: #f59e0b;
+}
+
+.metric-chip.lucie-piece-chip {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 10px;
+    white-space: nowrap;
+    min-height: 32px;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.metric-chip.affection-chip i {
+    color: #ef4444;
+}
+
+.metric-chip.chip-nutaku {
+    background: rgba(66, 153, 225, 0.18);
+    border: 1px solid rgba(66, 153, 225, 0.35);
+}
+
+.metric-chip.chip-top150 {
+    background: rgba(237, 137, 54, 0.18);
+    border: 1px solid rgba(237, 137, 54, 0.35);
+}
+
+.metric-chip.chip-france {
+    background: rgba(72, 187, 120, 0.18);
+    border: 1px solid rgba(72, 187, 120, 0.35);
+}
+
+.faction-shape {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    color: #60a5fa;
+}
+
+.shape-circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.shape-square {
+    width: 12px;
+    height: 12px;
+    background: currentColor;
+    border-radius: 2px;
+}
+
+.shape-triangle {
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 12px solid currentColor;
+}
+
+.metric-chip i.faction-syndicat,
+.faction-shape.faction-syndicat {
+    color: #e11d48; /* red */
+}
+
+.metric-chip i.faction-pacificateurs,
+.faction-shape.faction-pacificateurs {
+    color: #3b82f6; /* blue */
+}
+
+.metric-chip i.faction-hommeslibres,
+.faction-shape.faction-hommeslibres {
+    color: #f97316; /* orange */
+}
+
+.metric-chip-value {
+    font-weight: 700;
+}
+
+.metric-chip-detail {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    font-weight: 400;
+    margin-left: 2px;
+}
+
+.hub-meta-grid.single-row {
+    grid-template-columns: 1fr;
+}
+
+@media (max-width: 768px) {
+    .hub-meta-grid.two-cols {
+        grid-template-columns: 1fr;
+    }
+}
+
+.meta-inline {
+    gap: 6px;
+}
+
+.lucie-pieces-chips {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.lucie-piece-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    max-width: 100%;
+    font-size: 0.9rem;
+    word-wrap: normal;
+    line-height: 1.4;
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.lucie-piece-level {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #cbd5e1;
+    white-space: nowrap;
+    width: 55px;
+    text-align: right;
+}
+
+.lucie-piece-power {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fbbf24;
+    white-space: nowrap;
+    width: 35px;
+    text-align: right;
+}
+
+.lucie-metric {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.lucie-affection-block {
+    display: flex;
+    align-items: center;
+    order: -1;
+}
+
+.lucie-affection-block .affection-chip {
+    padding: 0;
+    background: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+}
+
+.lucie-affection-block .affection-chip i {
+    font-size: 24px;
+    color: #ef4444;
+}
+
+.lucie-affection-block .affection-chip .metric-chip-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    margin-left: 0;
 }
 
 /* Icône du chiffre */
@@ -116,6 +409,16 @@
     font-size: 1.8rem;
     font-weight: 700;
     color: white;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.metric-max-value {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    margin-left: 0;
 }
 
 .metric-label {

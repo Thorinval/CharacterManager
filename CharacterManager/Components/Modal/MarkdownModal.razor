@@ -1,0 +1,44 @@
+@using Markdig
+
+<div class="modal-body text-center">
+    <div class="app-icon mb-3">
+        <i class="bi bi-info-circle" style="font-size: 4rem; color: #0d6efd;"></i>
+    </div>
+    <div class="form-control changelog-content">
+        @((MarkupString)ContentHtml)
+    </div>
+</div>
+
+@code {
+    [Parameter] public string FileName { get; set; } = string.Empty;
+    [Parameter] public string NotFoundMessage { get; set; } = "Aucun fichier trouvé.";
+    [Parameter] public string ErrorMessage { get; set; } = "Erreur lors du chargement du fichier.";
+
+    private string ContentHtml { get; set; } = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                var filePath = Path.Combine(AppContext.BaseDirectory, FileName);
+                if (File.Exists(filePath))
+                {
+                    var content = await File.ReadAllTextAsync(filePath);
+                    ContentHtml = Markdig.Markdown.ToHtml(content);
+                }
+                else
+                {
+                    ContentHtml = $"<em>{NotFoundMessage}</em>";
+                }
+            }
+            catch
+            {
+                ContentHtml = $"<em>{ErrorMessage}</em>";
+            }
+
+            StateHasChanged();
+        }
+    }
+}

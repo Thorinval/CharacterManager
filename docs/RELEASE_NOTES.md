@@ -1,24 +1,38 @@
 # Release Notes - Character Manager
 
-> **Version actuelle**: 0.10.1
+> **Version actuelle**: 0.11.0
 
 ---
 
+## 0.11.0 (01 Janvier 2026)
+
+✨ - Création page "Maison de Lucie" avec affichage complet des pièces et de l'affection
+
+✨ - Ajout entrée menu "Maison de Lucie" avec navigation
+
+✨ - Tuile d'accueil "Maison de Lucie" avec aperçu rapide des pièces
+
+🔧 - Harmonisation des largeurs de tuiles sur le tableau de bord
+
+🔧 - Synchronisation des icônes de menu avec les pages correspondantes
+
+🔧 - Normalisation du système de grille CSS pour le layout responsive
+
+🐛 - Correction tests unitaires pour les méthodes Lucie House
+
+## 0.10.3 (01 Janvier 2026)
+
+🔧 - Alimentation roadmap à partir d'un fichier
+
 ## 0.10.2 (31 Décembre 2025)
 
-✨ - Suppression d'un classement
+🐛 - fix import des pieces
 
-🔨 - En cours - historique de classement
-
-🔨 - En cours - page d'accueil
+✨ - Suppression d'un classement de l'historique
 
 ## 0.10.1 (28 Décembre 2025)
 
 ✨ - Refonte fenetres modales
-
-🔨 - En cours - historique de classement
-
-🔨 - En cours - page d'accueil
 
 ## 0.10.0 (28 Décembre 2025)
 

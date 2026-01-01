@@ -65,9 +65,23 @@
             </NavLink>
 
             <NavLink class="nav-rail-item" href="historique">
-                <i class="bi bi-clock-history"></i>
+                <i class="bi bi-graph-up"></i>
                 <span>
-                    <LocalizedText Key="navigation.history" />
+                    <LocalizedText Key="navigation.rankings" />
+                </span>
+            </NavLink>
+
+            <NavLink class="nav-rail-item" href="histoligues">
+                <i class="bi bi-trophy"></i>
+                <span>
+                    <LocalizedText Key="navigation.leagueHistory" />
+                </span>
+            </NavLink>
+
+            <NavLink class="nav-rail-item" href="maison-lucie">
+                <i class="bi bi-house-fill"></i>
+                <span>
+                    <LocalizedText Key="navigation.lucieHouse" />
                 </span>
             </NavLink>
 
@@ -165,7 +179,7 @@
 
     private void ShowChangelogModal()
     {
-        ModalService.Open<ChangelogModal>(size: ModalSize.Auto);
+        ModalService.Open<ChangelogModal>(size: ModalSize.XL);
     }
 
     private Profile? currentProfile;

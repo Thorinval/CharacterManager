@@ -4,21 +4,26 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.EntityFrameworkCore
 @using CharacterManager.Server.Data;
+@using System.Linq;
+
+<link rel="stylesheet" href="/css/CreerClassementModal.css" />
 
 @inject IModalService ModalService
 @inject PersonnageService PersonnageService
+@inject HistoriqueClassementService HistoriqueClassementService
 
 <div class="modal-header-premium sticky-header">
     <i class="bi bi-clipboard-plus header-icon"></i>
 
     <div class="header-text">
-        <h2 class="modal-title-premium">Créer un classement</h2>
-        <p class="modal-subtitle-premium">Enregistrer une nouvelle entrée dans l’historique</p>
+        <h2 class="modal-title-premium">@(IsEdit ? "Éditer un classement" : "Créer un classement")</h2>
+        <p class="modal-subtitle-premium">@(IsEdit ? "Mettre à jour les valeurs saisissables" : "Enregistrer une nouvelle entrée dans l'historique")</p>
     </div>
 </div>
 
 <div class="modal-body">
-    <EditForm id="classementForm" EditContext="@editContext" OnValidSubmit="CreateClassement">
+    <EditForm id="classementForm" EditContext="@editContext" OnValidSubmit="SaveClassement">
+        <DataAnnotationsValidator />
 
         <h4 class="section-title">Informations générales</h4>
 
@@ -29,7 +34,7 @@
                     <i class="bi bi-calendar3"></i>
                     Date
                 </label>
-                <InputDateOnly id="dateEnregistrementInput" @bind-value="form.DateEnregistrement"
+                <InputDate Type="InputDateType.Date" id="dateEnregistrementInput" @bind-Value="form.DateEnregistrement"
                     class="@($"form-control form-control-sm {GetValidationClass(nameof(form.DateEnregistrement))}")" />
                 <ValidationMessage For="@(() => form.DateEnregistrement)" />
             </div>
@@ -39,8 +44,15 @@
                     <i class="bi bi-shield-check"></i>
                     Ligue
                 </label>
-                <InputNumber id="ligueInput" @bind-Value="form.Ligue"
-                    class="@($"form-control form-control-sm {GetValidationClass(nameof(form.Ligue))}")" />
+                <InputSelect int? id="ligueInput" @bind-Value="form.Ligue"
+                    class="@($"form-select form-select-sm {GetValidationClass(nameof(form.Ligue))}")">
+                    <option value="">Sélectionner</option>
+                    @foreach (var ligue in LigueSteps)
+                    {
+                        <option value="@ligue">Ligue @ligue</option>
+                    }
+                    <option value="@EliteTop50Value">Elite - Top 50</option>
+                </InputSelect>
                 <ValidationMessage For="@(() => form.Ligue)" />
             </div>
 
@@ -90,29 +102,31 @@
         </div>
     </EditForm>
 
-    <h4 class="section-title">Équipement & Puissance</h4>
+    <h4 class="section-title">Puissances</h4>
 
     <div class="bloc-pieces-puissance-premium">
 
-        <div class="pieces-zone">
-            <div class="label-premium">
-                <i class="bi bi-nut"></i> Pièces
+        <div class="puissance-zones">
+            <div class="commandant-zone">
+                <div class="label-premium">
+                    <i class="bi bi-crown"></i> Commandant
+                </div>
+                <span class="pill-puissance-compact">@PuissanceCommandant</span>
             </div>
 
-            <div class="pieces-pills">
-                @foreach (var p in Pieces)
-                {
-                    <span class="pill-piece">@p.Nom (Niv @p.Niveau)</span>
-                }
-            </div>
-        </div>
-
-        <div class="puissance-zone">
-            <div class="label-premium">
-                <i class="bi bi-lightning-charge"></i> Puissance totale
+            <div class="mercenaires-zone">
+                <div class="label-premium">
+                    <i class="bi bi-people"></i> Mercenaires
+                </div>
+                <span class="pill-puissance-compact">@PuissanceMercenaires</span>
             </div>
 
-            <span class="pill-puissance">@PuissanceTotale</span>
+            <div class="lucie-zone">
+                <div class="label-premium">
+                    <i class="bi bi-gems"></i> Pièces Lucie
+                </div>
+                <span class="pill-puissance-compact">@PuissanceLucie</span>
+            </div>
         </div>
 
     </div>
@@ -123,7 +137,7 @@
 
         <div class="collapse-toggle" @onclick="() => showPersonnages = !showPersonnages">
             <i class="bi bi-people-fill"></i>
-            <span>Commandant, Mercenaires & Androïdes</span>
+            <span>Escouade</span>
             <i class="bi @(showPersonnages ? "bi-chevron-up" : "bi-chevron-down")" style="margin-left:auto;"></i>
         </div>
 
@@ -182,28 +196,45 @@
                     </div>
                 </div>
 
-                <!-- Androïdes -->
-                <div class="bloc-personnage-type bloc-androides">
-                    <h5 class="subsection-title">Androïdes</h5>
-                    <div class="androides-grid">
-                        @foreach (var a in Androides)
-                        {
-                            <div class="personnage-card personnage-card-small">
-                                <div class="card-header-row">
-                                    <div class="card-rarity rarity-@a.Rarete.ToString().ToLower()">@a.Rarete</div>
-                                    <div class="card-name">@a.Nom</div>
-                                </div>
+                <!-- Androïdes et Pièces sur la même ligne -->
+                <div class="bloc-androides-et-pieces">
+                    <!-- Androïdes -->
+                    <div class="bloc-personnage-type bloc-androides">
+                        <h5 class="subsection-title">Androïdes</h5>
+                        <div class="androides-grid">
+                            @foreach (var a in Androides)
+                            {
+                                <div class="personnage-card personnage-card-small">
+                                    <div class="card-header-row">
+                                        <div class="card-rarity rarity-@a.Rarete.ToString().ToLower()">@a.Rarete</div>
+                                        <div class="card-name">@a.Nom</div>
+                                    </div>
 
-                                <img src="@a.GetImageUrl(true)" alt="@a.Nom" class="card-image"
-                                    onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+                                    <img src="@a.GetImageUrl(true)" alt="@a.Nom" class="card-image"
+                                        onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
 
-                                <div class="card-info">
-                                    <div>Niv: @a.Niveau</div>
-                                    <div class="card-stars">@TemplateEscouade.GetRankStars(a.Rang)</div>
-                                    <div>Puiss: @a.Puissance</div>
+                                    <div class="card-info">
+                                        <div>Niv: @a.Niveau</div>
+                                        <div class="card-stars">@TemplateEscouade.GetRankStars(a.Rang)</div>
+                                        <div>Puiss: @a.Puissance</div>
+                                    </div>
                                 </div>
-                            </div>
-                        }
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Pièces -->
+                    <div class="bloc-personnage-type bloc-pieces">
+                        <h5 class="subsection-title">Pièces</h5>
+                        <div class="pieces-pills">
+                            @foreach (var p in Pieces)
+                            {
+                                <span class="pill-piece">
+                                    <span class="pill-piece-name">@p.Nom (Niv @p.Niveau)</span>
+                                    <span class="pill-piece-power">@p.PuissanceLegacy</span>
+                                </span>
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
@@ -213,377 +244,118 @@
 
 <!-- FOOTER -->
 <div class="modal-footer">
-    <button type="submit" class="btn btn-success" disabled="@( !isValid )" onsubmit="CreateClassement"
-        form="classementForm">
-        Créer
+    <button type="submit" class="btn btn-success" disabled="@( !isValid )" form="classementForm">
+        @(IsEdit ? "Mettre à jour" : "Créer")
     </button>
 </div>
 
-<style>
-    /* ============================================================
-   MODALE CREER CLASSEMENT — STYLE PREMIUM (VERSION FINALE)
-   ============================================================ */
-    /* --- HEADER PREMIUM STICKY --- */
-    .modal-header-premium {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 14px 4px 18px 4px;
-        margin: 10px;
-        background: rgba(0, 0, 0, 0.35);
-        backdrop-filter: blur(6px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .sticky-header {
-        position: sticky;
-        top: 0;
-        z-index: 50;
-    }
-
-    .header-icon {
-        font-size: 2rem;
-        color: #4da3ff;
-        opacity: 0.9;
-    }
-
-    .header-text .modal-title-premium {
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: #e2e8f0;
-    }
-
-    .header-text .modal-subtitle-premium {
-        margin: 0;
-        font-size: 0.85rem;
-        color: #94a3b8;
-    }
-
-    .section-title {
-        text-align: left;
-        margin: 16px 0 8px;
-        font-size: 1rem;
-        font-weight: 600;
-        color: #d1d5db;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        padding-bottom: 3px;
-    }
-
-    /* --- CHIPS --- */
-    .chip-label {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.85rem;
-        padding: 4px 12px;
-        border-radius: 999px;
-        font-weight: 600;
-        white-space: nowrap;
-    }
-
-    .chip-label i {
-        opacity: 0.85;
-    }
-
-    .chip-nutaku {
-        background: rgba(66, 153, 225, 0.15);
-        border: 1px solid rgba(66, 153, 225, 0.35);
-        color: #4da3ff;
-    }
-
-    .chip-top {
-        background: rgba(237, 137, 54, 0.15);
-        border: 1px solid rgba(237, 137, 54, 0.35);
-        color: #ffb26b;
-    }
-
-    .chip-pays {
-        background: rgba(72, 187, 120, 0.15);
-        border: 1px solid rgba(72, 187, 120, 0.35);
-        color: #5cd68d;
-    }
-
-    /* --- BLOC PREMIUM : Informations générales (Date + Ligue + Score) --- */
-    .bloc-infos-premium {
-        display: flex;
-        gap: 20px;
-        padding: 16px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 10px;
-        margin-bottom: 16px;
-    }
-
-    .bloc-infos-premium .info-item {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .bloc-infos-premium label {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-weight: 600;
-        color: #cbd5e1;
-    }
-
-    .bloc-infos-premium label i {
-        opacity: 0.85;
-        font-size: 1rem;
-    }
-
-    /* --- BLOC PREMIUM : Classements (Nutaku + Top150 + France) --- */
-    .bloc-classements-premium {
-        display: flex;
-        gap: 20px;
-        padding: 16px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 10px;
-        margin-bottom: 24px;
-    }
-
-    .bloc-classements-premium .classement-item {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    /* --- BLOC PREMIUM : Pièces + Puissance totale --- */
-    .bloc-pieces-puissance-premium {
-        display: flex;
-        gap: 20px;
-        padding: 16px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 10px;
-        margin-bottom: 16px;
-    }
-
-    .pieces-zone,
-    .puissance-zone {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-    }
-
-    .label-premium {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-weight: 600;
-        color: #cbd5e1;
-    }
-
-    .label-premium i {
-        opacity: 0.85;
-        font-size: 1rem;
-    }
-
-    /* --- PILLS --- */
-    .pieces-pills {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-    }
-
-    .pill-piece {
-        background: rgba(155, 89, 182, 0.12);
-        border: 1px solid rgba(155, 89, 182, 0.35);
-        padding: 4px 10px;
-        border-radius: 999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    .pill-puissance {
-        background: rgba(0, 255, 170, 0.15);
-        border: 1px solid rgba(0, 255, 170, 0.35);
-        color: #00ffaa;
-        padding: 4px 10px;
-        border-radius: 999px;
-        font-size: 0.85rem;
-        font-weight: 700;
-    }
-
-    /* --- Cartes compactes --- */
-    .personnage-card {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 6px;
-        padding: 4px;
-        width: 90px;
-        text-align: center;
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    .personnage-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-    }
-
-    .personnage-card-small {
-        transform: scale(0.90);
-        transform-origin: top left;
-    }
-
-    .card-name {
-        font-weight: bold;
-        font-size: 0.80rem;
-        text-align: left;
-        color: #cbd5e1;
-        line-height: 1.2;
-        flex: 1;
-    }
-
-    .card-image {
-        width: 60px;
-        height: 72px;
-        /* slightly reduced */
-        object-fit: cover;
-        border-radius: 4px;
-        margin-bottom: 0.25rem;
-        border: 1px solid rgba(0, 0, 0, 0.1);
-    }
-
-    .card-info {
-        font-size: 0.65rem;
-        color: #cbd5e1;
-        line-height: 1.1;
-    }
-
-    /* --- Grilles compactes --- */
-    .mercenaires-grid,
-    .androides-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-        gap: 6px;
-        margin-top: 6px;
-    }
-
-    /* Bouton d’ouverture */
-    .collapse-toggle {
-        width: 100%;
-        background: rgba(0, 0, 0, 0.25);
-        backdrop-filter: blur(6px);
-        border: none;
-        padding: 14px 16px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: #e2e8f0;
-        font-weight: 600;
-        font-size: 1rem;
-        cursor: pointer;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .collapse-toggle:hover {
-        background: rgba(255, 255, 255, 0.06);
-    }
-
-    .collapse-toggle i {
-        font-size: 1.2rem;
-        opacity: 0.9;
-    }
-
-    /* Contenu interne */
-    .collapse-content {
-        flex: 1;
-        padding: 6px;
-        min-height: 0;
-        max-height: 34vh;
-        overflow: auto;
-    }
-
-    .bloc-personnages-premium {
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-        max-height: 45vh;
-        overflow: hidden;
-    }
-
-    /* Sous-titres internes */
-    .subsection-title {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #cbd5e1;
-        margin: 0 0 6px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        padding-bottom: 3px;
-    }
-
-    /* Ligne Commandant + Mercenaires */
-    .ligne-commandant-mercenaires {
-        display: flex;
-        gap: 6px;
-        margin-bottom: 16px;
-        flex-wrap: nowrap;
-    }
-
-    /* Bloc Commandant : largeur fixe */
-    .bloc-commandant {
-        width: 115px;
-        /* parfait pour 1 carte */
-        flex-shrink: 0;
-        /* empêche l'écrasement */
-        padding: 6px;
-    }
-
-    /* Bloc Mercenaires : prend tout l'espace restant */
-    .bloc-mercenaires {
-        flex: 1;
-    }
-
-    /* Bloc interne premium (style uniquement) */
-    .bloc-personnage-type {
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 10px;
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-    }
-
-    .bloc-androides {
-        margin-top: -5px;
-        /* rapproche du bloc du dessus */
-    }
-
-    EditForm {
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-    }
-</style>
-
 @code {
     private PersonnageHistorique Commandant { get; set; } = default!;
-
     private List<PersonnageHistorique> Mercenaires { get; set; } = new();
-
     private List<PersonnageHistorique> Androides { get; set; } = new();
     private List<PieceHistorique> Pieces { get; set; } = new();
+
+    private readonly List<int> LigueSteps = Enumerable.Range(1, 25).Reverse().ToList();
+    private const int EliteTop50Value = 50;
 
     private ClassementFormModel form = new();
     private EditContext? editContext;
     private bool isValid;
     private bool showPersonnages = true;
-    private int PuissanceTotale => PersonnageService.GetPuissanceEscouade();
+    private bool IsEdit => Existing != null;
+    private int PuissanceTotale => IsEdit && Existing != null ? Existing.PuissanceTotal : PersonnageService.GetPuissanceEscouade();
+    private int PuissanceCommandant { get; set; } = 0;
+    private int PuissanceMercenaires { get; set; } = 0;
+    private int PuissanceLucie { get; set; } = 0;
+
+    [Parameter] public HistoriqueClassement? Existing { get; set; }
+    [Parameter] public EventCallback OnSaved { get; set; }
 
     [Inject]
     public ApplicationDbContext DbContext { get; set; } = null!;
 
-    protected override void OnInitialized()
+    protected override void OnParametersSet()
     {
+        if (IsEdit && Existing != null)
+        {
+            form = new ClassementFormModel
+            {
+                DateEnregistrement = Existing.DateEnregistrement,
+                Ligue = Existing.Ligue,
+                Score = Existing.Score,
+                Nutaku = Existing.Classements.FirstOrDefault(c => c.Type == TypeClassement.Nutaku)?.Valeur,
+                Top150 = Existing.Classements.FirstOrDefault(c => c.Type == TypeClassement.Top150)?.Valeur,
+                France = Existing.Classements.FirstOrDefault(c => c.Type == TypeClassement.France)?.Valeur
+            };
+
+            Commandant = Existing.Commandant ?? new PersonnageHistorique { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
+            Mercenaires = Existing.Mercenaires?.ToList() ?? new List<PersonnageHistorique>();
+            Androides = Existing.Androides?.ToList() ?? new List<PersonnageHistorique>();
+            Pieces = Existing.Pieces?.ToList() ?? new List<PieceHistorique>();
+            
+            // Charger les puissances historisées
+            PuissanceCommandant = Existing.PuissanceCommandant;
+            PuissanceMercenaires = Existing.PuissanceMercenaires;
+            PuissanceLucie = Existing.PuissanceLucie;
+        }
+        else
+        {
+            form = new ClassementFormModel();
+            form.DateEnregistrement = DateOnly.FromDateTime(DateTime.Now);
+
+            var cmd = PersonnageService.GetCommandants(true).FirstOrDefault();
+            Commandant = cmd != null ? new PersonnageHistorique
+            {
+                IdOrigine = cmd.Id,
+                Nom = cmd.Nom,
+                Niveau = cmd.Niveau,
+                Rang = cmd.Rang,
+                Rarete = cmd.Rarete,
+                Puissance = cmd.Puissance,
+                Type = cmd.Type,
+                Capacites = cmd.Capacites,
+            } : new PersonnageHistorique { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
+
+            Mercenaires = PersonnageService.GetMercenaires(true)?.Select(m => new PersonnageHistorique
+            {
+                IdOrigine = m.Id,
+                Nom = m.Nom,
+                Niveau = m.Niveau,
+                Rang = m.Rang,
+                Rarete = m.Rarete,
+                Puissance = m.Puissance,
+                Type = m.Type,
+                Capacites = m.Capacites,
+            }).ToList() ?? new List<PersonnageHistorique>();
+
+            Androides = PersonnageService.GetAndroides(true)?.Select(a => new PersonnageHistorique
+            {
+                IdOrigine = a.Id,
+                Nom = a.Nom,
+                Niveau = a.Niveau,
+                Rang = a.Rang,
+                Rarete = a.Rarete,
+                Puissance = a.Puissance,
+                Type = a.Type,
+                Capacites = a.Capacites,
+            }).ToList() ?? new List<PersonnageHistorique>();
+
+            Pieces = PersonnageService.GetPieces(true)?.Select(p => new PieceHistorique
+            {
+                IdOrigine = p.Id,
+                Nom = p.Nom,
+                Niveau = p.Niveau,
+                Selectionnee = p.Selectionnee,
+                AspectsStrategiques = p.AspectsStrategiques,
+                AspectsTactiques = p.AspectsTactiques
+            }).ToList() ?? new List<PieceHistorique>();
+            
+            // Calculer les puissances actuelles
+            CalculerPuissances();
+        }
+
         editContext = new EditContext(form);
-        isValid = editContext.Validate(); // initialisation
+        isValid = IsEdit ? editContext.Validate() : false;
 
         editContext.OnFieldChanged += (_, __) =>
         {
@@ -591,52 +363,21 @@
             InvokeAsync(StateHasChanged);
         };
 
+        StateHasChanged();
+    }
 
-
-        var cmd = PersonnageService.GetCommandants(true).FirstOrDefault();
-        Commandant = cmd != null ? new PersonnageHistorique
-        {
-            IdOrigine = cmd.Id,
-            Nom = cmd.Nom,
-            Niveau = cmd.Niveau,
-            Rang = cmd.Rang,
-            Rarete = cmd.Rarete,
-            Puissance = cmd.Puissance,
-            Type = cmd.Type,
-            Capacites = cmd.Capacites,
-        } : new PersonnageHistorique { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
-
-        Mercenaires = PersonnageService.GetMercenaires(true)?.Select(m => new PersonnageHistorique
-        {
-            IdOrigine = m.Id,
-            Nom = m.Nom,
-            Niveau = m.Niveau,
-            Rang = m.Rang,
-            Rarete = m.Rarete,
-            Puissance = m.Puissance,
-            Type = m.Type,
-            Capacites = m.Capacites,
-        }).ToList() ?? new List<PersonnageHistorique>();
-
-        Androides = PersonnageService.GetAndroides(true)?.Select(a => new PersonnageHistorique
-        {
-            IdOrigine = a.Id,
-            Nom = a.Nom,
-            Niveau = a.Niveau,
-            Rang = a.Rang,
-            Rarete = a.Rarete,
-            Puissance = a.Puissance,
-            Type = a.Type,
-            Capacites = a.Capacites,
-        }).ToList() ?? new List<PersonnageHistorique>();
-
-        Pieces = PersonnageService.GetPieces(true)?.Select(p => new PieceHistorique
-        {
-            IdOrigine = p.Id,
-            Nom = p.Nom,
-            Niveau = p.Niveau,
-            Selectionnee = p.Selectionnee,
-        }).ToList() ?? new List<PieceHistorique>();
+    private void CalculerPuissances()
+    {
+        // Puissance du commandant
+        var cmdPuissance = Commandant?.Puissance ?? 0;
+        var cmdRang = Commandant?.Rang ?? 0;
+        PuissanceCommandant = cmdPuissance + (cmdRang * 20);
+        
+        // Puissance des mercenaires et androïdes
+        PuissanceMercenaires = Mercenaires.Sum(m => m.Puissance) + Androides.Sum(a => a.Puissance);
+        
+        // Puissance des pièces Lucie - utiliser la méthode du service
+        PuissanceLucie = PersonnageService.GetPuissanceLucieEscouade();
     }
 
     private void Reset()
@@ -646,12 +387,32 @@
         isValid = false;
     }
 
-    private void CreateClassement()
+    private async Task SaveClassement()
     {
         if (!isValid)
             return;
 
-        HistoriqueClassement? historique = new HistoriqueClassement
+        if (IsEdit && Existing != null)
+        {
+            await HistoriqueClassementService.UpdateClassementEditableAsync(
+                Existing.Id,
+                form.DateEnregistrement,
+                form.Ligue ?? 0,
+                form.Score ?? 0,
+                form.Nutaku ?? 0,
+                form.Top150 ?? 0,
+                form.France ?? 0);
+
+            if (OnSaved.HasDelegate)
+            {
+                await OnSaved.InvokeAsync();
+            }
+
+            ModalService.Close();
+            return;
+        }
+
+        HistoriqueClassement historique = new HistoriqueClassement
         {
             DateEnregistrement = form.DateEnregistrement,
             Ligue = form.Ligue ?? 0,
@@ -661,7 +422,10 @@
             Androides = Androides,
             Pieces = Pieces,
             Commandant = Commandant,
-            PuissanceTotal = PersonnageService.GetPuissanceEscouade()
+            PuissanceTotal = PersonnageService.GetPuissanceEscouade(),
+            PuissanceCommandant = PuissanceCommandant,
+            PuissanceMercenaires = PuissanceMercenaires,
+            PuissanceLucie = PuissanceLucie
         };
 
         historique.Classements.Add(new Classement
@@ -686,11 +450,18 @@
         });
 
         DbContext.HistoriquesClassement.Add(historique);
-        DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync();
 
         Reset();
+
+        if (OnSaved.HasDelegate)
+        {
+            await OnSaved.InvokeAsync();
+        }
+
         ModalService.Close();
     }
+
     private string GetValidationClass(string fieldName)
     {
         if (editContext == null)
@@ -698,12 +469,10 @@
 
         var fieldIdentifier = new FieldIdentifier(form, fieldName);
         bool hasErrors = editContext.GetValidationMessages(fieldIdentifier).Any();
-
-        // Champ touché ?
         bool isModified = editContext.IsModified(fieldIdentifier);
 
         if (!isModified)
-            return ""; // pas encore touché → neutre
+            return "";
 
         return hasErrors ? "is-invalid" : "is-valid";
     }

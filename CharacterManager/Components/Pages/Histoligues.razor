@@ -1,0 +1,192 @@
+@page "/histoligues"
+@using CharacterManager.Server.Models
+@using CharacterManager.Server.Services
+@inject HistoriqueLigueService HistoriqueLigueService
+@inject IJSRuntime JS
+
+<PageTitle>Historique des Ligues</PageTitle>
+
+<link rel="stylesheet" href="/css/Histoligues.css" />
+
+<div class="histoligues-container">
+    <div class="histoligues-header">
+        <h1>
+            <i class="bi bi-trophy"></i>
+            Historique des Ligues
+        </h1>
+        <button class="btn btn-primary" @onclick="OpenCreateModal">
+            <i class="bi bi-plus-circle"></i>
+            Nouveau passage
+        </button>
+    </div>
+
+    @if (historiques == null)
+    {
+        <p class="loading">Chargement...</p>
+    }
+    else if (!historiques.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <p>Aucun passage enregistré</p>
+            <button class="btn btn-primary" @onclick="OpenCreateModal">
+                Ajouter le premier passage
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="table-container">
+            <table class="table-histoligues">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Ligue</th>
+                        <th>Notes</th>
+                        <th class="actions-column">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var historique in historiques)
+                    {
+                        <tr>
+                            <td class="date-cell">@historique.DatePassage.ToString("dd/MM/yyyy")</td>
+                            <td class="ligue-cell">
+                                @if (historique.Ligue == 50)
+                                {
+                                    <span class="ligue-badge elite">Elite - Top 50</span>
+                                }
+                                else
+                                {
+                                    <span class="ligue-badge ligue-@historique.Ligue">Ligue @historique.Ligue</span>
+                                }
+                            </td>
+                            <td class="notes-cell">@(string.IsNullOrEmpty(historique.Notes) ? "-" : historique.Notes)</td>
+                            <td class="actions-cell">
+                                <button class="btn-icon btn-edit" @onclick="() => OpenEditModal(historique)" title="Éditer">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn-icon btn-delete" @onclick="() => DeleteHistorique(historique.Id)" title="Supprimer">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- Modal Créer/Éditer -->
+@if (showModal)
+{
+    <div class="modal-overlay" @onclick="CloseModal">
+        <div class="modal-content" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h3>@(isEdit ? "Éditer le passage" : "Nouveau passage")</h3>
+                <button class="btn-close" @onclick="CloseModal">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Date du passage</label>
+                    <InputDate Type="InputDateType.Date" @bind-Value="formModel.DatePassage" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Ligue</label>
+                    <select @bind="formModel.Ligue" class="form-control">
+                        <option value="">Sélectionner</option>
+                        @foreach (var ligue in LigueSteps)
+                        {
+                            <option value="@ligue">Ligue @ligue</option>
+                        }
+                        <option value="50">Elite - Top 50</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Notes (optionnel)</label>
+                    <textarea @bind="formModel.Notes" class="form-control" rows="3" placeholder="Ajouter des notes..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="CloseModal">Annuler</button>
+                <button class="btn btn-primary" @onclick="SaveHistorique" disabled="@(formModel.Ligue == 0)">
+                    @(isEdit ? "Mettre à jour" : "Créer")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<HistoriqueLigue>? historiques;
+    private bool showModal = false;
+    private bool isEdit = false;
+    private HistoriqueLigue formModel = new();
+    private readonly List<int> LigueSteps = Enumerable.Range(1, 25).Reverse().ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        historiques = await HistoriqueLigueService.GetAllAsync();
+    }
+
+    private void OpenCreateModal()
+    {
+        formModel = new HistoriqueLigue { DatePassage = DateOnly.FromDateTime(DateTime.Now) };
+        isEdit = false;
+        showModal = true;
+    }
+
+    private void OpenEditModal(HistoriqueLigue historique)
+    {
+        formModel = new HistoriqueLigue
+        {
+            Id = historique.Id,
+            DatePassage = historique.DatePassage,
+            Ligue = historique.Ligue,
+            Notes = historique.Notes
+        };
+        isEdit = true;
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        formModel = new();
+    }
+
+    private async Task SaveHistorique()
+    {
+        if (formModel.Ligue == 0) return;
+
+        if (isEdit)
+        {
+            await HistoriqueLigueService.UpdateAsync(formModel);
+        }
+        else
+        {
+            await HistoriqueLigueService.AddAsync(formModel);
+        }
+
+        CloseModal();
+        await LoadData();
+    }
+
+    private async Task DeleteHistorique(int id)
+    {
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", "Êtes-vous sûr de vouloir supprimer ce passage ?");
+        if (confirmed)
+        {
+            await HistoriqueLigueService.DeleteAsync(id);
+            await LoadData();
+        }
+    }
+}

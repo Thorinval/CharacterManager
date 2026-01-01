@@ -9,80 +9,16 @@ namespace CharacterManager.Server.Services;
 
 public class HistoriqueClassementService(ApplicationDbContext dbContext)
 {
-    /// <summary>
-    /// Enregistre l'état actuel de l'escouade dans l'historique
-    /// </summary>
-    public async Task EnregistrerEscouadeAsync(
-        List<Personnage> mercenaires,
-        Personnage? commandant,
-        List<Personnage> androides,
-        int? classement = null)
-    {
-        try
-        {
-            var mercenairesData = mercenaires.Select(m => new PersonnelHistorique
-            {
-                Id = m.Id,
-                Nom = m.Nom,
-                Niveau = m.Niveau,
-                Rang = m.Rang,
-                Rarete = m.Rarete.ToString(),
-                Puissance = m.Puissance,
-                ImageUrl = m.ImageUrlSelected
-            }).ToList();
-
-            var commandantData = commandant != null ? new PersonnelHistorique
-            {
-                Id = commandant.Id,
-                Nom = commandant.Nom,
-                Niveau = commandant.Niveau,
-                Rang = commandant.Rang,
-                Rarete = commandant.Rarete.ToString(),
-                Puissance = commandant.Puissance,
-                ImageUrl = commandant.ImageUrlPreview
-            } : null;
-
-            var androidsData = androides.Select(a => new PersonnelHistorique
-            {
-                Id = a.Id,
-                Nom = a.Nom,
-                Niveau = a.Niveau,
-                Rang = a.Rang,
-                Rarete = a.Rarete.ToString(),
-                Puissance = a.Puissance,
-                ImageUrl = a.ImageUrlSelected
-            }).ToList();
-
-            var donneesEscouade = new DonneesEscouadeSerialisees
-            {
-                Mercenaires = mercenairesData,
-                Commandant = commandantData,
-                Androides = androidsData
-            };
-
-            var historique = new HistoriqueEscouade
-            {
-                DateEnregistrement = DateTime.UtcNow,
-                PuissanceTotal = mercenairesData.Sum(m => m.Puissance)
-                    + (commandantData?.Puissance ?? 0)
-                    + androidsData.Sum(a => a.Puissance),
-                Classement = classement,
-                DonneesEscouadeJson = JsonSerializer.Serialize(donneesEscouade)
-            };
-
-            dbContext.HistoriquesEscouade.Add(historique);
-            await dbContext.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Erreur lors de l'enregistrement de l'escouade: {ex.Message}");
-        }
-    }
-
     public async Task<List<HistoriqueClassement>> GetHistoriqueAsync()
     {
         return await dbContext.HistoriquesClassement
+            .Include(h => h.Classements)
+            .Include(h => h.Commandant)
+            .Include(h => h.Mercenaires)
+            .Include(h => h.Androides)
+            .Include(h => h.Pieces)
             .OrderByDescending(h => h.DateEnregistrement)
+            .AsNoTracking()
             .ToListAsync();
     }
 
@@ -92,15 +28,27 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
             .Where(h =>
                 h.DateEnregistrement.ToDateTime(TimeOnly.MinValue) >= dateDebut.Date &&
                 h.DateEnregistrement.ToDateTime(TimeOnly.MinValue) <= dateFin.Date)
+            .Include(h => h.Classements)
+            .Include(h => h.Commandant)
+            .Include(h => h.Mercenaires)
+            .Include(h => h.Androides)
+            .Include(h => h.Pieces)
             .OrderByDescending(h => h.DateEnregistrement)
+            .AsNoTracking()
             .ToListAsync();
     }
 
     public async Task<List<HistoriqueClassement>> GetHistoriqueRecentAsync(int nombre = 50)
     {
         return await dbContext.HistoriquesClassement
+            .Include(h => h.Classements)
+            .Include(h => h.Commandant)
+            .Include(h => h.Mercenaires)
+            .Include(h => h.Androides)
+            .Include(h => h.Pieces)
             .OrderByDescending(h => h.DateEnregistrement)
             .Take(nombre)
+            .AsNoTracking()
             .ToListAsync();
     }
 
@@ -129,6 +77,50 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
     public async Task ViderHistoriqueAsync()
     {
         dbContext.HistoriquesClassement.RemoveRange(dbContext.HistoriquesClassement);
+        await dbContext.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Met à jour uniquement les champs éditables d'un historique existant
+    /// (date, ligue, score et valeurs de classement). Les personnages et pièces historiques ne sont pas modifiés.
+    /// </summary>
+    public async Task UpdateClassementEditableAsync(int id, DateOnly date, int ligue, int score, int nutaku, int top150, int france)
+    {
+        var historique = await dbContext.HistoriquesClassement
+            .Include(h => h.Classements)
+            .FirstOrDefaultAsync(h => h.Id == id);
+
+        if (historique == null)
+        {
+            throw new InvalidOperationException($"Aucun historique avec l'id {id} n'a été trouvé.");
+        }
+
+        historique.DateEnregistrement = date;
+        historique.Ligue = ligue;
+        historique.Score = score;
+
+        void UpsertClassement(TypeClassement type, int valeur, string nom)
+        {
+            var existing = historique.Classements.FirstOrDefault(c => c.Type == type);
+            if (existing != null)
+            {
+                existing.Valeur = valeur;
+            }
+            else
+            {
+                historique.Classements.Add(new Classement
+                {
+                    Nom = nom,
+                    Type = type,
+                    Valeur = valeur
+                });
+            }
+        }
+
+        UpsertClassement(TypeClassement.Nutaku, nutaku, "Classement Nutaku");
+        UpsertClassement(TypeClassement.Top150, top150, "Classement Top150");
+        UpsertClassement(TypeClassement.France, france, "Classement France");
+
         await dbContext.SaveChangesAsync();
     }
 
@@ -282,115 +274,6 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
         writer.WriteElementString("Niveau", p.Niveau.ToString());
         writer.WriteElementString("Rang", p.Rang.ToString());
         writer.WriteElementString("Puissance", p.Puissance.ToString());
-    }
-
-    /// <summary>
-    /// Importe l'historique depuis un XML avec validations métier
-    /// </summary>
-    public async Task<int> ImporterHistoriqueAsync(Stream stream)
-    {
-        var errors = new List<string>();
-        var personnages = await dbContext.Personnages.AsNoTracking().ToListAsync();
-        var personByName = personnages.ToDictionary(p => p.Nom.Trim(), StringComparer.OrdinalIgnoreCase);
-
-        using var buffer = new MemoryStream();
-        await stream.CopyToAsync(buffer);
-        buffer.Position = 0;
-        var doc = await XDocument.LoadAsync(buffer, LoadOptions.None, CancellationToken.None);
-        int count = 0;
-
-        foreach (var enregistrement in doc.Root?.Elements("Enregistrement") ?? Enumerable.Empty<XElement>())
-        {
-            int errorCountBefore = errors.Count;
-
-            // Parse ID attribute for upsert logic
-            string? idAttr = enregistrement.Attribute("ID")?.Value;
-            int? recordId = null;
-            if (!string.IsNullOrWhiteSpace(idAttr) && int.TryParse(idAttr, out var parsedId))
-            {
-                recordId = parsedId;
-            }
-
-            // Lire depuis le groupe informations
-            var informations = enregistrement.Element("informations");
-            var date = ParseDate(informations?.Element("Date")?.Value, errors, "Date");
-            var ligue = ParseOptionalInt(informations?.Element("Ligue")?.Value, "Ligue", errors, min: 0) ?? 0;
-            var puissanceTotale = ParseRequiredInt(informations?.Element("Puissance")?.Value, "Puissance", errors, min: 0);
-            var score = ParseOptionalInt(informations?.Element("Score")?.Value, "Score", errors, min: 0) ?? 0;
-            int? classement = ParseClassement(enregistrement.Element("Classement"), errors) ?? (int?)score;
-
-            var nutaku = ParseOptionalInt(enregistrement.Element("Classement")?.Element("Nutaku")?.Value, "Classement/Nutaku", errors, min: 0) ?? 0;
-            var top150 = ParseOptionalInt(enregistrement.Element("Classement")?.Element("Top150")?.Value ?? enregistrement.Element("Classement")?.Element("Top 150")?.Value, "Classement/Top150", errors, min: 0) ?? 0;
-            var pays = ParseOptionalInt(enregistrement.Element("Classement")?.Element("Pays")?.Value, "Classement/Pays", errors, min: 0) ?? 0;
-            var luciePuissance = ParseOptionalInt(enregistrement.Element("Lucie")?.Element("Puissance")?.Value, "Lucie", errors, min: 0) ?? 0;
-
-            var donnees = new DonneesEscouadeSerialisees
-            {
-                Commandant = ParsePerson(enregistrement.Element("Commandant"), "Commandant", TypePersonnage.Commandant, personByName, errors),
-                Mercenaires = ParsePersons(enregistrement.Element("Escouade"), "Mercenaire", TypePersonnage.Mercenaire, personByName, errors, maxCount: 8),
-                Androides = ParsePersons(enregistrement.Element("Androides"), "Androide", TypePersonnage.Androïde, personByName, errors, maxCount: 3),
-                LuciePuissance = luciePuissance,
-                Ligue = ligue,
-                Nutaku = nutaku,
-                Top150 = top150,
-                Pays = pays,
-                Score = score
-            };
-
-            if (errors.Count > errorCountBefore)
-            {
-                continue;
-            }
-
-            // Upsert: check if record exists by ID
-            HistoriqueEscouade? historique = null;
-            if (recordId.HasValue)
-            {
-                historique = await dbContext.HistoriquesEscouade.FindAsync(recordId.Value);
-            }
-
-            if (historique != null)
-            {
-                // Update existing record
-                historique.DateEnregistrement = (date ?? DateTime.UtcNow).ToUniversalTime();
-                historique.PuissanceTotal = puissanceTotale ?? 0;
-                historique.Classement = classement ?? ligue;
-                historique.DonneesEscouadeJson = JsonSerializer.Serialize(donnees);
-                dbContext.HistoriquesEscouade.Update(historique);
-            }
-            else
-            {
-                // Insert new record
-                historique = new HistoriqueEscouade
-                {
-                    DateEnregistrement = (date ?? DateTime.UtcNow).ToUniversalTime(),
-                    PuissanceTotal = puissanceTotale ?? 0,
-                    Classement = classement ?? ligue,
-                    DonneesEscouadeJson = JsonSerializer.Serialize(donnees)
-                };
-                dbContext.HistoriquesEscouade.Add(historique);
-            }
-
-            count++;
-        }
-
-        if (errors.Count > 0)
-        {
-            var message = string.Join(" | ", errors.Take(5));
-            if (errors.Count > 5)
-            {
-                message += $" (+{errors.Count - 5} autres erreurs)";
-            }
-
-            throw new InvalidOperationException($"Import interrompu: {message}");
-        }
-
-        if (count > 0)
-        {
-            await dbContext.SaveChangesAsync();
-        }
-
-        return count;
     }
 
     private static int? ParseRequiredInt(string? value, string label, List<string> errors, int min, int? max = null)

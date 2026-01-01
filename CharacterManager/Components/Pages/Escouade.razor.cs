@@ -26,6 +26,9 @@ public partial class Escouade
     [Inject]
     public ApplicationDbContext DbContext { get; set; } = null!;
 
+    [Inject]
+    public IModalService ModalService { get; set; } = null!;
+
     protected override void OnInitialized()
     {
         LoadPersonnages();
@@ -65,9 +68,10 @@ public partial class Escouade
 
     private void NavigateToDetail(int id, string filter, string? returnUrl = null)
     {
-        var back = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
-        var encodedBack = Uri.EscapeDataString(back);
-        Navigation.NavigateTo($"/detail-personnage/{id}?filter={filter}&returnUrl={encodedBack}");
+        ModalService.Open<CharacterManager.Components.Modal.DetailPersonnageModal>(
+            new Dictionary<string, object> { { "PersonnageId", id } },
+            ModalSize.XL
+        );
     }
 
 

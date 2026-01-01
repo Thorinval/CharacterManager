@@ -7,7 +7,7 @@ public enum TypeBonus
 {
     Tactique,
     Strategique
-}   
+}
 
 public class Aspect
 {
@@ -171,6 +171,11 @@ public class LucieHouse
     public bool PeutSelectionner() => NombrePiecesSelectionnees < MaxPiecesSelectionnees;
 
     /// <summary>
+    /// Niveau d'affection actuel de Lucie.
+    /// </summary>
+    public int Affection { get; set; }
+
+    /// <summary>
     /// Sélectionne une pièce si le maximum n'est pas atteint.
     /// </summary>
     public bool SelectionnerPiece(string nomPiece)
@@ -222,4 +227,5 @@ public class LucieHouse
             ]
         };
     }
+
 }

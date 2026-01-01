@@ -8,7 +8,11 @@
     <div class="modal-backdrop" @onclick="Close">
         <div class="modal-container @GetSizeClass()" @onclick:stopPropagation="true">
 
-            <button class="modal-close" @onclick="Close">×</button>
+            <div class="modal-header-actions">
+                <button class="modal-close-btn" @onclick="Close" aria-label="Fermer">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
 
             <DynamicComponent Type="currentComponent" Parameters="currentParameters" />
         </div>

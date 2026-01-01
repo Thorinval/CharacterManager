@@ -32,7 +32,7 @@
 .col-score { width: 70px; }
 .col-puissance { width: 80px; }
 .col-classement { width: 120px; }
-.col-lucie { width: 80px; }
+.col-lucie { width: 140px; }
 .col-actions { width: 90px; }
 
 /* Group separators in data rows */
@@ -227,6 +227,62 @@ td.ranking-inline.info-cell {
 .pill-ligue { background: rgba(52, 152, 219, 0.12); border-color: rgba(52, 152, 219, 0.35); }
 .pill-score { background: rgba(241, 196, 15, 0.12); border-color: rgba(241, 196, 15, 0.35); }
 .pill-puissance { background: rgba(155, 89, 182, 0.12); border-color: rgba(155, 89, 182, 0.35); }
+
+/* Lucie pieces stacked pills */
+.lucie-cell {
+    vertical-align: top;
+}
+
+.lucie-pills {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: stretch;
+}
+
+.lucie-pill {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: rgba(155, 89, 182, 0.12);
+    border: 1px solid rgba(155, 89, 182, 0.35);
+    color: #4b365f;
+    font-weight: 600;
+    gap: 8px;
+}
+
+.lucie-pill-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    line-height: 1.2;
+}
+
+.lucie-pill-name {
+    font-size: 0.9rem;
+}
+
+.lucie-pill-level {
+    font-size: 0.75rem;
+    color: #7c6f89;
+    font-weight: 500;
+}
+
+.lucie-pill-power {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    font-size: 0.85rem;
+    color: #2c2540;
+    min-width: 46px;
+}
 
 /* Bold names */
 .name-bold {

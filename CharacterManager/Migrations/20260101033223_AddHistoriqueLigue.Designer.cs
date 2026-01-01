@@ -3,6 +3,7 @@ using System;
 using CharacterManager.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CharacterManager.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260101033223_AddHistoriqueLigue")]
+    partial class AddHistoriqueLigue
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -28,9 +31,6 @@ namespace CharacterManager.Migrations
 
                     b.Property<string>("Language")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("LastExportDate")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("LastImportedDate")
@@ -134,6 +134,30 @@ namespace CharacterManager.Migrations
                     b.HasIndex("CommandantId");
 
                     b.ToTable("HistoriquesClassement");
+                });
+
+            modelBuilder.Entity("CharacterManager.Server.Models.HistoriqueEscouade", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Classement")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("DateEnregistrement")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DonneesEscouadeJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PuissanceTotal")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HistoriquesEscouade");
                 });
 
             modelBuilder.Entity("CharacterManager.Server.Models.HistoriqueLigue", b =>

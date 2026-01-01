@@ -4,8 +4,11 @@ using System.Text.Json.Serialization;
 namespace CharacterManager.Server.Models;
 
 /// <summary>
-/// Représente un enregistrement historique de l'escouade à une date donnée
+/// [OBSOLÈTE] Représente un enregistrement historique de l'escouade à une date donnée (ancien format JSON).
+/// Ce modèle est conservé uniquement pour compatibilité avec les anciennes données et l'import XML legacy.
+/// Pour les nouveaux enregistrements, utiliser HistoriqueClassement qui offre une structure relationnelle complète.
 /// </summary>
+[Obsolete("Ce modèle utilise un format JSON sérialisé obsolète. Utiliser HistoriqueClassement pour les nouveaux enregistrements.")]
 public class HistoriqueEscouade
 {
     [Key]

@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<CharacterManagerPML version="1.0" exportDate="2025-12-28T19:57:28Z">
+<CharacterManagerPML version="1.0" exportDate="2026-01-01T15:21:43Z">
   <inventaire>
     <Personnage>
-      <Nom>ALEXA</Nom>
+      <Nom>DRAGANA</Nom>
       <Rarete>SSR</Rarete>
       <Type>Commandant</Type>
-      <Puissance>1500</Puissance>
+      <Puissance>1535</Puissance>
       <PA>0</PA>
-      <PV>1461</PV>
-      <Niveau>91</Niveau>
-      <Rang>0</Rang>
+      <PV>1656</PV>
+      <Niveau>92</Niveau>
+      <Rang>2</Rang>
       <Role>Combattante</Role>
       <Faction>Syndicat</Faction>
       <Selectionne>False</Selectionne>
-      <Description>Personnage ALEXA importé</Description>
+      <Description>Personnage DRAGANA importé</Description>
     </Personnage>
     <Personnage>
       <Nom>AURELIA</Nom>
       <Rarete>SSR</Rarete>
       <Type>Commandant</Type>
-      <Puissance>1500</Puissance>
+      <Puissance>1535</Puissance>
       <PA>0</PA>
       <PV>1634</PV>
-      <Niveau>91</Niveau>
+      <Niveau>92</Niveau>
       <Rang>1</Rang>
       <Role>Combattante</Role>
       <Faction>Syndicat</Faction>
@@ -33,10 +33,10 @@
       <Nom>CIRAX</Nom>
       <Rarete>SSR</Rarete>
       <Type>Commandant</Type>
-      <Puissance>1500</Puissance>
+      <Puissance>1535</Puissance>
       <PA>0</PA>
       <PV>1634</PV>
-      <Niveau>91</Niveau>
+      <Niveau>92</Niveau>
       <Rang>1</Rang>
       <Role>Combattante</Role>
       <Faction>Syndicat</Faction>
@@ -44,27 +44,13 @@
       <Description>Personnage CIRAX importé</Description>
     </Personnage>
     <Personnage>
-      <Nom>DRAGANA</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Commandant</Type>
-      <Puissance>1500</Puissance>
-      <PA>0</PA>
-      <PV>1656</PV>
-      <Niveau>91</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>Syndicat</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage DRAGANA importé</Description>
-    </Personnage>
-    <Personnage>
       <Nom>HUNTER</Nom>
       <Rarete>SSR</Rarete>
       <Type>Commandant</Type>
-      <Puissance>1500</Puissance>
+      <Puissance>1535</Puissance>
       <PA>0</PA>
       <PV>1634</PV>
-      <Niveau>91</Niveau>
+      <Niveau>92</Niveau>
       <Rang>1</Rang>
       <Role>Combattante</Role>
       <Faction>Syndicat</Faction>
@@ -72,13 +58,27 @@
       <Description>Personnage HUNTER importé</Description>
     </Personnage>
     <Personnage>
+      <Nom>ALEXA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Commandant</Type>
+      <Puissance>1535</Puissance>
+      <PA>0</PA>
+      <PV>1461</PV>
+      <Niveau>92</Niveau>
+      <Rang>0</Rang>
+      <Role>Combattante</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage ALEXA importé</Description>
+    </Personnage>
+    <Personnage>
       <Nom>VERENE</Nom>
       <Rarete>SSR</Rarete>
       <Type>Commandant</Type>
-      <Puissance>1500</Puissance>
+      <Puissance>1535</Puissance>
       <PA>0</PA>
       <PV>1461</PV>
-      <Niveau>91</Niveau>
+      <Niveau>92</Niveau>
       <Rang>0</Rang>
       <Role>Combattante</Role>
       <Faction>Syndicat</Faction>
@@ -86,102 +86,32 @@
       <Description>Personnage VERENE importé</Description>
     </Personnage>
     <Personnage>
-      <Nom>ALISHA</Nom>
+      <Nom>KITTY</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>2495</Puissance>
-      <PA>139</PA>
-      <PV>315</PV>
-      <Niveau>11</Niveau>
+      <Puissance>3590</Puissance>
+      <PA>157</PA>
+      <PV>201</PV>
+      <Niveau>12</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>True</Selectionne>
+      <Description>Personnage KITTY importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>RAVENNA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3550</Puissance>
+      <PA>140</PA>
+      <PV>471</PV>
+      <Niveau>18</Niveau>
       <Rang>3</Rang>
       <Role>Sentinelle</Role>
       <Faction>HommesLibres</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage ALISHA importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>AMY</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1340</Puissance>
-      <PA>161</PA>
-      <PV>192</PV>
-      <Niveau>9</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>Syndicat</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage AMY importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>ARACHNE</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2040</Puissance>
-      <PA>93</PA>
-      <PV>105</PV>
-      <Niveau>15</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>Syndicat</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage ARACHNE importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>ARIANE</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1380</Puissance>
-      <PA>162</PA>
-      <PV>235</PV>
-      <Niveau>9</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>Syndicat</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage ARIANE importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>ASHA</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2095</Puissance>
-      <PA>203</PA>
-      <PV>251</PV>
-      <Niveau>15</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>HommesLibres</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage ASHA importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>BEA</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1780</Puissance>
-      <PA>105</PA>
-      <PV>235</PV>
-      <Niveau>13</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>Syndicat</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage BEA importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>BECK</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1370</Puissance>
-      <PA>84</PA>
-      <PV>315</PV>
-      <Niveau>7</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>Syndicat</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage BECK importé</Description>
+      <Selectionne>True</Selectionne>
+      <Description>Personnage RAVENNA importé</Description>
     </Personnage>
     <Personnage>
       <Nom>BELLE</Nom>
@@ -198,424 +128,32 @@
       <Description>Personnage BELLE importé</Description>
     </Personnage>
     <Personnage>
-      <Nom>BILLIE</Nom>
+      <Nom>REGINA</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>1480</Puissance>
-      <PA>96</PA>
-      <PV>227</PV>
-      <Niveau>11</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>HommesLibres</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage BILLIE importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>BLANCHE</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2095</Puissance>
-      <PA>217</PA>
-      <PV>243</PV>
-      <Niveau>15</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>HommesLibres</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage BLANCHE importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>BLOOM</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1945</Puissance>
-      <PA>206</PA>
-      <PV>170</PV>
-      <Niveau>15</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage BLOOM importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>BRITNEY</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1790</Puissance>
-      <PA>83</PA>
-      <PV>413</PV>
-      <Niveau>13</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage BRITNEY importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>CASEY</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1725</Puissance>
+      <Puissance>3430</Puissance>
       <PA>140</PA>
-      <PV>229</PV>
-      <Niveau>12</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage CASEY importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>CHARLOTTE</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1630</Puissance>
-      <PA>52</PA>
-      <PV>243</PV>
-      <Niveau>9</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>Syndicat</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage CHARLOTTE importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>DOMINIQUE</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2040</Puissance>
-      <PA>94</PA>
-      <PV>319</PV>
-      <Niveau>14</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage DOMINIQUE importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>EVE</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2060</Puissance>
-      <PA>98</PA>
-      <PV>358</PV>
-      <Niveau>10</Niveau>
-      <Rang>3</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>Syndicat</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage EVE importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>FAYE</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1920</Puissance>
-      <PA>189</PA>
-      <PV>146</PV>
-      <Niveau>8</Niveau>
-      <Rang>3</Rang>
-      <Role>Combattante</Role>
-      <Faction>Syndicat</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage FAYE importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>FLORENCE</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2410</Puissance>
-      <PA>130</PA>
-      <PV>157</PV>
-      <Niveau>12</Niveau>
-      <Rang>3</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage FLORENCE importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>GINNY</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1450</Puissance>
-      <PA>74</PA>
-      <PV>315</PV>
-      <Niveau>11</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage GINNY importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>GRACE</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1950</Puissance>
-      <PA>182</PA>
-      <PV>227</PV>
-      <Niveau>13</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage GRACE importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>HANNAH</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1795</Puissance>
-      <PA>112</PA>
-      <PV>177</PV>
-      <Niveau>13</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>HommesLibres</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage HANNAH importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>HARPER</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2000</Puissance>
-      <PA>176</PA>
-      <PV>184</PV>
+      <PV>509</PV>
       <Niveau>15</Niveau>
       <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage HARPER importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>HILDA</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2040</Puissance>
-      <PA>154</PA>
-      <PV>160</PV>
-      <Niveau>15</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage HILDA importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>IVY</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1765</Puissance>
-      <PA>135</PA>
-      <PV>150</PV>
-      <Niveau>13</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>HommesLibres</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage IVY importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>KAYYA</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1905</Puissance>
-      <PA>246</PA>
-      <PV>166</PV>
-      <Niveau>14</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>HommesLibres</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage KAYYA importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>KIRA</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1950</Puissance>
-      <PA>301</PA>
-      <PV>173</PV>
-      <Niveau>14</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage KIRA importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>KIRSTEN</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1860</Puissance>
-      <PA>109</PA>
-      <PV>356</PV>
-      <Niveau>14</Niveau>
-      <Rang>2</Rang>
       <Role>Sentinelle</Role>
-      <Faction>HommesLibres</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage KIRSTEN importé</Description>
+      <Faction>Syndicat</Faction>
+      <Selectionne>True</Selectionne>
+      <Description>Personnage REGINA importé</Description>
     </Personnage>
     <Personnage>
-      <Nom>KITTY</Nom>
+      <Nom>NATASHA</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>2690</Puissance>
-      <PA>157</PA>
-      <PV>201</PV>
-      <Niveau>9</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
+      <Puissance>3050</Puissance>
+      <PA>131</PA>
+      <PV>411</PV>
+      <Niveau>18</Niveau>
+      <Rang>3</Rang>
+      <Role>Combattante</Role>
       <Faction>Pacificateurs</Faction>
       <Selectionne>True</Selectionne>
-      <Description>Personnage KITTY importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>KORBEN</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1340</Puissance>
-      <PA>135</PA>
-      <PV>137</PV>
-      <Niveau>9</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage KORBEN importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>LETA</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1310</Puissance>
-      <PA>90</PA>
-      <PV>142</PV>
-      <Niveau>9</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage LETA importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>LILITH</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1765</Puissance>
-      <PA>133</PA>
-      <PV>196</PV>
-      <Niveau>12</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>Syndicat</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage LILITH importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>LOLA</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2170</Puissance>
-      <PA>169</PA>
-      <PV>161</PV>
-      <Niveau>15</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage LOLA importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>LORRAINE</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1460</Puissance>
-      <PA>59</PA>
-      <PV>169</PV>
-      <Niveau>10</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>Syndicat</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage LORRAINE importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>LUCRETIA</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2330</Puissance>
-      <PA>201</PA>
-      <PV>258</PV>
-      <Niveau>7</Niveau>
-      <Rang>3</Rang>
-      <Role>Combattante</Role>
-      <Faction>HommesLibres</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage LUCRETIA importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>LUTHER</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1385</Puissance>
-      <PA>59</PA>
-      <PV>194</PV>
-      <Niveau>8</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage LUTHER importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>MADELEINE</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1870</Puissance>
-      <PA>183</PA>
-      <PV>268</PV>
-      <Niveau>13</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>Syndicat</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage MADELEINE importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>MITSUKI</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2040</Puissance>
-      <PA>78</PA>
-      <PV>82</PV>
-      <Niveau>15</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>HommesLibres</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage MITSUKI importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>MORANA</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2820</Puissance>
-      <PA>168</PA>
-      <PV>359</PV>
-      <Niveau>15</Niveau>
-      <Rang>3</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>Syndicat</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage MORANA importé</Description>
+      <Description>Personnage NATASHA importé</Description>
     </Personnage>
     <Personnage>
       <Nom>NAOMI</Nom>
@@ -632,32 +170,18 @@
       <Description>Personnage NAOMI importé</Description>
     </Personnage>
     <Personnage>
-      <Nom>NATASHA</Nom>
+      <Nom>MORANA</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>2870</Puissance>
-      <PA>131</PA>
-      <PV>411</PV>
-      <Niveau>17</Niveau>
-      <Rang>3</Rang>
-      <Role>Combattante</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>True</Selectionne>
-      <Description>Personnage NATASHA importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>NICOLE</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2100</Puissance>
-      <PA>232</PA>
-      <PV>212</PV>
+      <Puissance>2820</Puissance>
+      <PA>168</PA>
+      <PV>359</PV>
       <Niveau>15</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>Pacificateurs</Faction>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
       <Selectionne>False</Selectionne>
-      <Description>Personnage NICOLE importé</Description>
+      <Description>Personnage MORANA importé</Description>
     </Personnage>
     <Personnage>
       <Nom>NYMERIA</Nom>
@@ -674,6 +198,230 @@
       <Description>Personnage NYMERIA importé</Description>
     </Personnage>
     <Personnage>
+      <Nom>VICTORIA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2715</Puissance>
+      <PA>173</PA>
+      <PV>384</PV>
+      <Niveau>13</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage VICTORIA importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>OMEGA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2545</Puissance>
+      <PA>198</PA>
+      <PV>186</PV>
+      <Niveau>13</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage OMEGA importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>FLORENCE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2520</Puissance>
+      <PA>130</PA>
+      <PV>157</PV>
+      <Niveau>13</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage FLORENCE importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>ALISHA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2495</Puissance>
+      <PA>139</PA>
+      <PV>315</PV>
+      <Niveau>11</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>HommesLibres</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage ALISHA importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>SUNMI</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2410</Puissance>
+      <PA>124</PA>
+      <PV>370</PV>
+      <Niveau>12</Niveau>
+      <Rang>3</Rang>
+      <Role>Combattante</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>True</Selectionne>
+      <Description>Personnage SUNMI importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>WAYNE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2410</Puissance>
+      <PA>43</PA>
+      <PV>180</PV>
+      <Niveau>12</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>HommesLibres</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage WAYNE importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>ROSE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2380</Puissance>
+      <PA>152</PA>
+      <PV>215</PV>
+      <Niveau>11</Niveau>
+      <Rang>3</Rang>
+      <Role>Combattante</Role>
+      <Faction>HommesLibres</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage ROSE importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>LUCRETIA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2330</Puissance>
+      <PA>201</PA>
+      <PV>258</PV>
+      <Niveau>7</Niveau>
+      <Rang>3</Rang>
+      <Role>Combattante</Role>
+      <Faction>HommesLibres</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage LUCRETIA importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>SIXTINE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2195</Puissance>
+      <PA>148</PA>
+      <PV>141</PV>
+      <Niveau>10</Niveau>
+      <Rang>3</Rang>
+      <Role>Combattante</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage SIXTINE importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>LOLA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2170</Puissance>
+      <PA>169</PA>
+      <PV>161</PV>
+      <Niveau>15</Niveau>
+      <Rang>2</Rang>
+      <Role>Combattante</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage LOLA importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>GRACE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2170</Puissance>
+      <PA>182</PA>
+      <PV>227</PV>
+      <Niveau>15</Niveau>
+      <Rang>2</Rang>
+      <Role>Combattante</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage GRACE importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>TRIXIE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2120</Puissance>
+      <PA>104</PA>
+      <PV>168</PV>
+      <Niveau>9</Niveau>
+      <Rang>3</Rang>
+      <Role>Combattante</Role>
+      <Faction>HommesLibres</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage TRIXIE importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>ZOE ET CHLOE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2110</Puissance>
+      <PA>206</PA>
+      <PV>168</PV>
+      <Niveau>9</Niveau>
+      <Rang>3</Rang>
+      <Role>Combattante</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage ZOE ET CHLOE importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>NICOLE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2100</Puissance>
+      <PA>232</PA>
+      <PV>212</PV>
+      <Niveau>15</Niveau>
+      <Rang>2</Rang>
+      <Role>Combattante</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage NICOLE importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>ASHA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2095</Puissance>
+      <PA>203</PA>
+      <PV>251</PV>
+      <Niveau>15</Niveau>
+      <Rang>2</Rang>
+      <Role>Combattante</Role>
+      <Faction>HommesLibres</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage ASHA importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>BLANCHE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2095</Puissance>
+      <PA>217</PA>
+      <PV>243</PV>
+      <Niveau>15</Niveau>
+      <Rang>2</Rang>
+      <Role>Combattante</Role>
+      <Faction>HommesLibres</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage BLANCHE importé</Description>
+    </Personnage>
+    <Personnage>
       <Nom>O-RINN</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
@@ -688,18 +436,326 @@
       <Description>Personnage O-RINN importé</Description>
     </Personnage>
     <Personnage>
-      <Nom>OMEGA</Nom>
+      <Nom>WENDY</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>2325</Puissance>
-      <PA>198</PA>
-      <PV>186</PV>
-      <Niveau>11</Niveau>
+      <Puissance>2095</Puissance>
+      <PA>104</PA>
+      <PV>380</PV>
+      <Niveau>15</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>HommesLibres</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage WENDY importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>EVE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2060</Puissance>
+      <PA>98</PA>
+      <PV>358</PV>
+      <Niveau>10</Niveau>
       <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage EVE importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>KIRA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2060</Puissance>
+      <PA>301</PA>
+      <PV>173</PV>
+      <Niveau>15</Niveau>
+      <Rang>2</Rang>
+      <Role>Combattante</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage KIRA importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>ARACHNE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2040</Puissance>
+      <PA>93</PA>
+      <PV>105</PV>
+      <Niveau>15</Niveau>
+      <Rang>2</Rang>
+      <Role>Combattante</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage ARACHNE importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>DOMINIQUE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2040</Puissance>
+      <PA>94</PA>
+      <PV>319</PV>
+      <Niveau>14</Niveau>
+      <Rang>2</Rang>
       <Role>Sentinelle</Role>
       <Faction>Pacificateurs</Faction>
       <Selectionne>False</Selectionne>
-      <Description>Personnage OMEGA importé</Description>
+      <Description>Personnage DOMINIQUE importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>MITSUKI</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2040</Puissance>
+      <PA>78</PA>
+      <PV>82</PV>
+      <Niveau>15</Niveau>
+      <Rang>2</Rang>
+      <Role>Combattante</Role>
+      <Faction>HommesLibres</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage MITSUKI importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>BLOOM</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2015</Puissance>
+      <PA>206</PA>
+      <PV>170</PV>
+      <Niveau>9</Niveau>
+      <Rang>3</Rang>
+      <Role>Combattante</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage BLOOM importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>HARPER</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2000</Puissance>
+      <PA>176</PA>
+      <PV>184</PV>
+      <Niveau>15</Niveau>
+      <Rang>2</Rang>
+      <Role>Combattante</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage HARPER importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>SKYE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1980</Puissance>
+      <PA>118</PA>
+      <PV>414</PV>
+      <Niveau>14</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>HommesLibres</Faction>
+      <Selectionne>True</Selectionne>
+      <Description>Personnage SKYE importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>HILDA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1970</Puissance>
+      <PA>154</PA>
+      <PV>160</PV>
+      <Niveau>7</Niveau>
+      <Rang>3</Rang>
+      <Role>Combattante</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage HILDA importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>KIRSTEN</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1970</Puissance>
+      <PA>109</PA>
+      <PV>356</PV>
+      <Niveau>15</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>HommesLibres</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage KIRSTEN importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>ZARA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1925</Puissance>
+      <PA>52</PA>
+      <PV>187</PV>
+      <Niveau>14</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>HommesLibres</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage ZARA importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>FAYE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1920</Puissance>
+      <PA>189</PA>
+      <PV>146</PV>
+      <Niveau>8</Niveau>
+      <Rang>3</Rang>
+      <Role>Combattante</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage FAYE importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>KAYYA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1905</Puissance>
+      <PA>246</PA>
+      <PV>166</PV>
+      <Niveau>14</Niveau>
+      <Rang>2</Rang>
+      <Role>Combattante</Role>
+      <Faction>HommesLibres</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage KAYYA importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>SCARLETT</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1905</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>14</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>MADELEINE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1870</Puissance>
+      <PA>183</PA>
+      <PV>268</PV>
+      <Niveau>13</Niveau>
+      <Rang>2</Rang>
+      <Role>Combattante</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage MADELEINE importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>TSINTAH</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1820</Puissance>
+      <PA>123</PA>
+      <PV>161</PV>
+      <Niveau>5</Niveau>
+      <Rang>3</Rang>
+      <Role>Combattante</Role>
+      <Faction>HommesLibres</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage TSINTAH importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>YUMIKO</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1810</Puissance>
+      <PA>112</PA>
+      <PV>440</PV>
+      <Niveau>14</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage YUMIKO importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>HANNAH</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1795</Puissance>
+      <PA>112</PA>
+      <PV>177</PV>
+      <Niveau>13</Niveau>
+      <Rang>2</Rang>
+      <Role>Combattante</Role>
+      <Faction>HommesLibres</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage HANNAH importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>BRITNEY</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1790</Puissance>
+      <PA>83</PA>
+      <PV>413</PV>
+      <Niveau>13</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage BRITNEY importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>BEA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1780</Puissance>
+      <PA>105</PA>
+      <PV>235</PV>
+      <Niveau>13</Niveau>
+      <Rang>2</Rang>
+      <Role>Combattante</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage BEA importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>IVY</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1765</Puissance>
+      <PA>135</PA>
+      <PV>150</PV>
+      <Niveau>13</Niveau>
+      <Rang>2</Rang>
+      <Role>Combattante</Role>
+      <Faction>HommesLibres</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage IVY importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>LILITH</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1765</Puissance>
+      <PA>133</PA>
+      <PV>196</PV>
+      <Niveau>12</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage LILITH importé</Description>
     </Personnage>
     <Personnage>
       <Nom>PIXIE</Nom>
@@ -716,60 +772,74 @@
       <Description>Personnage PIXIE importé</Description>
     </Personnage>
     <Personnage>
-      <Nom>RAVENNA</Nom>
+      <Nom>CASEY</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>3405</Puissance>
+      <Puissance>1985</Puissance>
       <PA>140</PA>
-      <PV>471</PV>
-      <Niveau>18</Niveau>
-      <Rang>3</Rang>
+      <PV>229</PV>
+      <Niveau>14</Niveau>
+      <Rang>2</Rang>
       <Role>Sentinelle</Role>
-      <Faction>HommesLibres</Faction>
-      <Selectionne>True</Selectionne>
-      <Description>Personnage RAVENNA importé</Description>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage CASEY importé</Description>
     </Personnage>
     <Personnage>
-      <Nom>REGINA</Nom>
+      <Nom>SHARON</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>3430</Puissance>
-      <PA>140</PA>
-      <PV>509</PV>
-      <Niveau>15</Niveau>
+      <Puissance>1670</Puissance>
+      <PA>100</PA>
+      <PV>373</PV>
+      <Niveau>13</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage SHARON importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>CHARLOTTE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1630</Puissance>
+      <PA>52</PA>
+      <PV>243</PV>
+      <Niveau>9</Niveau>
       <Rang>2</Rang>
       <Role>Sentinelle</Role>
       <Faction>Syndicat</Faction>
-      <Selectionne>True</Selectionne>
-      <Description>Personnage REGINA importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>RIVER</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1460</Puissance>
-      <PA>130</PA>
-      <PV>172</PV>
-      <Niveau>10</Niveau>
-      <Rang>2</Rang>
-      <Role>Combattante</Role>
-      <Faction>Pacificateurs</Faction>
       <Selectionne>False</Selectionne>
-      <Description>Personnage RIVER importé</Description>
+      <Description>Personnage CHARLOTTE importé</Description>
     </Personnage>
     <Personnage>
-      <Nom>ROSE</Nom>
+      <Nom>ZELIA</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>2380</Puissance>
-      <PA>152</PA>
-      <PV>215</PV>
+      <Puissance>1615</Puissance>
+      <PA>59</PA>
+      <PV>126</PV>
       <Niveau>11</Niveau>
-      <Rang>3</Rang>
-      <Role>Combattante</Role>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
       <Faction>HommesLibres</Faction>
       <Selectionne>False</Selectionne>
-      <Description>Personnage ROSE importé</Description>
+      <Description>Personnage ZELIA importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>LUTHER</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1595</Puissance>
+      <PA>59</PA>
+      <PV>194</PV>
+      <Niveau>11</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage LUTHER importé</Description>
     </Personnage>
     <Personnage>
       <Nom>SALMA</Nom>
@@ -800,69 +870,27 @@
       <Description>Personnage SELINA importé</Description>
     </Personnage>
     <Personnage>
-      <Nom>SHARON</Nom>
+      <Nom>ARIANE</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>1670</Puissance>
-      <PA>100</PA>
-      <PV>373</PV>
-      <Niveau>13</Niveau>
+      <Puissance>1520</Puissance>
+      <PA>162</PA>
+      <PV>235</PV>
+      <Niveau>11</Niveau>
       <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage SHARON importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>SIXTINE</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2125</Puissance>
-      <PA>148</PA>
-      <PV>141</PV>
-      <Niveau>9</Niveau>
-      <Rang>3</Rang>
       <Role>Combattante</Role>
       <Faction>Syndicat</Faction>
       <Selectionne>False</Selectionne>
-      <Description>Personnage SIXTINE importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>SKYE</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1980</Puissance>
-      <PA>118</PA>
-      <PV>414</PV>
-      <Niveau>14</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>HommesLibres</Faction>
-      <Selectionne>True</Selectionne>
-      <Description>Personnage SKYE importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>SUNMI</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2410</Puissance>
-      <PA>124</PA>
-      <PV>370</PV>
-      <Niveau>12</Niveau>
-      <Rang>3</Rang>
-      <Role>Combattante</Role>
-      <Faction>Syndicat</Faction>
-      <Selectionne>True</Selectionne>
-      <Description>Personnage SUNMI importé</Description>
+      <Description>Personnage ARIANE importé</Description>
     </Personnage>
     <Personnage>
       <Nom>THORA</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>1350</Puissance>
+      <Puissance>1490</Puissance>
       <PA>97</PA>
       <PV>292</PV>
-      <Niveau>8</Niveau>
+      <Niveau>10</Niveau>
       <Rang>2</Rang>
       <Role>Sentinelle</Role>
       <Faction>HommesLibres</Faction>
@@ -870,172 +898,130 @@
       <Description>Personnage THORA importé</Description>
     </Personnage>
     <Personnage>
-      <Nom>TRIXIE</Nom>
+      <Nom>BILLIE</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>2120</Puissance>
-      <PA>104</PA>
-      <PV>168</PV>
-      <Niveau>9</Niveau>
-      <Rang>3</Rang>
-      <Role>Combattante</Role>
-      <Faction>HommesLibres</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage TRIXIE importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>TSINTAH</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1820</Puissance>
-      <PA>123</PA>
-      <PV>161</PV>
-      <Niveau>5</Niveau>
-      <Rang>3</Rang>
-      <Role>Combattante</Role>
-      <Faction>HommesLibres</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage TSINTAH importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>VICTORIA</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2715</Puissance>
-      <PA>173</PA>
-      <PV>384</PV>
-      <Niveau>13</Niveau>
-      <Rang>3</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage VICTORIA importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>WAYNE</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2090</Puissance>
-      <PA>43</PA>
-      <PV>180</PV>
-      <Niveau>15</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>HommesLibres</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage WAYNE importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>WENDY</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>2095</Puissance>
-      <PA>104</PA>
-      <PV>380</PV>
-      <Niveau>15</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>HommesLibres</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage WENDY importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>YUMIKO</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1810</Puissance>
-      <PA>112</PA>
-      <PV>440</PV>
-      <Niveau>14</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>Pacificateurs</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage YUMIKO importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>ZARA</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1925</Puissance>
-      <PA>52</PA>
-      <PV>187</PV>
-      <Niveau>14</Niveau>
-      <Rang>2</Rang>
-      <Role>Sentinelle</Role>
-      <Faction>HommesLibres</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage ZARA importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>ZELIA</Nom>
-      <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1615</Puissance>
-      <PA>59</PA>
-      <PV>126</PV>
+      <Puissance>1480</Puissance>
+      <PA>96</PA>
+      <PV>227</PV>
       <Niveau>11</Niveau>
       <Rang>2</Rang>
       <Role>Sentinelle</Role>
       <Faction>HommesLibres</Faction>
       <Selectionne>False</Selectionne>
-      <Description>Personnage ZELIA importé</Description>
+      <Description>Personnage BILLIE importé</Description>
     </Personnage>
     <Personnage>
-      <Nom>ZOE ET CHLOE</Nom>
+      <Nom>LORRAINE</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>1820</Puissance>
-      <PA>206</PA>
-      <PV>168</PV>
-      <Niveau>13</Niveau>
+      <Puissance>1460</Puissance>
+      <PA>59</PA>
+      <PV>169</PV>
+      <Niveau>10</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage LORRAINE importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>RIVER</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1460</Puissance>
+      <PA>130</PA>
+      <PV>172</PV>
+      <Niveau>10</Niveau>
       <Rang>2</Rang>
       <Role>Combattante</Role>
-      <Faction>Syndicat</Faction>
+      <Faction>Pacificateurs</Faction>
       <Selectionne>False</Selectionne>
-      <Description>Personnage ZOE ET CHLOE importé</Description>
+      <Description>Personnage RIVER importé</Description>
     </Personnage>
     <Personnage>
-      <Nom>AUDREY</Nom>
-      <Rarete>SR</Rarete>
-      <Type>Androïde</Type>
-      <Puissance>830</Puissance>
-      <PA>0</PA>
-      <PV>5</PV>
-      <Niveau>8</Niveau>
-      <Rang>0</Rang>
-      <Role>Combattante</Role>
-      <Faction>Syndicat</Faction>
-      <Selectionne>True</Selectionne>
-      <Description>Personnage AUDREY importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>AYONG</Nom>
-      <Rarete>R</Rarete>
-      <Type>Androïde</Type>
-      <Puissance>605</Puissance>
-      <PA>0</PA>
-      <PV>8</PV>
-      <Niveau>17</Niveau>
-      <Rang>0</Rang>
-      <Role>Combattante</Role>
-      <Faction>Syndicat</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage AYONG importé</Description>
-    </Personnage>
-    <Personnage>
-      <Nom>Chloe</Nom>
-      <Rarete>SR</Rarete>
-      <Type>Androïde</Type>
-      <Puissance>775</Puissance>
+      <Nom>VESPINA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1460</Puissance>
       <PA>0</PA>
       <PV>0</PV>
-      <Niveau>6</Niveau>
-      <Rang>0</Rang>
+      <Niveau>10</Niveau>
+      <Rang>2</Rang>
       <Role>Sentinelle</Role>
       <Faction>Syndicat</Faction>
       <Selectionne>False</Selectionne>
       <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>GINNY</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1450</Puissance>
+      <PA>74</PA>
+      <PV>315</PV>
+      <Niveau>11</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage GINNY importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>LETA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1450</Puissance>
+      <PA>90</PA>
+      <PV>142</PV>
+      <Niveau>11</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage LETA importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>BECK</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1440</Puissance>
+      <PA>84</PA>
+      <PV>315</PV>
+      <Niveau>8</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage BECK importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>KORBEN</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1410</Puissance>
+      <PA>135</PA>
+      <PV>137</PV>
+      <Niveau>10</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage KORBEN importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>AMY</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1340</Puissance>
+      <PA>161</PA>
+      <PV>192</PV>
+      <Niveau>9</Niveau>
+      <Rang>2</Rang>
+      <Role>Combattante</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage AMY importé</Description>
     </Personnage>
     <Personnage>
       <Nom>ISABELLA</Nom>
@@ -1052,20 +1038,6 @@
       <Description>Personnage ISABELLA importé</Description>
     </Personnage>
     <Personnage>
-      <Nom>RAMONA</Nom>
-      <Rarete>SR</Rarete>
-      <Type>Androïde</Type>
-      <Puissance>800</Puissance>
-      <PA>0</PA>
-      <PV>5</PV>
-      <Niveau>7</Niveau>
-      <Rang>0</Rang>
-      <Role>Combattante</Role>
-      <Faction>Syndicat</Faction>
-      <Selectionne>False</Selectionne>
-      <Description>Personnage RAMONA importé</Description>
-    </Personnage>
-    <Personnage>
       <Nom>RUBY</Nom>
       <Rarete>SR</Rarete>
       <Type>Androïde</Type>
@@ -1080,10 +1052,220 @@
       <Description>Personnage RUBY importé</Description>
     </Personnage>
     <Personnage>
-      <Nom>SCARLETT</Nom>
+      <Nom>AUDREY</Nom>
+      <Rarete>SR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>830</Puissance>
+      <PA>0</PA>
+      <PV>5</PV>
+      <Niveau>8</Niveau>
+      <Rang>0</Rang>
+      <Role>Combattante</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>True</Selectionne>
+      <Description>Personnage AUDREY importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>RAMONA</Nom>
+      <Rarete>SR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>800</Puissance>
+      <PA>0</PA>
+      <PV>5</PV>
+      <Niveau>7</Niveau>
+      <Rang>0</Rang>
+      <Role>Combattante</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage RAMONA importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>Chloe</Nom>
+      <Rarete>SR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>775</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>6</Niveau>
+      <Rang>0</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>AYONG</Nom>
+      <Rarete>R</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>605</Puissance>
+      <PA>0</PA>
+      <PV>8</PV>
+      <Niveau>17</Niveau>
+      <Rang>0</Rang>
+      <Role>Combattante</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage AYONG importé</Description>
+    </Personnage>
+    <Personnage>
+      <Nom>HUNTER</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Commandant</Type>
+      <Puissance>1535</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>92</Niveau>
+      <Rang>1</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>ISABELLA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>870</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>3</Niveau>
+      <Rang>0</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>RUBY</Nom>
+      <Rarete>SR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>855</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>9</Niveau>
+      <Rang>0</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>AUDREY</Nom>
+      <Rarete>SR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>830</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>8</Niveau>
+      <Rang>0</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>KITTY</Nom>
       <Rarete>SSR</Rarete>
       <Type>Mercenaire</Type>
-      <Puissance>1905</Puissance>
+      <Puissance>3590</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>12</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>RAVENNA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3550</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>18</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>BELLE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3440</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>10</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>REGINA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3430</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>15</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>NATASHA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3050</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>18</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>NAOMI</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2970</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>14</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>SUNMI</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2410</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>12</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>SKYE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1980</Puissance>
       <PA>0</PA>
       <PV>0</PV>
       <Niveau>14</Niveau>
@@ -1094,13 +1276,503 @@
       <Description />
     </Personnage>
     <Personnage>
-      <Nom>VESPINA</Nom>
+      <Nom>HUNTER</Nom>
       <Rarete>SSR</Rarete>
-      <Type>Mercenaire</Type>
-      <Puissance>1390</Puissance>
+      <Type>Commandant</Type>
+      <Puissance>1535</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>92</Niveau>
+      <Rang>1</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>ISABELLA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>870</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>3</Niveau>
+      <Rang>0</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>RUBY</Nom>
+      <Rarete>SR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>855</Puissance>
       <PA>0</PA>
       <PV>0</PV>
       <Niveau>9</Niveau>
+      <Rang>0</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>AUDREY</Nom>
+      <Rarete>SR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>830</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>8</Niveau>
+      <Rang>0</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>KITTY</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3590</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>12</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>RAVENNA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3550</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>18</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>BELLE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3440</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>10</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>REGINA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3430</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>15</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>NATASHA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3050</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>18</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>NAOMI</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2970</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>14</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>SUNMI</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2410</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>12</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>SKYE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1980</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>14</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>HUNTER</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Commandant</Type>
+      <Puissance>1535</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>92</Niveau>
+      <Rang>1</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>ISABELLA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>870</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>3</Niveau>
+      <Rang>0</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>RUBY</Nom>
+      <Rarete>SR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>855</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>9</Niveau>
+      <Rang>0</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>AUDREY</Nom>
+      <Rarete>SR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>830</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>8</Niveau>
+      <Rang>0</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>KITTY</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3590</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>12</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>RAVENNA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3550</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>18</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>BELLE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3440</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>10</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>REGINA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3430</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>15</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>NATASHA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3050</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>18</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>NAOMI</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2970</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>14</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>SUNMI</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2410</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>12</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>SKYE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1980</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>14</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>HUNTER</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Commandant</Type>
+      <Puissance>1535</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>92</Niveau>
+      <Rang>1</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>ISABELLA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>870</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>3</Niveau>
+      <Rang>0</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>RUBY</Nom>
+      <Rarete>SR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>855</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>9</Niveau>
+      <Rang>0</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>AUDREY</Nom>
+      <Rarete>SR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>830</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>8</Niveau>
+      <Rang>0</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>KITTY</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3590</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>12</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>RAVENNA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3550</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>18</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>BELLE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3440</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>10</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>REGINA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3430</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>15</Niveau>
+      <Rang>2</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>NATASHA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3050</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>18</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>NAOMI</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2970</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>14</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>SUNMI</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>2410</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>12</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Personnage>
+    <Personnage>
+      <Nom>SKYE</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1980</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>14</Niveau>
       <Rang>2</Rang>
       <Role>Sentinelle</Role>
       <Faction>Syndicat</Faction>
@@ -1109,6 +1781,7 @@
     </Personnage>
   </inventaire>
   <LucieHouse>
+    <Affection>0</Affection>
     <Piece>
       <Nom>Bar</Nom>
       <Niveau>60</Niveau>
@@ -1118,9 +1791,9 @@
     </Piece>
     <Piece>
       <Nom>Café</Nom>
-      <Niveau>57</Niveau>
-      <PuissanceTactique>735</PuissanceTactique>
-      <PuissanceStrategique>1025</PuissanceStrategique>
+      <Niveau>63</Niveau>
+      <PuissanceTactique>885</PuissanceTactique>
+      <PuissanceStrategique>1325</PuissanceStrategique>
       <Selectionne>True</Selectionne>
     </Piece>
     <Piece>
@@ -1132,9 +1805,9 @@
     </Piece>
     <Piece>
       <Nom>Gymnase</Nom>
-      <Niveau>19</Niveau>
-      <PuissanceTactique>235</PuissanceTactique>
-      <PuissanceStrategique>385</PuissanceStrategique>
+      <Niveau>21</Niveau>
+      <PuissanceTactique>245</PuissanceTactique>
+      <PuissanceStrategique>395</PuissanceStrategique>
       <Selectionne>False</Selectionne>
     </Piece>
     <Piece>
@@ -1145,4 +1818,496 @@
       <Selectionne>False</Selectionne>
     </Piece>
   </LucieHouse>
+  <meilleurEscouade>
+    <Mercenaire>
+      <Nom>KITTY</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3590</Puissance>
+      <PA>157</PA>
+      <PV>201</PV>
+      <Niveau>12</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Pacificateurs</Faction>
+      <TypeAttaque>Mêlée</TypeAttaque>
+      <Selectionne>True</Selectionne>
+      <Description>Personnage KITTY importé</Description>
+    </Mercenaire>
+    <Mercenaire>
+      <Nom>KITTY</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3590</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>12</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <TypeAttaque>Mêlée</TypeAttaque>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Mercenaire>
+    <Mercenaire>
+      <Nom>KITTY</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3590</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>12</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <TypeAttaque>Mêlée</TypeAttaque>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Mercenaire>
+    <Mercenaire>
+      <Nom>KITTY</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3590</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>12</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <TypeAttaque>Mêlée</TypeAttaque>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Mercenaire>
+    <Mercenaire>
+      <Nom>KITTY</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3590</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>12</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <TypeAttaque>Mêlée</TypeAttaque>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Mercenaire>
+    <Mercenaire>
+      <Nom>RAVENNA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3550</Puissance>
+      <PA>140</PA>
+      <PV>471</PV>
+      <Niveau>18</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>HommesLibres</Faction>
+      <TypeAttaque>Inconnu</TypeAttaque>
+      <Selectionne>True</Selectionne>
+      <Description>Personnage RAVENNA importé</Description>
+    </Mercenaire>
+    <Mercenaire>
+      <Nom>RAVENNA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3550</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>18</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <TypeAttaque>Mêlée</TypeAttaque>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Mercenaire>
+    <Mercenaire>
+      <Nom>RAVENNA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3550</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>18</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <TypeAttaque>Mêlée</TypeAttaque>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Mercenaire>
+    <Mercenaire>
+      <Nom>RAVENNA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3550</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>18</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <TypeAttaque>Mêlée</TypeAttaque>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Mercenaire>
+    <Mercenaire>
+      <Nom>RAVENNA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>3550</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>18</Niveau>
+      <Rang>3</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <TypeAttaque>Mêlée</TypeAttaque>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Mercenaire>
+    <Commandant>
+      <Nom>DRAGANA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Commandant</Type>
+      <Puissance>1535</Puissance>
+      <PA>0</PA>
+      <PV>1656</PV>
+      <Niveau>92</Niveau>
+      <Rang>2</Rang>
+      <Role>Combattante</Role>
+      <Faction>Syndicat</Faction>
+      <TypeAttaque>Inconnu</TypeAttaque>
+      <Selectionne>False</Selectionne>
+      <Description>Personnage DRAGANA importé</Description>
+    </Commandant>
+    <Androide>
+      <Nom>ISABELLA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>870</Puissance>
+      <PA>0</PA>
+      <PV>20</PV>
+      <Niveau>3</Niveau>
+      <Rang>0</Rang>
+      <Role>Combattante</Role>
+      <Faction>Syndicat</Faction>
+      <TypeAttaque>Inconnu</TypeAttaque>
+      <Selectionne>True</Selectionne>
+      <Description>Personnage ISABELLA importé</Description>
+    </Androide>
+    <Androide>
+      <Nom>ISABELLA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>870</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>3</Niveau>
+      <Rang>0</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <TypeAttaque>Mêlée</TypeAttaque>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Androide>
+    <Androide>
+      <Nom>ISABELLA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>870</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>3</Niveau>
+      <Rang>0</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <TypeAttaque>Mêlée</TypeAttaque>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Androide>
+    <Androide>
+      <Nom>ISABELLA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>870</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>3</Niveau>
+      <Rang>0</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <TypeAttaque>Mêlée</TypeAttaque>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Androide>
+    <Androide>
+      <Nom>ISABELLA</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Androïde</Type>
+      <Puissance>870</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>3</Niveau>
+      <Rang>0</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <TypeAttaque>Mêlée</TypeAttaque>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Androide>
+  </meilleurEscouade>
+  <HistoriqueClassement>
+    <DateEnregistrement>2026-01-02</DateEnregistrement>
+    <Ligue>4</Ligue>
+    <Score>12000</Score>
+    <PuissanceTotal>33775</PuissanceTotal>
+    <PuissanceCommandant>1555</PuissanceCommandant>
+    <PuissanceMercenaires>26975</PuissanceMercenaires>
+    <PuissanceLucie>5245</PuissanceLucie>
+    <Classements>
+      <ClassementItem>
+        <Nom>Classement Nutaku</Nom>
+        <TypeClassement>Nutaku</TypeClassement>
+        <Valeur>1000</Valeur>
+      </ClassementItem>
+      <ClassementItem>
+        <Nom>Classement Top150</Nom>
+        <TypeClassement>Top150</TypeClassement>
+        <Valeur>1000</Valeur>
+      </ClassementItem>
+      <ClassementItem>
+        <Nom>Classement France</Nom>
+        <TypeClassement>France</TypeClassement>
+        <Valeur>1000</Valeur>
+      </ClassementItem>
+    </Classements>
+    <Mercenaires>
+      <Personnage>
+        <Nom>KITTY</Nom>
+        <Rarete>SSR</Rarete>
+        <Type>Mercenaire</Type>
+        <Puissance>3590</Puissance>
+        <PA>0</PA>
+        <PV>0</PV>
+        <Niveau>12</Niveau>
+        <Rang>3</Rang>
+        <Role>Sentinelle</Role>
+        <Faction>Syndicat</Faction>
+        <TypeAttaque>Mêlée</TypeAttaque>
+        <Selectionne>False</Selectionne>
+        <Description />
+      </Personnage>
+      <Personnage>
+        <Nom>RAVENNA</Nom>
+        <Rarete>SSR</Rarete>
+        <Type>Mercenaire</Type>
+        <Puissance>3550</Puissance>
+        <PA>0</PA>
+        <PV>0</PV>
+        <Niveau>18</Niveau>
+        <Rang>3</Rang>
+        <Role>Sentinelle</Role>
+        <Faction>Syndicat</Faction>
+        <TypeAttaque>Mêlée</TypeAttaque>
+        <Selectionne>False</Selectionne>
+        <Description />
+      </Personnage>
+      <Personnage>
+        <Nom>BELLE</Nom>
+        <Rarete>SSR</Rarete>
+        <Type>Mercenaire</Type>
+        <Puissance>3440</Puissance>
+        <PA>0</PA>
+        <PV>0</PV>
+        <Niveau>10</Niveau>
+        <Rang>3</Rang>
+        <Role>Sentinelle</Role>
+        <Faction>Syndicat</Faction>
+        <TypeAttaque>Mêlée</TypeAttaque>
+        <Selectionne>False</Selectionne>
+        <Description />
+      </Personnage>
+      <Personnage>
+        <Nom>REGINA</Nom>
+        <Rarete>SSR</Rarete>
+        <Type>Mercenaire</Type>
+        <Puissance>3430</Puissance>
+        <PA>0</PA>
+        <PV>0</PV>
+        <Niveau>15</Niveau>
+        <Rang>2</Rang>
+        <Role>Sentinelle</Role>
+        <Faction>Syndicat</Faction>
+        <TypeAttaque>Mêlée</TypeAttaque>
+        <Selectionne>False</Selectionne>
+        <Description />
+      </Personnage>
+      <Personnage>
+        <Nom>NATASHA</Nom>
+        <Rarete>SSR</Rarete>
+        <Type>Mercenaire</Type>
+        <Puissance>3050</Puissance>
+        <PA>0</PA>
+        <PV>0</PV>
+        <Niveau>18</Niveau>
+        <Rang>3</Rang>
+        <Role>Sentinelle</Role>
+        <Faction>Syndicat</Faction>
+        <TypeAttaque>Mêlée</TypeAttaque>
+        <Selectionne>False</Selectionne>
+        <Description />
+      </Personnage>
+      <Personnage>
+        <Nom>NAOMI</Nom>
+        <Rarete>SSR</Rarete>
+        <Type>Mercenaire</Type>
+        <Puissance>2970</Puissance>
+        <PA>0</PA>
+        <PV>0</PV>
+        <Niveau>14</Niveau>
+        <Rang>3</Rang>
+        <Role>Sentinelle</Role>
+        <Faction>Syndicat</Faction>
+        <TypeAttaque>Mêlée</TypeAttaque>
+        <Selectionne>False</Selectionne>
+        <Description />
+      </Personnage>
+      <Personnage>
+        <Nom>SUNMI</Nom>
+        <Rarete>SSR</Rarete>
+        <Type>Mercenaire</Type>
+        <Puissance>2410</Puissance>
+        <PA>0</PA>
+        <PV>0</PV>
+        <Niveau>12</Niveau>
+        <Rang>3</Rang>
+        <Role>Sentinelle</Role>
+        <Faction>Syndicat</Faction>
+        <TypeAttaque>Mêlée</TypeAttaque>
+        <Selectionne>False</Selectionne>
+        <Description />
+      </Personnage>
+      <Personnage>
+        <Nom>SKYE</Nom>
+        <Rarete>SSR</Rarete>
+        <Type>Mercenaire</Type>
+        <Puissance>1980</Puissance>
+        <PA>0</PA>
+        <PV>0</PV>
+        <Niveau>14</Niveau>
+        <Rang>2</Rang>
+        <Role>Sentinelle</Role>
+        <Faction>Syndicat</Faction>
+        <TypeAttaque>Mêlée</TypeAttaque>
+        <Selectionne>False</Selectionne>
+        <Description />
+      </Personnage>
+    </Mercenaires>
+    <Commandant>
+      <Nom>HUNTER</Nom>
+      <Rarete>SSR</Rarete>
+      <Type>Commandant</Type>
+      <Puissance>1535</Puissance>
+      <PA>0</PA>
+      <PV>0</PV>
+      <Niveau>92</Niveau>
+      <Rang>1</Rang>
+      <Role>Sentinelle</Role>
+      <Faction>Syndicat</Faction>
+      <TypeAttaque>Mêlée</TypeAttaque>
+      <Selectionne>False</Selectionne>
+      <Description />
+    </Commandant>
+    <Androides>
+      <Personnage>
+        <Nom>ISABELLA</Nom>
+        <Rarete>SSR</Rarete>
+        <Type>Androïde</Type>
+        <Puissance>870</Puissance>
+        <PA>0</PA>
+        <PV>0</PV>
+        <Niveau>3</Niveau>
+        <Rang>0</Rang>
+        <Role>Sentinelle</Role>
+        <Faction>Syndicat</Faction>
+        <TypeAttaque>Mêlée</TypeAttaque>
+        <Selectionne>False</Selectionne>
+        <Description />
+      </Personnage>
+      <Personnage>
+        <Nom>RUBY</Nom>
+        <Rarete>SR</Rarete>
+        <Type>Androïde</Type>
+        <Puissance>855</Puissance>
+        <PA>0</PA>
+        <PV>0</PV>
+        <Niveau>9</Niveau>
+        <Rang>0</Rang>
+        <Role>Sentinelle</Role>
+        <Faction>Syndicat</Faction>
+        <TypeAttaque>Mêlée</TypeAttaque>
+        <Selectionne>False</Selectionne>
+        <Description />
+      </Personnage>
+      <Personnage>
+        <Nom>AUDREY</Nom>
+        <Rarete>SR</Rarete>
+        <Type>Androïde</Type>
+        <Puissance>830</Puissance>
+        <PA>0</PA>
+        <PV>0</PV>
+        <Niveau>8</Niveau>
+        <Rang>0</Rang>
+        <Role>Sentinelle</Role>
+        <Faction>Syndicat</Faction>
+        <TypeAttaque>Mêlée</TypeAttaque>
+        <Selectionne>False</Selectionne>
+        <Description />
+      </Personnage>
+    </Androides>
+    <Pieces>
+      <Piece>
+        <Nom>Bar</Nom>
+        <Niveau>60</Niveau>
+        <PuissanceTactique>680</PuissanceTactique>
+        <PuissanceStrategique>1055</PuissanceStrategique>
+        <Selectionne>True</Selectionne>
+      </Piece>
+      <Piece>
+        <Nom>Café</Nom>
+        <Niveau>61</Niveau>
+        <PuissanceTactique>835</PuissanceTactique>
+        <PuissanceStrategique>1225</PuissanceStrategique>
+        <Selectionne>True</Selectionne>
+      </Piece>
+    </Pieces>
+  </HistoriqueClassement>
+  <HistoriqueLigue>
+    <DatePassage>2025-12-29</DatePassage>
+    <Ligue>3</Ligue>
+  </HistoriqueLigue>
+  <HistoriqueLigue>
+    <DatePassage>2025-12-13</DatePassage>
+    <Ligue>4</Ligue>
+  </HistoriqueLigue>
+  <HistoriqueLigue>
+    <DatePassage>2025-12-02</DatePassage>
+    <Ligue>5</Ligue>
+  </HistoriqueLigue>
+  <HistoriqueLigue>
+    <DatePassage>2025-11-28</DatePassage>
+    <Ligue>6</Ligue>
+  </HistoriqueLigue>
+  <HistoriqueLigue>
+    <DatePassage>2025-11-18</DatePassage>
+    <Ligue>7</Ligue>
+  </HistoriqueLigue>
+  <HistoriqueLigue>
+    <DatePassage>2025-11-09</DatePassage>
+    <Ligue>8</Ligue>
+  </HistoriqueLigue>
 </CharacterManagerPML>

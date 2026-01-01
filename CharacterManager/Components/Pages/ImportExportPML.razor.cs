@@ -30,12 +30,14 @@ public partial class ImportExportPML
     private bool importTemplates = false;
     private bool importBestSquad = false;
     private bool importHistories = false;
+    private bool importLeagueHistory = false;
 
     // Export checkboxes
     private bool exportInventory = true;
     private bool exportTemplates = false;
     private bool exportBestSquad = false;
     private bool exportHistories = false;
+    private bool exportLeagueHistory = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -50,12 +52,12 @@ public partial class ImportExportPML
 
     private bool HasSelectedImportTypes()
     {
-        return importInventory || importTemplates || importBestSquad || importHistories;
+        return importInventory || importTemplates || importBestSquad || importHistories || importLeagueHistory;
     }
 
     private bool HasSelectedExportTypes()
     {
-        return exportInventory || exportTemplates || exportBestSquad || exportHistories;
+        return exportInventory || exportTemplates || exportBestSquad || exportHistories || exportLeagueHistory;
     }
 
     private async Task HandleImport()
@@ -74,7 +76,8 @@ public partial class ImportExportPML
                 importInventory,
                 importTemplates,
                 importBestSquad,
-                importHistories
+                importHistories,
+                importLeagueHistory
             );
             importComplete = true;
 
@@ -113,7 +116,8 @@ public partial class ImportExportPML
                 exportInventory,
                 exportTemplates,
                 exportBestSquad,
-                exportHistories);
+                exportHistories,
+                exportLeagueHistory);
 
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             var fileName = $"export_{timestamp}.pml";
@@ -157,7 +161,8 @@ public partial class ImportExportPML
                 exportInventory,
                 exportTemplates,
                 exportBestSquad,
-                exportHistories);
+                exportHistories,
+                exportLeagueHistory);
 
             var configPath = Path.Combine("wwwroot", "config.pml");
             await File.WriteAllBytesAsync(configPath, exportData);

@@ -15,12 +15,20 @@ public class PersonnageService
 
     public Task<IEnumerable<Personnage>> GetAllAsync()
     {
-        return Task.FromResult(_context.Personnages.Include(static p => p.Capacites).AsEnumerable());
+        return Task.FromResult(_context.Personnages.Include(static p => p.Capacites).Where(static p => p.GetType() == typeof(Personnage)).AsEnumerable());
     }
 
     public IEnumerable<Personnage> GetAll()
     {
-        return [.. _context.Personnages.Include(static p => p.Capacites)];
+        return [.. _context.Personnages.Include(static p => p.Capacites).Where(static p => p.GetType() == typeof(Personnage))];
+    }
+
+    public (int Commandants, int Mercenaires, int Androides) GetInventoryCounts()
+    {
+        var commandants = _context.Personnages.Count(p => p.Type == TypePersonnage.Commandant && p.GetType() == typeof(Personnage));
+        var mercenaires = _context.Personnages.Count(p => p.Type == TypePersonnage.Mercenaire && p.GetType() == typeof(Personnage));
+        var androides = _context.Personnages.Count(p => p.Type == TypePersonnage.Androïde && p.GetType() == typeof(Personnage));
+        return (commandants, mercenaires, androides);
     }
 
     public int GetPuissanceEscouade()
@@ -37,7 +45,7 @@ public class PersonnageService
     public int GetPuissanceLucieEscouade()
     {
         var puissanceTactiqueLucie = _context.Pieces
-            .Where(p => p.Selectionnee)
+            .Where(p => p.Selectionnee && p.GetType() == typeof(Piece))
             .AsEnumerable()
             .Sum(p => p.AspectsTactiques?.Puissance ?? 0);
 
@@ -48,7 +56,7 @@ public class PersonnageService
 
     private int GetPuissanceCommandantEscouade() =>
         _context.Personnages
-            .Where(p => p.Selectionne && p.Type == TypePersonnage.Commandant)
+            .Where(p => p.Selectionne && p.Type == TypePersonnage.Commandant && p.GetType() == typeof(Personnage))
             .Select(p => p.Puissance + p.Rang * 20)
             .FirstOrDefault();
 
@@ -56,7 +64,7 @@ public class PersonnageService
     private int GetPuissanceTopCommandant()
     {
         return _context.Personnages
-            .Where(p => p.Type == TypePersonnage.Commandant)
+            .Where(p => p.Type == TypePersonnage.Commandant && p.GetType() == typeof(Personnage))
             .Select(p => p.Puissance + p.Rang * 20)
             .ToList()
             .DefaultIfEmpty(0)
@@ -67,6 +75,7 @@ public class PersonnageService
     {
         return _context.Pieces?
             .AsEnumerable()
+            .Where(p => p.GetType() == typeof(Piece))
             .Sum(p => p.AspectsStrategiques?.Puissance ?? 0) ?? 0;
     }
 
@@ -76,12 +85,19 @@ public class PersonnageService
                GetPuissanceTopCommandant() +
                GetTopAndroides().Sum(static p => p.Puissance);
 
+        var puissanceLucie = GetPuissanceMaxLucieEscouade();
+
+        return puissanceMax + puissanceLucie;
+    }
+
+    public int GetPuissanceMaxLucieEscouade()
+    {
         var puissanceLucie = GetTopLucieRooms()
             .AsEnumerable()
             .Sum(p => p.AspectsTactiques?.Puissance ?? 0) +
             GetPuissanceStrategiqueLucie();
 
-        return puissanceMax + puissanceLucie;
+        return puissanceLucie;
     }
 
     public int GetPuissanceSeuilCommandantPourLvlUp()
@@ -93,7 +109,7 @@ public class PersonnageService
     {
         return await Task.FromResult(_context.Personnages
             .Include(static p => p.Capacites)
-            .Where(static p => p.Type == TypePersonnage.Mercenaire)
+            .Where(static p => p.Type == TypePersonnage.Mercenaire && p.GetType() == typeof(Personnage))
             .OrderByDescending(static p => p.Puissance)
             .Take(count)
             .ToList());
@@ -104,7 +120,7 @@ public class PersonnageService
         return _context.Personnages
             .AsNoTracking()
             .Include(static p => p.Capacites)
-            .Where(static p => p.Type == TypePersonnage.Mercenaire)
+            .Where(static p => p.Type == TypePersonnage.Mercenaire && p.GetType() == typeof(Personnage))
             .OrderByDescending(static p => p.Puissance)
             .Take(count)
             .ToList();
@@ -114,7 +130,7 @@ public class PersonnageService
     {
         return await Task.FromResult(_context.Personnages
             .Include(static p => p.Capacites)
-            .Where(static p => p.Type == TypePersonnage.Commandant)
+            .Where(static p => p.Type == TypePersonnage.Commandant && p.GetType() == typeof(Personnage))
             .OrderByDescending(static p => p.Puissance)
             .FirstOrDefault());
     }
@@ -124,7 +140,7 @@ public class PersonnageService
         return _context.Personnages
             .AsNoTracking()
             .Include(static p => p.Capacites)
-            .Where(static p => p.Type == TypePersonnage.Commandant)
+            .Where(static p => p.Type == TypePersonnage.Commandant && p.GetType() == typeof(Personnage))
             .OrderByDescending(p => p.Puissance + p.Rang * 20)
             .FirstOrDefault();
     }
@@ -135,6 +151,7 @@ public class PersonnageService
         return _context.Pieces
             .AsNoTracking()
             .AsEnumerable()
+            .Where(p => p.GetType() == typeof(Piece))
             .OrderByDescending(static p => p.PuissanceTotale)
             .Take(count)
             .ToList();
@@ -144,7 +161,7 @@ public class PersonnageService
     {
         return await Task.FromResult(_context.Personnages
             .Include(static p => p.Capacites)
-            .Where(static p => p.Type == TypePersonnage.Androïde)
+            .Where(static p => p.Type == TypePersonnage.Androïde && p.GetType() == typeof(Personnage))
             .OrderByDescending(static p => p.Puissance)
             .Take(count)
             .ToList());
@@ -155,7 +172,7 @@ public class PersonnageService
         return _context.Personnages
             .AsNoTracking()
             .Include(static p => p.Capacites)
-            .Where(static p => p.Type == TypePersonnage.Androïde)
+            .Where(static p => p.Type == TypePersonnage.Androïde && p.GetType() == typeof(Personnage))
             .OrderByDescending(static p => p.Puissance)
             .Take(count)
             .ToList();
@@ -165,7 +182,7 @@ public class PersonnageService
     {
         return await Task.FromResult(_context.Personnages
             .Include(static p => p.Capacites)
-            .Where(static p => p.Selectionne)
+            .Where(static p => p.Selectionne && p.GetType() == typeof(Personnage))
             .ToList());
     }
 
@@ -173,7 +190,7 @@ public class PersonnageService
     {
         var query = _context.Personnages
             .Include(static p => p.Capacites)
-            .Where(static p => p.Type == TypePersonnage.Mercenaire);
+            .Where(static p => p.Type == TypePersonnage.Mercenaire && p.GetType() == typeof(Personnage));
 
         if (selectionneOnly)
         {
@@ -222,7 +239,7 @@ public class PersonnageService
     {
         var query = _context.Personnages
             .Include(static p => p.Capacites)
-            .Where(static p => p.Type == TypePersonnage.Mercenaire);
+            .Where(static p => p.Type == TypePersonnage.Mercenaire && p.GetType() == typeof(Personnage));
 
         if (selectionneOnly)
         {
@@ -235,7 +252,7 @@ public class PersonnageService
     {
         var query = _context.Personnages
             .Include(static p => p.Capacites)
-            .Where(static p => p.Type == TypePersonnage.Commandant);
+            .Where(static p => p.Type == TypePersonnage.Commandant && p.GetType() == typeof(Personnage));
 
         if (selectionneOnly)
         {
@@ -252,7 +269,7 @@ public class PersonnageService
 
         if (selectionneOnly)
         {
-            query = query.Where(static p => p.Selectionne);
+            query = query.Where(static p => p.Selectionne && p.GetType() == typeof(Personnage));
         }
 
         return query.ToList();
@@ -260,8 +277,10 @@ public class PersonnageService
 
     public IEnumerable<Piece> GetPieces(bool selectionneOnly = false)
     {
-        var query = _context.Pieces.AsNoTracking()
-            .AsEnumerable();
+        // Filtrer seulement les Piece (pas PieceHistorique) avant AsEnumerable
+        var query = _context.Pieces
+            .AsNoTracking()
+            .Where(p => p.GetType() == typeof(Piece));
 
         if (selectionneOnly)
         {
@@ -422,5 +441,25 @@ public class PersonnageService
         return _context.Personnages
             .Where(p => ids.Contains(p.Id))
             .Sum(p => p.Puissance);
+    }
+
+    /// <summary>
+    /// Récupère la Lucie House avec tous les détails
+    /// </summary>
+    public async Task<LucieHouse?> GetLucieHouseAsync()
+    {
+        return await _context.LucieHouses
+            .Include(l => l.Pieces)
+            .FirstOrDefaultAsync();
+    }
+
+    /// <summary>
+    /// Récupère toutes les pièces de la Lucie House
+    /// </summary>
+    public async Task<List<Piece>> GetLuciePiecesAsync()
+    {
+        return await _context.Pieces
+            .Where(p => p.GetType() == typeof(Piece))
+            .ToListAsync();
     }
 }

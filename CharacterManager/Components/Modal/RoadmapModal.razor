@@ -1,39 +1,12 @@
 @using CharacterManager.Server.Services
+
 @inject IModalService ModalService
-@inject RoadmapService RoadmapService
 
-<div class="modal-body text-center">
-
-    <div class="app-icon mb-3">
-        <i class="bi bi-info-circle" style="font-size: 4rem; color: #0d6efd;"></i>
-    </div>
-    <div class="modal-content">
-        <h3>ROADMAP</h3>
-        <textarea class="form-control" style="min-height: 200px;" @bind="RoadmapText"></textarea>
-    </div>
-</div>
-<div class="modal-footer">
-    <button type="button" class="btn btn-primary" @onclick="Save">Sauvegarder</button>
-</div>
+<MarkdownModal 
+    FileName="ROADMAP.md" 
+    NotFoundMessage="Aucune roadmap trouvée." 
+    ErrorMessage="Erreur lors du chargement de la roadmap." />
 
 @code {
-
-    private string RoadmapText { get; set; } = string.Empty;
-
-    private async Task Save()
-    {
-        await RoadmapService.SaveRoadmapAsync(RoadmapText);
-        ModalService.Close();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            RoadmapText = await RoadmapService.LoadRoadmapAsync();
-            StateHasChanged();
-        }
-    }
-
-
+    private void Close() => ModalService.Close();
 }

@@ -28,6 +28,9 @@ public partial class Inventaire : IAsyncDisposable
     public PmlImportService PmlImportService { get; set; } = null!;
 
     [Inject]
+    public IModalService ModalService { get; set; } = null!;
+
+    [Inject]
     public IWebHostEnvironment WebHostEnvironment { get; set; } = null!;
 
     [Inject]
@@ -639,7 +642,10 @@ public partial class Inventaire : IAsyncDisposable
 
     private void ViewPersonnage(int id)
     {
-        Navigation.NavigateTo($"/detail-personnage/{id}");
+        ModalService.Open<CharacterManager.Components.Modal.DetailPersonnageModal>(
+            new Dictionary<string, object> { { "PersonnageId", id } },
+            ModalSize.XL
+        );
     }
 
     private async Task ExportToPML()

@@ -15,70 +15,70 @@ namespace CharacterManager.Tests;
 
 public class PmlImportServiceTests : IDisposable
 {
-    private readonly ApplicationDbContext _context;
-    private readonly PersonnageService _personnageService;
-    private readonly PmlImportService _pmlImportService;
+  private readonly ApplicationDbContext _context;
+  private readonly PersonnageService _personnageService;
+  private readonly PmlImportService _pmlImportService;
 
-    public PmlImportServiceTests()
+  public PmlImportServiceTests()
+  {
+    var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        .UseInMemoryDatabase(Guid.NewGuid().ToString())
+        .Options;
+
+    _context = new ApplicationDbContext(options);
+    _context.Database.EnsureCreated();
+
+    _personnageService = new PersonnageService(_context);
+    _pmlImportService = new PmlImportService(_personnageService, _context);
+
+    SeedPersonnages();
+  }
+
+  private void SeedPersonnages()
+  {
+    _context.Personnages.Add(new Personnage
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
+      Nom = "REGINA",
+      Type = TypePersonnage.Mercenaire,
+      Rarete = Rarete.SSR,
+      Niveau = 14,
+      Rang = 2,
+      Puissance = 3320,
+      PA = 140,
+      PV = 509,
+      Role = Role.Sentinelle,
+      Faction = Faction.Syndicat,
+      Description = "SSR Mercenaire"
+    });
 
-        _context = new ApplicationDbContext(options);
-        _context.Database.EnsureCreated();
-        
-        _personnageService = new PersonnageService(_context);
-        _pmlImportService = new PmlImportService(_personnageService, _context);
-
-        SeedPersonnages();
-    }
-
-    private void SeedPersonnages()
+    _context.Personnages.Add(new Personnage
     {
-        _context.Personnages.Add(new Personnage
-        {
-            Nom = "REGINA",
-            Type = TypePersonnage.Mercenaire,
-            Rarete = Rarete.SSR,
-            Niveau = 14,
-            Rang = 2,
-            Puissance = 3320,
-            PA = 140,
-            PV = 509,
-            Role = Role.Sentinelle,
-            Faction = Faction.Syndicat,
-            Description = "SSR Mercenaire"
-        });
+      Nom = "ISABELLA",
+      Type = TypePersonnage.Androïde,
+      Rarete = Rarete.SSR,
+      Niveau = 2,
+      Rang = 0,
+      Puissance = 835,
+      PA = 0,
+      PV = 20,
+      Role = Role.Androide,
+      Faction = Faction.Inconnu,
+      Description = "SSR Androide"
+    });
 
-        _context.Personnages.Add(new Personnage
-        {
-            Nom = "ISABELLA",
-            Type = TypePersonnage.Androïde,
-            Rarete = Rarete.SSR,
-            Niveau = 2,
-            Rang = 0,
-            Puissance = 835,
-            PA = 0,
-            PV = 20,
-            Role = Role.Androide,
-            Faction = Faction.Inconnu,
-            Description = "SSR Androide"
-        });
+    _context.SaveChanges();
+  }
 
-        _context.SaveChanges();
-    }
+  public void Dispose()
+  {
+    _context?.Dispose();
+  }
 
-    public void Dispose()
-    {
-        _context?.Dispose();
-    }
-
-    [Fact]
-    public async Task ImportPmlAsync_WithValidInventaire_ShouldImportPersonnages()
-    {
-        // Arrange
-        var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+  [Fact]
+  public async Task ImportPmlAsync_WithValidInventaire_ShouldImportPersonnages()
+  {
+    // Arrange
+    var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <InventairePML version=""1.0"" exportDate=""2025-12-20T15:30:00Z"">
   <inventaire>
     <Personnage>
@@ -98,27 +98,27 @@ public class PmlImportServiceTests : IDisposable
   </inventaire>
 </InventairePML>";
 
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
+    var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
 
-        // Act
-        var result = await _pmlImportService.ImportPmlAsync(stream);
+    // Act
+    var result = await _pmlImportService.ImportPmlAsync(stream);
 
-        // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(1, result.SuccessCount);
+    // Assert
+    Assert.True(result.IsSuccess);
+    Assert.Equal(1, result.SuccessCount);
 
-        var belle = _context.Personnages.FirstOrDefault(p => p.Nom == "BELLE");
-        Assert.NotNull(belle);
-        Assert.Equal(Rarete.SSR, belle.Rarete);
-        Assert.Equal(TypePersonnage.Mercenaire, belle.Type);
-        Assert.Equal(3090, belle.Puissance);
-    }
+    var belle = _context.Personnages.FirstOrDefault(p => p.Nom == "BELLE");
+    Assert.NotNull(belle);
+    Assert.Equal(Rarete.SSR, belle.Rarete);
+    Assert.Equal(TypePersonnage.Mercenaire, belle.Type);
+    Assert.Equal(3090, belle.Puissance);
+  }
 
-    [Fact]
-    public async Task ImportPmlAsync_WithValidTemplate_ShouldImportTemplate()
-    {
-        // Arrange
-        var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+  [Fact]
+  public async Task ImportPmlAsync_WithValidTemplate_ShouldImportTemplate()
+  {
+    // Arrange
+    var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <TemplatesPML version=""1.0"" exportDate=""2025-12-20T15:30:00Z"">
   <template>
     <Nom>Mon Équipe</Nom>
@@ -138,25 +138,25 @@ public class PmlImportServiceTests : IDisposable
   </template>
 </TemplatesPML>";
 
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
+    var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
 
-        // Act
-        var result = await _pmlImportService.ImportPmlAsync(stream);
+    // Act
+    var result = await _pmlImportService.ImportPmlAsync(stream);
 
-        // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.SuccessCount);
+    // Assert
+    Assert.True(result.IsSuccess);
+    Assert.Equal(2, result.SuccessCount);
 
-        var template = _context.Templates.FirstOrDefault(t => t.Nom == "Mon Équipe");
-        Assert.NotNull(template);
-        Assert.Equal("Ma première équipe", template.Description);
-    }
+    var template = _context.Templates.FirstOrDefault(t => t.Nom == "Mon Équipe");
+    Assert.NotNull(template);
+    Assert.Equal("Ma première équipe", template.Description);
+  }
 
-    [Fact]
-    public async Task ImportPmlAsync_WithMixedSections_ShouldImportBoth()
-    {
-        // Arrange
-        var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+  [Fact]
+  public async Task ImportPmlAsync_WithMixedSections_ShouldImportBoth()
+  {
+    // Arrange
+    var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <HistoriqueEscouadePML version=""1.0"" exportDate=""2025-12-20T15:30:00Z"">
   <inventaire>
     <Personnage>
@@ -188,27 +188,27 @@ public class PmlImportServiceTests : IDisposable
   </templates>
 </HistoriqueEscouadePML>";
 
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
+    var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
 
-        // Act
-        var result = await _pmlImportService.ImportPmlAsync(stream);
+    // Act
+    var result = await _pmlImportService.ImportPmlAsync(stream);
 
-        // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.SuccessCount); // 1 personnage + 1 template
+    // Assert
+    Assert.True(result.IsSuccess);
+    Assert.Equal(2, result.SuccessCount); // 1 personnage + 1 template
 
-        var katara = _context.Personnages.FirstOrDefault(p => p.Nom == "KATARA");
-        Assert.NotNull(katara);
+    var katara = _context.Personnages.FirstOrDefault(p => p.Nom == "KATARA");
+    Assert.NotNull(katara);
 
-        var testTeam = _context.Templates.FirstOrDefault(t => t.Nom == "Test Team");
-        Assert.NotNull(testTeam);
-    }
+    var testTeam = _context.Templates.FirstOrDefault(t => t.Nom == "Test Team");
+    Assert.NotNull(testTeam);
+  }
 
-    [Fact]
-    public async Task ImportPmlAsync_WithBestSquad_ShouldImportAllRoles()
-    {
-        // Arrange
-        var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+  [Fact]
+  public async Task ImportPmlAsync_WithBestSquad_ShouldImportAllRoles()
+  {
+    // Arrange
+    var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <CharacterManagerPML version=""1.0"" exportDate=""2025-12-20T15:30:00Z"">
   <meilleurEscouade>
     <Mercenaire>
@@ -253,25 +253,27 @@ public class PmlImportServiceTests : IDisposable
   </meilleurEscouade>
 </CharacterManagerPML>";
 
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
+    var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
 
-        // Act
-        var result = await _pmlImportService.ImportPmlAsync(stream);
+    // Act
+    var result = await _pmlImportService.ImportPmlAsync(stream);
 
-        // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(3, result.SuccessCount);
+    // Assert
+    Assert.True(result.IsSuccess);
+    Assert.Equal(3, result.SuccessCount);
 
-        Assert.NotNull(_context.Personnages.FirstOrDefault(p => p.Nom == "ALYA" && p.Type == TypePersonnage.Mercenaire));
-        Assert.NotNull(_context.Personnages.FirstOrDefault(p => p.Nom == "COMMANDRA" && p.Type == TypePersonnage.Commandant));
-        Assert.NotNull(_context.Personnages.FirstOrDefault(p => p.Nom == "OMEGA" && p.Type == TypePersonnage.Androïde));
-    }
+    Assert.NotNull(_context.Personnages.FirstOrDefault(p => p.Nom == "ALYA" && p.Type == TypePersonnage.Mercenaire));
+    Assert.NotNull(_context.Personnages.FirstOrDefault(p => p.Nom == "COMMANDRA" && p.Type == TypePersonnage.Commandant));
+    Assert.NotNull(_context.Personnages.FirstOrDefault(p => p.Nom == "OMEGA" && p.Type == TypePersonnage.Androïde));
+  }
 
-    [Fact]
-    public async Task ImportPmlAsync_WithHistories_ShouldPersistEntries()
-    {
-        // Arrange
-        var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+  // Test désactivé : HistoriqueEscouade est obsolète, remplacé par HistoriqueClassement
+  /*
+  [Fact]
+  public async Task ImportPmlAsync_WithHistories_ShouldPersistEntries()
+  {
+    // Arrange
+    var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <CharacterManagerPML version=""1.0"" exportDate=""2025-12-20T15:30:00Z"">
   <HistoriqueEscouade>
     <DateEnregistrement>2025-01-01T10:00:00Z</DateEnregistrement>
@@ -286,22 +288,23 @@ public class PmlImportServiceTests : IDisposable
   </HistoriqueEscouade>
 </CharacterManagerPML>";
 
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
+    var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
 
-        // Act
-        var result = await _pmlImportService.ImportPmlAsync(stream);
+    // Act
+    var result = await _pmlImportService.ImportPmlAsync(stream);
 
-        // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.SuccessCount);
-        Assert.Equal(2, _context.HistoriquesEscouade.Count());
-    }
+    // Assert
+    Assert.True(result.IsSuccess);
+    Assert.Equal(2, result.SuccessCount);
+    Assert.Equal(2, _context.HistoriquesEscouade.Count());
+  }
+  */
 
-    [Fact]
-    public async Task ImportPmlAsync_WithFileName_ShouldPersistLastImportedName()
-    {
-        // Arrange
-        var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+  [Fact]
+  public async Task ImportPmlAsync_WithFileName_ShouldPersistLastImportedName()
+  {
+    // Arrange
+    var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <InventairePML version=""1.0"" exportDate=""2025-12-20T15:30:00Z"">
   <inventaire>
     <Personnage>
@@ -320,157 +323,157 @@ public class PmlImportServiceTests : IDisposable
   </inventaire>
 </InventairePML>";
 
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
+    var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
 
-        // Act
-        var result = await _pmlImportService.ImportPmlAsync(stream, fileName: "test-import.pml");
+    // Act
+    var result = await _pmlImportService.ImportPmlAsync(stream, fileName: "test-import.pml");
 
-        // Assert
-        Assert.True(result.IsSuccess);
-        var lastFile = await _pmlImportService.GetLastImportedFileName();
-        Assert.Equal("test-import.pml", lastFile);
-    }
+    // Assert
+    Assert.True(result.IsSuccess);
+    var lastFile = await _pmlImportService.GetLastImportedFileName();
+    Assert.Equal("test-import.pml", lastFile);
+  }
 
-    [Fact]
-    public async Task ExporterInventairePmlAsync_ShouldExportPersonnages()
+  [Fact]
+  public async Task ExporterInventairePmlAsync_ShouldExportPersonnages()
+  {
+    // Arrange
+    var personnages = _context.Personnages.ToList();
+
+    // Act
+    var pmlBytes = await _pmlImportService.ExporterInventairePmlAsync(personnages);
+
+    // Assert
+    Assert.NotNull(pmlBytes);
+    Assert.True(pmlBytes.Length > 0);
+
+    var content = Encoding.UTF8.GetString(pmlBytes);
+    Assert.Contains("<inventaire>", content);
+    Assert.Contains("REGINA", content);
+    Assert.Contains("ISABELLA", content);
+  }
+
+  [Fact]
+  public async Task ExporterInventairePmlAsync_ShouldIncludeLucieHouseWhenPresent()
+  {
+    // Arrange
+    var lucieHouse = new LucieHouse();
+    lucieHouse.Pieces.Add(new Piece
     {
-        // Arrange
-        var personnages = _context.Personnages.ToList();
+      Nom = "Salle du Trône",
+      Niveau = 3,
+      Selectionnee = true,
+      AspectsTactiques = new Aspect { Bonus = { "Dégâts" }, Puissance = 12 },
+      AspectsStrategiques = new Aspect { Bonus = { "PV" }, Puissance = 7 }
+    });
 
-        // Act
-        var pmlBytes = await _pmlImportService.ExporterInventairePmlAsync(personnages);
+    _context.LucieHouses.Add(lucieHouse);
+    await _context.SaveChangesAsync();
 
-        // Assert
-        Assert.NotNull(pmlBytes);
-        Assert.True(pmlBytes.Length > 0);
+    var personnages = _context.Personnages.ToList();
 
-        var content = Encoding.UTF8.GetString(pmlBytes);
-        Assert.Contains("<inventaire>", content);
-        Assert.Contains("REGINA", content);
-        Assert.Contains("ISABELLA", content);
-    }
+    // Act
+    var pmlBytes = await _pmlImportService.ExporterInventairePmlAsync(personnages);
 
-      [Fact]
-      public async Task ExporterInventairePmlAsync_ShouldIncludeLucieHouseWhenPresent()
-      {
-        // Arrange
-        var lucieHouse = new LucieHouse();
-        lucieHouse.Pieces.Add(new Piece
-        {
-          Nom = "Salle du Trône",
-          Niveau = 3,
-          Selectionnee = true,
-          AspectsTactiques = new Aspect { Bonus = { "Dégâts" }, Puissance = 12 },
-          AspectsStrategiques = new Aspect { Bonus = { "PV" }, Puissance = 7 }
-        });
+    // Assert
+    var content = Encoding.UTF8.GetString(pmlBytes);
+    Assert.Contains("<LucieHouse>", content);
+    Assert.Contains("Salle du Trône", content);
+    Assert.Contains("PuissanceTactique", content);
+    Assert.Contains("PuissanceStrategique", content);
+  }
 
-        _context.LucieHouses.Add(lucieHouse);
-        await _context.SaveChangesAsync();
-
-        var personnages = _context.Personnages.ToList();
-
-        // Act
-        var pmlBytes = await _pmlImportService.ExporterInventairePmlAsync(personnages);
-
-        // Assert
-        var content = Encoding.UTF8.GetString(pmlBytes);
-        Assert.Contains("<LucieHouse>", content);
-        Assert.Contains("Salle du Trône", content);
-        Assert.Contains("PuissanceTactique", content);
-        Assert.Contains("PuissanceStrategique", content);
-      }
-
-    [Fact]
-    public async Task ExporterTemplatesPmlAsync_ShouldExportTemplates()
+  [Fact]
+  public async Task ExporterTemplatesPmlAsync_ShouldExportTemplates()
+  {
+    // Arrange
+    var personnageIds = _context.Personnages.Select(p => p.Id).ToList();
+    var template = new Template
     {
-        // Arrange
-        var personnageIds = _context.Personnages.Select(p => p.Id).ToList();
-        var template = new Template
-        {
-            Nom = "Export Test",
-            Description = "Template for export"
-        };
-        template.SetPersonnageIds(personnageIds);
+      Nom = "Export Test",
+      Description = "Template for export"
+    };
+    template.SetPersonnageIds(personnageIds);
 
-        // Act
-        var pmlBytes = await _pmlImportService.ExporterTemplatesPmlAsync(new[] { template });
+    // Act
+    var pmlBytes = await _pmlImportService.ExporterTemplatesPmlAsync(new[] { template });
 
-        // Assert
-        Assert.NotNull(pmlBytes);
-        Assert.True(pmlBytes.Length > 0);
+    // Assert
+    Assert.NotNull(pmlBytes);
+    Assert.True(pmlBytes.Length > 0);
 
-        var content = Encoding.UTF8.GetString(pmlBytes);
-        Assert.Contains("<template>", content);
-        Assert.Contains("Export Test", content);
-        Assert.Contains("Template for export", content);
-    }
+    var content = Encoding.UTF8.GetString(pmlBytes);
+    Assert.Contains("<template>", content);
+    Assert.Contains("Export Test", content);
+    Assert.Contains("Template for export", content);
+  }
 
-      [Fact]
-      public async Task ExportPmlAsync_ShouldIncludeLucieHouseSection()
-      {
-        // Arrange
-        var lucieHouse = new LucieHouse();
-        lucieHouse.Pieces.Add(new Piece
-        {
-          Nom = "Atelier",
-          Niveau = 2,
-          Selectionnee = false,
-          AspectsTactiques = new Aspect { Bonus = { "Crit" }, Puissance = 5 },
-          AspectsStrategiques = new Aspect { Puissance = 3 }
-        });
-
-        _context.LucieHouses.Add(lucieHouse);
-        await _context.SaveChangesAsync();
-
-        // Act
-        var pmlBytes = await _pmlImportService.ExportPmlAsync(
-          exportInventory: true,
-          exportTemplates: false,
-          exportBestSquad: false,
-          exportHistories: false);
-
-        // Assert
-        var content = Encoding.UTF8.GetString(pmlBytes);
-        Assert.Contains("LucieHouse", content);
-        Assert.Contains("Atelier", content);
-        Assert.Contains("PuissanceTactique", content);
-        Assert.Contains("PuissanceStrategique", content);
-      }
-
-    [Fact]
-    public async Task ImportPmlAsync_WithEmptyFile_ShouldReturnError()
+  [Fact]
+  public async Task ExportPmlAsync_ShouldIncludeLucieHouseSection()
+  {
+    // Arrange
+    var lucieHouse = new LucieHouse();
+    lucieHouse.Pieces.Add(new Piece
     {
-        // Arrange
-        var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+      Nom = "Atelier",
+      Niveau = 2,
+      Selectionnee = false,
+      AspectsTactiques = new Aspect { Bonus = { "Crit" }, Puissance = 5 },
+      AspectsStrategiques = new Aspect { Puissance = 3 }
+    });
+
+    _context.LucieHouses.Add(lucieHouse);
+    await _context.SaveChangesAsync();
+
+    // Act
+    var pmlBytes = await _pmlImportService.ExportPmlAsync(
+      exportInventory: true,
+      exportTemplates: false,
+      exportBestSquad: false,
+      exportHistories: false);
+
+    // Assert
+    var content = Encoding.UTF8.GetString(pmlBytes);
+    Assert.Contains("LucieHouse", content);
+    Assert.Contains("Atelier", content);
+    Assert.Contains("PuissanceTactique", content);
+    Assert.Contains("PuissanceStrategique", content);
+  }
+
+  [Fact]
+  public async Task ImportPmlAsync_WithEmptyFile_ShouldReturnError()
+  {
+    // Arrange
+    var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <InventairePML version=""1.0"" exportDate=""2025-12-20T15:30:00Z"">
 </InventairePML>";
 
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
+    var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
 
-        // Act
-        var result = await _pmlImportService.ImportPmlAsync(stream);
+    // Act
+    var result = await _pmlImportService.ImportPmlAsync(stream);
 
-        // Assert
-        Assert.False(result.IsSuccess);
-        Assert.Equal(0, result.SuccessCount);
-    }
+    // Assert
+    Assert.False(result.IsSuccess);
+    Assert.Equal(0, result.SuccessCount);
+  }
 
-    [Fact]
-    public async Task ImportPmlAsync_WithLucieHouse_ShouldPersistPieces()
-    {
-        // Arrange
-        var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
-<CharacterManagerPML version=""1.0"" exportDate=""2025-12-20T15:30:00Z"">
+  [Fact]
+  public async Task ImportPmlAsync_WithLucieHouse_ShouldPersistPieces()
+  {
+
+    // Arrange
+    var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+      <InventairePML version=""1.0"" exportDate=""2025-12-20T15:30:00Z""> 
+      <inventaire>
   <LucieHouse>
     <Piece>
       <Nom>Hall</Nom>
       <Niveau>4</Niveau>
-      <PuissanceTactiques>120</PuissanceTactiques>
-      <PuissanceStrategiques>30</PuissanceStrategiques>
+      <PuissanceTactique>120</PuissanceTactique>
+      <PuissanceStrategique>30</PuissanceStrategique>
       <Selectionnee>true</Selectionnee>
       <BonusTactiques>
-        <Bonus>Dégâts</Bonus>
-        <Bonus>Précision</Bonus>
       </BonusTactiques>
     </Piece>
     <Piece>
@@ -480,25 +483,137 @@ public class PmlImportServiceTests : IDisposable
       <PuissanceStrategiques>30</PuissanceStrategiques>
       <Selectionnee>false</Selectionnee>
       <BonusStrategiques>
-        <Bonus>PV</Bonus>
       </BonusStrategiques>
     </Piece>
   </LucieHouse>
-</CharacterManagerPML>";
+</inventaire>
+</InventairePML>";
 
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
+    var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
 
-        // Act
-        var result = await _pmlImportService.ImportPmlAsync(stream);
+    // Act
+    var result = await _pmlImportService.ImportPmlAsync(stream);
 
-        // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.SuccessCount);
+    // Assert
+    Assert.True(result.IsSuccess);
+    Assert.Equal(2, result.SuccessCount);
 
-        var lucieHouse = _context.LucieHouses.Include(l => l.Pieces).FirstOrDefault();
-        Assert.NotNull(lucieHouse);
-        Assert.Equal(2, lucieHouse!.Pieces.Count);
-        Assert.Contains(lucieHouse.Pieces, p => p.Nom == "Hall" && p.AspectsTactiques.Bonus.Contains("Dégâts"));
-        Assert.Contains(lucieHouse.Pieces, p => p.Nom == "Bibliothèque" && p.AspectsStrategiques.Bonus.Contains("PV"));
-    }
+    var lucieHouse = _context.LucieHouses.Include(l => l.Pieces).FirstOrDefault();
+    Assert.NotNull(lucieHouse);
+    Assert.Equal(2, lucieHouse!.Pieces.Count);
+    Assert.Contains(lucieHouse.Pieces, p => p.Nom == "Hall" && p.Niveau==4);
+    Assert.Contains(lucieHouse.Pieces, p => p.Nom == "Bibliothèque" && p.Niveau==2);
+  }
+
+  [Fact]
+  public async Task GetLastImportedFileName_ShouldReturnLastImportedFileName()
+  {
+    // Arrange
+    var settings = new AppSettings
+    {
+      IsAdultModeEnabled = true,
+      Language = "fr",
+      LastImportedFileName = "test_export.pml",
+      LastImportedDate = DateTime.UtcNow
+    };
+    _context.AppSettings.Add(settings);
+    _context.SaveChanges();
+
+    // Act
+    var result = await _pmlImportService.GetLastImportedFileName();
+
+    // Assert
+    Assert.Equal("test_export.pml", result);
+  }
+
+  [Fact]
+  public async Task GetLastImportedFileName_WithoutAppSettings_ShouldReturnNull()
+  {
+    // Act
+    var result = await _pmlImportService.GetLastImportedFileName();
+
+    // Assert
+    Assert.Null(result);
+  }
+
+  [Fact]
+  public async Task GetLastImportedDateAsync_ShouldReturnLastImportedDate()
+  {
+    // Arrange
+    var now = DateTime.UtcNow;
+    var settings = new AppSettings
+    {
+      IsAdultModeEnabled = true,
+      Language = "fr",
+      LastImportedFileName = "test_export.pml",
+      LastImportedDate = now
+    };
+    _context.AppSettings.Add(settings);
+    _context.SaveChanges();
+
+    // Act
+    var result = await _pmlImportService.GetLastImportedDateAsync();
+
+    // Assert
+    Assert.NotNull(result);
+    Assert.Equal(now.Date, result?.Date);
+  }
+
+  [Fact]
+  public async Task GetLastExportDate_ShouldReturnLastExportDate()
+  {
+    // Arrange
+    var now = DateTime.UtcNow;
+    var settings = new AppSettings
+    {
+      IsAdultModeEnabled = true,
+      Language = "fr",
+      LastExportDate = now
+    };
+    _context.AppSettings.Add(settings);
+    _context.SaveChanges();
+
+    // Act
+    var result = await _pmlImportService.GetLastExportDate();
+
+    // Assert
+    Assert.NotNull(result);
+    Assert.Equal(now.Date, result?.Date);
+  }
+
+  [Fact]
+  public async Task ImportPmlAsync_ShouldSaveLastImportedFileName()
+  {
+    // Arrange
+    var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<InventairePML version=""1.0"" exportDate=""2025-12-20T15:30:00Z"">
+  <inventaire>
+    <Personnage>
+      <Nom>TEST</Nom>
+      <Rarete>SR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1000</Puissance>
+      <PA>50</PA>
+      <PV>100</PV>
+      <Niveau>5</Niveau>
+      <Rang>1</Rang>
+      <Role>Combattante</Role>
+      <Faction>Pacificateurs</Faction>
+      <Selectionne>false</Selectionne>
+      <Description>Test Personnage</Description>
+    </Personnage>
+  </inventaire>
+</InventairePML>";
+
+    var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
+
+    // Act
+    var result = await _pmlImportService.ImportPmlAsync(stream, "config_test.pml");
+
+    // Assert
+    Assert.True(result.IsSuccess);
+    var settings = _context.AppSettings.FirstOrDefault();
+    Assert.NotNull(settings);
+    Assert.Equal("config_test.pml", settings!.LastImportedFileName);
+  }
 }

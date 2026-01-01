@@ -1,0 +1,193 @@
+@page "/maison-lucie"
+@using CharacterManager.Components.Layout
+@using CharacterManager.Server.Services
+@using CharacterManager.Server.Models
+@rendermode InteractiveServer
+
+@inject PersonnageService PersonnageService
+@inject NavigationManager NavigationManager
+
+<link rel="stylesheet" href="/css/MaisonLucie.css" />
+
+<div class="lucie-house-container">
+    <div class="lucie-house-header">
+        <div class="lucie-house-title-section">
+            <i class="bi bi-house-fill lucie-icon"></i>
+            <h1><LocalizedText Key="navigation.lucieHouse" /></h1>
+        </div>
+        
+        @if (lucieHouse != null)
+        {
+            <div class="affection-badge">
+                <i class="bi bi-heart-fill"></i>
+                <span class="affection-value">@lucieHouse.Affection</span>
+                <span class="affection-label">Affection</span>
+            </div>
+        }
+    </div>
+
+    @if (lucieHouse == null)
+    {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p><LocalizedText Key="loading" /></p>
+        </div>
+    }
+    else if (pieces.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <p><LocalizedText Key="noData" /></p>
+        </div>
+    }
+    else
+    {
+        <div class="pieces-grid">
+            @foreach (var piece in pieces.OrderByDescending(p => p.Puissance).ToList())
+            {
+                <div class="piece-card">
+                    <div class="piece-header">
+                        <h3 class="piece-name" title="@piece.Nom">@piece.Nom</h3>
+                        <span class="piece-level">Lvl @piece.Niveau</span>
+                    </div>
+
+                    <div class="piece-body">
+                        <!-- Puissance Totale -->
+                        <div class="stat-row">
+                            <span class="stat-label">Puissance</span>
+                            <span class="stat-value">@piece.Puissance</span>
+                        </div>
+
+                        <!-- Aspect Tactique -->
+                        @if (piece.AspectsTactiques != null)
+                        {
+                            <div class="aspect-section">
+                                <div class="aspect-header">
+                                    <i class="bi bi-lightning-fill"></i>
+                                    <span>Tactique</span>
+                                </div>
+                                <div class="aspect-content">
+                                    <div class="aspect-puissance">
+                                        <span class="label">Puissance:</span>
+                                        <span class="value">@piece.AspectsTactiques.Puissance</span>
+                                    </div>
+                                    @if (piece.AspectsTactiques.Bonus?.Count > 0)
+                                    {
+                                        <div class="aspect-bonus">
+                                            <span class="label">Bonus:</span>
+                                            <div class="bonus-list">
+                                                @foreach (var bonus in piece.AspectsTactiques.Bonus)
+                                                {
+                                                    <span class="bonus-tag">@bonus</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Aspect Stratégie -->
+                        @if (piece.AspectsStrategiques != null)
+                        {
+                            <div class="aspect-section">
+                                <div class="aspect-header">
+                                    <i class="bi bi-shield-fill"></i>
+                                    <span>Stratégique</span>
+                                </div>
+                                <div class="aspect-content">
+                                    <div class="aspect-puissance">
+                                        <span class="label">Puissance:</span>
+                                        <span class="value">@piece.AspectsStrategiques.Puissance</span>
+                                    </div>
+                                    @if (piece.AspectsStrategiques.Bonus?.Count > 0)
+                                    {
+                                        <div class="aspect-bonus">
+                                            <span class="label">Bonus:</span>
+                                            <div class="bonus-list">
+                                                @foreach (var bonus in piece.AspectsStrategiques.Bonus)
+                                                {
+                                                    <span class="bonus-tag">@bonus</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Bonus Totaux -->
+                        <div class="bonus-totals">
+                            <div class="bonus-row">
+                                <span class="bonus-label">Total Tactique:</span>
+                                <span class="bonus-value">@(piece.BonusTactiques?.Count ?? 0)</span>
+                            </div>
+                            <div class="bonus-row">
+                                <span class="bonus-label">Total Stratégique:</span>
+                                <span class="bonus-value">@(piece.BonusStrategiques?.Count ?? 0)</span>
+                            </div>
+                        </div>
+
+                        <!-- Sélection -->
+                        <div class="selection-indicator">
+                            @if (piece.Selectionnee)
+                            {
+                                <span class="selected-badge"><i class="bi bi-check-circle-fill"></i> Sélectionnée</span>
+                            }
+                            else
+                            {
+                                <span class="not-selected-badge"><i class="bi bi-circle"></i> Non sélectionnée</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Statistiques Globales -->
+        <div class="statistics-section">
+            <h2><LocalizedText Key="statistics" /></h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-title">Total Pièces</span>
+                    <span class="stat-number">@pieces.Count</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Pièces Sélectionnées</span>
+                    <span class="stat-number">@pieces.Count(p => p.Selectionnee)</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Puissance Max Tactique</span>
+                    <span class="stat-number">@pieces.Max(p => p.AspectsTactiques?.Puissance ?? 0)</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Puissance Max Stratégique</span>
+                    <span class="stat-number">@pieces.Max(p => p.AspectsStrategiques?.Puissance ?? 0)</span>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private Server.Models.LucieHouse? lucieHouse;
+    private List<Server.Models.Piece> pieces = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            lucieHouse = await PersonnageService.GetLucieHouseAsync();
+            
+            if (lucieHouse != null)
+            {
+                // Récupérer les pièces avec leurs aspects
+                pieces = await PersonnageService.GetLuciePiecesAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Erreur lors du chargement de la Lucie House: {ex.Message}");
+        }
+    }
+}

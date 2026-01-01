@@ -1,0 +1,368 @@
+@using CharacterManager.Server.Constants
+@using CharacterManager.Server.Models
+@using CharacterManager.Server.Services
+@using System
+@using System.Linq
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+
+@inject PersonnageService PersonnageService
+@inject IModalService ModalService
+@inject IJSRuntime JSRuntime
+
+<link rel="stylesheet" href="/css/DetailPersonnage.css" />
+
+@if (currentPerso != null)
+{
+    <div class="modal-body">
+        <div class="page-header-banner mb-3">
+            <h3 class="text-center">@currentPerso.Nom</h3>
+            <div class="d-flex justify-content-center gap-2">
+                @if (!isEditing)
+                {
+                    <button @onclick="EnterEditMode" class="btn btn-primary edit-button">
+                        <span class="oi oi-pencil"></span> Éditer
+                    </button>
+                }
+                else
+                {
+                    <button @onclick="SaveChanges" class="btn btn-success save-button">
+                        <span class="oi oi-check"></span> Enregistrer
+                    </button>
+                    <button @onclick="CancelEdit" class="btn btn-secondary cancel-button">
+                        <span class="oi oi-x"></span> Annuler
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="personnage-detail-container">
+            <div class="container py-4">
+                <div class="card shadow-lg">
+                    <div class="card-body">
+                        @if (!isEditing)
+                        {
+                            <!-- Mode Lecture -->
+                            <div class="row">
+                                <div class="col-md-12 text-center mb-4">
+                                    <img src="@currentPerso.GetImageUrl(true)" alt="@currentPerso.Nom" class="detail-personnage-image" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="section-title">Informations Générales</h5>
+                                    
+                                    <div class="detail-item">
+                                        <label>@AppConstants.XmlElements.Nom :</label>
+                                        <span class="value">@currentPerso.Nom</span>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <label>@AppConstants.XmlElements.Rarete :</label>
+                                        <span class="value badge bg-@GetRarityClass(currentPerso.Rarete)">@currentPerso.Rarete</span>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <label>@AppConstants.XmlElements.Type :</label>
+                                        <span class="value">@currentPerso.Type</span>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <label>@AppConstants.XmlElements.Role :</label>
+                                        <span class="value">@currentPerso.Role</span>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <label>@AppConstants.XmlElements.Faction :</label>
+                                        <span class="value">@currentPerso.Faction</span>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <label>@AppConstants.XmlElements.TypeAttaque :</label>
+                                        <span class="value">@currentPerso.TypeAttaque</span>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <label>@AppConstants.XmlElements.Rang :</label>
+                                        <div class="stars">@CharacterManager.Components.Pages.TemplateEscouade.GetRankStars(currentPerso.Rang)</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h5 class="section-title">Statistiques</h5>
+                                    
+                                    <div class="detail-item">
+                                        <label>@AppConstants.XmlElements.Niveau :</label>
+                                        <span class="value badge bg-info">@currentPerso.Niveau</span>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <label>@AppConstants.XmlElements.Puissance :</label>
+                                        <span class="value badge bg-warning">@currentPerso.Puissance</span>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <label>@AppConstants.XmlElements.PA (Points d'Attaque) :</label>
+                                        <span class="value">@currentPerso.PA</span>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <label>@AppConstants.XmlElements.PV (Points de Vie) :</label>
+                                        <span class="value">@currentPerso.PV</span>
+                                    </div>
+
+                                    <div class="detail-item">
+                                        <label>@AppConstants.XmlElements.Selectionne :</label>
+                                        <span class="value">
+                                            @if (currentPerso.Selectionne)
+                                            {
+                                                <span class="badge bg-success">✓ Oui</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Non</span>
+                                            }
+                                        </span>
+                                    </div>
+
+                                    @if (currentPerso.Type == TypePersonnage.Commandant)
+                                    {
+                                        var seuil = PersonnageService.GetPuissanceSeuilCommandantPourLvlUp();
+                                        var puissanceMax = PersonnageService.GetPuissanceMaxEscouade();
+                                        var peutMonter = puissanceMax >= seuil;
+                                        <div class="mt-3">
+                                            <h6 class="section-title">Seuil de Puissance pour Level Up</h6>
+                                            <div class="detail-item">
+                                                <label>Puissance escouade :</label>
+                                                <span class="value badge bg-warning">@puissanceMax</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <label>Seuil requis :</label>
+                                                <span class="value badge bg-primary">@seuil</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <label>Statut :</label>
+                                                <span class="value badge @(peutMonter ? "bg-success" : "bg-danger")">@(peutMonter ? "✓ Suffisant" : "Insuffisant")</span>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(currentPerso.Description))
+                            {
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <h5 class="section-title">@AppConstants.XmlElements.Description</h5>
+                                        <p class="description-text">@currentPerso.Description</p>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <!-- Mode Édition -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="section-title">Informations Générales</h5>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">@AppConstants.XmlElements.Nom</label>
+                                        <input type="text" class="form-control" @bind="editedPerso.Nom" />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">@AppConstants.XmlElements.Rarete</label>
+                                        <select class="form-select" @bind="editedPerso.Rarete">
+                                            @foreach (Rarete rarete in Enum.GetValues(typeof(Rarete)))
+                                            {
+                                                <option value="@rarete">@rarete</option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">@AppConstants.XmlElements.Type</label>
+                                        <select class="form-select" @bind="editedPerso.Type">
+                                            @foreach (TypePersonnage type in Enum.GetValues(typeof(TypePersonnage)))
+                                            {
+                                                <option value="@type">@type</option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">@AppConstants.XmlElements.Role</label>
+                                        <select class="form-select" @bind="editedPerso.Role">
+                                            @foreach (Role role in Enum.GetValues(typeof(Role)))
+                                            {
+                                                <option value="@role">@role</option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">@AppConstants.XmlElements.Faction</label>
+                                        <select class="form-select" @bind="editedPerso.Faction">
+                                            @foreach (Faction faction in Enum.GetValues(typeof(Faction)))
+                                            {
+                                                <option value="@faction">@faction</option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">@AppConstants.XmlElements.TypeAttaque</label>
+                                        <select class="form-select" @bind="editedPerso.TypeAttaque">
+                                            @foreach (TypeAttaque typeAttaque in Enum.GetValues(typeof(TypeAttaque)))
+                                            {
+                                                <option value="@typeAttaque">@typeAttaque</option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">@AppConstants.XmlElements.Rang (0-7)</label>
+                                        <input type="number" class="form-control" @bind="editedPerso.Rang" min="0" max="7" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h5 class="section-title">Statistiques</h5>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">@AppConstants.XmlElements.Niveau</label>
+                                        <input type="number" class="form-control" @bind="editedPerso.Niveau" min="1" />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">@AppConstants.XmlElements.Puissance</label>
+                                        <div class="input-group input-group-sm">
+                                            <button class="btn btn-outline-secondary" type="button" @onclick="() => ChangePuissanceDetail(-1)" @onclick:stopPropagation="true">-</button>
+                                            <input type="number" class="form-control text-center" @bind="editedPerso.Puissance" min="0" />
+                                            <button class="btn btn-outline-secondary" type="button" @onclick="() => ChangePuissanceDetail(1)" @onclick:stopPropagation="true">+</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">@AppConstants.XmlElements.PA (Points d'Attaque)</label>
+                                        <input type="number" class="form-control" @bind="editedPerso.PA" min="0" />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">@AppConstants.XmlElements.PV (Points de Vie)</label>
+                                        <input type="number" class="form-control" @bind="editedPerso.PV" min="0" />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" @bind="editedPerso.Selectionne" id="selectionneCheck" />
+                                            <label class="form-check-label" for="selectionneCheck">
+                                                @AppConstants.XmlElements.Selectionne
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">@AppConstants.XmlElements.Description</label>
+                                        <textarea class="form-control" @bind="editedPerso.Description" rows="4"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="modal-body">
+        <div class="alert alert-danger">Personnage non trouvé</div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int PersonnageId { get; set; }
+
+    private Personnage? currentPerso;
+    private Personnage editedPerso = new();
+    private bool isEditing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentPerso = await PersonnageService.GetByIdAsync(PersonnageId);
+    }
+
+    private void Close() => ModalService.Close();
+
+    private void EnterEditMode()
+    {
+        if (currentPerso == null) return;
+
+        isEditing = true;
+        editedPerso = new Personnage
+        {
+            Id = currentPerso.Id,
+            Nom = currentPerso.Nom,
+            Rarete = currentPerso.Rarete,
+            Type = currentPerso.Type,
+            Niveau = currentPerso.Niveau,
+            Rang = currentPerso.Rang,
+            Puissance = currentPerso.Puissance,
+            PA = currentPerso.PA,
+            PV = currentPerso.PV,
+            Role = currentPerso.Role,
+            Faction = currentPerso.Faction,
+            TypeAttaque = currentPerso.TypeAttaque,
+            Selectionne = currentPerso.Selectionne,
+            Description = currentPerso.Description,
+            ImageUrlHeader = currentPerso.ImageUrlHeader
+        };
+    }
+
+    private async Task SaveChanges()
+    {
+        if (editedPerso == null) return;
+
+        try
+        {
+            PersonnageService.Update(editedPerso);
+            currentPerso = editedPerso;
+            isEditing = false;
+            await JSRuntime.InvokeVoidAsync("alert", "Personnage mis à jour avec succès.");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de la sauvegarde: {ex.Message}");
+        }
+    }
+
+    private void CancelEdit()
+    {
+        isEditing = false;
+        editedPerso = new();
+    }
+
+    private string GetRarityClass(Rarete rarete)
+    {
+        return rarete switch
+        {
+            Rarete.SSR => "danger",
+            Rarete.SR => "warning",
+            Rarete.R => "primary",
+            _ => "secondary"
+        };
+    }
+
+    private void ChangePuissanceDetail(int delta)
+    {
+        editedPerso.Puissance = Math.Max(0, editedPerso.Puissance + delta);
+    }
+}

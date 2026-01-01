@@ -1,46 +1,12 @@
-@using Markdig
 @using CharacterManager.Server.Services
-@inject AppVersionService VersionService
+
 @inject IModalService ModalService
 
-<div class="modal-body text-center">
-
-    <div class="app-icon mb-3">
-        <i class="bi bi-info-circle" style="font-size: 4rem; color: #0d6efd;"></i>
-    </div>
-    <div class="form-control changelog-content">
-        @((MarkupString)ChangeLogHtml)
-    </div>
-</div>
+<MarkdownModal 
+    FileName="RELEASE_NOTES.md" 
+    NotFoundMessage="Aucun changelog trouvé." 
+    ErrorMessage="Erreur lors du chargement du changelog." />
 
 @code {
-    private string ChangeLogText { get; set; } = string.Empty;
-    private string ChangeLogHtml { get; set; } = string.Empty;
-
     private void Close() => ModalService.Close();
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            try
-            {
-                var changelogPath = Path.Combine(AppContext.BaseDirectory, "RELEASE_NOTES.md");
-                if (File.Exists(changelogPath))
-                {
-                    ChangeLogText = await File.ReadAllTextAsync(changelogPath);
-                    ChangeLogHtml = Markdig.Markdown.ToHtml(ChangeLogText);
-                }
-                else
-                {
-                    ChangeLogHtml = "<em>Aucun changelog trouvé.</em>";
-                }
-            }
-            catch
-            {
-                ChangeLogHtml = "<em>Erreur lors du chargement du changelog.</em>";
-            }
-            StateHasChanged();
-        }
-    }
 }

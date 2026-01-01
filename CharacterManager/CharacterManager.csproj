@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Version>0.10.2</Version>
     <InformationalVersion>0.10.2</InformationalVersion>
+    <UserSecretsId>65bc735a-e5c1-43cb-88a6-ee6e309d2379</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,7 +27,12 @@
         <Link>RELEASE_NOTES.md</Link>
       </None>
     </ItemGroup>
-
+    <ItemGroup>
+      <None Include="..\docs\ROADMAP.md">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Link>ROADMAP.md</Link>
+      </None>
+    </ItemGroup>
   <Target Name="KillCharacterManagerProcess" BeforeTargets="Build" Condition="'$(OS)' == 'Windows_NT'">
     <Exec Command="powershell -NoProfile -Command &quot;Stop-Process -Name CharacterManager -Force -ErrorAction SilentlyContinue; exit 0&quot;" />
   </Target>

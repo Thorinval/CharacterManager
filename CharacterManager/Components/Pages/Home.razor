@@ -42,119 +42,368 @@
             </p>
         </div>
 
-        <div class="hub-grid">
-
-            <div class="hub-card" @onclick="@(() => GoTo("escouade"))">
-                <i class="hub-icon bi bi-people-fill"></i>
-
-                <span class="msr hub-icon">groups</span>
-                <h3>
-                    <LocalizedText Key="navigation.squad" />
-                </h3>
-                <p>
-                    <LocalizedText Key="home.squad" />
-                </p>
-
-                <div class="hub-metric">
-                    <div class="metric-icon">
-                        <i class="bi bi-lightning-charge-fill"></i>
+        <div class="hub-sections-wrapper">
+            <!-- Gestion des Escouades -->
+            <div class="hub-section">
+                <h2 class="hub-section-title">
+                <span class="msr">groups</span>
+                Gestion des Escouades
+                </h2>
+                <div class="hub-grid">
+                    <div class="hub-card" @onclick="@(() => GoTo("escouade"))">
+                    <div class="hub-card-head">
+                        <span class="msr hub-icon">groups</span>
+                        <h3>
+                            <LocalizedText Key="navigation.squad" />
+                        </h3>
                     </div>
-                    <div class="metric-text">
-                        <span class="metric-label">Puissance</span>
-                        <span class="metric-value">@puissanceEscouade</span>
+                    <p>
+                        <LocalizedText Key="home.squad" />
+                    </p>
+                    <div class="hub-metric">
+                        <div class="metric-icon">
+                            <i class="bi bi-lightning-charge-fill"></i>
+                        </div>
+                        <div class="metric-text">
+                            <span class="metric-label">Puissance</span>
+                            <span class="metric-value">@puissanceEscouade</span>
+                        </div>
+                    </div>
+                    <div class="hub-meta-grid two-cols">
+                        <div class="hub-meta-block">
+                            <span class="metric-label"><LocalizedText Key="home.mercByFaction" /></span>
+                            <div class="metric-chips">
+                                @foreach (var kvp in mercenairesParFaction)
+                                {
+                                    <span class="metric-chip" title="@GetFactionLabel(kvp.Key)">
+                                        <span class="faction-shape @GetFactionShapeClass(kvp.Key) @GetFactionColorClass(kvp.Key)"></span>
+                                        <span class="metric-chip-value">@kvp.Value</span>
+                                    </span>
+                                }
+                                @if (!mercenairesParFaction.Any())
+                                {
+                                    <span class="metric-chip">-</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="hub-meta-block">
+                            <span class="metric-label"><LocalizedText Key="home.mercByAttack" /></span>
+                            <div class="metric-chips">
+                                @foreach (var kvp in mercenairesParTypeAttaque)
+                                {
+                                    <span class="metric-chip" title="@GetTypeAttaqueLabel(kvp.Key)">
+                                        <i class="bi @GetTypeAttaqueIcon(kvp.Key)"></i>
+                                        <span class="metric-chip-value">@kvp.Value</span>
+                                    </span>
+                                }
+                                @if (!mercenairesParTypeAttaque.Any())
+                                {
+                                    <span class="metric-chip">-</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div class="hub-card" @onclick="@(() => GoTo(url: "meilleur-escouade"))">
+                    <div class="hub-card-head">
+                        <span class="msr hub-icon">military_tech</span>
+                        <h3>
+                            <LocalizedText Key="navigation.bestSquad" />
+                        </h3>
+                    </div>
+                    <p>
+                        <LocalizedText Key="home.bestSquad" />
+                    </p>
+                    <div class="hub-metric">
+                        <div class="metric-icon">
+                            <i class="bi bi-lightning-charge-fill"></i>
+                        </div>
+                        <div class="metric-text">
+                            <span class="metric-label">Puissance</span>
+                            <span class="metric-value">@puissanceMeilleureEscouade</span>
+                        </div>
+                    </div>
+                    <div class="hub-meta-grid two-cols">
+                        <div class="hub-meta-block">
+                            <span class="metric-label">Factions</span>
+                            <div class="metric-chips">
+                                @foreach (var kvp in bestSquadFactions)
+                                {
+                                    <span class="metric-chip" title="@GetFactionLabel(kvp.Key)">
+                                        <span class="faction-shape @GetFactionShapeClass(kvp.Key) @GetFactionColorClass(kvp.Key)"></span>
+                                        <span class="metric-chip-value">@kvp.Value</span>
+                                    </span>
+                                }
+                                @if (!bestSquadFactions.Any())
+                                {
+                                    <span class="metric-chip">-</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="hub-meta-block">
+                            <span class="metric-label">Types d'attaque</span>
+                            <div class="metric-chips">
+                                @foreach (var kvp in bestSquadAttackTypes)
+                                {
+                                    <span class="metric-chip" title="@GetTypeAttaqueLabel(kvp.Key)">
+                                        <i class="bi @GetTypeAttaqueIcon(kvp.Key)"></i>
+                                        <span class="metric-chip-value">@kvp.Value</span>
+                                    </span>
+                                }
+                                @if (!bestSquadAttackTypes.Any())
+                                {
+                                    <span class="metric-chip">-</span>
+                                }
+                            </div>
+                        </div>
+                    </div>                
+                </div>
+
+                <div class="hub-card" @onclick="@(() => GoTo(url: "maison-lucie"))">
+                    <div class="hub-card-head">
+                        <span class="msr hub-icon">home</span>
+                        <h3>
+                            <LocalizedText Key="home.lucieLabel" />
+                        </h3>
+                    </div>
+                    <p>
+                        <LocalizedText Key="home.lucie" />
+                    </p>
+                    <div class="hub-metric lucie-metric">
+                        <div class="lucie-affection-block">
+                            <span class="metric-chip affection-chip">
+                                <i class="bi bi-heart-fill"></i>
+                                <span class="metric-chip-value">@lucieAffection</span>
+                            </span>
+                        </div>
+                        <div class="metric-icon">
+                            <i class="bi bi-lightning-charge-fill"></i>
+                        </div>
+                        <div class="metric-text">
+                            <span class="metric-label">Puissance / Max</span>
+                            <span class="metric-value">@puissanceLucieEscouade <span class="metric-max-value">/ @luciePiecesMaxPower</span></span>
+                        </div>
+                    </div>
+                    <div class="hub-meta-grid">
+                        <div class="hub-meta-block">
+                            <span class="metric-label">Pièces</span>
+                            <div class="metric-chips lucie-pieces-chips">
+                                @foreach (var piece in luciePieces)
+                                {
+                                    <span class="metric-chip lucie-piece-chip">
+                                        <i class="bi bi-puzzle-fill"></i>
+                                        <span class="lucie-piece-name" title="@piece.Nom">@piece.Nom</span>
+                                        <span class="lucie-piece-level">Niv. @piece.Niveau</span>
+                                        <span class="lucie-piece-power">@piece.Puissance</span>
+                                    </span>
+                                }
+                                @if (!luciePieces.Any())
+                                {
+                                    <span class="metric-chip">-</span>
+                                }
+                            </div>
+                        </div>
+                    </div>   
                     </div>
                 </div>
             </div>
 
-            <div class="hub-card" @onclick="@(() => GoTo(url: "meilleur-escouade"))">
-                <span class="msr hub-icon">military_tech</span>
-                <h3>
-                    <LocalizedText Key="navigation.bestSquad" />
-                </h3>
-                <p>
-                    <LocalizedText Key="home.bestSquad" />
-                </p>
-
-                <div class="hub-metric">
-                    <div class="metric-icon">
-                        <i class="bi bi-lightning-charge-fill"></i>
+            <!-- Inventaire et Templates -->
+            <div class="hub-section">
+                <h2 class="hub-section-title">
+                <span class="msr">inventory_2</span>
+                Inventaire
+                </h2>
+                <div class="hub-grid">
+                    <div class="hub-card" @onclick="@(() => GoTo(url: "inventaire"))">
+                    <div class="hub-card-head">
+                        <span class="msr hub-icon">inventory_2</span>
+                        <h3>
+                            <LocalizedText Key="navigation.inventory" />
+                        </h3>
                     </div>
-                    <div class="metric-text">
-                        <span class="metric-label">Puissance</span>
-                        <span class="metric-value">@puissanceMeilleureEscouade</span>
+                    <p>
+                        <LocalizedText Key="home.inventorydesc" />
+                    </p>
+                    <div class="hub-meta-grid two-cols">
+                        <div class="hub-meta-block full-span">
+                            <div class="metric-chips nowrap">
+                                <span class="metric-chip"><LocalizedText Key="home.inventory.commanders" />: @inventaireCounts.Commandants</span>
+                                <span class="metric-chip"><LocalizedText Key="home.inventory.mercenaries" />: @inventaireCounts.Mercenaires</span>
+                                <span class="metric-chip"><LocalizedText Key="home.inventory.androids" />: @inventaireCounts.Androides</span>
+                            </div>
+                        </div>
+                        <div class="hub-meta-block">
+                            <span class="metric-label"><LocalizedText Key="home.mercByFaction" /></span>
+                            <div class="metric-chips">
+                                @foreach (var kvp in inventaireFactions)
+                                {
+                                    <span class="metric-chip" title="@GetFactionLabel(kvp.Key)">
+                                        <span class="faction-shape @GetFactionShapeClass(kvp.Key) @GetFactionColorClass(kvp.Key)"></span>
+                                        <span class="metric-chip-value">@kvp.Value</span>
+                                    </span>
+                                }
+                                @if (!inventaireFactions.Any())
+                                {
+                                    <span class="metric-chip">-</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="hub-meta-block">
+                            <span class="metric-label"><LocalizedText Key="home.mercByAttack" /></span>
+                            <div class="metric-chips">
+                                @foreach (var kvp in inventaireAttackTypes)
+                                {
+                                    <span class="metric-chip" title="@GetTypeAttaqueLabel(kvp.Key)">
+                                        <i class="bi @GetTypeAttaqueIcon(kvp.Key)"></i>
+                                        <span class="metric-chip-value">@kvp.Value</span>
+                                    </span>
+                                }
+                                @if (!inventaireAttackTypes.Any())
+                                {
+                                    <span class="metric-chip">-</span>
+                                }
+                            </div>
+                        </div>
                     </div>
-                </div>                
-            </div>
-
-            <div class="hub-card" @onclick="@(() => GoTo(url: "inventaire"))">
-                <span class="msr hub-icon">inventory_2</span>
-                <h3>
-                    <LocalizedText Key="navigation.inventory" />
-                </h3>
-                <p>
-                    <LocalizedText Key="home.inventory" />
-                </p>
-            </div>
-
-            <div class="hub-card" @onclick="@(() => GoTo(url: "templates"))">
-                <span class="msr hub-icon">layers</span>
-                <h3>
-                    <LocalizedText Key="navigation.templates" />
-                </h3>
-                <p>
-                    <LocalizedText Key="home.templates" />
-                </p>
-            </div>
-
-            <div class="hub-card" @onclick="@(() => GoTo(url: "import-export-pml"))">
-                <span class="msr hub-icon">sync_alt</span>
-                <h3>
-                    <LocalizedText Key="navigation.importExportPml" />
-                </h3>
-                <p>
-                    <LocalizedText Key="home.pml" />
-                </p>
-            </div>
-
-            <div class="hub-card" @onclick="@(() => GoTo(url: "historique"))">
-                <span class="msr hub-icon">history</span>
-                <h3>
-                    <LocalizedText Key="navigation.history" />
-                </h3>
-                <p>
-                    <LocalizedText Key="home.history" />
-                </p>
-            </div>
-
-            <div class="hub-card" @onclick="@(() => GoTo(url: "maison-lucie"))">
-                <span class="msr hub-icon">home</span>
-                <h3>
-                    <LocalizedText Key="home.lucieLabel" />
-                </h3>
-                <p>
-                    <LocalizedText Key="home.lucie" />
-                </p>
-                <div class="hub-metric">
-                    <div class="metric-icon">
-                        <i class="bi bi-lightning-charge-fill"></i>
                     </div>
-                    <div class="metric-text">
-                        <span class="metric-label">Puissance</span>
-                        <span class="metric-value">@puissanceLucieEscouade</span>
+
+                    <div class="hub-card" @onclick="@(() => GoTo(url: "templates"))">
+                    <div class="hub-card-head">
+                        <span class="msr hub-icon">layers</span>
+                        <h3>
+                            <LocalizedText Key="navigation.templates" />
+                        </h3>
                     </div>
-                </div>   
+                    <p>
+                        <LocalizedText Key="home.templates" />
+                    </p>
+                    </div>
+                </div>
             </div>
 
-            <div class="hub-card" @onclick="@(() => GoTo(url: "classements"))">
-                <span class="msr hub-icon">leaderboard</span>
-                <h3>
-                    <LocalizedText Key="navigation.rankings" />
-                </h3>
-                <p>
-                    <LocalizedText Key="home.history" />
-                </p>
+            <!-- Classements et Historique -->
+            <div class="hub-section">
+                <h2 class="hub-section-title">
+                <span class="msr">leaderboard</span>
+                Classements
+                </h2>
+                <div class="hub-grid">
+                    <div class="hub-card" @onclick="@(() => GoTo(url: "histoligues"))">
+                    <div class="hub-card-head">
+                        <span class="msr hub-icon">leaderboard</span>
+                        <h3>
+                            <LocalizedText Key="home.leaguePromotionTitle" />
+                        </h3>
+                    </div>
+                    <p>
+                        <LocalizedText Key="home.history" />
+                    </p>
+                    <div class="hub-metric">
+                        <div class="metric-icon">
+                            <i class="bi bi-trophy-fill"></i>
+                        </div>
+                        <div class="metric-text">
+                            <span class="metric-label"><LocalizedText Key="home.highestLeagueLabel" /></span>
+                            <span class="metric-value">@highestLigueLabel</span>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div class="hub-card" @onclick="@(() => GoTo(url: "historique"))">
+                    <div class="hub-card-head">
+                        <span class="msr hub-icon">trending_up</span>
+                        <h3>
+                            <LocalizedText Key="navigation.rankings" />
+                        </h3>
+                    </div>
+                    <p>
+                        <LocalizedText Key="home.history" />
+                    </p>
+                    <div class="hub-metric">
+                        <div class="metric-icon">
+                            <i class="bi bi-bar-chart-line-fill"></i>
+                        </div>
+                        <div class="metric-text">
+                            <span class="metric-label">Score</span>
+                            <span class="metric-value">@FormatClassementValeur(lastClassementSummary?.Top150 ?? 0)</span>
+                        </div>
+                    </div>
+                    <div class="hub-meta-grid">
+                        <div class="hub-meta-block">
+                            <span class="metric-label">Classements récents</span>
+                            <div class="metric-chips">
+                                @if (lastClassementSummary is { } classement)
+                                {
+                                    <span class="metric-chip chip-nutaku">
+                                        <i class="bi bi-globe2"></i>
+                                        <span>Nutaku</span>
+                                        <span class="metric-chip-value">@FormatClassementValeur(classement.Nutaku)</span>
+                                    </span>
+                                    <span class="metric-chip chip-top150">
+                                        <i class="bi bi-graph-up"></i>
+                                        <span>Top 150</span>
+                                        <span class="metric-chip-value">@FormatClassementValeur(classement.Top150)</span>
+                                    </span>
+                                    <span class="metric-chip chip-france">
+                                        <i class="bi bi-flag-fill"></i>
+                                        <span>France</span>
+                                        <span class="metric-chip-value">@FormatClassementValeur(classement.France)</span>
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="metric-chip">-</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
             </div>
 
+            <!-- Import / Export -->
+            <div class="hub-section">
+                <h2 class="hub-section-title">
+                <span class="msr">sync_alt</span>
+                Import / Export
+                </h2>
+                <div class="hub-grid">
+                    <div class="hub-card" @onclick="@(() => GoTo(url: "import-export-pml"))">
+                    <div class="hub-card-head">
+                        <span class="msr hub-icon">sync_alt</span>
+                        <h3>
+                            <LocalizedText Key="navigation.importExportPml" />
+                        </h3>
+                    </div>
+                    <p>
+                        <LocalizedText Key="home.pml" />
+                    </p>
+                    <div class="hub-meta-grid single-row">
+                        <div class="hub-meta-block meta-inline">
+                            <span class="metric-label">Dernier import / export</span>
+                            <div class="metric-chips inline">
+                                <span class="metric-chip">
+                                    <i class="bi bi-upload"></i>
+                                    <span>Import</span>
+                                    <span class="metric-chip-value">@FormatDate(lastImportDate)</span>
+                                    @if (!string.IsNullOrEmpty(lastImportFileName))
+                                    {
+                                        <span class="metric-chip-detail">(@lastImportFileName)</span>
+                                    }
+                                </span>
+                                <span class="metric-chip">
+                                    <i class="bi bi-download"></i>
+                                    <span>Export</span>
+                                    <span class="metric-chip-value">@FormatDate(lastExportDate)</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
