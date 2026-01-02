@@ -156,7 +156,7 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
                 writer.WriteElementString("Date", historique.DateEnregistrement.ToString("yyyy-MM-ddTHH:mm:ssZ"));
                 writer.WriteElementString("Ligue", historique.Ligue.ToString());
                 writer.WriteElementString("Score", historique.Score.ToString());
-                writer.WriteElementString("Puissance", historique.PuissanceTotal.ToString());
+                writer.WriteElementString("Puissance", historique.PuissanceTotale.ToString());
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("Classement");

@@ -136,6 +136,13 @@
                                             <LocalizedText Key="importExportPml.leagueHistory" />
                                         </label>
                                     </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" @bind="importCapacites"
+                                            id="importCapacites">
+                                        <label class="form-check-label" for="importCapacites">
+                                            Capacités
+                                        </label>
+                                    </div>
                                 </div>
 
                                 <div class="mb-3">
@@ -224,6 +231,13 @@
                                         id="exportLeagueHistory">
                                     <label class="form-check-label" for="exportLeagueHistory">
                                         <LocalizedText Key="importExportPml.leagueHistory" />
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" @bind="exportCapacites"
+                                        id="exportCapacites">
+                                    <label class="form-check-label" for="exportCapacites">
+                                        Capacités
                                     </label>
                                 </div>
                             </div>

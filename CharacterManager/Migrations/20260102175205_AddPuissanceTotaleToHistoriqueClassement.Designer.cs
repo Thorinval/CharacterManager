@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CharacterManager.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260101162435_AppSettings")]
-    partial class AppSettings
+    [Migration("20260102175205_AddPuissanceTotaleToHistoriqueClassement")]
+    partial class AddPuissanceTotaleToHistoriqueClassement
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -126,7 +126,7 @@ namespace CharacterManager.Migrations
                     b.Property<int>("PuissanceMercenaires")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("PuissanceTotal")
+                    b.Property<int>("PuissanceTotale")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Score")

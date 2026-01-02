@@ -46,13 +46,13 @@
             <!-- Gestion des Escouades -->
             <div class="hub-section">
                 <h2 class="hub-section-title">
-                <span class="msr">groups</span>
+                <i class="bi bi-people-fill"></i>
                 Gestion des Escouades
                 </h2>
                 <div class="hub-grid">
                     <div class="hub-card" @onclick="@(() => GoTo("escouade"))">
                     <div class="hub-card-head">
-                        <span class="msr hub-icon">groups</span>
+                        <i class="bi bi-people-fill hub-icon"></i>
                         <h3>
                             <LocalizedText Key="navigation.squad" />
                         </h3>
@@ -107,7 +107,7 @@
 
                     <div class="hub-card" @onclick="@(() => GoTo(url: "meilleur-escouade"))">
                     <div class="hub-card-head">
-                        <span class="msr hub-icon">military_tech</span>
+                        <i class="bi bi-star-fill hub-icon"></i>
                         <h3>
                             <LocalizedText Key="navigation.bestSquad" />
                         </h3>
@@ -162,7 +162,7 @@
 
                 <div class="hub-card" @onclick="@(() => GoTo(url: "maison-lucie"))">
                     <div class="hub-card-head">
-                        <span class="msr hub-icon">home</span>
+                        <i class="bi bi-house-fill hub-icon"></i>
                         <h3>
                             <LocalizedText Key="home.lucieLabel" />
                         </h3>
@@ -212,13 +212,13 @@
             <!-- Inventaire et Templates -->
             <div class="hub-section">
                 <h2 class="hub-section-title">
-                <span class="msr">inventory_2</span>
+                <i class="bi bi-bag-fill"></i>
                 Inventaire
                 </h2>
                 <div class="hub-grid">
                     <div class="hub-card" @onclick="@(() => GoTo(url: "inventaire"))">
                     <div class="hub-card-head">
-                        <span class="msr hub-icon">inventory_2</span>
+                        <i class="bi bi-bag-fill hub-icon"></i>
                         <h3>
                             <LocalizedText Key="navigation.inventory" />
                         </h3>
@@ -271,7 +271,7 @@
 
                     <div class="hub-card" @onclick="@(() => GoTo(url: "templates"))">
                     <div class="hub-card-head">
-                        <span class="msr hub-icon">layers</span>
+                        <i class="bi bi-layers-fill hub-icon"></i>
                         <h3>
                             <LocalizedText Key="navigation.templates" />
                         </h3>
@@ -280,19 +280,33 @@
                         <LocalizedText Key="home.templates" />
                     </p>
                     </div>
+
+                    <div class="hub-card" @onclick="@(() => GoTo(url: "capacites"))">
+                    <div class="hub-card-head">
+                        <i class="bi bi-lightning-charge-fill hub-icon"></i>
+                        <h3>Capacités</h3>
+                    </div>
+                    <p>Gérez les capacités de vos personnages</p>
+                    <div class="hub-meta-grid">
+                        <div class="hub-meta-block">
+                            <span class="metric-label">Total</span>
+                            <span class="metric-value">@capacitesCount</span>
+                        </div>
+                    </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Classements et Historique -->
             <div class="hub-section">
                 <h2 class="hub-section-title">
-                <span class="msr">leaderboard</span>
+                <i class="bi bi-list-check"></i>
                 Classements
                 </h2>
                 <div class="hub-grid">
                     <div class="hub-card" @onclick="@(() => GoTo(url: "histoligues"))">
                     <div class="hub-card-head">
-                        <span class="msr hub-icon">leaderboard</span>
+                        <i class="bi bi-list-check hub-icon"></i>
                         <h3>
                             <LocalizedText Key="home.leaguePromotionTitle" />
                         </h3>
@@ -313,7 +327,7 @@
 
                     <div class="hub-card" @onclick="@(() => GoTo(url: "historique"))">
                     <div class="hub-card-head">
-                        <span class="msr hub-icon">trending_up</span>
+                        <i class="bi bi-graph-up hub-icon"></i>
                         <h3>
                             <LocalizedText Key="navigation.rankings" />
                         </h3>
@@ -366,13 +380,13 @@
             <!-- Import / Export -->
             <div class="hub-section">
                 <h2 class="hub-section-title">
-                <span class="msr">sync_alt</span>
+                <i class="bi bi-arrow-left-right"></i>
                 Import / Export
                 </h2>
                 <div class="hub-grid">
                     <div class="hub-card" @onclick="@(() => GoTo(url: "import-export-pml"))">
                     <div class="hub-card-head">
-                        <span class="msr hub-icon">sync_alt</span>
+                        <i class="bi bi-arrow-left-right hub-icon"></i>
                         <h3>
                             <LocalizedText Key="navigation.importExportPml" />
                         </h3>

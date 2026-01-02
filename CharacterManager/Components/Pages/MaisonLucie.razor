@@ -2,6 +2,8 @@
 @using CharacterManager.Components.Layout
 @using CharacterManager.Server.Services
 @using CharacterManager.Server.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
 @rendermode InteractiveServer
 
 @inject PersonnageService PersonnageService
@@ -18,10 +20,23 @@
         
         @if (lucieHouse != null)
         {
-            <div class="affection-badge">
-                <i class="bi bi-heart-fill"></i>
-                <span class="affection-value">@lucieHouse.Affection</span>
-                <span class="affection-label">Affection</span>
+            <div class="d-flex align-items-center gap-3">
+                <div class="affection-badge">
+                    <i class="bi bi-heart-fill"></i>
+                    <span class="affection-value">@lucieHouse.Affection</span>
+                    <span class="affection-label">Affection</span>
+                </div>
+
+                <div class="lucie-house-actions d-flex align-items-center gap-2">
+                    <label class="btn btn-outline-secondary mb-0" for="lucieImportFile" title="Importer une sauvegarde Lucie House">
+                        <i class="bi bi-upload"></i> Importer
+                    </label>
+                    <InputFile id="lucieImportFile" class="d-none" accept=".pml,.xml" OnChange="HandleLucieImport" />
+
+                    <button class="btn btn-outline-success" @onclick="ExportLucieHouse" title="Exporter Lucie House">
+                        <i class="bi bi-download"></i> Exporter
+                    </button>
+                </div>
             </div>
         }
     </div>
@@ -172,22 +187,105 @@
 @code {
     private Server.Models.LucieHouse? lucieHouse;
     private List<Server.Models.Piece> pieces = new();
+    private bool lucieImporting;
+    private bool lucieExporting;
+
+    [Inject]
+    public PmlImportService PmlImportService { get; set; } = null!;
+
+    [Inject]
+    public IJSRuntime JSRuntime { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
+    {
+        await LoadLucieHouseDataAsync();
+    }
+
+    private async Task LoadLucieHouseDataAsync()
     {
         try
         {
             lucieHouse = await PersonnageService.GetLucieHouseAsync();
-            
+
             if (lucieHouse != null)
             {
                 // Récupérer les pièces avec leurs aspects
                 pieces = await PersonnageService.GetLuciePiecesAsync();
             }
+            else
+            {
+                pieces = new();
+            }
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Erreur lors du chargement de la Lucie House: {ex.Message}");
+        }
+    }
+
+    private async Task ExportLucieHouse()
+    {
+        if (lucieExporting)
+            return;
+
+        lucieExporting = true;
+
+        try
+        {
+            // Réutilise l'export existant (Lucie House incluse dans l'export inventaire)
+            var payload = await PmlImportService.ExporterInventairePmlAsync(Enumerable.Empty<Personnage>());
+            var fileName = $"LucieHouse_{DateTime.Now:yyyyMMdd_HHmmss}.pml";
+            await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(payload));
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur export Lucie House: {ex.Message}");
+        }
+        finally
+        {
+            lucieExporting = false;
+        }
+    }
+
+    private async Task HandleLucieImport(InputFileChangeEventArgs e)
+    {
+        if (lucieImporting)
+            return;
+
+        lucieImporting = true;
+
+        try
+        {
+            var file = e.File;
+            using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            var result = await PmlImportService.ImportPmlAsync(
+                stream,
+                file.Name,
+                importInventory: true,
+                importTemplates: false,
+                importBestSquad: false,
+                importHistories: false,
+                importLeagueHistory: false);
+
+            if (result.IsSuccess)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", $"Import Lucie House réussi ({result.SuccessCount} éléments)");
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", result.Error ?? "Import Lucie House échoué");
+            }
+
+            await LoadLucieHouseDataAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur import Lucie House: {ex.Message}");
+        }
+        finally
+        {
+            lucieImporting = false;
         }
     }
 }

@@ -1,8 +1,30 @@
 # Release Notes - Character Manager
 
-> **Version actuelle**: 0.11.0
+> **Version actuelle**: 0.11.1
 
 ---
+
+## 0.11.1 (02 Janvier 2026)
+
+✨ - Création de la page "Capacités" avec gestion CRUD complète des capacités
+
+✨ - Ajout d'une tuile "Capacités" sur le tableau de bord avec compteur
+
+✨ - Import/Export des capacités via fichier PML
+
+✨ - 28 capacités pré-importées avec icônes Bootstrap Icons
+
+🔧 - Refactorisation de la méthode ExportPmlAsync avec classe PmlExportOptions pour meilleure extensibilité
+
+🔧 - Ajout de constantes pour les types d'export (INVENTORY, TEMPLATES, BEST_SQUAD, HISTORIES, LEAGUE_HISTORY, CAPACITES)
+
+🔧 - Remplacement de toutes les icônes Material Symbols par Bootstrap Icons dans le tableau de bord
+
+🔧 - Réduction de la largeur minimale des hub-cards de 600px à 500px pour layout plus responsive
+
+🐛 - Migration appliquée : Correction colonne PuissanceTotale dans table HistoriquesClassement
+
+🐛 - Correction du rendu des icônes Bootstrap Icons avec le format correct bi bi-{iconname}
 
 ## 0.11.0 (01 Janvier 2026)
 

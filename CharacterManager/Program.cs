@@ -35,6 +35,7 @@ builder.Services.AddScoped<PersonnageService>();
 builder.Services.AddScoped<PmlImportService>();
 builder.Services.AddScoped<HistoriqueClassementService>();
 builder.Services.AddScoped<HistoriqueLigueService>();
+builder.Services.AddScoped<CapaciteService>();
 builder.Services.AddScoped<ClientLocalizationService>();
 builder.Services.AddScoped<CsvImportService>();
 

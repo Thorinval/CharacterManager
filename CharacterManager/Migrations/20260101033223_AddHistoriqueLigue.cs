@@ -17,7 +17,7 @@ namespace CharacterManager.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    DatePassage = table.Column<DateOnly>(type: "TEXT", nullable: false),
+                    DateMontee = table.Column<DateOnly>(type: "TEXT", nullable: false),
                     Ligue = table.Column<int>(type: "INTEGER", nullable: false),
                     Notes = table.Column<string>(type: "TEXT", nullable: true)
                 },

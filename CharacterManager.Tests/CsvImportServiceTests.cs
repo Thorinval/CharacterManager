@@ -68,7 +68,7 @@ BELLE;SSR;Mercenaire;3090;143;330;Distance;Sentinelle;8;3;Oui;Syndicat";
         {
             Nom = "REGINA",
             Rarete = Rarete.SR,
-            Type = TypePersonnage.Androïde,
+            Type = TypePersonnage.Androide,
             Puissance = 1000,
             Niveau = 1,
             Rang = 1,
@@ -232,7 +232,7 @@ ISABELLA;SSR;Androïde;835;;20;Androïde;Androïde;2;;Oui;Androïde";
         
         var android = _personnageService.GetAll().First();
         Assert.Equal("ISABELLA", android.Nom);
-        Assert.Equal(TypePersonnage.Androïde, android.Type);
+        Assert.Equal(TypePersonnage.Androide, android.Type);
         Assert.Equal(Rarete.SSR, android.Rarete);
     }
 }

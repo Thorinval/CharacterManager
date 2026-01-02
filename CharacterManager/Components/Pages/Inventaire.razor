@@ -113,76 +113,81 @@
         </div>
     </div>
 }
-else
-{
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <div class="input-group">
-                <input id="searchInput" type="text" class="form-control"
-                    placeholder="@LocalizationService.T("inventory.searchPlaceholder")" @bind="searchTerm"
-                    @oninput="HandleSearchInput" />
-                <button class="btn btn-outline-secondary" type="button" @onclick="ClearSearch"
-                    title="@LocalizationService.T("inventory.clearSearch")">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-        </div>
-        <div class="col-md-6 text-end">
-            @if (selectedPersonnages.Any())
-            {
-                <button class="btn btn-warning me-2" @onclick="ShowBulkEditModal">
-                    <LocalizedText Key="inventory.bulkEdit" /> (@selectedPersonnages.Count)
-                </button>
-            }
-            <button class="btn btn-primary"
-                @onclick="() => { isEditing = false; currentPersonnage = new Personnage(); showModal = true; }">
-                <LocalizedText Key="inventory.add" />
-            </button>
-            <button class="btn btn-info ms-2" @onclick="() => OpenTemplateEditor()" title="Créer un template d'escouade">
-                <i class="bi bi-plus-circle"></i>
-                <LocalizedText Key="inventory.template" />
-            </button>
-            <button class="btn btn-success ms-2" @onclick="ExportToPML" title="Exporter l'inventaire">
-                <i class="bi bi-download"></i>
-                <LocalizedText Key="inventory.export" />
-            </button>
-            <button class="btn btn-danger ms-2" @onclick="DeleteSelectedPersonnages"
-                disabled="@(!selectedPersonnages.Any())" title="Supprimer les personnages sélectionnés">
-                <i class="bi bi-trash-fill"></i>
-                <LocalizedText Key="inventory.bulkDelete" /> (@selectedPersonnages.Count)
-            </button>
-            <button class="btn btn-danger ms-2" @onclick="ResetAll" title="Supprimer les données">
-                <i class="bi bi-trash-fill"></i>
-                <LocalizedText Key="inventory.deleteAll" />
-            </button>
-        </div>
-    </div>
-}
 
 @if (!showTemplateEditor)
 {
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="sort-controls">
-            <span>
-                <LocalizedText Key="inventory.sort" />
-            </span>
-            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByPuissance">
-                <LocalizedText Key="inventory.power" />
-            </button>
-            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNom">
-                <LocalizedText Key="inventory.name" />
-            </button>
-            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRarete">
-                <LocalizedText Key="inventory.rarity" />
-            </button>
-            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNiveau">
-                <LocalizedText Key="inventory.level" />
-            </button>
-            <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRang">
-                <LocalizedText Key="inventory.rank" />
-            </button>
+    <div class="mb-3" style="padding-top: 1rem;">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-4 col-md-12">
+                <div class="sort-controls d-flex flex-wrap align-items-center gap-2">
+                    <span class="me-1">
+                        <LocalizedText Key="inventory.sort" />
+                    </span>
+                    <button class="btn btn-sm btn-outline-secondary" @onclick="SortByPuissance">
+                        <LocalizedText Key="inventory.power" />
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNom">
+                        <LocalizedText Key="inventory.name" />
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRarete">
+                        <LocalizedText Key="inventory.rarity" />
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" @onclick="SortByNiveau">
+                        <LocalizedText Key="inventory.level" />
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" @onclick="SortByRang">
+                        <LocalizedText Key="inventory.rank" />
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="input-group">
+                    <input id="searchInput" type="text" class="form-control"
+                        placeholder="@LocalizationService.T("inventory.searchPlaceholder")" @bind="searchTerm"
+                        @oninput="HandleSearchInput" />
+                    <button class="btn btn-outline-secondary" type="button" @onclick="ClearSearch"
+                        title="@LocalizationService.T("inventory.clearSearch")">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex justify-content-end align-items-center flex-wrap gap-2">
+                    @if (selectedPersonnages.Any())
+                    {
+                        <button class="btn btn-warning" @onclick="ShowBulkEditModal">
+                            <LocalizedText Key="inventory.bulkEdit" /> (@selectedPersonnages.Count)
+                        </button>
+                    }
+                    <button class="btn btn-primary"
+                        @onclick="() => { isEditing = false; currentPersonnage = new Personnage(); showModal = true; }">
+                        <LocalizedText Key="inventory.add" />
+                    </button>
+                    <button class="btn btn-info" @onclick="() => OpenTemplateEditor()"
+                        title="Créer un template d'escouade">
+                        <i class="bi bi-plus-circle"></i>
+                        <LocalizedText Key="inventory.template" />
+                    </button>
+                    <button class="btn btn-success" @onclick="ExportToPML" title="Exporter l'inventaire">
+                        <i class="bi bi-download"></i>
+                        <LocalizedText Key="inventory.export" />
+                    </button>
+                    <button class="btn btn-danger" @onclick="DeleteSelectedPersonnages"
+                        disabled="@(!selectedPersonnages.Any())" title="Supprimer les personnages sélectionnés">
+                        <i class="bi bi-trash-fill"></i>
+                        <LocalizedText Key="inventory.bulkDelete" /> (@selectedPersonnages.Count)
+                    </button>
+                    <button class="btn btn-danger" @onclick="ResetAll" title="Supprimer les données">
+                        <i class="bi bi-trash-fill"></i>
+                        <LocalizedText Key="inventory.deleteAll" />
+                    </button>
+                </div>
+            </div>
         </div>
-        <div class="view-mode-controls">
+
+        <div class="d-flex justify-content-end align-items-center gap-2 view-mode-controls mt-2">
             <button class="btn btn-sm @GetViewModeClass(AppConstants.Defaults.ViewModeGrid)"
                 @onclick="@(() => viewMode = AppConstants.Defaults.ViewModeGrid)"
                 title="@LocalizationService.T("inventory.grid")">
@@ -213,8 +218,9 @@ else
             var colorClass = GetBadgeColor(option.Value);
 
             <li class="nav-item">
-                <button class="nav-link d-flex align-items-center
-                                                   @(SelectedFilter == option.Value ? "active glow-active" : "")"
+                <button
+                    class="nav-link d-flex align-items-center
+                                                                           @(SelectedFilter == option.Value ? "active glow-active" : "")"
                     @onclick="() => OnFilterClicked(option.Value)">
 
                     <span class="me-2">
@@ -274,12 +280,12 @@ else
                                     <label for=@($"selectionneInput_p{personnage.Id}")>
                                         <LocalizedText Key="inventory.selected" />
                                     </label>
-                                    <InputCheckbox id=@($"selectionneInput_p{personnage.Id}") @bind-Value="@personnage.Selectionne"
-                                        @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Selectionne", e.Value?.ToString() ?? "false"))"
-                                        @onclick:stopPropagation="true" />
+                                    <InputCheckbox id=@($"selectionneInput_p{personnage.Id}") Value="@personnage.Selectionne"
+                                        ValueChanged="@( (bool value) => OnSelectionneChanged(personnage.Id, value) )"
+                                        ValueExpression="@(() => personnage.Selectionne)" @onclick:stopPropagation="true" />
                                 </div>
 
-                                @if (personnage.Type != TypePersonnage.Androïde)
+                                @if (personnage.Type != TypePersonnage.Androide)
                                 {
                                     <div class="editable-field">
                                         <span>
@@ -508,9 +514,10 @@ else
                         <label for="action" class="form-label">Type d'attaque</label>
                         <select class="form-control" id="action" @bind="currentPersonnage.TypeAttaque">
                             <option value="">Sélectionner un type d'attaque</option>
-                            <option value="Mêlée">Mêlée</option>
+                            <option value="Melee">Mêlée</option>
                             <option value="Distance">Distance</option>
-                            <option value="Androïde">Androïde</option>
+                            <option value="Androide">Androïde</option>
+                            <option value="Commandant">Commandant</option>
                         </select>
                     </div>
                 </div>

@@ -1,0 +1,261 @@
+@page "/capacites"
+@layout CharacterManager.Components.Layout.MainLayout
+
+@using CharacterManager.Server.Models
+@using CharacterManager.Server.Services
+@using Microsoft.AspNetCore.Components.Forms
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inject CapaciteService CapaciteService
+@inject PmlImportService PmlImportService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Gestion des Capacités</PageTitle>
+
+<link rel="stylesheet" href="/css/Capacites.css" />
+
+<div class="page-container">
+    <div class="page-header">
+        <h1><i class="bi bi-lightning-charge-fill"></i> Gestion des Capacités</h1>
+        <div class="header-actions">
+            <button class="btn btn-primary" @onclick="OpenCreateModal">
+                <i class="bi bi-plus-circle"></i> Nouvelle Capacité
+            </button>
+            <button class="btn btn-success" @onclick="ExportCapacites" disabled="@(capacites?.Count == 0)">
+                <i class="bi bi-download"></i> Exporter
+            </button>
+            <label class="btn btn-info mb-0" for="importCapacitesFile">
+                <i class="bi bi-upload"></i> Importer
+            </label>
+            <InputFile id="importCapacitesFile" class="d-none" accept=".pml,.xml" OnChange="HandleImportCapacites" />
+        </div>
+    </div>
+
+    @if (capacites == null)
+    {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Chargement...</p>
+        </div>
+    }
+    else if (capacites.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <p>Aucune capacité disponible.</p>
+        </div>
+    }
+    else
+    {
+        <div class="capacites-grid">
+            @foreach (var capacite in capacites)
+            {
+                <div class="capacite-card">
+                    <div class="card-header">
+                        @if (!string.IsNullOrEmpty(capacite.Icon))
+                        {
+                            <i class="bi bi-@capacite.Icon capacite-icon"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-lightning-charge-fill capacite-icon"></i>
+                        }
+                        <h3>@capacite.Nom</h3>
+                    </div>
+
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(capacite.Description))
+                        {
+                            <p class="card-description">@capacite.Description</p>
+                        }
+                        else
+                        {
+                            <p class="card-description text-muted">Aucune description</p>
+                        }
+                    </div>
+
+                    <div class="card-actions">
+                        <button class="btn btn-sm btn-warning" @onclick="() => OpenEditModal(capacite)">
+                            <i class="bi bi-pencil"></i> Éditer
+                        </button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteCapacite(capacite.Id)">
+                            <i class="bi bi-trash"></i> Supprimer
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@if (showModal)
+{
+    <div class="modal-overlay" @onclick:stopPropagation="true">
+        <div class="modal-dialog-custom" @onclick:stopPropagation="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEditing ? "Éditer Capacité" : "Nouvelle Capacité")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nomInput" class="form-label">Nom *</label>
+                        <input type="text" class="form-control" id="nomInput" @bind="currentCapacite.Nom" placeholder="Nom de la capacité" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="descriptionInput" class="form-label">Description</label>
+                        <textarea class="form-control" id="descriptionInput" rows="3" @bind="currentCapacite.Description" placeholder="Description de la capacité"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="iconInput" class="form-label">Icône (nom Bootstrap Icons sans le préfixe 'bi-')</label>
+                        <input type="text" class="form-control" id="iconInput" @bind="currentCapacite.Icon" placeholder="ex: lightning-charge-fill" />
+                        @if (!string.IsNullOrEmpty(currentCapacite.Icon))
+                        {
+                            <small class="text-muted d-block mt-2">
+                                Aperçu: <i class="bi bi-@currentCapacite.Icon"></i>
+                            </small>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Annuler</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveCapacite" disabled="@string.IsNullOrWhiteSpace(currentCapacite.Nom)">
+                        @(isEditing ? "Mettre à jour" : "Créer")
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Capacite>? capacites;
+    private Capacite currentCapacite = new();
+    private bool showModal = false;
+    private bool isEditing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCapacitesAsync();
+    }
+
+    private async Task LoadCapacitesAsync()
+    {
+        try
+        {
+            capacites = await CapaciteService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors du chargement des capacités: {ex.Message}");
+        }
+    }
+
+    private void OpenCreateModal()
+    {
+        currentCapacite = new();
+        isEditing = false;
+        showModal = true;
+    }
+
+    private void OpenEditModal(Capacite capacite)
+    {
+        currentCapacite = new() { Id = capacite.Id, Nom = capacite.Nom, Description = capacite.Description, Icon = capacite.Icon };
+        isEditing = true;
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        currentCapacite = new();
+    }
+
+    private async Task SaveCapacite()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(currentCapacite.Nom))
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Le nom de la capacité est requis.");
+                return;
+            }
+
+            if (isEditing)
+            {
+                await CapaciteService.UpdateAsync(currentCapacite.Id, currentCapacite);
+            }
+            else
+            {
+                await CapaciteService.CreateAsync(currentCapacite);
+            }
+
+            CloseModal();
+            await LoadCapacitesAsync();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de la sauvegarde: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteCapacite(int id)
+    {
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Êtes-vous sûr de vouloir supprimer cette capacité ?");
+        if (confirmed)
+        {
+            try
+            {
+                await CapaciteService.DeleteAsync(id);
+                await LoadCapacitesAsync();
+            }
+            catch (Exception ex)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de la suppression: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task ExportCapacites()
+    {
+        try
+        {
+            if (capacites?.Count == 0)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Aucune capacité à exporter");
+                return;
+            }
+
+            var pmlBytes = await PmlImportService.ExporterCapacitesPmlAsync(capacites ?? new());
+            var fileName = $"Capacites_{DateTime.Now:yyyyMMdd_HHmmss}.pml";
+            await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pmlBytes));
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de l'export: {ex.Message}");
+        }
+    }
+
+    private async Task HandleImportCapacites(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            var file = e.File;
+            using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            var result = await PmlImportService.ImportCapacitesAsync(stream, file.Name);
+
+            if (result.IsSuccess)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", $"Import réussi : {result.SuccessCount} capacité(s) importée(s)");
+                await LoadCapacitesAsync();
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", result.Error ?? "Import échoué");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de l'import: {ex.Message}");
+        }
+    }
+}

@@ -27,7 +27,7 @@ public class PersonnageService
     {
         var commandants = _context.Personnages.Count(p => p.Type == TypePersonnage.Commandant && p.GetType() == typeof(Personnage));
         var mercenaires = _context.Personnages.Count(p => p.Type == TypePersonnage.Mercenaire && p.GetType() == typeof(Personnage));
-        var androides = _context.Personnages.Count(p => p.Type == TypePersonnage.Androïde && p.GetType() == typeof(Personnage));
+        var androides = _context.Personnages.Count(p => p.Type == TypePersonnage.Androide && p.GetType() == typeof(Personnage));
         return (commandants, mercenaires, androides);
     }
 
@@ -161,7 +161,7 @@ public class PersonnageService
     {
         return await Task.FromResult(_context.Personnages
             .Include(static p => p.Capacites)
-            .Where(static p => p.Type == TypePersonnage.Androïde && p.GetType() == typeof(Personnage))
+            .Where(static p => p.Type == TypePersonnage.Androide && p.GetType() == typeof(Personnage))
             .OrderByDescending(static p => p.Puissance)
             .Take(count)
             .ToList());
@@ -172,7 +172,7 @@ public class PersonnageService
         return _context.Personnages
             .AsNoTracking()
             .Include(static p => p.Capacites)
-            .Where(static p => p.Type == TypePersonnage.Androïde && p.GetType() == typeof(Personnage))
+            .Where(static p => p.Type == TypePersonnage.Androide && p.GetType() == typeof(Personnage))
             .OrderByDescending(static p => p.Puissance)
             .Take(count)
             .ToList();
@@ -218,7 +218,7 @@ public class PersonnageService
     {
         var query = _context.Personnages
             .Include(static p => p.Capacites)
-            .Where(static p => p.Type == TypePersonnage.Androïde);
+            .Where(static p => p.Type == TypePersonnage.Androide);
 
         if (selectionneOnly)
         {
@@ -265,7 +265,7 @@ public class PersonnageService
     {
         var query = _context.Personnages
             .Include(static p => p.Capacites)
-            .Where(static p => p.Type == TypePersonnage.Androïde);
+            .Where(static p => p.Type == TypePersonnage.Androide);
 
         if (selectionneOnly)
         {

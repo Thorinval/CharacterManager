@@ -72,7 +72,7 @@
                                     <td class="info-cell date-cell"><span class="pill pill-date">@historique.DateEnregistrement.ToString("dd/MM/yyyy")</span></td>
                                     <td class="info-cell ligue-cell"><span class="pill pill-ligue">@historique.Ligue</span></td>
                                     <td class="info-cell score-cell"><span class="pill pill-score">@historique.Score</span></td>
-                                    <td class="info-cell puissance-cell"><span class="pill pill-puissance">@historique.PuissanceTotal</span></td>
+                                    <td class="info-cell puissance-cell"><span class="pill pill-puissance">@historique.PuissanceTotale</span></td>
                                     <td class="ranking-inline info-cell">
                                         <div class="chip chip-nutaku" title="Classement Nutaku (global)"><i class="bi bi-globe"></i><strong>Nutaku</strong> : @historique.Classements.FirstOrDefault(c => c.Type == TypeClassement.Nutaku)?.Valeur</div>
                                         <div class="chip chip-top" title="Classement Top 150"><i class="bi bi-trophy"></i><strong>Top 150</strong> : @historique.Classements.FirstOrDefault(c => c.Type == TypeClassement.Top150)?.Valeur</div>

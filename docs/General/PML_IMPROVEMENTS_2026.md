@@ -35,17 +35,17 @@ L'affection de Lucie House n'était pas exportée ni importée dans le format PM
 
 ### Problème
 
-Les historiques de passage dans les ligues n'étaient pas gérés dans l'import/export PML.
+Les historiques de montée dans les ligues n'étaient pas gérés dans l'import/export PML.
 
 ### Solution
 
-Ajout d'une nouvelle section `<HistoriqueLigue>` pour gérer les passages de ligue.
+Ajout d'une nouvelle section `<HistoriqueLigue>` pour gérer les montées de ligue.
 
 ### Structure XML
 
 ```xml
 <HistoriqueLigue>
-  <DatePassage>2026-01-01</DatePassage>
+  <DateMontee>2026-01-01</DateMontee>
   <Ligue>25</Ligue>
   <Notes>Passage en ligue Elite</Notes>
 </HistoriqueLigue>
@@ -173,7 +173,7 @@ public const string Affection = "Affection";
 
 // Éléments d'historique de ligue
 public const string HistoriqueLigue = "HistoriqueLigue";
-public const string DatePassage = "DatePassage";
+public const string DateMontee = "DateMontee";
 public const string Ligue = "Ligue";
 public const string Notes = "Notes";
 
@@ -272,7 +272,7 @@ Pour valider les modifications :
 
 Ces améliorations permettent maintenant une sauvegarde et restauration complète de l'état de l'application, incluant :
 - L'affection de Lucie House
-- L'historique complet des passages de ligue
+- L'historique complet des montées de ligue
 - L'historique détaillé des classements avec toutes les compositions d'escouade
 
 Le format PML est maintenant le format d'export/import principal et complet de CharacterManager.

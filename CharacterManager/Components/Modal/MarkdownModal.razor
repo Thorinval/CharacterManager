@@ -1,10 +1,10 @@
 @using Markdig
 
-<div class="modal-body text-center">
-    <div class="app-icon mb-3">
+<div class="modal-body">
+    <div class="app-icon mb-3 text-center">
         <i class="bi bi-info-circle" style="font-size: 4rem; color: #0d6efd;"></i>
     </div>
-    <div class="form-control changelog-content">
+    <div class="form-control changelog-content" style="max-height: 60vh; overflow-y: auto;">
         @((MarkupString)ContentHtml)
     </div>
 </div>

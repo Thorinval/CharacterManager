@@ -71,7 +71,7 @@
 .hub-grid {
     margin-top: 15px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(600px, calc(33.333% - 14px)));
+    grid-template-columns: repeat(auto-fit, minmax(500px, calc(33.333% - 14px)));
     grid-auto-rows: 360px;
     gap: 20px;
     max-width: 1900px;

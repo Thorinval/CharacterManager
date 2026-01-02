@@ -102,7 +102,7 @@
         </div>
     </EditForm>
 
-    <h4 class="section-title">Puissances</h4>
+    <h4 class="section-title">Puissance (@PuissanceTotale)</h4>
 
     <div class="bloc-pieces-puissance-premium">
 
@@ -263,7 +263,7 @@
     private bool isValid;
     private bool showPersonnages = true;
     private bool IsEdit => Existing != null;
-    private int PuissanceTotale => IsEdit && Existing != null ? Existing.PuissanceTotal : PersonnageService.GetPuissanceEscouade();
+    private int PuissanceTotale => IsEdit && Existing != null ? Existing.PuissanceTotale : PersonnageService.GetPuissanceEscouade();
     private int PuissanceCommandant { get; set; } = 0;
     private int PuissanceMercenaires { get; set; } = 0;
     private int PuissanceLucie { get; set; } = 0;
@@ -422,7 +422,7 @@
             Androides = Androides,
             Pieces = Pieces,
             Commandant = Commandant,
-            PuissanceTotal = PersonnageService.GetPuissanceEscouade(),
+            PuissanceTotale = PersonnageService.GetPuissanceEscouade(),
             PuissanceCommandant = PuissanceCommandant,
             PuissanceMercenaires = PuissanceMercenaires,
             PuissanceLucie = PuissanceLucie

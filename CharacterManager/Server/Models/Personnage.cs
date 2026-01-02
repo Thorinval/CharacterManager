@@ -14,7 +14,7 @@ public enum TypePersonnage
 {
     Mercenaire,
     Commandant,
-    Androïde,
+    Androide,
     Inconnu
 }
 
@@ -37,9 +37,9 @@ public enum Faction
 
 public enum TypeAttaque
 {
-    Mêlée,
+    Melee,
     Distance,
-    Androïde,
+    Androide,
     Commandant,
     Inconnu
 }

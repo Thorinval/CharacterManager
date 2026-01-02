@@ -16,7 +16,7 @@
         </h1>
         <button class="btn btn-primary" @onclick="OpenCreateModal">
             <i class="bi bi-plus-circle"></i>
-            Nouveau passage
+            Nouvelle date de montée
         </button>
     </div>
 
@@ -28,9 +28,9 @@
     {
         <div class="empty-state">
             <i class="bi bi-inbox"></i>
-            <p>Aucun passage enregistré</p>
+            <p>Aucune date enregistrée</p>
             <button class="btn btn-primary" @onclick="OpenCreateModal">
-                Ajouter le premier passage
+                Ajouter la première date
             </button>
         </div>
     }
@@ -50,7 +50,7 @@
                     @foreach (var historique in historiques)
                     {
                         <tr>
-                            <td class="date-cell">@historique.DatePassage.ToString("dd/MM/yyyy")</td>
+                            <td class="date-cell">@historique.DateMontee.ToString("dd/MM/yyyy")</td>
                             <td class="ligue-cell">
                                 @if (historique.Ligue == 50)
                                 {
@@ -84,15 +84,15 @@
     <div class="modal-overlay" @onclick="CloseModal">
         <div class="modal-content" @onclick:stopPropagation="true">
             <div class="modal-header">
-                <h3>@(isEdit ? "Éditer le passage" : "Nouveau passage")</h3>
+                <h3>@(isEdit ? "Éditer la date de montée" : "Nouvelle date de montée")</h3>
                 <button class="btn-close" @onclick="CloseModal">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Date du passage</label>
-                    <InputDate Type="InputDateType.Date" @bind-Value="formModel.DatePassage" class="form-control" />
+                    <label>Date de montée</label>
+                    <InputDate Type="InputDateType.Date" @bind-Value="formModel.DateMontee" class="form-control" />
                 </div>
                 <div class="form-group">
                     <label>Ligue</label>
@@ -139,7 +139,7 @@
 
     private void OpenCreateModal()
     {
-        formModel = new HistoriqueLigue { DatePassage = DateOnly.FromDateTime(DateTime.Now) };
+        formModel = new HistoriqueLigue { DateMontee = DateOnly.FromDateTime(DateTime.Now) };
         isEdit = false;
         showModal = true;
     }
@@ -149,7 +149,7 @@
         formModel = new HistoriqueLigue
         {
             Id = historique.Id,
-            DatePassage = historique.DatePassage,
+            DateMontee = historique.DateMontee,
             Ligue = historique.Ligue,
             Notes = historique.Notes
         };
@@ -182,7 +182,7 @@
 
     private async Task DeleteHistorique(int id)
     {
-        bool confirmed = await JS.InvokeAsync<bool>("confirm", "Êtes-vous sûr de vouloir supprimer ce passage ?");
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", "Êtes-vous sûr de vouloir supprimer cette date de montée ?");
         if (confirmed)
         {
             await HistoriqueLigueService.DeleteAsync(id);

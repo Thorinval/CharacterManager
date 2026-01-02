@@ -39,7 +39,7 @@ public class ImporterHistoriqueXmlTests : IDisposable
         string[] ands = new[] { "RUBY", "AUDREY", "ISABELLA" };
         foreach (var a in ands)
         {
-            _context.Personnages.Add(new Personnage { Nom = a, Type = TypePersonnage.Androïde, Rarete = Rarete.Inconnu, Niveau = 1, Rang = 0, Puissance = 0, Description = string.Empty });
+            _context.Personnages.Add(new Personnage { Nom = a, Type = TypePersonnage.Androide, Rarete = Rarete.Inconnu, Niveau = 1, Rang = 0, Puissance = 0, Description = string.Empty });
         }
         _context.SaveChanges();
     }

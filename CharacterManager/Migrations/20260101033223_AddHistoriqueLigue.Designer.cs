@@ -166,7 +166,7 @@ namespace CharacterManager.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateOnly>("DatePassage")
+                    b.Property<DateOnly>("DateMontee")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Ligue")

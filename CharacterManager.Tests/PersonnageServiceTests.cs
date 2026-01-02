@@ -48,7 +48,7 @@ public class PersonnageServiceTests : IDisposable
             Faction = Faction.Syndicat,
             Description = "Ancienne description",
             Selectionne = false,
-            TypeAttaque = TypeAttaque.Mêlée
+            TypeAttaque = TypeAttaque.Melee
         };
 
         _context.Personnages.Add(existingPersonnage);
@@ -469,7 +469,7 @@ public class PersonnageServiceTests : IDisposable
             Faction = Faction.Syndicat,
             Description = "test",
             Selectionne = false,
-            TypeAttaque = TypeAttaque.Mêlée
+            TypeAttaque = TypeAttaque.Melee
         };
 
         _context.Personnages.Add(mercenary);

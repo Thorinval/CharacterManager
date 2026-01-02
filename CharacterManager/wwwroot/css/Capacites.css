@@ -1,0 +1,227 @@
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.header-actions .btn {
+    white-space: nowrap;
+}
+
+.loading-state,
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.capacites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.capacite-card {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.capacite-card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border-color: #007bff;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    word-break: break-word;
+}
+
+.capacite-icon {
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+.card-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+}
+
+.card-description {
+    margin: 0;
+    color: #495057;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+
+.card-description.text-muted {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+.card-actions .btn {
+    flex: 1;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+}
+
+.modal-dialog-custom {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6c757d;
+    padding: 0;
+    width: auto;
+    height: auto;
+}
+
+.btn-close:hover {
+    color: #000;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    border-top: 1px solid #dee2e6;
+    justify-content: flex-end;
+}
+
+.modal-footer .btn {
+    min-width: 100px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .capacites-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-dialog-custom {
+        width: 95%;
+    }
+}

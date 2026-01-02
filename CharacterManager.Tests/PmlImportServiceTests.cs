@@ -54,7 +54,7 @@ public class PmlImportServiceTests : IDisposable
     _context.Personnages.Add(new Personnage
     {
       Nom = "ISABELLA",
-      Type = TypePersonnage.Androïde,
+      Type = TypePersonnage.Androide,
       Rarete = Rarete.SSR,
       Niveau = 2,
       Rang = 0,
@@ -264,7 +264,7 @@ public class PmlImportServiceTests : IDisposable
 
     Assert.NotNull(_context.Personnages.FirstOrDefault(p => p.Nom == "ALYA" && p.Type == TypePersonnage.Mercenaire));
     Assert.NotNull(_context.Personnages.FirstOrDefault(p => p.Nom == "COMMANDRA" && p.Type == TypePersonnage.Commandant));
-    Assert.NotNull(_context.Personnages.FirstOrDefault(p => p.Nom == "OMEGA" && p.Type == TypePersonnage.Androïde));
+    Assert.NotNull(_context.Personnages.FirstOrDefault(p => p.Nom == "OMEGA" && p.Type == TypePersonnage.Androide));
   }
 
   // Test désactivé : HistoriqueEscouade est obsolète, remplacé par HistoriqueClassement
@@ -426,11 +426,9 @@ public class PmlImportServiceTests : IDisposable
     await _context.SaveChangesAsync();
 
     // Act
-    var pmlBytes = await _pmlImportService.ExportPmlAsync(
-      exportInventory: true,
-      exportTemplates: false,
-      exportBestSquad: false,
-      exportHistories: false);
+    var exportOptions = new PmlExportOptions();
+    exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_INVENTORY);
+    var pmlBytes = await _pmlImportService.ExportPmlAsync(exportOptions);
 
     // Assert
     var content = Encoding.UTF8.GetString(pmlBytes);

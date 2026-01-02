@@ -50,7 +50,7 @@ public class HistoriqueClassement
     public PersonnageHistorique? Commandant { get; set; }
     public List<PersonnageHistorique> Androides { get; set; } = [];
 
-    public int PuissanceTotal { get; set; }
+    public int PuissanceTotale { get; set; }
 
     public List<PieceHistorique> Pieces { get; set; } = [];
 }

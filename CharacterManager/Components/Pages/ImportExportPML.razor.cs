@@ -25,22 +25,77 @@ public partial class ImportExportPML
     private string? lastImportedFileName;
     private string activeTab = "import";
 
-    // Import checkboxes
-    private bool importInventory = true;
-    private bool importTemplates = false;
-    private bool importBestSquad = false;
-    private bool importHistories = false;
-    private bool importLeagueHistory = false;
+    // Import/Export options
+    private PmlExportOptions exportOptions = new();
 
-    // Export checkboxes
-    private bool exportInventory = true;
-    private bool exportTemplates = false;
-    private bool exportBestSquad = false;
-    private bool exportHistories = false;
-    private bool exportLeagueHistory = false;
+    // Import checkboxes (mapped to PmlExportOptions)
+    private bool importInventory 
+    { 
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_INVENTORY);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_INVENTORY); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_INVENTORY); }
+    }
+    private bool importTemplates
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_TEMPLATES);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_TEMPLATES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_TEMPLATES); }
+    }
+    private bool importBestSquad
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD); }
+    }
+    private bool importHistories
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_HISTORIES);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_HISTORIES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_HISTORIES); }
+    }
+    private bool importLeagueHistory
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY); }
+    }
+    private bool importCapacites
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_CAPACITES);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_CAPACITES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_CAPACITES); }
+    }
+
+    // Export checkboxes (mapped to PmlExportOptions)
+    private bool exportInventory 
+    { 
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_INVENTORY);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_INVENTORY); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_INVENTORY); }
+    }
+    private bool exportTemplates
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_TEMPLATES);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_TEMPLATES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_TEMPLATES); }
+    }
+    private bool exportBestSquad
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD); }
+    }
+    private bool exportHistories
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_HISTORIES);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_HISTORIES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_HISTORIES); }
+    }
+    private bool exportLeagueHistory
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY); }
+    }
+    private bool exportCapacites
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_CAPACITES);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_CAPACITES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_CAPACITES); }
+    }
 
     protected override async Task OnInitializedAsync()
     {
+        // Initialiser les options d'export avec les valeurs par défaut
+        exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_INVENTORY);
         lastImportedFileName = await PmlImportService.GetLastImportedFileName();
     }
 
@@ -52,12 +107,12 @@ public partial class ImportExportPML
 
     private bool HasSelectedImportTypes()
     {
-        return importInventory || importTemplates || importBestSquad || importHistories || importLeagueHistory;
+        return exportOptions.HasSelectedExports();
     }
 
     private bool HasSelectedExportTypes()
     {
-        return exportInventory || exportTemplates || exportBestSquad || exportHistories || exportLeagueHistory;
+        return exportOptions.HasSelectedExports();
     }
 
     private async Task HandleImport()
@@ -73,12 +128,31 @@ public partial class ImportExportPML
             importResult = await PmlImportService.ImportPmlAsync(
                 stream,
                 selectedFileName ?? "",
-                importInventory,
-                importTemplates,
-                importBestSquad,
-                importHistories,
-                importLeagueHistory
+                exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_INVENTORY),
+                exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_TEMPLATES),
+                exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD),
+                exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_HISTORIES),
+                exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY)
             );
+
+            // Import capacités si sélectionné
+            if (exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_CAPACITES) && importResult.IsSuccess)
+            {
+                using var capacitesStream = new MemoryStream();
+                await stream.CopyToAsync(capacitesStream);
+                capacitesStream.Position = 0;
+                var capacitesResult = await PmlImportService.ImportCapacitesAsync(capacitesStream, selectedFileName ?? "");
+                if (capacitesResult.IsSuccess)
+                {
+                    importResult.SuccessCount += capacitesResult.SuccessCount;
+                    importResult.Errors.AddRange(capacitesResult.Errors);
+                }
+                else if (!capacitesResult.IsSuccess && !capacitesResult.Error?.Contains("Aucune section") == true)
+                {
+                    importResult.Errors.Add(capacitesResult.Error ?? "Erreur lors de l'import des capacités");
+                }
+            }
+
             importComplete = true;
 
             // Rafraîchir le nom du dernier fichier importé
@@ -112,12 +186,7 @@ public partial class ImportExportPML
     {
         try
         {
-            var exportData = await PmlImportService.ExportPmlAsync(
-                exportInventory,
-                exportTemplates,
-                exportBestSquad,
-                exportHistories,
-                exportLeagueHistory);
+            var exportData = await PmlImportService.ExportPmlAsync(exportOptions);
 
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             var fileName = $"export_{timestamp}.pml";
@@ -157,12 +226,7 @@ public partial class ImportExportPML
     {
         try
         {
-            var exportData = await PmlImportService.ExportPmlAsync(
-                exportInventory,
-                exportTemplates,
-                exportBestSquad,
-                exportHistories,
-                exportLeagueHistory);
+            var exportData = await PmlImportService.ExportPmlAsync(exportOptions);
 
             var configPath = Path.Combine("wwwroot", "config.pml");
             await File.WriteAllBytesAsync(configPath, exportData);

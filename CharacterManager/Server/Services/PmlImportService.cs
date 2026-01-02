@@ -190,6 +190,8 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                     continue;
                 }
 
+                var normalizedTemplate = NormalizeUpper(templateName);
+
                 // Chercher le template existant ou en créer un nouveau
                 var existingTemplate = await _context.Templates
                     .FirstOrDefaultAsync(t => t.Nom.Equals(templateName, StringComparison.OrdinalIgnoreCase));
@@ -319,7 +321,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
         {
             try
             {
-                var dateStr = historiqueLigueElement.Element(AppConstants.XmlElements.DatePassage)?.Value;
+                var dateStr = historiqueLigueElement.Element(AppConstants.XmlElements.DateMontee)?.Value;
                 var ligueStr = historiqueLigueElement.Element(AppConstants.XmlElements.Ligue)?.Value;
                 var notes = historiqueLigueElement.Element(AppConstants.XmlElements.Notes)?.Value;
 
@@ -329,9 +331,9 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                     continue;
                 }
 
-                if (!DateOnly.TryParse(dateStr, out var datePassage))
+                if (!DateOnly.TryParse(dateStr, out var DateMontee))
                 {
-                    errors.Add($"Date de passage invalide: {dateStr}");
+                    errors.Add($"Date de montée invalide: {dateStr}");
                     continue;
                 }
 
@@ -343,7 +345,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
 
                 var historiqueLigue = new HistoriqueLigue
                 {
-                    DatePassage = datePassage,
+                    DateMontee = DateMontee,
                     Ligue = ligue,
                     Notes = notes
                 };
@@ -397,7 +399,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                     DateEnregistrement = dateEnregistrement,
                     Ligue = int.TryParse(ligueStr, out var ligue) ? ligue : 0,
                     Score = int.TryParse(scoreStr, out var score) ? score : 0,
-                    PuissanceTotal = int.TryParse(puissanceTotalStr, out var puissanceTotal) ? puissanceTotal : 0,
+                    PuissanceTotale = int.TryParse(puissanceTotalStr, out var puissanceTotal) ? puissanceTotal : 0,
                     PuissanceCommandant = int.TryParse(puissanceCommandantStr, out var puissanceCommandant) ? puissanceCommandant : 0,
                     PuissanceMercenaires = int.TryParse(puissanceMercenairesStr, out var puissanceMercenaires) ? puissanceMercenaires : 0,
                     PuissanceLucie = int.TryParse(puissanceLucieStr, out var puissanceLucie) ? puissanceLucie : 0
@@ -528,7 +530,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                             {
                                 Nom = nom,
                                 Niveau = int.TryParse(pieceElement.Element(AppConstants.XmlElements.Niveau)?.Value, out var niveau) ? niveau : 1,
-                                Selectionnee = bool.TryParse(pieceElement.Element(AppConstants.XmlElements.Selectionne)?.Value, out var sel) && sel,
+                                Selectionnee = ParseBool(pieceElement.Element(AppConstants.XmlElements.Selectionne)?.Value),
                                 IdOrigine = 0
                             };
 
@@ -570,7 +572,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
         try
         {
             var lucieHouse = new LucieHouse();
-            
+
             // Importer l'affection
             var affectionStr = lucieHouseElement.Element(AppConstants.XmlElements.Affection)?.Value;
             if (!string.IsNullOrWhiteSpace(affectionStr) && int.TryParse(affectionStr, out var affection))
@@ -592,7 +594,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                     {
                         Nom = nom,
                         Niveau = int.TryParse(pieceElement.Element(AppConstants.XmlElements.Niveau)?.Value, out var niveau) ? niveau : 1,
-                        Selectionnee = bool.TryParse(pieceElement.Element(AppConstants.XmlElements.Selectionne)?.Value, out var sel) && sel
+                        Selectionnee = ParseBool(pieceElement.Element(AppConstants.XmlElements.Selectionne)?.Value)
                     };
 
                     // Parser les bonus tactiques
@@ -686,7 +688,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             Role = ParseRole(element.Element(AppConstants.XmlElements.Role)?.Value),
             Faction = ParseFaction(element.Element(AppConstants.XmlElements.Faction)?.Value),
             TypeAttaque = ParseTypeAttaque(element.Element(AppConstants.XmlElements.TypeAttaque)?.Value),
-            Selectionne = bool.TryParse(element.Element(AppConstants.XmlElements.Selectionne)?.Value, out var sel) && sel,
+            Selectionne = ParseBool(element.Element(AppConstants.XmlElements.Selectionne)?.Value),
             Description = element.Element(AppConstants.XmlElements.Description)?.Value ?? $"Personnage {nom}",
         };
 
@@ -840,13 +842,15 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
     /// <summary>
     /// Exporte les données sélectionnées au format PML
     /// </summary>
-    public async Task<byte[]> ExportPmlAsync(
-        bool exportInventory = true,
-        bool exportTemplates = true,
-        bool exportBestSquad = true,
-        bool exportHistories = true,
-        bool exportLeagueHistory = false)
+    public async Task<byte[]> ExportPmlAsync(PmlExportOptions? options = null)
     {
+        // Rétro-compatibilité: créer des options par défaut
+        options ??= new PmlExportOptions(
+            PmlExportOptions.EXPORT_TYPE_INVENTORY,
+            PmlExportOptions.EXPORT_TYPE_TEMPLATES,
+            PmlExportOptions.EXPORT_TYPE_BEST_SQUAD
+        );
+
         var settings = new System.Xml.XmlWriterSettings
         {
             Indent = true,
@@ -862,7 +866,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             writer.WriteAttributeString(AppConstants.XmlElements.ExportDate, DateTime.UtcNow.ToString(AppConstants.DateTimeFormats.IsoDateTime));
 
             // Export inventaire
-            if (exportInventory)
+            if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_INVENTORY))
             {
                 writer.WriteStartElement(AppConstants.XmlElements.Inventaire);
                 var personnages = await _context.Personnages.ToListAsync();
@@ -931,7 +935,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             }
 
             // Export templates
-            if (exportTemplates)
+            if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_TEMPLATES))
             {
                 var templates = await _context.Templates.ToListAsync();
                 foreach (var template in templates)
@@ -959,7 +963,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             }
 
             // Export meilleure escouade
-            if (exportBestSquad)
+            if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD))
             {
                 writer.WriteStartElement(AppConstants.XmlElements.MeilleurEscouade);
 
@@ -992,7 +996,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
 
                 // Androides (top 5 par puissance)
                 var topAndroides = await _context.Personnages
-                    .Where(p => p.Type == TypePersonnage.Androïde)
+                    .Where(p => p.Type == TypePersonnage.Androide)
                     .OrderByDescending(p => p.Puissance)
                     .Take(5)
                     .ToListAsync();
@@ -1008,7 +1012,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             }
 
             // Export historiques de classement
-            if (exportHistories)
+            if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_HISTORIES))
             {
                 // Export historiques de classement (version structurée complète)
                 var historiquesClassement = await _context.HistoriquesClassement
@@ -1027,7 +1031,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                     writer.WriteElementString(AppConstants.XmlElements.DateEnregistrement, historiqueClassement.DateEnregistrement.ToString("yyyy-MM-dd"));
                     writer.WriteElementString(AppConstants.XmlElements.Ligue, historiqueClassement.Ligue.ToString());
                     writer.WriteElementString(AppConstants.XmlElements.Score, historiqueClassement.Score.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.PuissanceTotal, historiqueClassement.PuissanceTotal.ToString());
+                    writer.WriteElementString(AppConstants.XmlElements.PuissanceTotal, historiqueClassement.PuissanceTotale.ToString());
                     writer.WriteElementString(AppConstants.XmlElements.PuissanceCommandant, historiqueClassement.PuissanceCommandant.ToString());
                     writer.WriteElementString(AppConstants.XmlElements.PuissanceMercenaires, historiqueClassement.PuissanceMercenaires.ToString());
                     writer.WriteElementString(AppConstants.XmlElements.PuissanceLucie, historiqueClassement.PuissanceLucie.ToString());
@@ -1103,21 +1107,40 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             }
 
             // Export historiques de ligue
-            if (exportLeagueHistory)
+            if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY))
             {
                 var historiquesLigue = await _context.HistoriquesLigue
-                    .OrderByDescending(h => h.DatePassage)
+                    .OrderByDescending(h => h.DateMontee)
                     .Take(100)
                     .ToListAsync();
 
                 foreach (var historiqueLigue in historiquesLigue)
                 {
                     writer.WriteStartElement(AppConstants.XmlElements.HistoriqueLigue);
-                    writer.WriteElementString(AppConstants.XmlElements.DatePassage, historiqueLigue.DatePassage.ToString("yyyy-MM-dd"));
+                    writer.WriteElementString(AppConstants.XmlElements.DateMontee, historiqueLigue.DateMontee.ToString("yyyy-MM-dd"));
                     writer.WriteElementString(AppConstants.XmlElements.Ligue, historiqueLigue.Ligue.ToString());
                     if (!string.IsNullOrWhiteSpace(historiqueLigue.Notes))
                     {
                         writer.WriteElementString(AppConstants.XmlElements.Notes, historiqueLigue.Notes);
+                    }
+                    writer.WriteEndElement();
+                }
+            }
+
+            // Export capacités
+            if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_CAPACITES))
+            {
+                var capacites = await _context.Capacites.ToListAsync();
+                if (capacites.Any())
+                {
+                    writer.WriteStartElement("Capacites");
+                    foreach (var capacite in capacites)
+                    {
+                        writer.WriteStartElement("Capacite");
+                        writer.WriteElementString("Nom", capacite.Nom);
+                        writer.WriteElementString("Description", capacite.Description ?? "");
+                        writer.WriteElementString("Icon", capacite.Icon ?? "");
+                        writer.WriteEndElement();
                     }
                     writer.WriteEndElement();
                 }
@@ -1154,12 +1177,16 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
 
     private void ImportOrUpdatePersonnage(Personnage nouveauPersonnage)
     {
-        var existing = _personnageService.GetAll()
-            .FirstOrDefault(p => p.Nom.Equals(nouveauPersonnage.Nom, StringComparison.OrdinalIgnoreCase));
+
+        var normalizedName = NormalizeUpper(nouveauPersonnage.Nom);
+
+        var existing = _context.Personnages
+            .FirstOrDefault(p => p.Nom == normalizedName);
 
         if (existing != null)
         {
             // Mettre à jour le personnage existant
+            existing.Nom = normalizedName;
             existing.Rarete = nouveauPersonnage.Rarete;
             existing.Type = nouveauPersonnage.Type;
             existing.Puissance = nouveauPersonnage.Puissance;
@@ -1178,12 +1205,14 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
         else
         {
             // Ajouter le nouveau personnage
+            nouveauPersonnage.Nom = normalizedName;
             _context.Personnages.Add(nouveauPersonnage);
         }
 
         _context.SaveChanges();
     }
 
+    private static string NormalizeUpper(string? value) => (value ?? string.Empty).Trim().ToUpper();
     private static Rarete ParseRarete(string? value)
     {
         return value switch
@@ -1195,12 +1224,27 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
         };
     }
 
+    private static bool ParseBool(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        var trimmed = value.Trim();
+
+        return trimmed.Equals("true", StringComparison.OrdinalIgnoreCase)
+            || trimmed.Equals("1", StringComparison.OrdinalIgnoreCase)
+            || trimmed.Equals("yes", StringComparison.OrdinalIgnoreCase)
+            || trimmed.Equals("oui", StringComparison.OrdinalIgnoreCase);
+    }
+
     private static TypePersonnage ParseType(string? value)
     {
         return value switch
         {
             AppConstants.XmlElements.Mercenaire => TypePersonnage.Mercenaire,
-            AppConstants.XmlElements.Androïde or AppConstants.XmlElements.Androide => TypePersonnage.Androïde,
+            AppConstants.XmlElements.Androïde or AppConstants.XmlElements.Androide => TypePersonnage.Androide,
             AppConstants.XmlElements.Commandant => TypePersonnage.Commandant,
             _ => TypePersonnage.Mercenaire
         };
@@ -1233,9 +1277,9 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
     {
         return value switch
         {
-            AppConstants.XmlElements.MeleeAccent or AppConstants.XmlElements.Melee => TypeAttaque.Mêlée,
+            AppConstants.XmlElements.MeleeAccent or AppConstants.XmlElements.Melee => TypeAttaque.Melee,
             "Distance" => TypeAttaque.Distance,
-            AppConstants.XmlElements.Androïde or AppConstants.XmlElements.Androide => TypeAttaque.Androïde,
+            AppConstants.XmlElements.Androïde or AppConstants.XmlElements.Androide => TypeAttaque.Androide,
             _ => TypeAttaque.Inconnu
         };
     }
@@ -1293,5 +1337,130 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
 
         settings.LastExportDate = DateTime.Now;
         await _context.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Exporte uniquement les capacités au format PML
+    /// </summary>
+    public Task<byte[]> ExporterCapacitesPmlAsync(IEnumerable<Capacite> capacites)
+    {
+        var settings = new System.Xml.XmlWriterSettings
+        {
+            Indent = true,
+            Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)
+        };
+
+        using var memoryStream = new MemoryStream();
+        using (var writer = System.Xml.XmlWriter.Create(memoryStream, settings))
+        {
+            writer.WriteStartDocument();
+            writer.WriteStartElement("CapacitesPML");
+            writer.WriteAttributeString("version", "1.0");
+            writer.WriteAttributeString("exportDate", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+
+            writer.WriteStartElement("Capacites");
+            foreach (var capacite in capacites)
+            {
+                writer.WriteStartElement("Capacite");
+                writer.WriteElementString("Nom", capacite.Nom);
+                writer.WriteElementString("Description", capacite.Description ?? "");
+                writer.WriteElementString("Icon", capacite.Icon ?? "");
+                writer.WriteEndElement();
+            }
+            writer.WriteEndElement();
+
+            writer.WriteEndElement();
+            writer.WriteEndDocument();
+        }
+
+        return Task.FromResult(memoryStream.ToArray());
+    }
+
+    /// <summary>
+    /// Importe les capacités au format PML
+    /// </summary>
+    public async Task<ImportResult> ImportCapacitesAsync(Stream pmlStream, string fileName = "")
+    {
+        var result = new ImportResult();
+        var errors = new List<string>();
+
+        try
+        {
+            using var buffer = new MemoryStream();
+            await pmlStream.CopyToAsync(buffer);
+            buffer.Position = 0;
+            var doc = await XDocument.LoadAsync(buffer, LoadOptions.None, CancellationToken.None);
+
+            if (doc.Root == null)
+            {
+                result.Error = "Le fichier est vide ou invalide";
+                return result;
+            }
+
+            // Trouver la section Capacites
+            var capacitesElements = doc.Root.Elements("Capacites");
+            if (!capacitesElements.Any())
+            {
+                result.Error = "Aucune section Capacites trouvée dans le fichier";
+                return result;
+            }
+
+            var capacitesElement = capacitesElements.First();
+            var capaciteElements = capacitesElement.Elements("Capacite");
+
+            var importedCount = 0;
+            foreach (var capaciteElement in capaciteElements)
+            {
+                try
+                {
+                    var nom = capaciteElement.Element("Nom")?.Value?.Trim();
+                    if (string.IsNullOrWhiteSpace(nom))
+                    {
+                        errors.Add("Une capacité sans nom a été ignorée");
+                        continue;
+                    }
+
+                    var description = capaciteElement.Element("Description")?.Value ?? "";
+                    var icon = capaciteElement.Element("Icon")?.Value ?? "";
+
+                    // Vérifier si la capacité existe déjà
+                    var existing = await _context.Capacites.FirstOrDefaultAsync(c => c.Nom == nom);
+                    if (existing != null)
+                    {
+                        // Mettre à jour
+                        existing.Description = description;
+                        existing.Icon = icon;
+                    }
+                    else
+                    {
+                        // Créer
+                        _context.Capacites.Add(new Capacite
+                        {
+                            Nom = nom,
+                            Description = description,
+                            Icon = icon
+                        });
+                    }
+
+                    importedCount++;
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"Erreur lors de l'import d'une capacité: {ex.Message}");
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            result.IsSuccess = true;
+            result.SuccessCount = importedCount;
+            result.Errors = errors;
+        }
+        catch (Exception ex)
+        {
+            result.IsSuccess = false;
+            result.Error = $"Erreur lors de l'import des capacités: {ex.Message}";
+        }
+
+        return result;
     }
 }

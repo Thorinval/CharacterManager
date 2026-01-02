@@ -251,6 +251,11 @@ public partial class Inventaire : IAsyncDisposable
         }
     }
 
+    private void OnSelectionneChanged(int personnageId, bool value)
+    {
+        UpdatePersonnageField(personnageId, AppConstants.XmlElements.Selectionne, value.ToString());
+    }
+
     private void UpdateRankFromStar(int personnageId, int clickedStar, int currentRank)
     {
         // Toggle down if clicking the currently selected star (allows rank 0)
@@ -303,7 +308,7 @@ public partial class Inventaire : IAsyncDisposable
             InventoryFilter.Tous => personnages.Count + LuciePieces.Count,
             InventoryFilter.Commandants => personnages.Count(p => p.Type == TypePersonnage.Commandant),
             InventoryFilter.Mercenaires => personnages.Count(p => p.Type == TypePersonnage.Mercenaire),
-            InventoryFilter.Androides => personnages.Count(p => p.Type == TypePersonnage.Androïde),
+            InventoryFilter.Androides => personnages.Count(p => p.Type == TypePersonnage.Androide),
             InventoryFilter.LucyRooms => LuciePieces.Count,
             _ => 0
         };
@@ -316,7 +321,7 @@ public partial class Inventaire : IAsyncDisposable
             InventoryFilter.Tous => personnages,
             InventoryFilter.Commandants => personnages.Where(p => p.Type == TypePersonnage.Commandant),
             InventoryFilter.Mercenaires => personnages.Where(p => p.Type == TypePersonnage.Mercenaire),
-            InventoryFilter.Androides => personnages.Where(p => p.Type == TypePersonnage.Androïde),
+            InventoryFilter.Androides => personnages.Where(p => p.Type == TypePersonnage.Androide),
             InventoryFilter.LucyRooms => [], // LucyRooms has no Personnage
             _ => []
         };
@@ -368,7 +373,7 @@ public partial class Inventaire : IAsyncDisposable
             InventoryFilter.Tous => filtered,
             InventoryFilter.Commandants => filtered.Where(p => p.Type == TypePersonnage.Commandant),
             InventoryFilter.Mercenaires => filtered.Where(p => p.Type == TypePersonnage.Mercenaire),
-            InventoryFilter.Androides => filtered.Where(p => p.Type == TypePersonnage.Androïde),
+            InventoryFilter.Androides => filtered.Where(p => p.Type == TypePersonnage.Androide),
             InventoryFilter.LucyRooms => filtered.Where(p => p.Type == TypePersonnage.Inconnu),
             _ => filtered
         };
@@ -390,7 +395,7 @@ public partial class Inventaire : IAsyncDisposable
     {
         { TypePersonnage.Commandant, 1 },
         { TypePersonnage.Mercenaire, 2 },
-        { TypePersonnage.Androïde, 3 }
+        { TypePersonnage.Androide, 3 }
     };
 
         personnagesFiltres = sortColumn switch

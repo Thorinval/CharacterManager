@@ -17,7 +17,7 @@ public class HistoriqueLigueService
     public async Task<List<HistoriqueLigue>> GetAllAsync()
     {
         return await _context.HistoriquesLigue
-            .OrderByDescending(h => h.DatePassage)
+            .OrderByDescending(h => h.DateMontee)
             .ThenByDescending(h => h.Ligue)
             .ToListAsync();
     }
@@ -50,7 +50,7 @@ public class HistoriqueLigueService
         if (existing == null)
             return false;
 
-        existing.DatePassage = historique.DatePassage;
+        existing.DateMontee = historique.DateMontee;
         existing.Ligue = historique.Ligue;
         existing.Notes = historique.Notes;
 

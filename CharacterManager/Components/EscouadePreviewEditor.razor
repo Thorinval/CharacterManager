@@ -339,7 +339,7 @@
     {
         if (slotIndex == 0) return type == TypePersonnage.Commandant;
         if (slotIndex >= 1 && slotIndex <= 8) return type == TypePersonnage.Mercenaire;
-        if (slotIndex >= 9 && slotIndex <= 11) return type == TypePersonnage.Androïde;
+        if (slotIndex >= 9 && slotIndex <= 11) return type == TypePersonnage.Androide;
         return false;
     }
 
@@ -372,7 +372,7 @@
 
             if (!IsTypeAllowed(slotIndex, personnage.Type))
             {
-                var expected = slotIndex == 0 ? TypePersonnage.Commandant : (slotIndex <= 8 ? TypePersonnage.Mercenaire : TypePersonnage.Androïde);
+                var expected = slotIndex == 0 ? TypePersonnage.Commandant : (slotIndex <= 8 ? TypePersonnage.Mercenaire : TypePersonnage.Androide);
                 var msg = $"Ce slot accepte {expected}. Type reçu: {personnage.Type}";
                 if (OnInvalidDrop.HasDelegate)
                 {

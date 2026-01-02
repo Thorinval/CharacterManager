@@ -153,7 +153,7 @@ public static class AppConstants
 
         // Éléments d'historique de ligue
         public const string HistoriqueLigue = "HistoriqueLigue";
-        public const string DatePassage = "DatePassage";
+        public const string DateMontee = "DateMontee";
         public const string Ligue = "Ligue";
         public const string Notes = "Notes";
 

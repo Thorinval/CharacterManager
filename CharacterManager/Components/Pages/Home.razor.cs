@@ -40,6 +40,9 @@ public partial class Home : IAsyncDisposable
     [Inject]
     public HistoriqueClassementService HistoriqueClassementService { get; set; } = null!;
 
+    [Inject]
+    public CapaciteService CapaciteService { get; set; } = null!;
+
     private string homeImageUrl = AppConstants.Paths.HomeDefaultBackground;
     private bool isAdultModeEnabled;
     private bool showPmlImportAlert = false;
@@ -62,6 +65,7 @@ public partial class Home : IAsyncDisposable
     private DateTime? lastExportDate;
     private string? lastImportFileName;
     private (int Commandants, int Mercenaires, int Androides) inventaireCounts;
+    private int capacitesCount;
 
     protected override async Task OnInitializedAsync()
     {
@@ -119,6 +123,9 @@ public partial class Home : IAsyncDisposable
                 GetClassementValeur(lastClassement, TypeClassement.France)
             );
         }
+
+        // Charge du nombre de capacités
+        capacitesCount = CapaciteService.GetCount();
 
         // Vérifie si la base est vide (aucun personnage, template, historique ou profil)
         bool dbIsEmpty = !await DbContext.Personnages.AnyAsync()
@@ -258,9 +265,9 @@ public partial class Home : IAsyncDisposable
 
     private string GetTypeAttaqueLabel(TypeAttaque typeAttaque) => typeAttaque switch
     {
-        TypeAttaque.Mêlée => LocalizationService.T("home.attackType.melee"),
+        TypeAttaque.Melee => LocalizationService.T("home.attackType.melee"),
         TypeAttaque.Distance => LocalizationService.T("home.attackType.distance"),
-        TypeAttaque.Androïde => LocalizationService.T("home.attackType.android"),
+        TypeAttaque.Androide => LocalizationService.T("home.attackType.android"),
         TypeAttaque.Commandant => LocalizationService.T("home.attackType.commander"),
         _ => LocalizationService.T("home.attackType.unknown")
     };
@@ -283,9 +290,9 @@ public partial class Home : IAsyncDisposable
 
     private static string GetTypeAttaqueIcon(TypeAttaque typeAttaque) => typeAttaque switch
     {
-        TypeAttaque.Mêlée => "bi-hand-thumbs-up-fill",
+        TypeAttaque.Melee => "bi-hand-thumbs-up-fill",
         TypeAttaque.Distance => "bi-bullseye",
-        TypeAttaque.Androïde => "bi-cpu",
+        TypeAttaque.Androide => "bi-cpu",
         TypeAttaque.Commandant => "bi-star-fill",
         _ => "bi-question-circle"
     };

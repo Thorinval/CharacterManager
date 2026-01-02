@@ -2287,27 +2287,27 @@
     </Pieces>
   </HistoriqueClassement>
   <HistoriqueLigue>
-    <DatePassage>2025-12-29</DatePassage>
+    <DateMontee>2025-12-29</DateMontee>
     <Ligue>3</Ligue>
   </HistoriqueLigue>
   <HistoriqueLigue>
-    <DatePassage>2025-12-13</DatePassage>
+    <DateMontee>2025-12-13</DateMontee>
     <Ligue>4</Ligue>
   </HistoriqueLigue>
   <HistoriqueLigue>
-    <DatePassage>2025-12-02</DatePassage>
+    <DateMontee>2025-12-02</DateMontee>
     <Ligue>5</Ligue>
   </HistoriqueLigue>
   <HistoriqueLigue>
-    <DatePassage>2025-11-28</DatePassage>
+    <DateMontee>2025-11-28</DateMontee>
     <Ligue>6</Ligue>
   </HistoriqueLigue>
   <HistoriqueLigue>
-    <DatePassage>2025-11-18</DatePassage>
+    <DateMontee>2025-11-18</DateMontee>
     <Ligue>7</Ligue>
   </HistoriqueLigue>
   <HistoriqueLigue>
-    <DatePassage>2025-11-09</DatePassage>
+    <DateMontee>2025-11-09</DateMontee>
     <Ligue>8</Ligue>
   </HistoriqueLigue>
 </CharacterManagerPML>

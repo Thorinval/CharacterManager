@@ -156,7 +156,7 @@ public class CsvImportService(PersonnageService personnageService, ApplicationDb
         return v switch
         {
             "mercenaire" => TypePersonnage.Mercenaire,
-            "androïde" or "androide" => TypePersonnage.Androïde,
+            "androïde" or "androide" => TypePersonnage.Androide,
             "commandant" => TypePersonnage.Commandant,
             _ => TypePersonnage.Mercenaire
         };
@@ -180,9 +180,9 @@ public class CsvImportService(PersonnageService personnageService, ApplicationDb
         var v = value?.Trim().ToLowerInvariant() ?? string.Empty;
         return v switch
         {
-            "mêlée" or "melee" => TypeAttaque.Mêlée,
+            "mêlée" or "melee" => TypeAttaque.Melee,
             "distance" => TypeAttaque.Distance,
-            "androïde" or "androide" => TypeAttaque.Androïde,
+            "androïde" or "androide" => TypeAttaque.Androide,
             _ => TypeAttaque.Inconnu
         };
     }

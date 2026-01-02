@@ -123,7 +123,7 @@ namespace CharacterManager.Migrations
                     b.Property<int>("PuissanceMercenaires")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("PuissanceTotal")
+                    b.Property<int>("PuissanceTotale")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Score")
@@ -142,7 +142,7 @@ namespace CharacterManager.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateOnly>("DatePassage")
+                    b.Property<DateOnly>("DateMontee")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Ligue")

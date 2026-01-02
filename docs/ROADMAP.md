@@ -2,10 +2,18 @@
 
 > **JANVIER 2026**: A faire
 
-* fix fenêtre changelog
-* affichage des stats
+* Associer les catégories aux personnages et lucie
 * refonte graphique
 * gestion relations des personnages
+
+## 0.11.1 (2 Janvier 2026)
+
+* page des catérories
+
+## 0.11.0 (1 Janvier 2026)
+
+* fix fenêtre changelog
+* affichage des stats
 
 ## 0.10.3 (1 Janvier 2026)
 
