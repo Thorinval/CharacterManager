@@ -1,8 +1,22 @@
 # Release Notes - Character Manager
 
-> **Version actuelle**: 0.11.1
+> **Version actuelle**: 0.12.0
 
 ---
+
+## 0.12.0 (02 Janvier 2026)
+
+🏗️ - Architecture: Création du projet `CharacterManager.Resources.Interface` pour intégrer les images d'interface
+
+🏗️ - Architecture: Service `InterfaceResourceManager` pour accéder aux ressources embedded
+
+🔧 - API: Ajout du contrôleur `ResourcesController` pour servir les images depuis la DLL
+
+📦 - Configuration: Images d'interface packagées comme ressources embedded dans l'assembly
+
+🗺️ - Documentation: Plan de migration des ressources pour les versions futures
+
+**En cours**: Migration progressive des fichiers images depuis `wwwroot/images/interface` vers `CharacterManager.Resources.Interface/Images`
 
 ## 0.11.1 (02 Janvier 2026)
 

@@ -64,10 +64,18 @@ public class AppVersionService
             // Si git n'est pas disponible ou erreur, utiliser la date de build
         }
 
-        // Fallback: utiliser la date de build de l'assembly
+        // Fallback: utiliser la date de build à partir du chemin réel (compatible single-file)
         var assembly = Assembly.GetExecutingAssembly();
-        var fileInfo = new FileInfo(assembly.Location);
-        return $"Build {fileInfo.LastWriteTime:yyyyMMdd}";
+        var assemblyPath = assembly.Location;
+
+        // En single-file, assembly.Location est vide: on utilise le binaire en cours d'exécution
+        if (string.IsNullOrWhiteSpace(assemblyPath))
+        {
+            assemblyPath = Process.GetCurrentProcess().MainModule?.FileName ?? AppContext.BaseDirectory;
+        }
+
+        var lastWrite = File.GetLastWriteTime(assemblyPath);
+        return $"Build {lastWrite:yyyyMMdd}";
     }
 
     public string GetGitCommitHash()

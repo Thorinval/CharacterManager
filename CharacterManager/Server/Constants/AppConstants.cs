@@ -39,14 +39,15 @@ public static class AppConstants
     {
         public const string ImagesPersonnages = "/images/personnages";
         public const string ImagesAdultes = "/images/personnages/adult";
-        public const string ImagesInterface = "/images/interface";
+        // Images d'interface désormais servies via la DLL de ressources
+        public const string ImagesInterface = "/api/resources/interface";
         public const string I18nFolder = "i18n";
         public const string WwwRoot = "wwwroot";
 
         // Images par défaut
-        public const string DefaultPortrait = "/images/interface/default_portrait.png";
-        public const string GenericCommandantHeader = "/images/interface/fondheader.png";
-        public const string HomeDefaultBackground = "/images/interface/fondheader.png";
+        public const string DefaultPortrait = "/api/resources/interface/default_portrait.png";
+        public const string GenericCommandantHeader = "/api/resources/interface/fondheader.png";
+        public const string HomeDefaultBackground = "/api/resources/interface/fondheader.png";
     }
 
     /// <summary>

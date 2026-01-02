@@ -4,9 +4,10 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>0.10.2</Version>
-    <InformationalVersion>0.10.2</InformationalVersion>
+    <Version>0.12.0</Version>
+    <InformationalVersion>0.12.0</InformationalVersion>
     <UserSecretsId>65bc735a-e5c1-43cb-88a6-ee6e309d2379</UserSecretsId>
+    <ApplicationIcon>CharacterManager.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +21,17 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <!-- Copier wwwroot (CSS, i18n, images) dans le dossier de sortie pour exécution via l'exe -->
+  <ItemGroup>
+    <Content Update="wwwroot\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CharacterManager.Resources.Interface\CharacterManager.Resources.Interface.csproj" />
   </ItemGroup>
     <ItemGroup>
       <None Include="..\docs\RELEASE_NOTES.md">

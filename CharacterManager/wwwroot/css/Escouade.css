@@ -98,7 +98,7 @@
     z-index: 9999;
     width: 210px;
     height: 110px;
-    background: url('/images/interface/btn_retour.png') no-repeat center;
+    background: url('/api/resources/interface/btn_retour.png') no-repeat center;
     background-size: 100% 100%;
     border: none;
     color: transparent;

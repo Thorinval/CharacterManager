@@ -85,7 +85,7 @@
                                                     <div class="card-rarity rarity-@historique.Commandant?.Rarete.ToString().ToLower()">@historique.Commandant?.Rarete</div>
                                                     <div class="card-name">@historique.Commandant?.Nom</div>
                                                 </div>
-                                                <img src="@GetImageUrl(historique.Commandant?.Nom ?? string.Empty)" alt="@historique.Commandant?.Nom" class="card-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+                                                <img src="@GetImageUrl(historique.Commandant?.Nom ?? string.Empty)" alt="@historique.Commandant?.Nom" class="card-image" onerror="this.onerror=null; this.src='/api/resources/interface/default_portrait.png';" />
                                                 <div class="card-info">
                                                     <div>Niv: @historique.Commandant?.Niveau</div>
                                                     <div class="card-stars">@CharacterManager.Components.Pages.TemplateEscouade.GetRankStars(historique.Commandant?.Rang ?? 0)</div>
@@ -105,7 +105,7 @@
                                                         <div class="card-rarity rarity-@merc.Rarete.ToString().ToLower()">@merc.Rarete</div>
                                                         <div class="card-name">@merc.Nom</div>
                                                     </div>
-                                                    <img src="@GetImageUrl(merc.Nom)" alt="@merc.Nom" class="card-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+                                                    <img src="@GetImageUrl(merc.Nom)" alt="@merc.Nom" class="card-image" onerror="this.onerror=null; this.src='/api/resources/interface/default_portrait.png';" />
                                                     <div class="card-info">
                                                         <div>Niv: @merc.Niveau</div>
                                                         <div class="card-stars">@CharacterManager.Components.Pages.TemplateEscouade.GetRankStars(merc.Rang)</div>
@@ -131,7 +131,7 @@
                                                         <div class="card-rarity rarity-@android.Rarete.ToString().ToLower()">@android.Rarete</div>
                                                         <div class="card-name">@android.Nom</div>
                                                     </div>
-                                                    <img src="@GetImageUrl(android.Nom)" alt="@android.Nom" class="card-image" onerror="this.onerror=null; this.src='/images/interface/default_portrait.png';" />
+                                                    <img src="@GetImageUrl(android.Nom)" alt="@android.Nom" class="card-image" onerror="this.onerror=null; this.src='/api/resources/interface/default_portrait.png';" />
                                                     <div class="card-info">
                                                         <div>Niv: @android.Niveau</div>
                                                         <div>Puiss: @android.Puissance</div>

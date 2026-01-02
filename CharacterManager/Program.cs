@@ -51,6 +51,9 @@ builder.Services.AddSingleton<IModalService, ModalService>();
 builder.Services.AddHttpClient<UpdateService>();
 builder.Services.AddHttpClient();  // Pour les appels HTTP du ClientLocalizationService
 
+// API controllers (ex: ResourcesController)
+builder.Services.AddControllers();
+
 var app = builder.Build();
 
 // Apply migrations automatically
@@ -521,6 +524,9 @@ app.UseAntiforgery();
 
 // Serve static files from wwwroot (icons, images, css)
 app.UseStaticFiles();
+
+// API endpoints
+app.MapControllers();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
