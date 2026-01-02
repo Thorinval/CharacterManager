@@ -44,7 +44,7 @@ L'installateur a été généré avec succès:
 
 ```
 📁 publish/installer/
-└── CharacterManager-0.12.0-Setup.exe (76 MB)
+└── CharacterManager-Setup.exe (76 MB)
 ```
 
 ---
@@ -53,7 +53,7 @@ L'installateur a été généré avec succès:
 
 ```powershell
 # Exécuter l'installateur
-.\publish\installer\CharacterManager-0.12.0-Setup.exe
+.\publish\installer\CharacterManager-Setup.exe
 ```
 
 Ou cliquez simplement deux fois sur le fichier.
@@ -82,7 +82,7 @@ Pour faciliter la compilation:
 .\Build-Installer.ps1
 
 # 2. Tester l'installation
-.\publish\installer\CharacterManager-0.12.0-Setup.exe
+.\publish\installer\CharacterManager-Setup.exe
 
 # 3. Suivre l'assistant d'installation
 

@@ -30,7 +30,7 @@ A modern web-based application for managing characters, equipment, capacities, a
 
 ### Option 1: Windows Installer (Recommended)
 ```batch
-1. Download: CharacterManager-0.12.0-Setup.exe
+1. Download: CharacterManager-Setup.exe
 2. Run installer
 3. Launch from Start Menu
 4. Open: http://localhost:5000
@@ -135,7 +135,7 @@ CharacterManager.Tests/              # Unit tests (61 tests)
 # Create installer
 .\Deploy-Manager.ps1 -Action all
 
-# Result: publish\installer\CharacterManager-0.12.0-Setup.exe
+# Result: publish\installer\CharacterManager-Setup.exe
 ```
 
 ### Production (Portable)
@@ -296,5 +296,5 @@ This project is licensed under the **MIT License** - see [LICENSE](./LICENSE) fi
 **Last Updated**: 2025-01-02  
 **Status**: ✅ Production Ready
 
-**Quick Launch**: `.\Deploy-Local.bat` or download [CharacterManager-0.12.0-Setup.exe](./publish/installer/)
+**Quick Launch**: `.\Deploy-Local.bat` or download [CharacterManager-Setup.exe](./publish/installer/)
 

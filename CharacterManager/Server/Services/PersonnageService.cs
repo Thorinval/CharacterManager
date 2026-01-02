@@ -306,11 +306,10 @@ public class PersonnageService
 
     public void Add(Personnage personnage)
     {
-        // Remplir les colonnes stockées pour compatibilité base de données
-        var slug = personnage.Nom?.ToLower().Replace(" ", "_") ?? string.Empty;
-        personnage.ImageUrlDetailStored = $"/images/personnages/{slug}.png";
-        personnage.ImageUrlPreviewStored = $"/images/personnages/{slug}_small_portrait.png";
-        personnage.ImageUrlSelectedStored = $"/images/personnages/{slug}_small_select.png";
+        // Remplir les colonnes stockées pour compatibilité base de données (v0.12.1+: API de ressources)
+        personnage.ImageUrlDetailStored = PersonnageImageUrlHelper.GetImageDetailUrl(personnage.Nom);
+        personnage.ImageUrlPreviewStored = PersonnageImageUrlHelper.GetImageSmallPortraitUrl(personnage.Nom);
+        personnage.ImageUrlSelectedStored = PersonnageImageUrlHelper.GetImageSmallSelectUrl(personnage.Nom);
         _context.Personnages.Add(personnage);
         _context.SaveChanges();
     }
@@ -334,11 +333,10 @@ public class PersonnageService
             existing.Selectionne = personnage.Selectionne;
             existing.TypeAttaque = personnage.TypeAttaque;
 
-            // Mettre à jour les colonnes stockées si le nom change
-            var slug = existing.Nom?.ToLower().Replace(" ", "_") ?? string.Empty;
-            existing.ImageUrlDetailStored = $"/images/personnages/{slug}.png";
-            existing.ImageUrlPreviewStored = $"/images/personnages/{slug}_small_portrait.png";
-            existing.ImageUrlSelectedStored = $"/images/personnages/{slug}_small_select.png";
+            // Mettre à jour les colonnes stockées si le nom change (v0.12.1+: API de ressources)
+            existing.ImageUrlDetailStored = PersonnageImageUrlHelper.GetImageDetailUrl(existing.Nom);
+            existing.ImageUrlPreviewStored = PersonnageImageUrlHelper.GetImageSmallPortraitUrl(existing.Nom);
+            existing.ImageUrlSelectedStored = PersonnageImageUrlHelper.GetImageSmallSelectUrl(existing.Nom);
 
             _context.SaveChanges();
         }

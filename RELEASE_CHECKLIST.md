@@ -71,7 +71,7 @@
 
 ### Pour les utilisateurs (Installateur)
 ```batch
-CharacterManager-0.12.0-Setup.exe
+CharacterManager-Setup.exe
 ```
 
 ### Pour les utilisateurs (Portable)
@@ -98,7 +98,7 @@ dotnet run -c Release
 
 ### Requis pour Release
 - ✅ `publish/` - Dossier complet (150 MB)
-- ✅ `CharacterManager-0.12.0-Setup.exe` - Installateur
+- ✅ `CharacterManager-Setup.exe` - Installateur
 - ✅ `RELEASE_0.12.0.md` - Notes de release
 - ✅ `INSTALLATION_GUIDE.md` - Guide installation
 

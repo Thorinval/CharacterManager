@@ -252,7 +252,7 @@ powershell -ExecutionPolicy Bypass -File Test-Release.ps1 -Verbose
 # Compile installer (requires Inno Setup)
 iscc CharacterManager.iss
 
-# Result: publish\installer\CharacterManager-0.12.0-Setup.exe
+# Result: publish\installer\CharacterManager-Setup.exe
 ```
 
 ### 4. Quick Local Test
@@ -264,7 +264,7 @@ iscc CharacterManager.iss
 ### 5. Production Deployment
 ```powershell
 # Option 1: Use installer
-# Run CharacterManager-0.12.0-Setup.exe
+# Run CharacterManager-Setup.exe
 
 # Option 2: Use portable
 # Copy publish/ folder to any location

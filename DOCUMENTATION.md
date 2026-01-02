@@ -79,7 +79,7 @@ Start here if you want to develop or deploy:
 ### "I want to build the installer"
 1. **[DEPLOYMENT.md](./DEPLOYMENT.md)** - See "Building the Installer"
 2. Run: `.\Deploy-Manager.ps1 -Action all`
-3. Test: `publish\installer\CharacterManager-0.12.0-Setup.exe`
+3. Test: `publish\installer\CharacterManager-Setup.exe`
 
 ### "I want to understand the architecture"
 1. **[README_v0.12.0.md](./README_v0.12.0.md)** - See Architecture section

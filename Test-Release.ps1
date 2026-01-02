@@ -161,8 +161,8 @@ if (Test-Path "CharacterManager\CharacterManager.csproj") {
 
 if (Test-Path "CharacterManager.iss") {
     $iss = Get-Content "CharacterManager.iss"
-    $hasVersion = $iss -match 'AppVersion=0\.12\.0'
-    Add-Check "Version is 0.12.0 in .iss" $hasVersion
+    $hasVersion = $iss -match 'AppVersion=0\.12\.1'
+    Add-Check "Version is 0.12.1 in .iss" $hasVersion
 }
 
 # Summary
@@ -180,7 +180,7 @@ if ($readyForRelease) {
     Write-Host "`nNext steps:" -ForegroundColor Yellow
     Write-Host "1. Run final tests: .\Deploy-Manager.ps1 -Action test"
     Write-Host "2. Create installer: .\Deploy-Manager.ps1 -Action installer"
-    Write-Host "3. Test installer: publish\installer\CharacterManager-0.12.0-Setup.exe"
+    Write-Host "3. Test installer: publish\installer\CharacterManager-Setup.exe"
     Write-Host "4. Tag release: git tag v0.12.0"
     exit 0
 } else {

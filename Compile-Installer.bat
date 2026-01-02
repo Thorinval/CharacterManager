@@ -74,10 +74,10 @@ if %errorlevel% equ 0 (
     echo [OK] Compilation successful!
     echo.
     echo Installer created:
-    echo   Path: publish\installer\CharacterManager-0.12.0-Setup.exe
+    echo   Path: publish\installer\CharacterManager-Setup.exe
     echo.
     echo Next step: Run the installer
-    echo   Command: publish\installer\CharacterManager-0.12.0-Setup.exe
+    echo   Command: publish\installer\CharacterManager-Setup.exe
 ) else (
     echo.
     echo [FAIL] Compilation failed with code: %errorlevel%

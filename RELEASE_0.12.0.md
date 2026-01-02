@@ -150,7 +150,7 @@ Response: 200 OK
 
 ### Pour les utilisateurs finaux
 ```
-1. Télécharger CharacterManager-0.12.0-Setup.exe
+1. Télécharger CharacterManager-Setup.exe
 2. Exécuter l'installateur
 3. Lancer l'application
 4. Accéder à http://localhost:5000

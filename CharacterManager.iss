@@ -4,14 +4,14 @@
 
 [Setup]
 AppName=Character Manager
-AppVersion=0.12.0
+AppVersion=0.12.1
 AppPublisher=CharacterManager
 AppPublisherURL=https://github.com/Thorinval/CharacterManager
 DefaultDirName={autopf}\CharacterManager
 DefaultGroupName=Character Manager
 AllowNoIcons=yes
 OutputDir=publish\installer
-OutputBaseFilename=CharacterManager-0.12.0-Setup
+OutputBaseFilename=CharacterManager-0.12.1-Setup
 Compression=lzma
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64

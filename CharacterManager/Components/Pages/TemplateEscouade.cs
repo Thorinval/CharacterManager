@@ -2,6 +2,7 @@ namespace CharacterManager.Components.Pages;
 
 using System.IO;
 using CharacterManager.Server.Constants;
+using CharacterManager.Server.Services;
 using Microsoft.AspNetCore.Components;
 
 public class TemplateEscouade
@@ -13,6 +14,7 @@ public class TemplateEscouade
 
     /// <summary>
     /// Résout le chemin d'image header en fonction du nom.
+    /// Depuis v0.12.1, utilise le nouveau helper qui pointe vers les ressources embarquées.
     /// </summary>
     public static string ResolveHeaderImage(string? nomCommandant)
     {
@@ -21,16 +23,7 @@ public class TemplateEscouade
             return AppConstants.Paths.GenericCommandantHeader;
         }
 
-        var nomFichier = nomCommandant.ToLower().Replace(" ", "_");
-        return $"{AppConstants.Paths.ImagesPersonnages}/{nomFichier}{AppConstants.ImageSuffixes.Header}{AppConstants.FileExtensions.Png}";
-
-        /*
-                if (FileExists(standardCandidate))
-                {
-                    return standardCandidate;
-                }*/
-
-        //return AppConstants.Paths.GenericCommandantHeader;
+        return PersonnageImageUrlHelper.GetImageHeaderUrl(nomCommandant);
     }
 
     /// <summary>

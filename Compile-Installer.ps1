@@ -58,7 +58,7 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "✅ Compilation successful!" -ForegroundColor Green
     Write-Host ""
     
-    $installerPath = "publish\installer\CharacterManager-0.12.0-Setup.exe"
+    $installerPath = "publish\installer\CharacterManager-Setup.exe"
     if (Test-Path $installerPath) {
         $size = (Get-Item $installerPath).Length / 1MB
         Write-Host "📦 Installer created:" -ForegroundColor Cyan

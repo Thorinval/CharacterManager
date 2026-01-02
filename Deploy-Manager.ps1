@@ -113,7 +113,7 @@ function Invoke-Installer {
     & $issPath $issFile
     
     if ($LASTEXITCODE -eq 0) {
-        $installerFile = Join-Path $projectRoot "publish\installer\CharacterManager-0.12.0-Setup.exe"
+        $installerFile = Join-Path $projectRoot "publish\installer\CharacterManager-Setup.exe"
         Write-Success "✓ Installateur créé: $installerFile"
     } else {
         Write-Error_ "✗ Erreur lors de la compilation du setup"

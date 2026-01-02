@@ -4,7 +4,7 @@
 
 ### Windows - Installateur (Recommandé)
 ```batch
-1. Double-click: CharacterManager-0.12.0-Setup.exe
+1. Double-click: CharacterManager-Setup.exe
 2. Follow installer wizard
 3. Click "Launch" at the end
 4. Open browser to: http://localhost:5000

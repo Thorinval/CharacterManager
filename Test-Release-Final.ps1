@@ -91,7 +91,7 @@ if (Test-Path "CharacterManager\CharacterManager.csproj") {
 
 if (Test-Path "CharacterManager.iss") {
     $iss = Get-Content "CharacterManager.iss" -Raw
-    $hasVersion = $iss -match 'AppVersion=0\.12\.0'
+    $hasVersion = $iss -match 'AppVersion=0\.12\.1'
     Check-Item "Version in .iss" $hasVersion
 }
 
@@ -110,7 +110,7 @@ if ($readyForRelease) {
     Write-Host "`nProchaines étapes:" -ForegroundColor Yellow
     Write-Host "1. Exécuter les tests: .\Deploy-Manager.ps1 -Action test" -ForegroundColor Cyan
     Write-Host "2. Créer l'installateur: .\Deploy-Manager.ps1 -Action installer" -ForegroundColor Cyan
-    Write-Host "3. Tester l'installateur: publish\installer\CharacterManager-0.12.0-Setup.exe" -ForegroundColor Cyan
+    Write-Host "3. Tester l'installateur: publish\installer\CharacterManager-Setup.exe" -ForegroundColor Cyan
     exit 0
 } else {
     Write-Host "`n⚠️ Please fix the issues above" -ForegroundColor Yellow

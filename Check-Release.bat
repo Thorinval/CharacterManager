@@ -1,5 +1,5 @@
 @echo off
-REM Pre-Release Verification Checklist for Character Manager v0.12.0
+REM Pre-Release Verification Checklist for Character Manager v0.12.1
 
 setlocal enabledelayedexpansion
 
@@ -8,7 +8,7 @@ set FAIL=0
 
 echo.
 echo ============================================================
-echo   Character Manager v0.12.0 - Pre-Release Verification
+echo   Character Manager v0.12.1 - Pre-Release Verification
 echo ============================================================
 echo.
 
@@ -53,7 +53,7 @@ echo.
 echo [7] Checking documentation...
 if exist DEPLOYMENT.md (echo [OK] DEPLOYMENT.md exists) else (echo [FAIL] DEPLOYMENT.md missing && set /a FAIL+=1)
 if exist INSTALLATION_GUIDE.md (echo [OK] INSTALLATION_GUIDE.md exists) else (echo [FAIL] INSTALLATION_GUIDE.md missing && set /a FAIL+=1)
-if exist RELEASE_0.12.0.md (echo [OK] RELEASE_0.12.0.md exists) else (echo [FAIL] RELEASE_0.12.0.md missing && set /a FAIL+=1)
+if exist RELEASE_0.12.1.md (echo [OK] RELEASE_0.12.1.md exists) else (echo [FAIL] RELEASE_0.12.1.md missing && set /a FAIL+=1)
 
 REM 8. Scripts
 echo.
@@ -86,7 +86,7 @@ if %FAIL% equ 0 (
     echo Next steps:
     echo   1. Run tests: .\Deploy-Manager.ps1 -Action test
     echo   2. Create installer: .\Deploy-Manager.ps1 -Action installer
-    echo   3. Test installer: publish\installer\CharacterManager-0.12.0-Setup.exe
+    echo   3. Test installer: publish\installer\CharacterManager-Setup.exe
     exit /b 0
 ) else (
     echo FAILED - Please fix the issues above before release

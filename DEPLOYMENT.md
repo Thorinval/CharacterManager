@@ -2,7 +2,7 @@
 
 ## 📌 Vue d'ensemble
 
-Ce document décrit les différentes façons de déployer et d'installer **Character Manager** v0.12.0.
+Ce document décrit les différentes façons de déployer et d'installer **Character Manager** v0.12.1.
 
 ---
 
@@ -13,7 +13,7 @@ Ce document décrit les différentes façons de déployer et d'installer **Chara
 | **Développement local** | `.\Deploy-Manager.ps1 -Action run` | Lance l'app sur http://localhost:5000 |
 | **Préparation Release** | `.\Deploy-Manager.ps1 -Action all` | Build + Tests + Publish + Installer |
 | **Test rapide** | `.\Deploy-Local.bat` | Compile et lance directement |
-| **Utilisateur final** | `CharacterManager-0.12.0-Setup.exe` | Installateur Windows auto-contenu |
+| **Utilisateur final** | `CharacterManager-Setup.exe` | Installateur Windows auto-contenu |
 | **Déploiement portable** | Copier le dossier `publish/` | Aucune installation requise |
 
 ---
@@ -113,7 +113,7 @@ chmod +x Deploy-Local.sh
 ### Option A: Installateur Windows (Recommandé pour utilisateurs)
 
 ```
-CharacterManager-0.12.0-Setup.exe
+CharacterManager-Setup.exe
 ```
 
 **Avantages:**
@@ -209,7 +209,7 @@ publish/
 └── ... autres fichiers .NET
 
 publish/installer/
-└── CharacterManager-0.12.0-Setup.exe (Installateur)
+└── CharacterManager-Setup.exe (Installateur)
 ```
 
 ---
@@ -252,7 +252,7 @@ dotnet test CharacterManager.sln -c Release -v detailed
 
 ### Installation
 
-1. Télécharger `CharacterManager-0.12.0-Setup.exe`
+1. Télécharger `CharacterManager-Setup.exe`
 2. Double-cliquer pour exécuter
 3. Suivre l'assistant
 4. L'app se lance automatiquement
@@ -285,11 +285,11 @@ Via Windows → Paramètres → Applications → Applications installées → Ch
 - [ ] Notes de release mises à jour
 - [ ] Changelog complété
 - [ ] Pas de fichiers temporaires/secrets committés
-- [ ] Installer testé: `CharacterManager-0.12.0-Setup.exe`
+- [ ] Installer testé: `CharacterManager-Setup.exe`
 - [ ] Application portable testée
 - [ ] Base de données se crée correctement au premier lancement
 - [ ] Pas de logs d'erreur en mode Release
 
 ---
 
-**Dernière mise à jour**: v0.12.0 - 2025-01-02
+**Dernière mise à jour**: v0.12.1 - 2026-01-03

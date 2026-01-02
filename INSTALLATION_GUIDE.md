@@ -14,7 +14,7 @@
 
 ### Option 1: Utiliser l'installateur (Recommandé)
 
-1. **Télécharger** le fichier `CharacterManager-0.12.0-Setup.exe`
+1. **Télécharger** le fichier `CharacterManager-Setup.exe`
 2. **Exécuter** l'installateur
 3. **Suivre** l'assistant d'installation
 4. **Lancer** l'application depuis le menu Démarrer ou le raccourci Bureau
@@ -58,7 +58,7 @@ iscc CharacterManager.iss
 
 ### Résultat
 
-L'installateur généré: `CharacterManager-0.12.0-Setup.exe`
+L'installateur généré: `CharacterManager-Setup.exe`
 - Localisation: `publish\installer\`
 - Taille: ~150 MB (contient .NET Runtime + Application)
 

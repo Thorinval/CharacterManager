@@ -1,6 +1,7 @@
 namespace CharacterManager.Server.Models;
 
 using Microsoft.AspNetCore.Identity;
+using CharacterManager.Server.Services;
 
 public enum Rarete
 {
@@ -64,13 +65,14 @@ public class Personnage
     public Role Role { get; set; }
     public Faction Faction { get; set; }
 
-    // Images du personnage - calculées dynamiquement pour l'affichage (non mappées en base)
+    // Images du personnage - calculées dynamiquement via l'API de ressources (v0.12.1+)
+    // Les images sont maintenant servies depuis la DLL CharacterManager.Resources.Personnages
     [System.ComponentModel.DataAnnotations.Schema.NotMapped]
-    public string ImageUrlDetail => $"/images/personnages/{Nom.ToLower().Replace(" ", "_")}.png";
+    public string ImageUrlDetail => PersonnageImageUrlHelper.GetImageDetailUrl(Nom);
     [System.ComponentModel.DataAnnotations.Schema.NotMapped]
-    public string ImageUrlPreview => $"/images/personnages/{Nom.ToLower().Replace(" ", "_")}_small_portrait.png";
+    public string ImageUrlPreview => PersonnageImageUrlHelper.GetImageSmallPortraitUrl(Nom);
     [System.ComponentModel.DataAnnotations.Schema.NotMapped]
-    public string ImageUrlSelected => $"/images/personnages/{Nom.ToLower().Replace(" ", "_")}_small_select.png";
+    public string ImageUrlSelected => PersonnageImageUrlHelper.GetImageSmallSelectUrl(Nom);
 
     // Colonnes stockées pour compatibilité avec l'ancien schéma (remplies automatiquement au save)
     [System.ComponentModel.DataAnnotations.Schema.Column("ImageUrlDetail")]

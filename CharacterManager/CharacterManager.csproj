@@ -4,8 +4,8 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>0.12.0</Version>
-    <InformationalVersion>0.12.0</InformationalVersion>
+    <Version>0.12.1</Version>
+    <InformationalVersion>0.12.1</InformationalVersion>
     <UserSecretsId>65bc735a-e5c1-43cb-88a6-ee6e309d2379</UserSecretsId>
     <ApplicationIcon>CharacterManager.ico</ApplicationIcon>
   </PropertyGroup>
@@ -32,6 +32,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CharacterManager.Resources.Interface\CharacterManager.Resources.Interface.csproj" />
+    <ProjectReference Include="..\CharacterManager.Resources.Personnages\CharacterManager.Resources.Personnages.csproj" />
   </ItemGroup>
     <ItemGroup>
       <None Include="..\docs\RELEASE_NOTES.md">

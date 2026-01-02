@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Version>0.12.1</Version>
+  </PropertyGroup>
+
+  <!-- Inclure toutes les images de personnages comme ressources embedded -->
+  <ItemGroup>
+    <EmbeddedResource Include="Images/**/*.png" />
+    <EmbeddedResource Include="Images/**/*.jpg" />
+  </ItemGroup>
+
+</Project>

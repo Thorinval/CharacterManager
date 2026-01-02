@@ -37,7 +37,9 @@ public static class AppConstants
     /// </summary>
     public static class Paths
     {
-        public const string ImagesPersonnages = "/images/personnages";
+        // Images de personnages désormais servies via la DLL de ressources (v0.12.1+)
+        public const string ImagesPersonnages = "/api/resources/personnages";
+        public const string ImagesPersonnagesLegacy = "/images/personnages"; // Pour compatibilité v0.12.0
         public const string ImagesAdultes = "/images/personnages/adult";
         // Images d'interface désormais servies via la DLL de ressources
         public const string ImagesInterface = "/api/resources/interface";
