@@ -4,6 +4,7 @@
 *.pdb
 *.so
 *.dylib
+*.zip
 
 # Build results
 bin/
@@ -51,4 +52,3 @@ Thumbs.db
 
 # Publish output
 publish/
-CharacterManager-v0.12.1-win-x64.zip

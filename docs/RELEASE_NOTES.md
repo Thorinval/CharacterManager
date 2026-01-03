@@ -1,8 +1,36 @@
 # Release Notes - Character Manager
 
-> **Version actuelle**: 0.12.2
+> **Version actuelle**: 0.13.0
 
 ---
+
+## 0.13.0 (03 Janvier 2026)
+
+✨ - Modèle: Ajout des attributs `HasRelation` (bool) et `NivRelation` (int) au modèle Personnage pour les mercenaires
+
+✨ - BDD: Migration EF Core pour l'ajout des colonnes HasRelation et NivRelation à la table Personnages
+
+✨ - UI/UX: Système complet de relations mercenaires (affichage lecture, édition avec bounds 1-30)
+
+✨ - Import/Export: Support des relations HasRelation/NivRelation dans le format d'import/export PML
+
+✨ - Modale: Consolidation - Une seule modale `DetailPersonnageModal` pour tous les accès (image + édition)
+
+✨ - UI/UX: Capacités affichées en tuiles style Home (dark theme #273449, icônes bleues, grille 9/ligne)
+
+✨ - UI/UX: Pièces Maison Lucie affichées en tuiles style Home (alignement gauche, 320px fixes)
+
+🔧 - Refactorisation: Suppression de la page dupliquée `DetailPersonnage.razor` (conservée uniquement la modale)
+
+🔧 - Inventaire: Clic "Modifier" ouvre maintenant la modale directement en mode édition (paramètre StartInEdit)
+
+🔧 - Inventaire: Clic image affiche la modale de détail en mode lecture
+
+🔧 - Modal: Contrainte max-height 350px sur l'image du personnage dans la modale
+
+🔧 - CSS: Page Capacités calée à gauche, conteneur full-width (sans max-width)
+
+🔧 - CSS: Page Maison Lucie utilise classes hub pour cohérence visuelle avec Home
 
 ## 0.12.2 (03 Janvier 2026)
 

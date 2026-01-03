@@ -44,7 +44,7 @@
                         {
                             <!-- Mode Lecture -->
                             <div class="row">
-                                <div class="col-md-12 text-center mb-4">
+                                <div class="col-md-12 text-center mb-4 detail-image-row">
                                     <img src="@currentPerso.GetImageUrl(true)" alt="@currentPerso.Nom" class="detail-personnage-image" />
                                 </div>
                             </div>
@@ -124,6 +124,14 @@
                                             }
                                         </span>
                                     </div>
+
+                                    @if (currentPerso.Type == TypePersonnage.Mercenaire && currentPerso.HasRelation)
+                                    {
+                                        <div class="detail-item">
+                                            <label>Niveau de Relation :</label>
+                                            <span class="value badge bg-primary">@currentPerso.NivRelation</span>
+                                        </div>
+                                    }
 
                                     @if (currentPerso.Type == TypePersonnage.Commandant)
                                     {
@@ -262,6 +270,26 @@
                                             </label>
                                         </div>
                                     </div>
+
+                                    @if (editedPerso.Type == TypePersonnage.Mercenaire)
+                                    {
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" @bind="editedPerso.HasRelation" id="hasRelationCheck" />
+                                                <label class="form-check-label" for="hasRelationCheck">
+                                                    Relations
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        @if (editedPerso.HasRelation)
+                                        {
+                                            <div class="mb-3">
+                                                <label class="form-label">Niveau de Relation (1-30)</label>
+                                                <input type="number" class="form-control" @bind="editedPerso.NivRelation" min="1" max="30" />
+                                            </div>
+                                        }
+                                    }
                                 </div>
                             </div>
 
@@ -291,6 +319,9 @@ else
     [Parameter]
     public int PersonnageId { get; set; }
 
+    [Parameter]
+    public bool StartInEdit { get; set; }
+
     private Personnage? currentPerso;
     private Personnage editedPerso = new();
     private bool isEditing = false;
@@ -298,6 +329,11 @@ else
     protected override async Task OnInitializedAsync()
     {
         currentPerso = await PersonnageService.GetByIdAsync(PersonnageId);
+
+        if (StartInEdit && currentPerso != null)
+        {
+            EnterEditMode();
+        }
     }
 
     private void Close() => ModalService.Close();
@@ -323,7 +359,9 @@ else
             TypeAttaque = currentPerso.TypeAttaque,
             Selectionne = currentPerso.Selectionne,
             Description = currentPerso.Description,
-            ImageUrlHeader = currentPerso.ImageUrlHeader
+            ImageUrlHeader = currentPerso.ImageUrlHeader,
+            HasRelation = currentPerso.HasRelation,
+            NivRelation = currentPerso.NivRelation
         };
     }
 
@@ -333,6 +371,15 @@ else
 
         try
         {
+            if (!editedPerso.HasRelation)
+            {
+                editedPerso.NivRelation = 0;
+            }
+            else if (editedPerso.NivRelation < 1)
+            {
+                editedPerso.NivRelation = 1;
+            }
+
             PersonnageService.Update(editedPerso);
             currentPerso = editedPerso;
             isEditing = false;

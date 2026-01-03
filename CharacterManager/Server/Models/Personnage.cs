@@ -103,4 +103,8 @@ public class Personnage
 
     // Type d'attaque
     public TypeAttaque TypeAttaque { get; set; }
+
+    // Relations (disponible pour certains mercenaires)
+    public bool HasRelation { get; set; } = false;
+    public int NivRelation { get; set; } = 0;
 }

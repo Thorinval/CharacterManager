@@ -139,6 +139,8 @@ public static class AppConstants
         public const string Faction = "Faction";
         public const string Selectionne = "Selectionne";
         public const string Description = "Description";
+        public const string HasRelation = "HasRelation";
+        public const string NivRelation = "NivRelation";
         public const string Mercenaire = "Mercenaire";
         public const string Commandant = "Commandant";
         public const string Androide = "Androide";

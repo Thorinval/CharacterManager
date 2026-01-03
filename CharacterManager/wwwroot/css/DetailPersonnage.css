@@ -2,6 +2,20 @@
     padding: 20px;
 }
 
+.detail-image-row {
+    max-height: 350px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.detail-image-row img {
+    max-height: 350px;
+    width: auto;
+    object-fit: contain;
+}
+
 .personnage-card {
     background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     border-radius: 10px;

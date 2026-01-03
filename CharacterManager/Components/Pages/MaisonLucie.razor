@@ -56,11 +56,11 @@
     }
     else
     {
-        <div class="pieces-grid">
+        <div class="pieces-grid hub-grid">
             @foreach (var piece in pieces.OrderByDescending(p => p.Puissance).ToList())
             {
-                <div class="piece-card">
-                    <div class="piece-header">
+                <div class="piece-card hub-card">
+                    <div class="piece-header hub-card-head">
                         <h3 class="piece-name" title="@piece.Nom">@piece.Nom</h3>
                         <span class="piece-level">Lvl @piece.Niveau</span>
                     </div>

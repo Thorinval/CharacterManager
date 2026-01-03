@@ -540,26 +540,15 @@ public partial class Inventaire : IAsyncDisposable
 
     private void EditPersonnage(Personnage personnage)
     {
-        currentPersonnage = new Personnage
-        {
-            Id = personnage.Id,
-            Nom = personnage.Nom,
-            Rarete = personnage.Rarete,
-            Niveau = personnage.Niveau,
-            Type = personnage.Type,
-            Rang = personnage.Rang,
-            Puissance = personnage.Puissance,
-            PA = personnage.PA,
-            PV = personnage.PV,
-            Role = personnage.Role,
-            Faction = personnage.Faction,
-            Description = personnage.Description,
-            Selectionne = personnage.Selectionne,
-            TypeAttaque = personnage.TypeAttaque
-        };
-        isEditing = true;
-        showModal = true;
-        StateHasChanged();
+        // Ouvrir la modale de détail directement en mode édition
+        ModalService.Open<CharacterManager.Components.Modal.DetailPersonnageModal>(
+            new Dictionary<string, object>
+            {
+                { "PersonnageId", personnage.Id },
+                { "StartInEdit", true }
+            },
+            ModalSize.XL
+        );
     }
 
     private void DeletePersonnage(int id)

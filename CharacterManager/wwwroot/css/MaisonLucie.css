@@ -1,7 +1,7 @@
 .lucie-house-container {
-    padding: 24px;
-    max-width: 1400px;
-    margin: 0 auto;
+    padding: 2rem 1rem 2rem 1.5rem;
+    max-width: none;
+    margin: 0;
 }
 
 .lucie-house-header {
@@ -62,42 +62,46 @@
 
 .pieces-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, 320px);
+    gap: 1rem;
+    justify-content: start;
     margin-bottom: 40px;
 }
 
 .piece-card {
-    background: linear-gradient(135deg, rgba(139, 69, 19, 0.05), rgba(210, 180, 140, 0.05));
-    border: 1px solid rgba(139, 69, 19, 0.15);
+    background: #273449;
+    color: #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 220px;
 }
 
 .piece-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(139, 69, 19, 0.3);
-    box-shadow: 0 8px 24px rgba(139, 69, 19, 0.15);
+    background: #2f3e52;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .piece-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px;
-    background: linear-gradient(90deg, rgba(139, 69, 19, 0.1), rgba(139, 69, 19, 0.05));
-    border-bottom: 1px solid rgba(139, 69, 19, 0.1);
+    padding: 1rem;
+    background: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    gap: 0.75rem;
 }
 
 .piece-name {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 1.05rem;
     font-weight: 600;
-    color: #5d4037;
+    color: #e2e8f0;
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -105,126 +109,127 @@
 }
 
 .piece-level {
-    padding: 4px 12px;
-    background: rgba(139, 69, 19, 0.1);
-    border-radius: 20px;
-    font-size: 0.85rem;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    font-size: 0.8rem;
     font-weight: 600;
-    color: #8b4513;
+    color: #cbd5e1;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .piece-body {
-    padding: 16px;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 0.75rem;
     flex: 1;
+    color: #cbd5e1;
+    font-size: 0.95rem;
 }
 
 .stat-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px;
-    background: rgba(212, 163, 115, 0.05);
-    border-radius: 8px;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 6px;
+    font-size: 0.9rem;
 }
 
 .stat-label {
-    font-size: 0.9rem;
-    color: #666;
-    font-weight: 500;
+    color: #cbd5e1;
 }
 
 .stat-value {
-    font-size: 1.3rem;
     font-weight: 700;
-    color: #fbbf24;
+    color: #60a5fa;
 }
 
 .aspect-section {
-    border: 1px solid rgba(139, 69, 19, 0.1);
-    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
     overflow: hidden;
 }
 
 .aspect-header {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 12px;
-    background: rgba(139, 69, 19, 0.08);
+    gap: 6px;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.04);
     font-weight: 600;
-    font-size: 0.95rem;
-    color: #5d4037;
+    font-size: 0.9rem;
+    color: #cbd5e1;
 }
 
 .aspect-header i {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    color: #60a5fa;
 }
 
 .aspect-content {
-    padding: 12px;
+    padding: 0.75rem;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 0.75rem;
 }
 
 .aspect-puissance {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    font-size: 0.9rem;
 }
 
 .aspect-puissance .label {
-    font-size: 0.85rem;
-    color: #666;
-    font-weight: 500;
+    color: #cbd5e1;
 }
 
 .aspect-puissance .value {
     font-weight: 700;
-    color: #fbbf24;
-    font-size: 1.1rem;
+    color: #60a5fa;
 }
 
 .aspect-bonus {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 0.5rem;
 }
 
 .aspect-bonus .label {
-    font-size: 0.85rem;
-    color: #666;
+    color: #cbd5e1;
+    font-size: 0.9rem;
     font-weight: 500;
 }
 
 .bonus-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 0.5rem;
 }
 
 .bonus-tag {
-    padding: 4px 10px;
-    background: rgba(251, 191, 36, 0.1);
-    border: 1px solid rgba(251, 191, 36, 0.3);
-    border-radius: 16px;
+    padding: 3px 8px;
+    background: rgba(96, 165, 250, 0.1);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    border-radius: 12px;
     font-size: 0.75rem;
-    color: #fbbf24;
+    color: #60a5fa;
     font-weight: 600;
     white-space: nowrap;
 }
 
 .bonus-totals {
-    padding: 12px;
-    background: rgba(100, 100, 100, 0.05);
-    border-radius: 8px;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 6px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 0.5rem;
+    font-size: 0.9rem;
 }
 
 .bonus-row {
@@ -234,30 +239,45 @@
 }
 
 .bonus-label {
-    font-size: 0.85rem;
-    color: #666;
-    font-weight: 500;
+    color: #cbd5e1;
 }
 
 .bonus-value {
     font-weight: 700;
-    color: #8b4513;
-    font-size: 1rem;
+    color: #60a5fa;
 }
 
 .selection-indicator {
     display: flex;
     justify-content: center;
     margin-top: auto;
-    padding-top: 12px;
-    border-top: 1px solid rgba(139, 69, 19, 0.1);
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .selected-badge {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.not-selected-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(148, 163, 184, 0.1);
+    color: #94a3b8;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
     background: rgba(34, 197, 94, 0.1);
     border: 1px solid rgba(34, 197, 94, 0.3);
     border-radius: 20px;

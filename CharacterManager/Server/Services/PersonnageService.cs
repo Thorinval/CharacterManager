@@ -332,6 +332,8 @@ public class PersonnageService
             existing.Description = personnage.Description;
             existing.Selectionne = personnage.Selectionne;
             existing.TypeAttaque = personnage.TypeAttaque;
+            existing.HasRelation = personnage.HasRelation;
+            existing.NivRelation = personnage.NivRelation;
 
             // Mettre à jour les colonnes stockées si le nom change (v0.12.1+: API de ressources)
             existing.ImageUrlDetailStored = PersonnageImageUrlHelper.GetImageDetailUrl(existing.Nom);

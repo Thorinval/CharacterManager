@@ -46,18 +46,18 @@
     }
     else
     {
-        <div class="capacites-grid">
+        <div class="capacites-grid hub-grid">
             @foreach (var capacite in capacites)
             {
-                <div class="capacite-card">
-                    <div class="card-header">
+                <div class="capacite-card hub-card">
+                    <div class="card-header hub-card-head">
                         @if (!string.IsNullOrEmpty(capacite.Icon))
                         {
-                            <i class="bi bi-@capacite.Icon capacite-icon"></i>
+                            <i class="bi bi-@capacite.Icon capacite-icon hub-icon"></i>
                         }
                         else
                         {
-                            <i class="bi bi-lightning-charge-fill capacite-icon"></i>
+                            <i class="bi bi-lightning-charge-fill capacite-icon hub-icon"></i>
                         }
                         <h3>@capacite.Nom</h3>
                     </div>
@@ -73,7 +73,7 @@
                         }
                     </div>
 
-                    <div class="card-actions">
+                    <div class="card-actions d-flex gap-2 flex-wrap">
                         <button class="btn btn-sm btn-warning" @onclick="() => OpenEditModal(capacite)">
                             <i class="bi bi-pencil"></i> Éditer
                         </button>

@@ -690,6 +690,8 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             TypeAttaque = ParseTypeAttaque(element.Element(AppConstants.XmlElements.TypeAttaque)?.Value),
             Selectionne = ParseBool(element.Element(AppConstants.XmlElements.Selectionne)?.Value),
             Description = element.Element(AppConstants.XmlElements.Description)?.Value ?? $"Personnage {nom}",
+            HasRelation = ParseBool(element.Element(AppConstants.XmlElements.HasRelation)?.Value),
+            NivRelation = int.TryParse(element.Element(AppConstants.XmlElements.NivRelation)?.Value, out var nivRel) ? nivRel : 0,
         };
 
         // Gérer les URLs des images
@@ -736,6 +738,8 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                 writer.WriteElementString(AppConstants.XmlElements.TypeAttaque, personnage.TypeAttaque.ToString());
                 writer.WriteElementString(AppConstants.XmlElements.Selectionne, personnage.Selectionne.ToString());
                 writer.WriteElementString(AppConstants.XmlElements.Description, personnage.Description ?? "");
+                writer.WriteElementString(AppConstants.XmlElements.HasRelation, personnage.HasRelation.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.NivRelation, personnage.NivRelation.ToString());
                 writer.WriteEndElement();
             }
 
