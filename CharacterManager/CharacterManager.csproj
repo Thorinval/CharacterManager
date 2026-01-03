@@ -50,4 +50,44 @@
     <Exec Command="powershell -NoProfile -Command &quot;Stop-Process -Name CharacterManager -Force -ErrorAction SilentlyContinue; exit 0&quot;" />
   </Target>
 
+  <!-- Exclure les fichiers de test de la publication -->
+  <ItemGroup>
+    <Content Remove="$(PublishDir)**\Microsoft.TestPlatform*.dll" />
+    <Content Remove="$(PublishDir)**\Microsoft.TestPlatform*.resources.dll" />
+    <Content Remove="$(PublishDir)**\Microsoft.VisualStudio.TestPlatform*.dll" />
+    <Content Remove="$(PublishDir)**\Microsoft.VisualStudio.TestPlatform*.resources.dll" />
+    <Content Remove="$(PublishDir)**\Microsoft.VisualStudio.TraceDataCollector*.dll" />
+    <Content Remove="$(PublishDir)**\Microsoft.VisualStudio.TraceDataCollector*.resources.dll" />
+    <Content Remove="$(PublishDir)**\testhost*.dll" />
+    <Content Remove="$(PublishDir)**\datacollector*.dll" />
+  </ItemGroup>
+
+  <!-- Alternative : Exclure tous les dossiers de localisation de test -->
+  <Target Name="RemoveTestPlatformFiles" AfterTargets="Publish">
+    <ItemGroup>
+      <TestPlatformFiles Include="$(PublishDir)**\Microsoft.TestPlatform*.dll" />
+      <TestPlatformFiles Include="$(PublishDir)**\Microsoft.VisualStudio.TestPlatform*.dll" />
+      <TestPlatformFiles Include="$(PublishDir)**\Microsoft.VisualStudio.TraceDataCollector*.dll" />
+      <TestPlatformFiles Include="$(PublishDir)**\testhost*.dll" />
+      <TestPlatformFiles Include="$(PublishDir)**\datacollector*.dll" />
+      <PdbFiles Include="$(PublishDir)**\*.pdb" />
+      <TestLocalizationFolders Include="$(PublishDir)cs" />
+      <TestLocalizationFolders Include="$(PublishDir)de" />
+      <TestLocalizationFolders Include="$(PublishDir)es" />
+      <TestLocalizationFolders Include="$(PublishDir)fr" />
+      <TestLocalizationFolders Include="$(PublishDir)it" />
+      <TestLocalizationFolders Include="$(PublishDir)ja" />
+      <TestLocalizationFolders Include="$(PublishDir)ko" />
+      <TestLocalizationFolders Include="$(PublishDir)pl" />
+      <TestLocalizationFolders Include="$(PublishDir)pt-BR" />
+      <TestLocalizationFolders Include="$(PublishDir)ru" />
+      <TestLocalizationFolders Include="$(PublishDir)tr" />
+      <TestLocalizationFolders Include="$(PublishDir)zh-Hans" />
+      <TestLocalizationFolders Include="$(PublishDir)zh-Hant" />
+    </ItemGroup>
+    <Delete Files="@(TestPlatformFiles)" />
+    <Delete Files="@(PdbFiles)" />
+    <RemoveDir Directories="@(TestLocalizationFolders)" />
+  </Target>
+
 </Project>

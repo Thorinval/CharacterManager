@@ -36,7 +36,7 @@ dotnet publish .\CharacterManager\CharacterManager.csproj `
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""
-    Write-Host "✓ Publication réussie!" -ForegroundColor Green
+    Write-Host "[OK] Publication reussie!" -ForegroundColor Green
     Write-Host ""
     Write-Host "Fichiers publiés dans: $OutputPath" -ForegroundColor Cyan
     
@@ -53,7 +53,7 @@ if ($LASTEXITCODE -eq 0) {
     
     Compress-Archive -Path "$OutputPath\*" -DestinationPath $zipName
     
-    Write-Host "✓ Archive créée: $zipName" -ForegroundColor Green
+    Write-Host "[OK] Archive creee: $zipName" -ForegroundColor Green
     Write-Host ""
     Write-Host "Taille de l'archive: $([math]::Round((Get-Item $zipName).Length / 1MB, 2)) MB" -ForegroundColor Cyan
     Write-Host ""
@@ -63,6 +63,6 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host ""
 } else {
     Write-Host ""
-    Write-Host "✗ Erreur lors de la publication" -ForegroundColor Red
+    Write-Host "[ERREUR] Erreur lors de la publication" -ForegroundColor Red
     exit 1
 }
