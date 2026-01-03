@@ -175,6 +175,16 @@ if ($successCount -eq $scripts.Count) {
     $newVersion = Get-CurrentVersion
     Write-Host "Nouvelle version: $newVersion" -ForegroundColor $colors.Success
     Write-Host ""
+    
+    # Supprimer le fichier ZIP créé lors de la publication
+    $zipName = "CharacterManager-v$newVersion-win-x64.zip"
+    $zipPath = Join-Path $rootDir $zipName
+    if (Test-Path $zipPath) {
+        Remove-Item $zipPath -Force
+        Write-Host "[NETTOYAGE] Fichier ZIP supprime: $zipName" -ForegroundColor $colors.Warning
+        Write-Host ""
+    }
+    
     Write-Host "[DOSSIERS] Fichiers disponibles a:" -ForegroundColor $colors.Success
     Write-Host "  publish/ - Application publiee" -ForegroundColor $colors.Success
     Write-Host "  publish/installer/ - Installateur Windows" -ForegroundColor $colors.Success
