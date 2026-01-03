@@ -112,21 +112,7 @@ public partial class Inventaire : IAsyncDisposable
         var query = uri.Query.TrimStart('?');
         if (!string.IsNullOrEmpty(query))
         {
-            var parts = query.Split('&', StringSplitOptions.RemoveEmptyEntries);
-            foreach (var part in parts)
-            {
-                var kv = part.Split('=', 2);
-                if (kv.Length == 2 && kv[0].Equals("templateId", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (int.TryParse(Uri.UnescapeDataString(kv[1]), out var templateId))
-                    {
-                        showTemplateEditor = true;
-                        templates = [.. PersonnageService.GetAllTemplates()];
-                        selectedTemplateId = templateId;
-                        _ = InvokeAsync(async () => await LoadSelectedTemplate());
-                    }
-                }
-            }
+            // Template loading removed - now handled in Templates page
         }
     }
 
@@ -674,56 +660,62 @@ public partial class Inventaire : IAsyncDisposable
         }
     }
 
-    // ===== Template Methods =====
-
-    private bool showTemplateEditor = false;
-    private Toast? toastRef;
-    private string templateNom = string.Empty;
-    private string templateDescription = string.Empty;
-    private List<Personnage?> templatePersonnages = [];
-    private List<int> templateSelectedIds = [];
-    private List<Template> templates = [];
-    private int selectedTemplateId = 0;
-
-    private void OpenTemplateEditor()
+    private async Task HandleImportInventaire(InputFileChangeEventArgs e)
     {
-        showTemplateEditor = true;
-        templateNom = string.Empty;
-        templateDescription = string.Empty;
-        templatePersonnages.Clear();
-        templateSelectedIds.Clear();
-        templates = [.. PersonnageService.GetAllTemplates()];
-        selectedTemplateId = 0;
-        viewMode = AppConstants.Defaults.ViewModeGrid;
-    }
-
-    private void CancelTemplateCreation()
-    {
-        showTemplateEditor = false;
-        templateNom = string.Empty;
-        templateDescription = string.Empty;
-        templatePersonnages.Clear();
-        templateSelectedIds.Clear();
-        selectedTemplateId = 0;
-    }
-
-    private async Task HandleTemplateSelectionChanged(List<int> selectedIds)
-    {
-        templateSelectedIds = selectedIds;
-        // Recharger les personnages sélectionnés
-        templatePersonnages.Clear();
-        foreach (var id in selectedIds)
+        var file = e.File;
+        if (file == null)
         {
-            var p = await GetPersonnageById(id);
-            if (p != null)
-                templatePersonnages.Add(p);
+            return;
+        }
+
+        var isSupported = file.Name.EndsWith(AppConstants.FileExtensions.Pml, StringComparison.OrdinalIgnoreCase)
+                       || file.Name.EndsWith(AppConstants.FileExtensions.Xml, StringComparison.OrdinalIgnoreCase);
+
+        if (!isSupported)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Veuillez sélectionner un fichier PML ou XML.");
+            return;
+        }
+
+        try
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            var result = await PmlImportService.ImportPmlAsync(
+                stream,
+                file.Name,
+                importInventory: true,
+                importTemplates: false,
+                importBestSquad: false,
+                importHistories: false,
+                importLeagueHistory: false);
+
+            var importMessage = result.SuccessCount > 0
+                ? $"{result.SuccessCount} personnage(s) importé(s) avec succès."
+                : "Aucun personnage importé.";
+
+            if (!string.IsNullOrEmpty(result.Error))
+            {
+                importMessage += $"\nErreur: {result.Error}";
+            }
+
+            if (result.Errors.Count > 0)
+            {
+                var preview = string.Join("\n", result.Errors.Take(3));
+                importMessage += $"\nDétails (aperçu):\n{preview}";
+            }
+
+            await JSRuntime.InvokeVoidAsync("alert", importMessage);
+            await LoadPersonnagesAsync();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de l'import: {ex.Message}");
         }
     }
 
-    private Task<Personnage?> GetPersonnageById(int id)
-    {
-        return Task.FromResult(PersonnageService.GetById(id));
-    }
+    // ===== Lucie House Management =====
+
+    private Toast? toastRef;
 
     private async Task LoadLucieHouseAsync()
     {
@@ -1003,80 +995,6 @@ public partial class Inventaire : IAsyncDisposable
         DbContext.Pieces.Update(piece);
         await DbContext.SaveChangesAsync();
         await InvokeAsync(StateHasChanged);
-    }
-
-    private async Task SaveTemplate()
-    {
-        if (string.IsNullOrEmpty(templateNom) || templateSelectedIds.Count == 0)
-            return;
-
-        try
-        {
-            var template = await PersonnageService.CreateTemplateAsync(
-                templateNom,
-                templateDescription,
-                templateSelectedIds
-            );
-
-            toastRef?.Show($"Template '{template.Nom}' créé avec succès!", "success");
-            CancelTemplateCreation();
-            templates = [.. PersonnageService.GetAllTemplates()];
-        }
-        catch (Exception ex)
-        {
-            toastRef?.Show($"Erreur lors de la création du template: {ex.Message}", "error");
-        }
-    }
-
-    private async Task LoadSelectedTemplate()
-    {
-        if (selectedTemplateId == 0)
-            return;
-
-        var template = await PersonnageService.GetTemplateAsync(selectedTemplateId);
-        if (template is null)
-        {
-            toastRef?.Show("Template introuvable", "error");
-            return;
-        }
-
-        var ids = template.GetPersonnageIds();
-        templateSelectedIds = ids;
-        templatePersonnages = [];
-        foreach (var id in ids)
-        {
-            var p = PersonnageService.GetById(id);
-            if (p != null)
-                templatePersonnages.Add(p);
-        }
-        templateNom = template.Nom;
-        templateDescription = template.Description;
-        toastRef?.Show($"Template '{template.Nom}' chargé.", "info");
-    }
-
-    private async Task ExportTemplateAsPml()
-    {
-        if (templateSelectedIds.Count == 0)
-            return;
-
-        try
-        {
-            var template = new Template
-            {
-                Nom = templateNom,
-                Description = templateDescription
-            };
-            template.SetPersonnageIds(templateSelectedIds);
-
-            var pmlBytes = await PmlImportService.ExporterTemplatesPmlAsync(new[] { template });
-            var fileName = $"{AppConstants.ExportPrefixes.Template}_{templateNom}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
-
-            await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pmlBytes));
-        }
-        catch (Exception ex)
-        {
-            toastRef?.Show($"Erreur lors de l'export du template: {ex.Message}", "error");
-        }
     }
 
     private Task HandleInvalidDrop(string message)

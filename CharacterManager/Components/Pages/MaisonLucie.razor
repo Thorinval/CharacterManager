@@ -28,14 +28,13 @@
                 </div>
 
                 <div class="lucie-house-actions d-flex align-items-center gap-2">
-                    <label class="btn btn-outline-secondary mb-0" for="lucieImportFile" title="Importer une sauvegarde Lucie House">
+                    <button class="btn btn-success" @onclick="ExportLucieHouse" title="Exporter Lucie House">
+                        <i class="bi bi-download"></i> Exporter
+                    </button>
+                    <label class="btn btn-info mb-0" for="lucieImportFile" title="Importer une sauvegarde Lucie House">
                         <i class="bi bi-upload"></i> Importer
                     </label>
                     <InputFile id="lucieImportFile" class="d-none" accept=".pml,.xml" OnChange="HandleLucieImport" />
-
-                    <button class="btn btn-outline-success" @onclick="ExportLucieHouse" title="Exporter Lucie House">
-                        <i class="bi bi-download"></i> Exporter
-                    </button>
                 </div>
             </div>
         }

@@ -33,14 +33,14 @@
 
 .affection-badge {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 8px;
-    padding: 16px 24px;
+    gap: 12px;
+    padding: 12px 20px;
     background: linear-gradient(135deg, rgba(255, 105, 180, 0.1), rgba(219, 112, 147, 0.1));
     border: 2px solid rgba(219, 112, 147, 0.3);
     border-radius: 12px;
-    min-width: 140px;
+    white-space: nowrap;
 }
 
 .affection-badge i {
@@ -49,15 +49,15 @@
 }
 
 .affection-value {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: #db7093;
 }
 
 .affection-label {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #db7093;
-    opacity: 0.8;
+    opacity: 0.9;
 }
 
 .pieces-grid {

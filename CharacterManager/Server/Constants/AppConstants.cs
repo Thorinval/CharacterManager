@@ -80,6 +80,7 @@ public static class AppConstants
         public const string Inventaire = "inventaire";
         public const string Template = "template";
         public const string HistoriqueClassements = "historique_classements";
+        public const string HistoriqueLigues = "historique_ligues";
     }
 
     /// <summary>

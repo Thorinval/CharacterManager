@@ -5,8 +5,11 @@
 @using CharacterManager.Server.Models
 @using CharacterManager.Server.Services
 @using CharacterManager.Components
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
 
 <link rel="stylesheet" href="/css/Templates.css" />
+<link rel="stylesheet" href="/css/Inventaire.css" />
 
 <PageTitle><LocalizedText Key="templates.title" /></PageTitle>
 
@@ -17,54 +20,159 @@
 
 <Toast @ref="toastRef" />
 
-@if (templates is null)
+<!-- Template Creator Button -->
+<div class="templates-header">
+    <button class="btn btn-primary" @onclick="() => OpenTemplateEditor()" title="Créer un nouveau template">
+        <i class="bi bi-plus-circle"></i>
+        <LocalizedText Key="inventory.template" />
+    </button>
+</div>
+
+@if (!showTemplateEditor)
 {
-    <p><LocalizedText Key="common.loading" /></p>
-}
-else if (!templates.Any())
-{
-    <p><LocalizedText Key="templates.empty" /></p>
+    @if (templates is null)
+    {
+        <p><LocalizedText Key="common.loading" /></p>
+    }
+    else if (!templates.Any())
+    {
+        <p><LocalizedText Key="templates.empty" /></p>
+    }
+    else
+    {
+        <div class="templates-list">
+            @foreach (var t in templates)
+            {
+                <div class="template-card">
+                    <div class="template-header">
+                        @if (editingTemplateId == t.Id)
+                        {
+                            <input class="form-control form-control-sm" style="max-width: 240px; display:inline-block;" @bind="editingName" />
+                            <button class="btn btn-sm btn-success ms-2" @onclick="(() => SaveRename(t))"><i class="bi bi-check"></i></button>
+                            <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelRename"><i class="bi bi-x"></i></button>
+                        }
+                        else
+                        {
+                            <span class="template-name">@t.Nom</span>
+                            <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="(() => StartRename(t))"><i class="bi bi-pencil"></i></button>
+                        }
+                        <span class="template-power"><LocalizedText Key="templates.power" /> <strong>@t.PuissanceTotal</strong></span>
+                    </div>
+                    <div class="template-meta">
+                        <span><LocalizedText Key="templates.created" /> @t.DateCreation.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</span>
+                        <span><LocalizedText Key="templates.modified" /> @t.DateModification.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</span>
+                    </div>
+                    <div class="template-actions">
+                        <button class="btn btn-primary" @onclick="(() => OpenInInventaire(t.Id))">
+                            <i class="bi bi-folder2-open"></i> <LocalizedText Key="templates.open" />
+                        </button>
+                        <button class="btn btn-info" @onclick="(() => ExportTemplate(t.Id))">
+                            <i class="bi bi-download"></i> <LocalizedText Key="templates.export" /> PML
+                        </button>
+                        <button class="btn btn-secondary" @onclick="(() => DuplicateTemplate(t.Id))">
+                            <i class="bi bi-files"></i> <LocalizedText Key="templates.duplicate" />
+                        </button>
+                        <button class="btn btn-danger" @onclick="(() => DeleteTemplate(t.Id))">
+                            <i class="bi bi-trash"></i> <LocalizedText Key="templates.delete" />
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 }
 else
 {
-    <div class="templates-list">
-        @foreach (var t in templates)
-        {
-            <div class="template-card">
-                <div class="template-header">
-                    @if (editingTemplateId == t.Id)
-                    {
-                        <input class="form-control form-control-sm" style="max-width: 240px; display:inline-block;" @bind="editingName" />
-                        <button class="btn btn-sm btn-success ms-2" @onclick="(() => SaveRename(t))"><i class="bi bi-check"></i></button>
-                        <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelRename"><i class="bi bi-x"></i></button>
-                    }
-                    else
-                    {
-                        <span class="template-name">@t.Nom</span>
-                        <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="(() => StartRename(t))"><i class="bi bi-pencil"></i></button>
-                    }
-                    <span class="template-power"><LocalizedText Key="templates.power" /> <strong>@t.PuissanceTotal</strong></span>
-                </div>
-                <div class="template-meta">
-                    <span><LocalizedText Key="templates.created" /> @t.DateCreation.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</span>
-                    <span><LocalizedText Key="templates.modified" /> @t.DateModification.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</span>
-                </div>
-                <div class="template-actions">
-                    <button class="btn btn-primary" @onclick="(() => OpenInInventaire(t.Id))">
-                        <i class="bi bi-folder2-open"></i> <LocalizedText Key="templates.open" />
-                    </button>
-                    <button class="btn btn-info" @onclick="(() => ExportTemplate(t.Id))">
-                        <i class="bi bi-download"></i> <LocalizedText Key="templates.export" /> PML
-                    </button>
-                    <button class="btn btn-secondary" @onclick="(() => DuplicateTemplate(t.Id))">
-                        <i class="bi bi-files"></i> <LocalizedText Key="templates.duplicate" />
-                    </button>
-                    <button class="btn btn-danger" @onclick="(() => DeleteTemplate(t.Id))">
-                        <i class="bi bi-trash"></i> <LocalizedText Key="templates.delete" />
-                    </button>
+    <!-- Template Editor Section -->
+    <div class="template-editor-wrapper">
+        <div class="template-editor-section">
+            <EscouadePreviewEditor PersonnagesSelectionnes="@templatePersonnages"
+                OnSelectionChanged="@HandleTemplateSelectionChanged" OnPersonnageRequested="@GetPersonnageById"
+                DraggedPersonnageId="@currentlyDraggedId" OnInvalidDrop="@(() => HandleInvalidDrop())" />
+
+            <div class="template-actions mt-2">
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div class="input-group">
+                        <input id="templateNomInput" type="text" class="form-control"
+                            style="font-size: 0.85rem; padding: 0.4rem 0.6rem;" placeholder="Nom du template"
+                            @bind="templateNom" />
+                        <input id="templateDescriptionInput" type="text" class="form-control"
+                            style="font-size: 0.85rem; padding: 0.4rem 0.6rem;" placeholder="Description (optionnel)"
+                            @bind="templateDescription" />
+                    </div>
+                    <div class="input-group">
+                        <select id="templateSelect" class="form-select" style="font-size: 0.85rem; padding: 0.4rem 0.6rem;"
+                            @bind="selectedTemplateId">
+                            <option value="0">Charger template</option>
+                            @foreach (var t in templates)
+                            {
+                                <option value="@t.Id">@t.Nom</option>
+                            }
+                        </select>
+                        <button class="btn btn-outline-primary btn-sm" style="font-size: 0.75rem;"
+                            @onclick="LoadSelectedTemplate" disabled="@(selectedTemplateId == 0)">
+                            <i class="bi bi-upload"></i>
+                        </button>
+                    </div>
+                    <div class="input-group" style="gap: 4px;">
+                        <button class="btn btn-success btn-sm" style="flex: 1; font-size: 0.75rem;" @onclick="SaveTemplate"
+                            disabled="@(string.IsNullOrEmpty(templateNom) || templateSelectedIds.Count == 0)">
+                            <i class="bi bi-check-circle"></i> Créer
+                        </button>
+                        <button class="btn btn-secondary btn-sm" style="flex: 1; font-size: 0.75rem;"
+                            @onclick="() => CancelTemplateCreation()">
+                            <i class="bi bi-x"></i> Annuler
+                        </button>
+                        <button class="btn btn-info btn-sm" style="flex: 1; font-size: 0.75rem;"
+                            @onclick="ExportTemplateAsPml">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
-        }
+        </div>
+
+        <div class="template-inventory-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h6 style="margin: 0; font-size: 0.9rem;">Inventaire</h6>
+                <button class="btn btn-sm btn-outline-secondary" @onclick="() => CancelTemplateCreation()"
+                    title="Fermer l'éditeur" style="padding: 0.2rem 0.4rem;">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="input-group" style="margin-bottom: 8px;">
+                <input id="searchInput" type="text" class="form-control" style="font-size: 0.85rem; padding: 0.4rem 0.6rem;"
+                    placeholder="Rechercher..." @bind="searchTerm" @oninput="HandleSearchInput" />
+                <button class="btn btn-outline-secondary btn-sm" type="button" @onclick="ClearSearch" title="Effacer">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="template-inventory-content">
+                @if (personnagesFiltres.Any())
+                {
+                    <div class="template-inventory-grid-grouped">
+                        @foreach (var groupe in GroupedPersonnages)
+                        {
+                            <div class="template-type-group-header">
+                                <h6>@groupe.Key (@groupe.Count())</h6>
+                            </div>
+                            @foreach (var personnage in groupe)
+                            {
+                                <div class="personnage-card-grid-compact" @ondragstart="@(e => HandleDragStart(e, personnage))"
+                                    draggable="true">
+                                    <img src="@personnage.GetImageUrl(true)" alt="@personnage.Nom" class="personnage-card-image-compact"
+                                        onerror="this.onerror=null; this.src='/api/resources/interface/default_portrait.png';" />
+                                    <div class="card-overlay-compact">
+                                        <span class="card-name-compact">@personnage.Nom</span>
+                                        <span class="card-puissance-compact">@personnage.Puissance</span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+            </div>
+        </div>
     </div>
 }
 

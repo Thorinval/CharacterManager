@@ -13,6 +13,9 @@ public partial class Historique
     public HistoriqueClassementService HistoriqueService { get; set; } = null!;
 
     [Inject]
+    public PmlImportService PmlImportService { get; set; } = null!;
+
+    [Inject]
     public IJSRuntime JSRuntime { get; set; } = null!;
 
     [Inject]
@@ -92,9 +95,16 @@ public partial class Historique
     {
         try
         {
-            var xmlBytes = await HistoriqueService.ExporterHistoriqueXmlAsync();
-            var fileName = $"{AppConstants.ExportPrefixes.HistoriqueClassements}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Xml}";
-            var base64 = Convert.ToBase64String(xmlBytes);
+            var options = PmlExportOptions.FromBooleans(
+                exportInventory: false,
+                exportTemplates: false,
+                exportBestSquad: false,
+                exportHistories: true,
+                exportLeagueHistory: false);
+
+            var bytes = await PmlImportService.ExportPmlAsync(options);
+            var fileName = $"{AppConstants.ExportPrefixes.HistoriqueClassements}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
+            var base64 = Convert.ToBase64String(bytes);
             await JSRuntime.InvokeVoidAsync("downloadFile", fileName, base64);
         }
         catch (Exception ex)
@@ -111,21 +121,49 @@ public partial class Historique
 
     private async Task HandleFileSelected(InputFileChangeEventArgs e)
     {
+        var file = e.File;
+        if (file == null)
+        {
+            return;
+        }
+
+        var isSupported = file.Name.EndsWith(AppConstants.FileExtensions.Pml, StringComparison.OrdinalIgnoreCase);
+
+        if (!isSupported)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Veuillez sélectionner un fichier PML.");
+            return;
+        }
+
         try
         {
-            var file = e.File;
-            if (file != null && (file.Name.EndsWith(AppConstants.FileExtensions.Xml, StringComparison.OrdinalIgnoreCase)
-                              || file.Name.EndsWith(AppConstants.FileExtensions.Pml, StringComparison.OrdinalIgnoreCase)))
+            using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            var result = await PmlImportService.ImportPmlAsync(
+                stream,
+                file.Name,
+                importInventory: false,
+                importTemplates: false,
+                importBestSquad: false,
+                importHistories: true,
+                importLeagueHistory: false);
+
+            var importMessage = result.SuccessCount > 0
+                ? $"{result.SuccessCount} enregistrement(s) importé(s) avec succès."
+                : "Aucun enregistrement importé.";
+
+            if (!string.IsNullOrEmpty(result.Error))
             {
-                using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
-                var count = 0;
-                await ChargerHistorique();
-                await JSRuntime.InvokeVoidAsync("alert", $"{count} enregistrement(s) importé(s) avec succès.");
+                importMessage += $"\nErreur: {result.Error}";
             }
-            else
+
+            if (result.Errors.Count > 0)
             {
-                await JSRuntime.InvokeVoidAsync("alert", "Veuillez sélectionner un fichier XML ou PML.");
+                var preview = string.Join("\n", result.Errors.Take(3));
+                importMessage += $"\nDétails (aperçu):\n{preview}";
             }
+
+            await JSRuntime.InvokeVoidAsync("alert", importMessage);
+            await ChargerHistorique();
         }
         catch (Exception ex)
         {

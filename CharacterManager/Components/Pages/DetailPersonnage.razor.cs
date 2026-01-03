@@ -136,7 +136,6 @@ public partial class DetailPersonnage
             PersonnageService.Update(editedPerso);
             currentPerso = editedPerso;
             isEditing = false;
-            await JSRuntime.InvokeVoidAsync("alert", "Personnage mis à jour avec succès.");
         }
         catch (Exception ex)
         {

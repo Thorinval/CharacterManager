@@ -19,104 +19,7 @@
 
 <Toast @ref="toastRef" />
 
-<!-- Section Template Preview -->
-@if (showTemplateEditor)
-{
-    <div class="template-editor-wrapper">
-        <div class="template-editor-section">
-            <EscouadePreviewEditor PersonnagesSelectionnes="@templatePersonnages"
-                OnSelectionChanged="@HandleTemplateSelectionChanged" OnPersonnageRequested="@GetPersonnageById"
-                DraggedPersonnageId="@currentlyDraggedId" OnInvalidDrop="@HandleInvalidDrop" />
-
-            <div class="template-actions mt-2">
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <div class="input-group">
-                        <input id="templateNomInput" type="text" class="form-control"
-                            style="font-size: 0.85rem; padding: 0.4rem 0.6rem;" placeholder="Nom du template"
-                            @bind="templateNom" />
-                        <input id="templateDescriptionInput" type="text" class="form-control"
-                            style="font-size: 0.85rem; padding: 0.4rem 0.6rem;" placeholder="Description (optionnel)"
-                            @bind="templateDescription" />
-                    </div>
-                    <div class="input-group">
-                        <select id="templateSelect" class="form-select" style="font-size: 0.85rem; padding: 0.4rem 0.6rem;"
-                            @bind="selectedTemplateId">
-                            <option value="0">Charger template</option>
-                            @foreach (var t in templates)
-                            {
-                                <option value="@t.Id">@t.Nom</option>
-                            }
-                        </select>
-                        <button class="btn btn-outline-primary btn-sm" style="font-size: 0.75rem;"
-                            @onclick="LoadSelectedTemplate" disabled="@(selectedTemplateId == 0)">
-                            <i class="bi bi-upload"></i>
-                        </button>
-                    </div>
-                    <div class="input-group" style="gap: 4px;">
-                        <button class="btn btn-success btn-sm" style="flex: 1; font-size: 0.75rem;" @onclick="SaveTemplate"
-                            disabled="@(string.IsNullOrEmpty(templateNom) || templateSelectedIds.Count == 0)">
-                            <i class="bi bi-check-circle"></i> Créer
-                        </button>
-                        <button class="btn btn-secondary btn-sm" style="flex: 1; font-size: 0.75rem;"
-                            @onclick="() => CancelTemplateCreation()">
-                            <i class="bi bi-x"></i> Annuler
-                        </button>
-                        <button class="btn btn-info btn-sm" style="flex: 1; font-size: 0.75rem;"
-                            @onclick="ExportTemplateAsPml">
-                            <i class="bi bi-download"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="template-inventory-panel">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <h6 style="margin: 0; font-size: 0.9rem;">Inventaire</h6>
-                <button class="btn btn-sm btn-outline-secondary" @onclick="() => showTemplateEditor = false"
-                    title="Fermer l'éditeur" style="padding: 0.2rem 0.4rem;">
-                    <i class="bi bi-x"></i>
-                </button>
-            </div>
-            <div class="input-group" style="margin-bottom: 8px;">
-                <input id="searchInput" type="text" class="form-control" style="font-size: 0.85rem; padding: 0.4rem 0.6rem;"
-                    placeholder="Rechercher..." @bind="searchTerm" @oninput="HandleSearchInput" />
-                <button class="btn btn-outline-secondary btn-sm" type="button" @onclick="ClearSearch" title="Effacer">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-            <div class="template-inventory-content">
-                @if (personnagesFiltres.Any())
-                {
-                    <div class="template-inventory-grid-grouped">
-                        @foreach (var groupe in GroupedPersonnages)
-                        {
-                            <div class="template-type-group-header">
-                                <h6>@groupe.Key (@groupe.Count())</h6>
-                            </div>
-                            @foreach (var personnage in groupe)
-                            {
-                                <div class="personnage-card-grid-compact" @ondragstart="@(e => HandleDragStart(e, personnage))"
-                                    draggable="true">
-                                    <img src="@personnage.GetImageUrl(true)" alt="@personnage.Nom" class="personnage-card-image-compact"
-                                        onerror="this.onerror=null; this.src='/api/resources/interface/default_portrait.png';" />
-                                    <div class="card-overlay-compact">
-                                        <span class="card-name-compact">@personnage.Nom</span>
-                                        <span class="card-puissance-compact">@personnage.Puissance</span>
-                                    </div>
-                                </div>
-                            }
-                        }
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
-}
-
-@if (!showTemplateEditor)
-{
-    <div class="mb-3" style="padding-top: 1rem;">
+<div class="mb-3" style="padding-top: 1rem;">
         <div class="row g-3 align-items-center">
             <div class="col-lg-4 col-md-12">
                 <div class="sort-controls d-flex flex-wrap align-items-center gap-2">
@@ -165,15 +68,15 @@
                         @onclick="() => { isEditing = false; currentPersonnage = new Personnage(); showModal = true; }">
                         <LocalizedText Key="inventory.add" />
                     </button>
-                    <button class="btn btn-info" @onclick="() => OpenTemplateEditor()"
-                        title="Créer un template d'escouade">
-                        <i class="bi bi-plus-circle"></i>
-                        <LocalizedText Key="inventory.template" />
-                    </button>
                     <button class="btn btn-success" @onclick="ExportToPML" title="Exporter l'inventaire">
                         <i class="bi bi-download"></i>
                         <LocalizedText Key="inventory.export" />
                     </button>
+                    <label class="btn btn-info mb-0" for="importInventaireFile" title="@LocalizationService.T("inventory.import")">
+                        <i class="bi bi-upload"></i>
+                        <LocalizedText Key="inventory.import" />
+                    </label>
+                    <InputFile id="importInventaireFile" class="d-none" accept=".pml,.xml" OnChange="HandleImportInventaire" />
                     <button class="btn btn-danger" @onclick="DeleteSelectedPersonnages"
                         disabled="@(!selectedPersonnages.Any())" title="Supprimer les personnages sélectionnés">
                         <i class="bi bi-trash-fill"></i>
@@ -588,5 +491,4 @@
                 </div>
             </div>
         </div>
-    </div>
-}
+    </div>}

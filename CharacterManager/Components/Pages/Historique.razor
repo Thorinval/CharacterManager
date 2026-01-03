@@ -14,8 +14,6 @@
 <PageTitle><LocalizedText Key="history.title" /></PageTitle>
 
 <div class="page-header-banner">
-    <a href="@AppConstants.Routes.Home" class="back-button" aria-label="Retour" title="Back to home"></a>
-    <h1 class="page-title"><LocalizedText Key="history.pageTitle" /></h1>
 </div>
 
 <div class="historique-container">
@@ -34,8 +32,8 @@
                     <button class="btn btn-primary" @onclick="ShowCreerClassementModalAsync"><LocalizedText Key="history.create" /></button>
                     <button class="btn btn-primary" @onclick="FiltrerHistorique"><LocalizedText Key="history.filter" /></button>
                     <button class="btn btn-secondary" @onclick="ReinitialiserFiltres"><LocalizedText Key="history.reset" /></button>
-                    <button class="btn btn-success" @onclick="ExporterHistorique" title=""><i class="bi bi-download"></i> <LocalizedText Key="history.exportXml" /></button>
-                    <button class="btn btn-info" @onclick="ImporterHistorique" title=""><i class="bi bi-upload"></i> <LocalizedText Key="history.importXml" /></button>
+                    <button class="btn btn-success" @onclick="ExporterHistorique" title=""><i class="bi bi-download"></i> <LocalizedText Key="history.export" /></button>
+                    <button class="btn btn-info" @onclick="ImporterHistorique" title=""><i class="bi bi-upload"></i> <LocalizedText Key="history.import" /></button>
                     <button class="btn btn-danger" @onclick="ViderHistorique" title=""><LocalizedText Key="history.clear" /></button>
                 </div>
             </div>
@@ -191,6 +189,6 @@
     </div>
 </div>
 
-<InputFile id="historiqueFileInput" @ref="inputFileRef" OnChange="HandleFileSelected" accept=".xml" style="display:none;" />
+<InputFile id="historiqueFileInput" @ref="inputFileRef" OnChange="HandleFileSelected" accept=".pml" style="display:none;" />
 
 

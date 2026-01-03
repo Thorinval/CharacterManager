@@ -358,16 +358,15 @@
 }
 
 .lucie-affection-block .affection-chip {
-    padding: 0;
-    background: none;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    padding: 0 12px;
     background: rgba(255,255,255,0.08);
+    height: 48px;
+    min-width: 88px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0;
+    gap: 8px;
 }
 
 .lucie-affection-block .affection-chip i {

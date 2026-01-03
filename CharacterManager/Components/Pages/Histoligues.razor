@@ -1,7 +1,11 @@
 @page "/histoligues"
 @using CharacterManager.Server.Models
 @using CharacterManager.Server.Services
+@using CharacterManager.Server.Constants
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Linq
 @inject HistoriqueLigueService HistoriqueLigueService
+@inject PmlImportService PmlImportService
 @inject IJSRuntime JS
 
 <PageTitle>Historique des Ligues</PageTitle>
@@ -14,10 +18,21 @@
             <i class="bi bi-trophy"></i>
             Historique des Ligues
         </h1>
-        <button class="btn btn-primary" @onclick="OpenCreateModal">
-            <i class="bi bi-plus-circle"></i>
-            Nouvelle date de montée
-        </button>
+        <div class="histoligues-actions">
+            <button class="btn btn-primary" @onclick="OpenCreateModal">
+                <i class="bi bi-plus-circle"></i>
+                Nouvelle date de montée
+            </button>
+            <button class="btn btn-success" @onclick="ExporterHistoriquesLigue">
+                <i class="bi bi-download"></i>
+                Exporter
+            </button>
+            <label class="btn btn-info mb-0" for="importLeagueHistoryFile">
+                <i class="bi bi-upload"></i>
+                Importer
+            </label>
+            <InputFile id="importLeagueHistoryFile" class="d-none" accept=".pml" OnChange="ImporterHistoriquesLigue" />
+        </div>
     </div>
 
     @if (historiques == null)
@@ -187,6 +202,80 @@
         {
             await HistoriqueLigueService.DeleteAsync(id);
             await LoadData();
+        }
+    }
+
+    private async Task ExporterHistoriquesLigue()
+    {
+        try
+        {
+            var options = PmlExportOptions.FromBooleans(
+                exportInventory: false,
+                exportTemplates: false,
+                exportBestSquad: false,
+                exportHistories: false,
+                exportLeagueHistory: true);
+
+            var bytes = await PmlImportService.ExportPmlAsync(options);
+            var fileName = $"{AppConstants.ExportPrefixes.HistoriqueLigues}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
+            var base64 = Convert.ToBase64String(bytes);
+            await JS.InvokeVoidAsync("downloadFile", fileName, base64);
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Erreur lors de l'export: {ex.Message}");
+        }
+    }
+
+    private async Task ImporterHistoriquesLigue(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null)
+        {
+            return;
+        }
+
+        var isSupported = file.Name.EndsWith(AppConstants.FileExtensions.Pml, StringComparison.OrdinalIgnoreCase);
+
+        if (!isSupported)
+        {
+            await JS.InvokeVoidAsync("alert", "Veuillez sélectionner un fichier PML.");
+            return;
+        }
+
+        try
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            var result = await PmlImportService.ImportPmlAsync(
+                stream,
+                file.Name,
+                importInventory: false,
+                importTemplates: false,
+                importBestSquad: false,
+                importHistories: false,
+                importLeagueHistory: true);
+
+            var importMessage = result.SuccessCount > 0
+                ? $"{result.SuccessCount} enregistrement(s) importé(s) avec succès."
+                : "Aucun enregistrement importé.";
+
+            if (!string.IsNullOrEmpty(result.Error))
+            {
+                importMessage += $"\nErreur: {result.Error}";
+            }
+
+            if (result.Errors.Count > 0)
+            {
+                var preview = string.Join("\n", result.Errors.Take(3));
+                importMessage += $"\nDétails (aperçu):\n{preview}";
+            }
+
+            await JS.InvokeVoidAsync("alert", importMessage);
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Erreur lors de l'import: {ex.Message}");
         }
     }
 }

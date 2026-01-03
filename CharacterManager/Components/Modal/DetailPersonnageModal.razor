@@ -336,7 +336,7 @@ else
             PersonnageService.Update(editedPerso);
             currentPerso = editedPerso;
             isEditing = false;
-            await JSRuntime.InvokeVoidAsync("alert", "Personnage mis à jour avec succès.");
+            Close();
         }
         catch (Exception ex)
         {
