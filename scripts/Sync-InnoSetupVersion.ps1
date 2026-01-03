@@ -5,8 +5,12 @@
 Write-Host "=== Synchronizing Inno Setup Version ===" -ForegroundColor Cyan
 Write-Host ""
 
+# Déterminer le répertoire racine (parent du dossier scripts)
+$scriptDir = Split-Path -Parent -Path $MyInvocation.MyCommand.Path
+$rootDir = Split-Path -Parent -Path $scriptDir
+
 # Read version from appsettings.json
-$appSettingsPath = ".\CharacterManager\appsettings.json"
+$appSettingsPath = Join-Path $rootDir "CharacterManager\appsettings.json"
 if (-not (Test-Path $appSettingsPath)) {
     Write-Error "appsettings.json not found at $appSettingsPath"
     exit 1
@@ -24,7 +28,7 @@ Write-Host "Version from appsettings.json: $version" -ForegroundColor Green
 Write-Host ""
 
 # Read current Inno Setup file
-$innoPath = ".\CharacterManager.iss"
+$innoPath = Join-Path $rootDir "CharacterManager.iss"
 if (-not (Test-Path $innoPath)) {
     Write-Error "CharacterManager.iss not found at $innoPath"
     exit 1

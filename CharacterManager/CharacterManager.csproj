@@ -4,8 +4,8 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>0.12.2</Version>
-    <InformationalVersion>0.12.2</InformationalVersion>
+    <Version>0.12.4</Version>
+    <InformationalVersion>0.12.4</InformationalVersion>
     <UserSecretsId>65bc735a-e5c1-43cb-88a6-ee6e309d2379</UserSecretsId>
     <ApplicationIcon>CharacterManager.ico</ApplicationIcon>
   </PropertyGroup>

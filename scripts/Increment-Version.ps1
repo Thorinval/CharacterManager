@@ -1,14 +1,20 @@
 # Script pour incrémenter manuellement la version du projet
 # Source unique : appsettings.json -> AppInfo.Version
-# Usage : .\Increment-Version.ps1 [-Type major|minor|patch] (par défaut: patch)
+# Usage : .\Increment-Version.ps1 [-Type major|minor|patch] [-Test] (par défaut: patch)
+# Mode test: .\Increment-Version.ps1 -Type patch -Test (simule l'incrémentation sans modifier les fichiers)
 
 param(
     [ValidateSet("major", "minor", "patch")]
-    [string]$Type = "patch"
+    [string]$Type = "patch",
+    [switch]$Test = $false
 )
 
-$CsprojFile = "CharacterManager\CharacterManager.csproj"
-$AppSettingsFile = "CharacterManager\appsettings.json"
+# Déterminer le répertoire racine (parent du dossier scripts)
+$scriptDir = Split-Path -Parent -Path $MyInvocation.MyCommand.Path
+$rootDir = Split-Path -Parent -Path $scriptDir
+
+$CsprojFile = Join-Path $rootDir "CharacterManager\CharacterManager.csproj"
+$AppSettingsFile = Join-Path $rootDir "CharacterManager\appsettings.json"
 
 if (-not (Test-Path $CsprojFile)) { Write-Error "Erreur: $CsprojFile introuvable"; exit 1 }
 if (-not (Test-Path $AppSettingsFile)) { Write-Error "Erreur: $AppSettingsFile introuvable"; exit 1 }
@@ -25,6 +31,18 @@ switch ($Type) {
 }
 $newVersion = ($parts -join '.')
 
+# Mode test: afficher le résultat sans modifier les fichiers
+if ($Test) {
+    Write-Host ""
+    Write-Host "========== MODE TEST ==========" -ForegroundColor Yellow
+    Write-Host "Aucun fichier n'a été modifié" -ForegroundColor Yellow
+    Write-Host "Version actuelle: $currentVersion" -ForegroundColor Cyan
+    Write-Host "Version simulée ($Type): $newVersion" -ForegroundColor Green
+    Write-Host "==============================" -ForegroundColor Yellow
+    Write-Host ""
+    exit 0
+}
+
 # Mettre à jour appsettings
 $appJson.AppInfo.Version = $newVersion
 $appJson | ConvertTo-Json -Depth 10 | Out-File $AppSettingsFile -Encoding utf8 -NoNewline
@@ -36,11 +54,3 @@ $csprojContent = $csprojContent -replace '<InformationalVersion>.*?</Information
 $csprojContent | Out-File $CsprojFile -Encoding utf8 -NoNewline
 
 Write-Host "Version incrémentée ($Type): $currentVersion -> $newVersion" -ForegroundColor Green
-
-# Proposer de commiter
-$response = Read-Host "Voulez-vous commiter cette modification? (o/n)"
-if ($response -eq 'o' -or $response -eq 'O') {
-    git add $AppSettingsFile $CsprojFile
-    git commit -m "chore: bump version to $newVersion"
-    Write-Host "Commit effectué!" -ForegroundColor Green
-}

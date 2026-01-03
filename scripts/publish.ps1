@@ -4,8 +4,17 @@
 param(
     [string]$Configuration = "Release",
     [string]$Runtime = "win-x64",
-    [string]$OutputPath = ".\publish"
+    [string]$OutputPath = $null
 )
+
+# Déterminer le répertoire racine (parent du dossier scripts)
+$scriptDir = Split-Path -Parent -Path $MyInvocation.MyCommand.Path
+$rootDir = Split-Path -Parent -Path $scriptDir
+
+# Définir le chemin de sortie par défaut si non fourni
+if (-not $OutputPath) {
+    $OutputPath = Join-Path $rootDir "publish"
+}
 
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host "  Character Manager - Publication" -ForegroundColor Cyan
@@ -25,7 +34,8 @@ Write-Host ""
 
 # Publier l'application
 Write-Host "Publication de l'application..." -ForegroundColor Yellow
-dotnet publish .\CharacterManager\CharacterManager.csproj `
+$csprojPath = Join-Path $rootDir "CharacterManager\CharacterManager.csproj"
+dotnet publish $csprojPath `
     --configuration $Configuration `
     --runtime $Runtime `
     --self-contained true `
@@ -41,7 +51,8 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "Fichiers publiés dans: $OutputPath" -ForegroundColor Cyan
     
     # Créer un fichier ZIP pour distribution
-    $version = (Get-Content .\CharacterManager\appsettings.json | ConvertFrom-Json).AppInfo.Version
+    $appSettingsPath = Join-Path $rootDir "CharacterManager\appsettings.json"
+    $version = (Get-Content $appSettingsPath | ConvertFrom-Json).AppInfo.Version
     $zipName = "CharacterManager-v$version-$Runtime.zip"
     
     Write-Host ""
