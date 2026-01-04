@@ -728,25 +728,7 @@ public class PmlImportService(ApplicationDbContext context)
 
             writer.WriteStartElement(AppConstants.XmlElements.Inventaire);
 
-            foreach (var personnage in personnages)
-            {
-                writer.WriteStartElement(AppConstants.XmlElements.Personnage);
-                writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
-                writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.Type, personnage.Type.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.PA, personnage.PA.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.PV, personnage.PV.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.Rang, personnage.Rang.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.Role, personnage.Role.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.Faction, personnage.Faction.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.TypeAttaque, personnage.TypeAttaque.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.Selectionne, personnage.Selectionne.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.HasRelation, personnage.HasRelation.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.NivRelation, personnage.NivRelation.ToString());
-                writer.WriteEndElement();
-            }
+            WritePersonnageDatas(personnages, writer);
 
             // Export Lucie House as part of the inventory payload (no extra checkbox/UI toggle)
             var lucieHouse = _context.LucieHouses.Include(l => l.Pieces).FirstOrDefault();
@@ -757,34 +739,7 @@ public class PmlImportService(ApplicationDbContext context)
 
                 foreach (var piece in lucieHouse.Pieces)
                 {
-                    writer.WriteStartElement(AppConstants.XmlElements.Piece);
-                    writer.WriteElementString(AppConstants.XmlElements.Nom, piece.Nom);
-                    writer.WriteElementString(AppConstants.XmlElements.Niveau, piece.Niveau.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.PuissanceTactique, piece.AspectsTactiques.Puissance.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.PuissanceStrategique, piece.AspectsStrategiques.Puissance.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.Selectionne, piece.Selectionnee.ToString());
-
-                    if (piece.AspectsTactiques.Bonus.Count > 0)
-                    {
-                        writer.WriteStartElement(AppConstants.XmlElements.BonusTactiques);
-                        foreach (var bonus in piece.AspectsTactiques.Bonus)
-                        {
-                            writer.WriteElementString(AppConstants.XmlElements.Bonus, bonus);
-                        }
-                        writer.WriteEndElement();
-                    }
-
-                    if (piece.AspectsStrategiques.Bonus.Count > 0)
-                    {
-                        writer.WriteStartElement(AppConstants.XmlElements.BonusStrategiques);
-                        foreach (var bonus in piece.AspectsStrategiques.Bonus)
-                        {
-                            writer.WriteElementString(AppConstants.XmlElements.Bonus, bonus);
-                        }
-                        writer.WriteEndElement();
-                    }
-
-                    writer.WriteEndElement();
+                    WriteLuciePieceData(writer, piece);
                 }
 
                 writer.WriteEndElement();
@@ -796,6 +751,55 @@ public class PmlImportService(ApplicationDbContext context)
 
         return Task.FromResult(memoryStream.ToArray());
     }
+
+    private static void WriteLuciePieceData(System.Xml.XmlWriter writer, Piece piece, bool avecBonus = true)
+    {
+        writer.WriteStartElement(AppConstants.XmlElements.Piece);
+        writer.WriteElementString(AppConstants.XmlElements.Nom, piece.Nom);
+        writer.WriteElementString(AppConstants.XmlElements.Niveau, piece.Niveau.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.PuissanceTactique, piece.AspectsTactiques.Puissance.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.PuissanceStrategique, piece.AspectsStrategiques.Puissance.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Selectionne, piece.Selectionnee.ToString());
+
+        if (avecBonus)
+        {
+            if (piece.AspectsTactiques.Bonus.Count > 0)
+            {
+                writer.WriteStartElement(AppConstants.XmlElements.BonusTactiques);
+                foreach (var bonus in piece.AspectsTactiques.Bonus)
+                {
+                    writer.WriteElementString(AppConstants.XmlElements.Bonus, bonus);
+                }
+                writer.WriteEndElement();
+            }
+
+            if (piece.AspectsStrategiques.Bonus.Count > 0)
+            {
+                writer.WriteStartElement(AppConstants.XmlElements.BonusStrategiques);
+                foreach (var bonus in piece.AspectsStrategiques.Bonus)
+                {
+                    writer.WriteElementString(AppConstants.XmlElements.Bonus, bonus);
+                }
+                writer.WriteEndElement();
+            }
+        }
+
+        writer.WriteEndElement();
+    }
+
+    private static void WritePersonnageDatas(IEnumerable<Personnage> personnages, System.Xml.XmlWriter writer)
+    {
+        foreach (var personnage in personnages)
+        {
+            WritePersonnageData(writer, personnage);
+
+            writer.WriteEndElement();
+        }
+    }
+
+
+
+
 
     /// <summary>
     /// Exporte les templates au format PML
@@ -973,7 +977,7 @@ public class PmlImportService(ApplicationDbContext context)
                 writer.WriteElementString(AppConstants.XmlElements.PuissanceLucie, historiqueClassement.PuissanceLucie.ToString());
 
                 // Export des classements
-                if (historiqueClassement.Classements.Any())
+                if (historiqueClassement.Classements.Count != 0)
                 {
                     writer.WriteStartElement(AppConstants.XmlElements.Classements);
                     foreach (var classement in historiqueClassement.Classements)
@@ -988,7 +992,7 @@ public class PmlImportService(ApplicationDbContext context)
                 }
 
                 // Export des mercenaires
-                if (historiqueClassement.Mercenaires.Any())
+                if (historiqueClassement.Mercenaires.Count != 0)
                 {
                     writer.WriteStartElement(AppConstants.XmlElements.Mercenaires);
                     foreach (var mercenaire in historiqueClassement.Mercenaires)
@@ -1009,7 +1013,7 @@ public class PmlImportService(ApplicationDbContext context)
                 }
 
                 // Export des androïdes
-                if (historiqueClassement.Androides.Any())
+                if (historiqueClassement.Androides.Count != 0)
                 {
                     writer.WriteStartElement(AppConstants.XmlElements.Androides);
                     foreach (var androide in historiqueClassement.Androides)
@@ -1022,18 +1026,12 @@ public class PmlImportService(ApplicationDbContext context)
                 }
 
                 // Export des pièces
-                if (historiqueClassement.Pieces.Any())
+                if (historiqueClassement.Pieces.Count != 0)
                 {
                     writer.WriteStartElement(AppConstants.XmlElements.Pieces);
                     foreach (var piece in historiqueClassement.Pieces)
                     {
-                        writer.WriteStartElement(AppConstants.XmlElements.Piece);
-                        writer.WriteElementString(AppConstants.XmlElements.Nom, piece.Nom);
-                        writer.WriteElementString(AppConstants.XmlElements.Niveau, piece.Niveau.ToString());
-                        writer.WriteElementString(AppConstants.XmlElements.PuissanceTactique, piece.AspectsTactiques.Puissance.ToString());
-                        writer.WriteElementString(AppConstants.XmlElements.PuissanceStrategique, piece.AspectsStrategiques.Puissance.ToString());
-                        writer.WriteElementString(AppConstants.XmlElements.Selectionne, piece.Selectionnee.ToString());
-                        writer.WriteEndElement();
+                        WriteLuciePieceData(writer, piece, avecBonus: false);
                     }
                     writer.WriteEndElement();
                 }
@@ -1147,36 +1145,7 @@ public class PmlImportService(ApplicationDbContext context)
 
             foreach (var piece in lucieHouse.Pieces)
             {
-                writer.WriteStartElement(AppConstants.XmlElements.Piece);
-                writer.WriteElementString(AppConstants.XmlElements.Nom, piece.Nom);
-                writer.WriteElementString(AppConstants.XmlElements.Niveau, piece.Niveau.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.PuissanceTactique, piece.AspectsTactiques.Puissance.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.PuissanceStrategique, piece.AspectsStrategiques.Puissance.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.Selectionne, piece.Selectionnee.ToString());
-
-                // Export des bonus tactiques
-                if (piece.AspectsTactiques.Bonus.Count > 0)
-                {
-                    writer.WriteStartElement(AppConstants.XmlElements.BonusTactiques);
-                    foreach (var bonus in piece.AspectsTactiques.Bonus)
-                    {
-                        writer.WriteElementString(AppConstants.XmlElements.Bonus, bonus);
-                    }
-                    writer.WriteEndElement();
-                }
-
-                // Export des bonus stratégiques
-                if (piece.AspectsStrategiques.Bonus.Count > 0)
-                {
-                    writer.WriteStartElement(AppConstants.XmlElements.BonusStrategiques);
-                    foreach (var bonus in piece.AspectsStrategiques.Bonus)
-                    {
-                        writer.WriteElementString(AppConstants.XmlElements.Bonus, bonus);
-                    }
-                    writer.WriteEndElement();
-                }
-
-                writer.WriteEndElement();
+                WriteLuciePieceData(writer, piece);
             }
 
             writer.WriteEndElement();
@@ -1186,22 +1155,7 @@ public class PmlImportService(ApplicationDbContext context)
     private async Task WritePersonnageDatas(System.Xml.XmlWriter writer)
     {
         var personnages = await _context.Personnages.ToListAsync();
-        foreach (var personnage in personnages)
-        {
-            writer.WriteStartElement(AppConstants.XmlElements.Personnage);
-            writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
-            writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
-            writer.WriteElementString(AppConstants.XmlElements.Type, personnage.Type.ToString());
-            writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
-            writer.WriteElementString(AppConstants.XmlElements.PA, personnage.PA.ToString());
-            writer.WriteElementString(AppConstants.XmlElements.PV, personnage.PV.ToString());
-            writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
-            writer.WriteElementString(AppConstants.XmlElements.Rang, personnage.Rang.ToString());
-            writer.WriteElementString(AppConstants.XmlElements.Role, personnage.Role.ToString());
-            writer.WriteElementString(AppConstants.XmlElements.Faction, personnage.Faction.ToString());
-            writer.WriteElementString(AppConstants.XmlElements.Selectionne, personnage.Selectionne.ToString());
-            writer.WriteEndElement();
-        }
+        WritePersonnageDatas(personnages, writer);
         writer.WriteEndElement();
     }
 

@@ -178,7 +178,7 @@ body {
    ============================================================ */
 
 .msr {
-    font-family: "Material Symbols Rounded";
+    font-family: "Material Symbols Rounded", sans-serif;
     font-size: 22px;
     font-weight: 300;
     color: #d1d5db;

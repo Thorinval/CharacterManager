@@ -46,9 +46,9 @@ check_command() {
         local path=$(command -v "$cmd")
         print_success "  Installé: $path"
         
-        if [ -n "$min_version" ]; then
+        if [[ -n "$min_version" ]]; then
             local version=$($cmd --version 2>&1 | head -n1 | grep -oP '\d+\.\d+' | head -1)
-            if [ -n "$version" ]; then
+            if [[ -n "$version" ]]; then
                 print_success "  Version: $version"
             fi
         fi
@@ -56,7 +56,7 @@ check_command() {
         return 0
     else
         print_error "  Non trouvé"
-        if [ -n "$install_url" ]; then
+        if [[ -n "$install_url" ]]; then
             print_info "  Installer depuis: $install_url"
         fi
         return 1
@@ -92,13 +92,13 @@ check_command "terraform" "Terraform" "1.0" "https://www.terraform.io/downloads.
 check_command "node" "Node.js (optionnel)" "16.0" "https://nodejs.org/en/download/" && true || true
 
 # Configuration GCP
-if [ $GCLOUD_OK -eq 1 ]; then
+if [[ $GCLOUD_OK -eq 1 ]]; then
     echo ""
     echo -e "${YELLOW}☁️  Google Cloud Configuration${NC}"
     echo -e "${CYAN}──────────────────────────────────────────────────────────────${NC}"
     
     PROJECT=$(gcloud config get-value project 2>/dev/null || echo "")
-    if [ -n "$PROJECT" ] && [ "$PROJECT" != "null" ]; then
+    if [[ -n "$PROJECT" ]] && [[ "$PROJECT" != "null" ]]; then
         print_success "  Projet actif: $PROJECT"
     else
         print_warning "  Aucun projet GCP configuré"
@@ -106,7 +106,7 @@ if [ $GCLOUD_OK -eq 1 ]; then
     fi
     
     AUTH=$(gcloud auth list 2>/dev/null | grep -i active || echo "")
-    if [ -n "$AUTH" ]; then
+    if [[ -n "$AUTH" ]]; then
         print_success "  Authentifié"
     else
         print_error "  Non authentifié"
@@ -135,7 +135,7 @@ echo -e "${CYAN}─────────────────────�
 AVAILABLE=$(df / | tail -1 | awk '{print $4}')
 AVAILABLE_GB=$((AVAILABLE / 1024 / 1024))
 
-if [ $AVAILABLE_GB -gt 10 ]; then
+if [[ $AVAILABLE_GB -gt 10 ]]; then
     print_success "  Espace libre: ${AVAILABLE_GB} GB (recommandé: 10+ GB)"
 else
     print_warning "  Espace libre: ${AVAILABLE_GB} GB (recommandé: 10+ GB)"
@@ -151,7 +151,7 @@ echo ""
 print_info "Erreurs: $ERROR_COUNT"
 print_info "Avertissements: $WARNING_COUNT"
 
-if [ $ERROR_COUNT -eq 0 ]; then
+if [[ $ERROR_COUNT -eq 0 ]]; then
     echo ""
     print_success "✅ Tous les prérequis sont satisfaits!"
     echo ""
