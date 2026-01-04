@@ -40,8 +40,8 @@ public partial class Inventaire : IAsyncDisposable
     private List<Personnage> personnagesFiltres = [];
     private LucieHouse? lucieHouse;
     private List<Piece> LuciePieces => lucieHouse?.Pieces ?? [];
-    private List<Piece> luciePiecesFiltres = [];
-    private bool showModal = false;
+    internal List<Piece> luciePiecesFiltres = [];
+    internal bool showModal = false;
     private bool isEditing = false;
     private Personnage currentPersonnage = new();
 
@@ -51,41 +51,41 @@ public partial class Inventaire : IAsyncDisposable
 
     // Sélection multiple
     private HashSet<int> selectedPersonnages = [];
-    private bool showBulkEditModal = false;
+    internal bool showBulkEditModal = false;
     private string bulkEditProperty = "";
     private string bulkEditValue = "";
 
     // Filtre Commandants
-    private bool ShowOnlyCommandants = false;
-    private bool ShowOnlyMercenaires = false;
-    private bool ShowOnlyAndroides = false;
-    private bool ShowOnlyLucyRooms = false;
+    internal bool ShowOnlyCommandants = false;
+    internal bool ShowOnlyMercenaires = false;
+    internal bool ShowOnlyAndroides = false;
+    internal bool ShowOnlyLucyRooms = false;
 
-    private void ToggleShowOnlyCommandants(ChangeEventArgs e)
+    internal void ToggleShowOnlyCommandants(ChangeEventArgs e)
     {
         ShowOnlyCommandants = (bool?)e.Value == true;
         ApplyFiltersAndSorting();
     }
 
-    private void ToggleShowOnlyMercenaires(ChangeEventArgs e)
+    internal void ToggleShowOnlyMercenaires(ChangeEventArgs e)
     {
         ShowOnlyMercenaires = (bool?)e.Value == true;
         ApplyFiltersAndSorting();
     }
 
-    private void ToggleShowOnlyAndroides(ChangeEventArgs e)
+    internal void ToggleShowOnlyAndroides(ChangeEventArgs e)
     {
         ShowOnlyAndroides = (bool?)e.Value == true;
         ApplyFiltersAndSorting();
     }
 
-    private void ToggleShowOnlyLucyRooms(ChangeEventArgs e)
+    internal void ToggleShowOnlyLucyRooms(ChangeEventArgs e)
     {
         ShowOnlyLucyRooms = (bool?)e.Value == true;
         ApplyFiltersAndSorting();
     }
 
-    private bool SelectAllChecked
+    internal bool SelectAllChecked
     {
         get => selectedPersonnages.Count == personnagesFiltres.Count && personnagesFiltres.Count > 0;
         set
@@ -101,15 +101,23 @@ public partial class Inventaire : IAsyncDisposable
         }
     }
 
-    private IEnumerable<IGrouping<TypePersonnage, Personnage>> GroupedPersonnages =>
+    internal IEnumerable<IGrouping<TypePersonnage, Personnage>> GroupedPersonnages =>
         personnagesFiltres.GroupBy(p => p.Type)
-            .OrderBy(g => g.Key == TypePersonnage.Commandant ? 1 : g.Key == TypePersonnage.Mercenaire ? 2 : 3);
+            .OrderBy(g => GetTypeOrder(g.Key));
+
+    internal static int GetTypeOrder(TypePersonnage type) =>
+        type switch
+        {
+            TypePersonnage.Commandant => 1,
+            TypePersonnage.Mercenaire => 2,
+            _ => 3
+        };
 
     // Filtre
     private string searchTerm = "";
 
     // Mode d'affichage
-    private string viewMode = AppConstants.Defaults.ViewModeGrid;
+    internal string viewMode = AppConstants.Defaults.ViewModeGrid;
 
     protected override async Task OnInitializedAsync()
     {
@@ -131,12 +139,12 @@ public partial class Inventaire : IAsyncDisposable
         return ValueTask.CompletedTask;
     }
 
-    private string GetViewModeClass(string mode)
+    internal string GetViewModeClass(string mode)
     {
         return viewMode == mode ? "btn-primary" : "btn-outline-secondary";
     }
 
-    private async Task ChangeNiveauPiece(int pieceId, int delta)
+    internal async Task ChangeNiveauPiece(int pieceId, int delta)
     {
         var piece = lucieHouse?.Pieces.FirstOrDefault(p => p.Id == pieceId);
         if (piece != null)
@@ -146,7 +154,7 @@ public partial class Inventaire : IAsyncDisposable
         }
     }
 
-    private async Task ChangePuissance(int personnageId, int delta)
+    internal async Task ChangePuissance(int personnageId, int delta)
     {
         var personnage = personnagesFiltres.FirstOrDefault(p => p.Id == personnageId);
         if (personnage != null)
@@ -157,7 +165,7 @@ public partial class Inventaire : IAsyncDisposable
     }
 
 
-    private async Task ChangePuissancePiece(int pieceId, TypeBonus typeBonus, int delta)
+    internal async Task ChangePuissancePiece(int pieceId, TypeBonus typeBonus, int delta)
     {
         var piece = lucieHouse?.Pieces.FirstOrDefault(p => p.Id == pieceId);
         if (piece != null)
@@ -178,17 +186,17 @@ public partial class Inventaire : IAsyncDisposable
         }
     }
 
-    private string GetContainerClass()
+    internal string GetContainerClass()
     {
         return viewMode == AppConstants.Defaults.ViewModeGrid ? "personnages-grid" : "personnages-list";
     }
 
-    private static string GetContainerClassCompact()
+    internal static string GetContainerClassCompact()
     {
         return "personnages-grid-compact";
     }
 
-    private static string GetRarityClass(Rarete rarete)
+    internal static string GetRarityClass(Rarete rarete)
     {
         return rarete switch
         {
@@ -247,12 +255,12 @@ public partial class Inventaire : IAsyncDisposable
         }
     }
 
-    private void OnSelectionneChanged(int personnageId, bool value)
+    internal void OnSelectionneChanged(int personnageId, bool value)
     {
         UpdatePersonnageField(personnageId, AppConstants.XmlElements.Selectionne, value.ToString());
     }
 
-    private void UpdateRankFromStar(int personnageId, int clickedStar, int currentRank)
+    internal void UpdateRankFromStar(int personnageId, int clickedStar, int currentRank)
     {
         // Toggle down if clicking the currently selected star (allows rank 0)
         var newRank = clickedStar == currentRank ? Math.Max(0, clickedStar - 1) : clickedStar;
@@ -276,9 +284,9 @@ public partial class Inventaire : IAsyncDisposable
 
     private InventoryFilter SelectedFilter = InventoryFilter.Tous;
 
-    private record FilterOption(InventoryFilter Value, string LocalizationKey);
+    internal record FilterOption(InventoryFilter Value, string LocalizationKey);
 
-    private readonly List<FilterOption> FilterOptions =
+    internal readonly List<FilterOption> FilterOptions =
     [
         new(InventoryFilter.Tous, "inventory.showAll"),
         new(InventoryFilter.Commandants, "inventory.showOnlyCommandants"),
@@ -287,7 +295,7 @@ public partial class Inventaire : IAsyncDisposable
         new(InventoryFilter.LucyRooms, "inventory.showOnlyLucyRooms")
     ];
 
-    private void OnFilterClicked(InventoryFilter clicked)
+    internal void OnFilterClicked(InventoryFilter clicked)
     {
         if (SelectedFilter == clicked)
             return;
@@ -297,7 +305,7 @@ public partial class Inventaire : IAsyncDisposable
     }
 
     // 🔢 Compteur dynamique pour les badges
-    private int GetCount(InventoryFilter filter)
+    internal int GetCount(InventoryFilter filter)
     {
         return filter switch
         {
@@ -310,7 +318,7 @@ public partial class Inventaire : IAsyncDisposable
         };
     }
 
-    private string GetBadgeColor(InventoryFilter filter)
+    internal string GetBadgeColor(InventoryFilter filter)
     {
         IEnumerable<Personnage> list = filter switch
         {
@@ -438,7 +446,7 @@ public partial class Inventaire : IAsyncDisposable
         ApplyFiltersAndSorting();
     }
 
-    private void HandleSearchInput(ChangeEventArgs e)
+    internal void HandleSearchInput(ChangeEventArgs e)
     {
         OnSearchChanged(e.Value?.ToString() ?? "");
     }
@@ -453,30 +461,30 @@ public partial class Inventaire : IAsyncDisposable
         }
     }
 
-    private void ClearSearch()
+    internal void ClearSearch()
     {
         searchTerm = "";
         ApplyFiltersAndSorting();
     }
 
-    private static MarkupString GetRankStars(int rank)
+    internal static MarkupString GetRankStars(int rank)
     {
-        var stars = "";
+        var starsBuilder = new System.Text.StringBuilder();
         for (int i = 1; i <= 7; i++)
         {
             if (i <= rank)
             {
-                stars += "<span style='color: #FFD700;'>★</span>";
+                starsBuilder.Append("<span style='color: #FFD700;'>★</span>");
             }
             else
             {
-                stars += "<span style='color: #CCCCCC;'>☆</span>";
+                starsBuilder.Append("<span style='color: #CCCCCC;'>☆</span>");
             }
         }
-        return new MarkupString(stars);
+        return new MarkupString(starsBuilder.ToString());
     }
 
-    private void ToggleSelection(int id)
+    internal void ToggleSelection(int id)
     {
         if (!selectedPersonnages.Remove(id))
         {
@@ -496,7 +504,7 @@ public partial class Inventaire : IAsyncDisposable
         }
     }
 
-    private void ShowBulkEditModal()
+    internal void ShowBulkEditModal()
     {
         if (selectedPersonnages.Any())
         {

@@ -834,6 +834,7 @@ public class PmlImportService(ApplicationDbContext context)
                     if (personnage != null)
                     {
                         writer.WriteStartElement(AppConstants.XmlElements.Personnage);
+                        WritePersonnageData(writer, personnage,);
                         writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
                         writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
                         writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
@@ -1110,10 +1111,7 @@ public class PmlImportService(ApplicationDbContext context)
                     if (personnage != null)
                     {
                         writer.WriteStartElement(AppConstants.XmlElements.Personnage);
-                        writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
-                        writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
-                        writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
-                        writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
+                        WritePersonnageData(writer, personnage, isTemplate: true);
                         writer.WriteEndElement();
                     }
                 }
@@ -1162,20 +1160,25 @@ public class PmlImportService(ApplicationDbContext context)
     /// <summary>
     /// Helper method to write personnage data to XML
     /// </summary>
-    private static void WritePersonnageData(System.Xml.XmlWriter writer, Personnage personnage)
+    private static void WritePersonnageData(System.Xml.XmlWriter writer, Personnage personnage, bool isTemplate = false)
     {
         writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
         writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
         writer.WriteElementString(AppConstants.XmlElements.Type, personnage.Type.ToString());
         writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
-        writer.WriteElementString(AppConstants.XmlElements.PA, personnage.PA.ToString());
-        writer.WriteElementString(AppConstants.XmlElements.PV, personnage.PV.ToString());
         writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
-        writer.WriteElementString(AppConstants.XmlElements.Rang, personnage.Rang.ToString());
-        writer.WriteElementString(AppConstants.XmlElements.Role, personnage.Role.ToString());
-        writer.WriteElementString(AppConstants.XmlElements.Faction, personnage.Faction.ToString());
-        writer.WriteElementString(AppConstants.XmlElements.TypeAttaque, personnage.TypeAttaque.ToString());
-        writer.WriteElementString(AppConstants.XmlElements.Selectionne, personnage.Selectionne.ToString());
+
+        if (!isTemplate)
+        {
+            writer.WriteElementString(AppConstants.XmlElements.PA, personnage.PA.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.PV, personnage.PV.ToString());
+
+            writer.WriteElementString(AppConstants.XmlElements.Rang, personnage.Rang.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.Role, personnage.Role.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.Faction, personnage.Faction.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.TypeAttaque, personnage.TypeAttaque.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.Selectionne, personnage.Selectionne.ToString());
+        }
     }
 
     private void ImportOrUpdatePersonnage(Personnage nouveauPersonnage)
