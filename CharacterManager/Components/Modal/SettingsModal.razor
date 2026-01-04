@@ -113,7 +113,7 @@
         appVersion = AppVersionService.GetAppVersion();
         await LocalizationService.InitializeAsync(currentLanguage);
         
-        var locService = new LocalizationService(new HttpClient(), null!);
+        var locService = new LocalizationService(null!);
         availableLanguages = locService.GetAvailableLanguages();
     }
 

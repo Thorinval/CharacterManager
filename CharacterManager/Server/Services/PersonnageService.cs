@@ -66,7 +66,7 @@ public class PersonnageService
         return _context.Personnages
             .Where(p => p.Type == TypePersonnage.Commandant && p.GetType() == typeof(Personnage))
             .Select(p => p.Puissance + p.Rang * 20)
-            .ToList()
+            .AsEnumerable()
             .DefaultIfEmpty(0)
             .Max();
     }
@@ -107,12 +107,12 @@ public class PersonnageService
 
     public async Task<IEnumerable<Personnage>> GetTopMercenairesAsync(int count = 8)
     {
-        return await Task.FromResult(_context.Personnages
+        return await _context.Personnages
             .Include(static p => p.Capacites)
             .Where(static p => p.Type == TypePersonnage.Mercenaire && p.GetType() == typeof(Personnage))
             .OrderByDescending(static p => p.Puissance)
             .Take(count)
-            .ToList());
+            .ToListAsync();
     }
 
     public IEnumerable<Personnage> GetTopMercenaires(int count = 8)
@@ -128,11 +128,11 @@ public class PersonnageService
 
     public async Task<Personnage?> GetTopCommandantAsync()
     {
-        return await Task.FromResult(_context.Personnages
+        return await _context.Personnages
             .Include(static p => p.Capacites)
             .Where(static p => p.Type == TypePersonnage.Commandant && p.GetType() == typeof(Personnage))
             .OrderByDescending(static p => p.Puissance)
-            .FirstOrDefault());
+            .FirstOrDefaultAsync();
     }
 
     public Personnage? GetTopCommandant()
@@ -159,12 +159,12 @@ public class PersonnageService
 
     public async Task<IEnumerable<Personnage>> GetTopAndroidesAsync(int count = 3)
     {
-        return await Task.FromResult(_context.Personnages
+        return await _context.Personnages
             .Include(static p => p.Capacites)
             .Where(static p => p.Type == TypePersonnage.Androide && p.GetType() == typeof(Personnage))
             .OrderByDescending(static p => p.Puissance)
             .Take(count)
-            .ToList());
+            .ToListAsync();
     }
 
     public IEnumerable<Personnage> GetTopAndroides(int count = 3)
@@ -180,10 +180,10 @@ public class PersonnageService
 
     public async Task<IEnumerable<Personnage>> GetEscouadeAsync()
     {
-        return await Task.FromResult(_context.Personnages
+        return await _context.Personnages
             .Include(static p => p.Capacites)
             .Where(static p => p.Selectionne && p.GetType() == typeof(Personnage))
-            .ToList());
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<Personnage>> GetMercenairesAsync(bool selectionneOnly = false)
@@ -197,7 +197,7 @@ public class PersonnageService
             query = query.Where(static p => p.Selectionne);
         }
 
-        return await Task.FromResult(query.ToList());
+        return await query.ToListAsync();
     }
 
     public async Task<IEnumerable<Personnage>> GetCommandantsAsync(bool selectionneOnly = false)
@@ -211,7 +211,7 @@ public class PersonnageService
             query = query.Where(static p => p.Selectionne);
         }
 
-        return await Task.FromResult(query.ToList());
+        return await query.ToListAsync();
     }
 
     public async Task<IEnumerable<Personnage>> GetAndroïdesAsync(bool selectionneOnly = false)
@@ -225,7 +225,7 @@ public class PersonnageService
             query = query.Where(static p => p.Selectionne);
         }
 
-        return await Task.FromResult(query.ToList());
+        return await query.ToListAsync();
     }
 
     public IEnumerable<Personnage> GetEscouade()
@@ -389,9 +389,9 @@ public class PersonnageService
 
     public async Task<Template> CreateTemplateAsync(string nom, string description, List<int> personnageIds)
     {
-        var personnages = _context.Personnages
+        var personnages = await _context.Personnages
             .Where(p => personnageIds.Contains(p.Id))
-            .ToList();
+            .ToListAsync();
 
         var template = new Template
         {
@@ -424,9 +424,9 @@ public class PersonnageService
         if (template == null)
             return false;
 
-        var personnages = _context.Personnages
+        var personnages = await _context.Personnages
             .Where(p => personnageIds.Contains(p.Id))
-            .ToList();
+        .ToListAsync();
 
         template.Nom = nom;
         template.Description = description;

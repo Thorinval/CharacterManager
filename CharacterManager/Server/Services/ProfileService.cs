@@ -57,10 +57,10 @@ public class ProfileService
         return true;
     }
 
-    public bool VerifyPassword(Profile profile, string password)
+    public static bool VerifyPassword(Profile profile, string password)
         => VerifyPbkdf2(password, profile.PasswordHash, profile.PasswordSalt);
 
-    public (bool ok, string? error) ValidatePasswordStrength(string password)
+    public static (bool ok, string? error) ValidatePasswordStrength(string password)
     {
         if (string.IsNullOrEmpty(password) || password.Length < 8) return (false, "Au moins 8 caractères");
         if (!password.Any(char.IsUpper)) return (false, "Inclure une majuscule");

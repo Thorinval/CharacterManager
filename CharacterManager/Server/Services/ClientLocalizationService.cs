@@ -49,7 +49,7 @@ public class ClientLocalizationService
             var path = Path.Combine(_env.WebRootPath, "i18n", $"{languageCode}.json");
             if (!File.Exists(path))
             {
-                _logger.LogWarning($"Fichier de localisation introuvable: {path}");
+                _logger.LogWarning("Fichier de localisation introuvable: {Path}", path);
                 _currentResources = new Dictionary<string, object>();
                 return;
             }
@@ -62,7 +62,7 @@ public class ClientLocalizationService
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Erreur lors du chargement des ressources: {ex.Message}");
+            _logger.LogError(ex, "Erreur lors du chargement des ressources: {Message}", ex.Message);
             _currentResources = new Dictionary<string, object>();
         }
     }
@@ -80,49 +80,53 @@ public class ClientLocalizationService
 
         foreach (var k in keys)
         {
-            if (current is JsonElement element)
-            {
-                if (element.TryGetProperty(k, out var prop))
-                {
-                    current = prop;
-                }
-                else
-                {
-                    return key;
-                }
-            }
-            else if (current is Dictionary<string, object> dict)
-            {
-                if (dict.TryGetValue(k, out var value))
-                {
-                    current = value;
-                }
-                else
-                {
-                    return key;
-                }
-            }
-            else
+            current = GetNestedValue(current, k);
+            if (current == null)
             {
                 return key;
             }
         }
 
-        // Convertir le résultat final en string
-        if (current is JsonElement finalElement)
+        return ConvertToString(current, key);
+    }
+
+    /// <summary>
+    /// Récupère une valeur imbriquée depuis un JsonElement ou Dictionary
+    /// </summary>
+    private static object? GetNestedValue(object? current, string key)
+    {
+        if (current is JsonElement element)
         {
-            return finalElement.ValueKind switch
+            return element.TryGetProperty(key, out var prop) ? prop : null;
+        }
+
+        if (current is Dictionary<string, object> dict)
+        {
+            return dict.TryGetValue(key, out var value) ? value : null;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Convertit une valeur en chaîne de caractères
+    /// </summary>
+    private static string ConvertToString(object? current, string fallbackKey)
+    {
+        if (current is JsonElement element)
+        {
+            return element.ValueKind switch
             {
-                JsonValueKind.String => finalElement.GetString() ?? key,
-                JsonValueKind.Number => finalElement.ToString(),
+                JsonValueKind.String => element.GetString() ?? fallbackKey,
+                JsonValueKind.Number => element.ToString(),
                 JsonValueKind.True => "true",
                 JsonValueKind.False => "false",
-                JsonValueKind.Null => key,
-                _ => key
+                JsonValueKind.Null => fallbackKey,
+                _ => fallbackKey
             };
         }
 
-        return current?.ToString() ?? key;
+        return current?.ToString() ?? fallbackKey;
     }
 
     /// <summary>
@@ -135,8 +139,7 @@ public class ClientLocalizationService
     /// </summary>
     public async Task SetLanguageAsync(string languageCode)
     {
-        _currentLanguage = languageCode;
-        await LoadResourcesAsync(languageCode);
+        await InitializeAsync(languageCode);
     }
 
     /// <summary>
@@ -165,15 +168,12 @@ public class ClientLocalizationService
                 var languageToUse = _languageContext.GetLanguageForUser(username);
                 
                 // Mettre à jour la langue actuelle si elle a changé
-                if (_currentLanguage != languageToUse)
-                {
-                    _currentLanguage = languageToUse;
-                }
+                _currentLanguage = languageToUse;
 
                 var path = Path.Combine(_env.WebRootPath, "i18n", $"{_currentLanguage}.json");
                 if (!File.Exists(path))
                 {
-                    _logger.LogWarning($"Fichier de localisation introuvable (lazy): {path}");
+                    _logger.LogWarning("Fichier de localisation introuvable (lazy): {Path}", path);
                     _currentResources = new Dictionary<string, object>();
                     return;
                 }
@@ -186,7 +186,7 @@ public class ClientLocalizationService
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Erreur lors du chargement lazy des ressources: {ex.Message}");
+                _logger.LogError(ex, "Erreur lors du chargement lazy des ressources: {Message}", ex.Message);
                 _currentResources = new Dictionary<string, object>();
             }
         }

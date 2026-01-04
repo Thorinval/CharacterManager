@@ -30,7 +30,7 @@ public class PersonnageImageConfigService
     /// - Chemin complet si image non-adulte OU mode adulte activé
     /// - Chaîne vide "" si image adulte ET mode adulte désactivé (signal pour UI d'afficher lightblue)
     /// </returns>
-    public string GetDisplayPath(string cheminImage, bool isAdultModeEnabled)
+    public static string GetDisplayPath(string cheminImage, bool isAdultModeEnabled)
     {
         if (string.IsNullOrEmpty(cheminImage))
             return cheminImage;

@@ -4,7 +4,7 @@ using CharacterManager.Server.Constants;
 using Microsoft.EntityFrameworkCore;
 using System.Xml.Linq;
 using System.Text;
-
+using System.Globalization;
 
 namespace CharacterManager.Server.Services;
 
@@ -13,9 +13,8 @@ namespace CharacterManager.Server.Services;
 /// Extension .pml pour les fichiers d'import/export
 /// Supporte les sections : HistoriqueClassements, inventaire, template
 /// </summary>
-public class PmlImportService(PersonnageService personnageService, ApplicationDbContext context)
+public class PmlImportService(ApplicationDbContext context)
 {
-    private readonly PersonnageService _personnageService = personnageService;
     private readonly ApplicationDbContext _context = context;
 
     /// <summary>
@@ -41,65 +40,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                 return result;
             }
 
-            // Traiter la section inventaire
-            if (importInventory)
-            {
-                var inventaireElements = doc.Root.Elements(AppConstants.XmlElements.Inventaire);
-                if (!inventaireElements.Any() && doc.Root.Name.LocalName.Equals(AppConstants.XmlElements.Inventaire, StringComparison.OrdinalIgnoreCase))
-                {
-                    inventaireElements = [doc.Root];
-                }
-
-                if (inventaireElements.Any())
-                {
-                    result.SuccessCount += await ImportInventaireAsync(inventaireElements, errors);
-                }
-
-            }
-
-            // Traiter la section templates (directs ou encapsulés dans <templates>)
-            if (importTemplates)
-            {
-                var directTemplates = doc.Root.Elements(AppConstants.XmlElements.Template);
-                var nestedTemplates = doc.Root.Element(AppConstants.XmlElements.Templates)?.Elements(AppConstants.XmlElements.Template) ?? Enumerable.Empty<XElement>();
-                var templateElements = directTemplates.Concat(nestedTemplates);
-
-                if (templateElements.Any())
-                {
-                    result.SuccessCount += await ImportTemplatesAsync(templateElements, errors);
-                }
-            }
-
-            // Traiter la section meilleure escouade
-            if (importBestSquad)
-            {
-                var bestSquadElements = doc.Root.Elements(AppConstants.XmlElements.MeilleurEscouade);
-                if (bestSquadElements.Any())
-                {
-                    result.SuccessCount += await ImportBestSquadAsync(bestSquadElements, errors);
-                }
-            }
-
-            // Traiter la section historiques
-            if (importHistories)
-            {
-                // Traiter les historiques de classement
-                var historiqueClassementElements = doc.Root.Elements(AppConstants.XmlElements.HistoriqueClassement);
-                if (historiqueClassementElements.Any())
-                {
-                    result.SuccessCount += await ImportHistoriquesClassementAsync(historiqueClassementElements, errors);
-                }
-            }
-
-            // Traiter les historiques de ligue
-            if (importLeagueHistory)
-            {
-                var historiqueLigueElements = doc.Root.Elements(AppConstants.XmlElements.HistoriqueLigue);
-                if (historiqueLigueElements.Any())
-                {
-                    result.SuccessCount += await ImportHistoriquesLigueAsync(historiqueLigueElements, errors);
-                }
-            }
+            result.SuccessCount += await ProcessImportSections(doc.Root, importInventory, importTemplates, importBestSquad, importHistories, importLeagueHistory, errors);
 
             result.Errors = errors;
 
@@ -126,12 +67,85 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
     }
 
     /// <summary>
+    /// Traite toutes les sections d'import
+    /// </summary>
+    private async Task<int> ProcessImportSections(XElement root, bool importInventory, bool importTemplates,
+        bool importBestSquad, bool importHistories, bool importLeagueHistory, List<string> errors)
+    {
+        int totalCount = 0;
+
+        if (importInventory)
+        {
+            totalCount += await ProcessInventorySection(root, errors);
+        }
+
+        if (importTemplates)
+        {
+            totalCount += await ProcessTemplatesSection(root, errors);
+        }
+
+        if (importBestSquad)
+        {
+            totalCount += await ProcessBestSquadSection(root, errors);
+        }
+
+        if (importHistories)
+        {
+            totalCount += await ProcessHistoriesSection(root, errors);
+        }
+
+        if (importLeagueHistory)
+        {
+            totalCount += await ProcessLeagueHistorySection(root, errors);
+        }
+
+        return totalCount;
+    }
+
+    private async Task<int> ProcessInventorySection(XElement root, List<string> errors)
+    {
+        var inventaireElements = root.Elements(AppConstants.XmlElements.Inventaire);
+        if (!inventaireElements.Any() && root.Name.LocalName.Equals(AppConstants.XmlElements.Inventaire, StringComparison.OrdinalIgnoreCase))
+        {
+            inventaireElements = [root];
+        }
+
+        return inventaireElements.Any() ? await ImportInventaireAsync(inventaireElements, errors) : 0;
+    }
+
+    private async Task<int> ProcessTemplatesSection(XElement root, List<string> errors)
+    {
+        var directTemplates = root.Elements(AppConstants.XmlElements.Template);
+        var nestedTemplates = root.Element(AppConstants.XmlElements.Templates)?.Elements(AppConstants.XmlElements.Template) ?? Enumerable.Empty<XElement>();
+        var templateElements = directTemplates.Concat(nestedTemplates);
+
+        return templateElements.Any() ? await ImportTemplatesAsync(templateElements, errors) : 0;
+    }
+
+    private async Task<int> ProcessBestSquadSection(XElement root, List<string> errors)
+    {
+        var bestSquadElements = root.Elements(AppConstants.XmlElements.MeilleurEscouade);
+        return bestSquadElements.Any() ? await ImportBestSquadAsync(bestSquadElements, errors) : 0;
+    }
+
+    private async Task<int> ProcessHistoriesSection(XElement root, List<string> errors)
+    {
+        var historiqueClassementElements = root.Elements(AppConstants.XmlElements.HistoriqueClassement);
+        return historiqueClassementElements.Any() ? await ImportHistoriquesClassementAsync(historiqueClassementElements, errors) : 0;
+    }
+
+    private async Task<int> ProcessLeagueHistorySection(XElement root, List<string> errors)
+    {
+        var historiqueLigueElements = root.Elements(AppConstants.XmlElements.HistoriqueLigue);
+        return historiqueLigueElements.Any() ? await ImportHistoriquesLigueAsync(historiqueLigueElements, errors) : 0;
+    }
+
+    /// <summary>
     /// Importe les données depuis la section inventaire
     /// </summary>
     private async Task<int> ImportInventaireAsync(IEnumerable<XElement> inventaireElements, List<string> errors)
     {
         int importedCount = 0;
-        var personnages = await _context.Personnages.AsNoTracking().ToListAsync();
 
         foreach (var inventaire in inventaireElements)
         {
@@ -194,7 +208,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
 
                 // Chercher le template existant ou en créer un nouveau
                 var existingTemplate = await _context.Templates
-                    .FirstOrDefaultAsync(t => t.Nom.Equals(templateName, StringComparison.OrdinalIgnoreCase));
+                    .FirstOrDefaultAsync(t => t.Nom.Equals(normalizedTemplate, StringComparison.OrdinalIgnoreCase));
 
                 if (existingTemplate == null)
                 {
@@ -331,7 +345,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                     continue;
                 }
 
-                if (!DateOnly.TryParse(dateStr, out var DateMontee))
+                if (!DateOnly.TryParse(dateStr, CultureInfo.InvariantCulture, out var DateMontee))
                 {
                     errors.Add($"Date de montée invalide: {dateStr}");
                     continue;
@@ -388,7 +402,7 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                     continue;
                 }
 
-                if (!DateOnly.TryParse(dateStr, out var dateEnregistrement))
+                if (!DateOnly.TryParse(dateStr, CultureInfo.InvariantCulture, out var dateEnregistrement))
                 {
                     errors.Add($"Date d'enregistrement invalide: {dateStr}");
                     continue;
@@ -690,10 +704,6 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             NivRelation = int.TryParse(element.Element(AppConstants.XmlElements.NivRelation)?.Value, out var nivRel) ? nivRel : 0,
         };
 
-        // Gérer les URLs des images
-        string nomLower = personnage.Nom.ToLower();
-        // Les images sont maintenant calculées automatiquement selon le nom du personnage
-
         return personnage;
     }
 
@@ -865,36 +875,157 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             writer.WriteAttributeString(AppConstants.XmlElements.ExportDate, DateTime.UtcNow.ToString(AppConstants.DateTimeFormats.IsoDateTime));
 
             // Export inventaire
-            if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_INVENTORY))
+            await ExporterInventairePmlAsync(options, writer);
+
+            // Export templates
+            await ExporterTemplatesPmlAsync(options, writer);
+
+            // Export meilleure escouade
+            await ExporterBestSquadPmlAsync(options, writer);
+
+            // Export historiques de classement
+            await ExporterHistoriquesClassementPmlAsync(options, writer);
+
+            // Export historiques de ligue
+            await ExporterHistoriquesLiguePmlAsync(options, writer);
+
+            // Export capacités
+            await ExporterCapacitesPmlAsync(options, writer);
+
+            writer.WriteEndDocument();
+        }
+
+        var bytes = memoryStream.ToArray();
+        await SaveLastExportDate();
+        return bytes;
+    }
+
+    private async Task ExporterHistoriquesLiguePmlAsync(PmlExportOptions options, System.Xml.XmlWriter writer)
+    {
+        if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY))
+        {
+            var historiquesLigue = await _context.HistoriquesLigue
+                .OrderByDescending(h => h.DateMontee)
+                .Take(100)
+                .ToListAsync();
+
+            foreach (var historiqueLigue in historiquesLigue)
             {
-                writer.WriteStartElement(AppConstants.XmlElements.Inventaire);
-                var personnages = await _context.Personnages.ToListAsync();
-                foreach (var personnage in personnages)
+                writer.WriteStartElement(AppConstants.XmlElements.HistoriqueLigue);
+                writer.WriteElementString(AppConstants.XmlElements.DateMontee, historiqueLigue.DateMontee.ToString("yyyy-MM-dd"));
+                writer.WriteElementString(AppConstants.XmlElements.Ligue, historiqueLigue.Ligue.ToString());
+                if (!string.IsNullOrWhiteSpace(historiqueLigue.Notes))
                 {
-                    writer.WriteStartElement(AppConstants.XmlElements.Personnage);
-                    writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
-                    writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.Type, personnage.Type.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.PA, personnage.PA.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.PV, personnage.PV.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.Rang, personnage.Rang.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.Role, personnage.Role.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.Faction, personnage.Faction.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.Selectionne, personnage.Selectionne.ToString());
+                    writer.WriteElementString(AppConstants.XmlElements.Notes, historiqueLigue.Notes);
+                }
+                writer.WriteEndElement();
+            }
+        }
+    }
+
+    private async Task ExporterCapacitesPmlAsync(PmlExportOptions options, System.Xml.XmlWriter writer)
+    {
+        if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_CAPACITES))
+        {
+            var capacites = await _context.Capacites.ToListAsync();
+            if (capacites.Any())
+            {
+                writer.WriteStartElement("Capacites");
+                foreach (var capacite in capacites)
+                {
+                    writer.WriteStartElement("Capacite");
+                    writer.WriteElementString("Nom", capacite.Nom);
+                    writer.WriteElementString("Description", capacite.Description ?? "");
+                    writer.WriteElementString("Icon", capacite.Icon ?? "");
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
+            }
+        }
 
-                // Export Lucie House
-                var lucieHouse = await _context.LucieHouses.Include(l => l.Pieces).FirstOrDefaultAsync();
-                if (lucieHouse != null)
+        writer.WriteEndElement();
+    }
+
+    private async Task ExporterHistoriquesClassementPmlAsync(PmlExportOptions options, System.Xml.XmlWriter writer)
+    {
+        if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_HISTORIES))
+        {
+            // Export historiques de classement (version structurée complète)
+            var historiquesClassement = await _context.HistoriquesClassement
+                .Include(h => h.Mercenaires)
+                .Include(h => h.Commandant)
+                .Include(h => h.Androides)
+                .Include(h => h.Pieces)
+                .Include(h => h.Classements)
+                .OrderByDescending(h => h.DateEnregistrement)
+                .Take(50)
+                .ToListAsync();
+
+            foreach (var historiqueClassement in historiquesClassement)
+            {
+                writer.WriteStartElement(AppConstants.XmlElements.HistoriqueClassement);
+                writer.WriteElementString(AppConstants.XmlElements.DateEnregistrement, historiqueClassement.DateEnregistrement.ToString("yyyy-MM-dd"));
+                writer.WriteElementString(AppConstants.XmlElements.Ligue, historiqueClassement.Ligue.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Score, historiqueClassement.Score.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.PuissanceTotal, historiqueClassement.PuissanceTotale.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.PuissanceCommandant, historiqueClassement.PuissanceCommandant.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.PuissanceMercenaires, historiqueClassement.PuissanceMercenaires.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.PuissanceLucie, historiqueClassement.PuissanceLucie.ToString());
+
+                // Export des classements
+                if (historiqueClassement.Classements.Any())
                 {
-                    writer.WriteStartElement(AppConstants.XmlElements.LucieHouse);
-                    writer.WriteElementString(AppConstants.XmlElements.Affection, lucieHouse.Affection.ToString());
+                    writer.WriteStartElement(AppConstants.XmlElements.Classements);
+                    foreach (var classement in historiqueClassement.Classements)
+                    {
+                        writer.WriteStartElement(AppConstants.XmlElements.ClassementItem);
+                        writer.WriteElementString(AppConstants.XmlElements.Nom, classement.Nom);
+                        writer.WriteElementString(AppConstants.XmlElements.TypeClassement, classement.Type.ToString());
+                        writer.WriteElementString(AppConstants.XmlElements.Valeur, classement.Valeur.ToString());
+                        writer.WriteEndElement();
+                    }
+                    writer.WriteEndElement();
+                }
 
-                    foreach (var piece in lucieHouse.Pieces)
+                // Export des mercenaires
+                if (historiqueClassement.Mercenaires.Any())
+                {
+                    writer.WriteStartElement(AppConstants.XmlElements.Mercenaires);
+                    foreach (var mercenaire in historiqueClassement.Mercenaires)
+                    {
+                        writer.WriteStartElement(AppConstants.XmlElements.Personnage);
+                        WritePersonnageData(writer, mercenaire);
+                        writer.WriteEndElement();
+                    }
+                    writer.WriteEndElement();
+                }
+
+                // Export du commandant
+                if (historiqueClassement.Commandant != null)
+                {
+                    writer.WriteStartElement(AppConstants.XmlElements.Commandant);
+                    WritePersonnageData(writer, historiqueClassement.Commandant);
+                    writer.WriteEndElement();
+                }
+
+                // Export des androïdes
+                if (historiqueClassement.Androides.Any())
+                {
+                    writer.WriteStartElement(AppConstants.XmlElements.Androides);
+                    foreach (var androide in historiqueClassement.Androides)
+                    {
+                        writer.WriteStartElement(AppConstants.XmlElements.Personnage);
+                        WritePersonnageData(writer, androide);
+                        writer.WriteEndElement();
+                    }
+                    writer.WriteEndElement();
+                }
+
+                // Export des pièces
+                if (historiqueClassement.Pieces.Any())
+                {
+                    writer.WriteStartElement(AppConstants.XmlElements.Pieces);
+                    foreach (var piece in historiqueClassement.Pieces)
                     {
                         writer.WriteStartElement(AppConstants.XmlElements.Piece);
                         writer.WriteElementString(AppConstants.XmlElements.Nom, piece.Nom);
@@ -902,255 +1033,176 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
                         writer.WriteElementString(AppConstants.XmlElements.PuissanceTactique, piece.AspectsTactiques.Puissance.ToString());
                         writer.WriteElementString(AppConstants.XmlElements.PuissanceStrategique, piece.AspectsStrategiques.Puissance.ToString());
                         writer.WriteElementString(AppConstants.XmlElements.Selectionne, piece.Selectionnee.ToString());
-
-                        // Export des bonus tactiques
-                        if (piece.AspectsTactiques.Bonus.Count > 0)
-                        {
-                            writer.WriteStartElement(AppConstants.XmlElements.BonusTactiques);
-                            foreach (var bonus in piece.AspectsTactiques.Bonus)
-                            {
-                                writer.WriteElementString(AppConstants.XmlElements.Bonus, bonus);
-                            }
-                            writer.WriteEndElement();
-                        }
-
-                        // Export des bonus stratégiques
-                        if (piece.AspectsStrategiques.Bonus.Count > 0)
-                        {
-                            writer.WriteStartElement(AppConstants.XmlElements.BonusStrategiques);
-                            foreach (var bonus in piece.AspectsStrategiques.Bonus)
-                            {
-                                writer.WriteElementString(AppConstants.XmlElements.Bonus, bonus);
-                            }
-                            writer.WriteEndElement();
-                        }
-
                         writer.WriteEndElement();
                     }
-
                     writer.WriteEndElement();
                 }
+
+                writer.WriteEndElement();
+            }
+        }
+    }
+
+    private async Task ExporterBestSquadPmlAsync(PmlExportOptions options, System.Xml.XmlWriter writer)
+    {
+        if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD))
+        {
+            writer.WriteStartElement(AppConstants.XmlElements.MeilleurEscouade);
+
+            // Mercenaires (top 10 par puissance)
+            var topMercenaires = await _context.Personnages
+                .Where(p => p.Type == TypePersonnage.Mercenaire)
+                .OrderByDescending(p => p.Puissance)
+                .Take(10)
+                .ToListAsync();
+
+            foreach (var merc in topMercenaires)
+            {
+                writer.WriteStartElement(AppConstants.XmlElements.Mercenaire);
+                WritePersonnageData(writer, merc);
+                writer.WriteEndElement();
             }
 
-            // Export templates
-            if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_TEMPLATES))
-            {
-                var templates = await _context.Templates.ToListAsync();
-                foreach (var template in templates)
-                {
-                    writer.WriteStartElement(AppConstants.XmlElements.Template);
-                    writer.WriteElementString(AppConstants.XmlElements.Nom, template.Nom);
-                    writer.WriteElementString(AppConstants.XmlElements.Description, template.Description ?? "");
+            // Commandant (le plus puissant)
+            var topCommandant = await _context.Personnages
+                .Where(p => p.Type == TypePersonnage.Commandant)
+                .OrderByDescending(p => p.Puissance)
+                .FirstOrDefaultAsync();
 
-                    var personnageIds = template.GetPersonnageIds();
-                    foreach (var personnageId in personnageIds)
+            if (topCommandant != null)
+            {
+                writer.WriteStartElement(AppConstants.XmlElements.Commandant);
+                WritePersonnageData(writer, topCommandant);
+                writer.WriteEndElement();
+            }
+
+            // Androides (top 5 par puissance)
+            var topAndroides = await _context.Personnages
+                .Where(p => p.Type == TypePersonnage.Androide)
+                .OrderByDescending(p => p.Puissance)
+                .Take(5)
+                .ToListAsync();
+
+            foreach (var android in topAndroides)
+            {
+                writer.WriteStartElement(AppConstants.XmlElements.Androide);
+                WritePersonnageData(writer, android);
+                writer.WriteEndElement();
+            }
+
+            writer.WriteEndElement();
+        }
+    }
+
+    private async Task ExporterTemplatesPmlAsync(PmlExportOptions options, System.Xml.XmlWriter writer)
+    {
+        if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_TEMPLATES))
+        {
+            var templates = await _context.Templates.ToListAsync();
+            foreach (var template in templates)
+            {
+                writer.WriteStartElement(AppConstants.XmlElements.Template);
+                writer.WriteElementString(AppConstants.XmlElements.Nom, template.Nom);
+                writer.WriteElementString(AppConstants.XmlElements.Description, template.Description ?? "");
+
+                var personnageIds = template.GetPersonnageIds();
+                foreach (var personnageId in personnageIds)
+                {
+                    var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.Id == personnageId);
+                    if (personnage != null)
                     {
-                        var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.Id == personnageId);
-                        if (personnage != null)
-                        {
-                            writer.WriteStartElement(AppConstants.XmlElements.Personnage);
-                            writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
-                            writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
-                            writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
-                            writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
-                            writer.WriteEndElement();
-                        }
+                        writer.WriteStartElement(AppConstants.XmlElements.Personnage);
+                        writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
+                        writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
+                        writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
+                        writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
+                        writer.WriteEndElement();
+                    }
+                }
+                writer.WriteEndElement();
+            }
+        }
+    }
+
+    private async Task ExporterInventairePmlAsync(PmlExportOptions options, System.Xml.XmlWriter writer)
+    {
+        if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_INVENTORY))
+        {
+            writer.WriteStartElement(AppConstants.XmlElements.Inventaire);
+
+            await WritePersonnageDatas(writer);
+
+            // Export Lucie House
+            await WriteLucieHouseDatas(writer);
+        }
+    }
+
+    private async Task WriteLucieHouseDatas(System.Xml.XmlWriter writer)
+    {
+        var lucieHouse = await _context.LucieHouses.Include(l => l.Pieces).FirstOrDefaultAsync();
+        if (lucieHouse != null)
+        {
+            writer.WriteStartElement(AppConstants.XmlElements.LucieHouse);
+            writer.WriteElementString(AppConstants.XmlElements.Affection, lucieHouse.Affection.ToString());
+
+            foreach (var piece in lucieHouse.Pieces)
+            {
+                writer.WriteStartElement(AppConstants.XmlElements.Piece);
+                writer.WriteElementString(AppConstants.XmlElements.Nom, piece.Nom);
+                writer.WriteElementString(AppConstants.XmlElements.Niveau, piece.Niveau.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.PuissanceTactique, piece.AspectsTactiques.Puissance.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.PuissanceStrategique, piece.AspectsStrategiques.Puissance.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Selectionne, piece.Selectionnee.ToString());
+
+                // Export des bonus tactiques
+                if (piece.AspectsTactiques.Bonus.Count > 0)
+                {
+                    writer.WriteStartElement(AppConstants.XmlElements.BonusTactiques);
+                    foreach (var bonus in piece.AspectsTactiques.Bonus)
+                    {
+                        writer.WriteElementString(AppConstants.XmlElements.Bonus, bonus);
                     }
                     writer.WriteEndElement();
                 }
-            }
 
-            // Export meilleure escouade
-            if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD))
-            {
-                writer.WriteStartElement(AppConstants.XmlElements.MeilleurEscouade);
-
-                // Mercenaires (top 10 par puissance)
-                var topMercenaires = await _context.Personnages
-                    .Where(p => p.Type == TypePersonnage.Mercenaire)
-                    .OrderByDescending(p => p.Puissance)
-                    .Take(10)
-                    .ToListAsync();
-
-                foreach (var merc in topMercenaires)
+                // Export des bonus stratégiques
+                if (piece.AspectsStrategiques.Bonus.Count > 0)
                 {
-                    writer.WriteStartElement(AppConstants.XmlElements.Mercenaire);
-                    WritePersonnageData(writer, merc);
-                    writer.WriteEndElement();
-                }
-
-                // Commandant (le plus puissant)
-                var topCommandant = await _context.Personnages
-                    .Where(p => p.Type == TypePersonnage.Commandant)
-                    .OrderByDescending(p => p.Puissance)
-                    .FirstOrDefaultAsync();
-
-                if (topCommandant != null)
-                {
-                    writer.WriteStartElement(AppConstants.XmlElements.Commandant);
-                    WritePersonnageData(writer, topCommandant);
-                    writer.WriteEndElement();
-                }
-
-                // Androides (top 5 par puissance)
-                var topAndroides = await _context.Personnages
-                    .Where(p => p.Type == TypePersonnage.Androide)
-                    .OrderByDescending(p => p.Puissance)
-                    .Take(5)
-                    .ToListAsync();
-
-                foreach (var android in topAndroides)
-                {
-                    writer.WriteStartElement(AppConstants.XmlElements.Androide);
-                    WritePersonnageData(writer, android);
+                    writer.WriteStartElement(AppConstants.XmlElements.BonusStrategiques);
+                    foreach (var bonus in piece.AspectsStrategiques.Bonus)
+                    {
+                        writer.WriteElementString(AppConstants.XmlElements.Bonus, bonus);
+                    }
                     writer.WriteEndElement();
                 }
 
                 writer.WriteEndElement();
             }
 
-            // Export historiques de classement
-            if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_HISTORIES))
-            {
-                // Export historiques de classement (version structurée complète)
-                var historiquesClassement = await _context.HistoriquesClassement
-                    .Include(h => h.Mercenaires)
-                    .Include(h => h.Commandant)
-                    .Include(h => h.Androides)
-                    .Include(h => h.Pieces)
-                    .Include(h => h.Classements)
-                    .OrderByDescending(h => h.DateEnregistrement)
-                    .Take(50)
-                    .ToListAsync();
-
-                foreach (var historiqueClassement in historiquesClassement)
-                {
-                    writer.WriteStartElement(AppConstants.XmlElements.HistoriqueClassement);
-                    writer.WriteElementString(AppConstants.XmlElements.DateEnregistrement, historiqueClassement.DateEnregistrement.ToString("yyyy-MM-dd"));
-                    writer.WriteElementString(AppConstants.XmlElements.Ligue, historiqueClassement.Ligue.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.Score, historiqueClassement.Score.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.PuissanceTotal, historiqueClassement.PuissanceTotale.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.PuissanceCommandant, historiqueClassement.PuissanceCommandant.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.PuissanceMercenaires, historiqueClassement.PuissanceMercenaires.ToString());
-                    writer.WriteElementString(AppConstants.XmlElements.PuissanceLucie, historiqueClassement.PuissanceLucie.ToString());
-
-                    // Export des classements
-                    if (historiqueClassement.Classements.Any())
-                    {
-                        writer.WriteStartElement(AppConstants.XmlElements.Classements);
-                        foreach (var classement in historiqueClassement.Classements)
-                        {
-                            writer.WriteStartElement(AppConstants.XmlElements.ClassementItem);
-                            writer.WriteElementString(AppConstants.XmlElements.Nom, classement.Nom);
-                            writer.WriteElementString(AppConstants.XmlElements.TypeClassement, classement.Type.ToString());
-                            writer.WriteElementString(AppConstants.XmlElements.Valeur, classement.Valeur.ToString());
-                            writer.WriteEndElement();
-                        }
-                        writer.WriteEndElement();
-                    }
-
-                    // Export des mercenaires
-                    if (historiqueClassement.Mercenaires.Any())
-                    {
-                        writer.WriteStartElement(AppConstants.XmlElements.Mercenaires);
-                        foreach (var mercenaire in historiqueClassement.Mercenaires)
-                        {
-                            writer.WriteStartElement(AppConstants.XmlElements.Personnage);
-                            WritePersonnageData(writer, mercenaire);
-                            writer.WriteEndElement();
-                        }
-                        writer.WriteEndElement();
-                    }
-
-                    // Export du commandant
-                    if (historiqueClassement.Commandant != null)
-                    {
-                        writer.WriteStartElement(AppConstants.XmlElements.Commandant);
-                        WritePersonnageData(writer, historiqueClassement.Commandant);
-                        writer.WriteEndElement();
-                    }
-
-                    // Export des androïdes
-                    if (historiqueClassement.Androides.Any())
-                    {
-                        writer.WriteStartElement(AppConstants.XmlElements.Androides);
-                        foreach (var androide in historiqueClassement.Androides)
-                        {
-                            writer.WriteStartElement(AppConstants.XmlElements.Personnage);
-                            WritePersonnageData(writer, androide);
-                            writer.WriteEndElement();
-                        }
-                        writer.WriteEndElement();
-                    }
-
-                    // Export des pièces
-                    if (historiqueClassement.Pieces.Any())
-                    {
-                        writer.WriteStartElement(AppConstants.XmlElements.Pieces);
-                        foreach (var piece in historiqueClassement.Pieces)
-                        {
-                            writer.WriteStartElement(AppConstants.XmlElements.Piece);
-                            writer.WriteElementString(AppConstants.XmlElements.Nom, piece.Nom);
-                            writer.WriteElementString(AppConstants.XmlElements.Niveau, piece.Niveau.ToString());
-                            writer.WriteElementString(AppConstants.XmlElements.PuissanceTactique, piece.AspectsTactiques.Puissance.ToString());
-                            writer.WriteElementString(AppConstants.XmlElements.PuissanceStrategique, piece.AspectsStrategiques.Puissance.ToString());
-                            writer.WriteElementString(AppConstants.XmlElements.Selectionne, piece.Selectionnee.ToString());
-                            writer.WriteEndElement();
-                        }
-                        writer.WriteEndElement();
-                    }
-
-                    writer.WriteEndElement();
-                }
-            }
-
-            // Export historiques de ligue
-            if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY))
-            {
-                var historiquesLigue = await _context.HistoriquesLigue
-                    .OrderByDescending(h => h.DateMontee)
-                    .Take(100)
-                    .ToListAsync();
-
-                foreach (var historiqueLigue in historiquesLigue)
-                {
-                    writer.WriteStartElement(AppConstants.XmlElements.HistoriqueLigue);
-                    writer.WriteElementString(AppConstants.XmlElements.DateMontee, historiqueLigue.DateMontee.ToString("yyyy-MM-dd"));
-                    writer.WriteElementString(AppConstants.XmlElements.Ligue, historiqueLigue.Ligue.ToString());
-                    if (!string.IsNullOrWhiteSpace(historiqueLigue.Notes))
-                    {
-                        writer.WriteElementString(AppConstants.XmlElements.Notes, historiqueLigue.Notes);
-                    }
-                    writer.WriteEndElement();
-                }
-            }
-
-            // Export capacités
-            if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_CAPACITES))
-            {
-                var capacites = await _context.Capacites.ToListAsync();
-                if (capacites.Any())
-                {
-                    writer.WriteStartElement("Capacites");
-                    foreach (var capacite in capacites)
-                    {
-                        writer.WriteStartElement("Capacite");
-                        writer.WriteElementString("Nom", capacite.Nom);
-                        writer.WriteElementString("Description", capacite.Description ?? "");
-                        writer.WriteElementString("Icon", capacite.Icon ?? "");
-                        writer.WriteEndElement();
-                    }
-                    writer.WriteEndElement();
-                }
-            }
-
             writer.WriteEndElement();
-            writer.WriteEndDocument();
         }
+    }
 
-        var bytes = memoryStream.ToArray();
-        await SaveLastExportDate();
-        return bytes;
+    private async Task WritePersonnageDatas(System.Xml.XmlWriter writer)
+    {
+        var personnages = await _context.Personnages.ToListAsync();
+        foreach (var personnage in personnages)
+        {
+            writer.WriteStartElement(AppConstants.XmlElements.Personnage);
+            writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
+            writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.Type, personnage.Type.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.PA, personnage.PA.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.PV, personnage.PV.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.Rang, personnage.Rang.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.Role, personnage.Role.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.Faction, personnage.Faction.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.Selectionne, personnage.Selectionne.ToString());
+            writer.WriteEndElement();
+        }
+        writer.WriteEndElement();
     }
 
     /// <summary>
@@ -1278,16 +1330,6 @@ public class PmlImportService(PersonnageService personnageService, ApplicationDb
             AppConstants.XmlElements.Androïde or AppConstants.XmlElements.Androide => TypeAttaque.Androide,
             _ => TypeAttaque.Inconnu
         };
-    }
-
-    private static string EnsureImageOrDefault(string relativePath)
-    {
-        var fullPath = Path.Combine(
-            Directory.GetCurrentDirectory(),
-            AppConstants.Paths.WwwRoot,
-            relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar)
-        );
-        return File.Exists(fullPath) ? relativePath : AppConstants.Paths.DefaultPortrait;
     }
 
     public async Task<string?> GetLastImportedFileName()

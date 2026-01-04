@@ -73,7 +73,7 @@ public class UpdateService
                 IsUpdateAvailable = isNewer,
                 ReleaseNotes = latestRelease.ReleaseNotes ?? "",
                 DownloadUrl = downloadUrl,
-                PublishedAt = DateTime.Parse(latestRelease.ReleaseDate ?? DateTime.Now.ToString("yyyy-MM-dd"))
+                PublishedAt = DateTime.Parse(latestRelease.ReleaseDate ?? DateTime.Now.ToString("yyyy-MM-dd"), System.Globalization.CultureInfo.InvariantCulture)
             };
         }
         catch (Exception)
@@ -136,7 +136,7 @@ public class UpdateService
         }
     }
 
-    private bool IsNewerVersion(string latest, string current)
+    private static bool IsNewerVersion(string latest, string current)
     {
         try
         {

@@ -11,17 +11,17 @@ using Microsoft.Data.Sqlite;
 
 public partial class Escouade
 {
-    private List<Personnage> personnagesEscouade = new();
-    private List<Personnage> mercenaires = new();
-    private List<Personnage> commandants = new();
-    private List<Personnage> androides = new();
-    private List<Piece> luciePieces = new();
+    internal List<Personnage> personnagesEscouade = new();
+    internal List<Personnage> mercenaires = new();
+    internal List<Personnage> commandants = new();
+    internal List<Personnage> androides = new();
+    internal List<Piece> luciePieces = new();
 
-    private bool showModal = false;
-    private Personnage currentPersonnage = new();
-    private bool isEditing = false;
+    internal bool showModal = false;
+    internal Personnage currentPersonnage = new();
+    internal bool isEditing = false;
 
-    private int puissanceEscouade = 0;
+    internal int puissanceEscouade = 0;
 
     [Inject]
     public ApplicationDbContext DbContext { get; set; } = null!;
@@ -68,14 +68,14 @@ public partial class Escouade
 
     private void NavigateToDetail(int id, string filter, string? returnUrl = null)
     {
-        ModalService.Open<CharacterManager.Components.Modal.DetailPersonnageModal>(
+        ModalService.Open<Modal.DetailPersonnageModal>(
             new Dictionary<string, object> { { "PersonnageId", id } },
             ModalSize.XL
         );
     }
 
 
-    private string GetCommandantHeaderImage()
+    internal string GetCommandantHeaderImage()
     {
         if (commandants.Count != 0)
         {

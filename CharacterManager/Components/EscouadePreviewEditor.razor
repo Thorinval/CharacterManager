@@ -325,7 +325,7 @@
 
     private string GetDisplayImage(string originalImageUrl)
     {
-        return ImageConfigService.GetDisplayPath(originalImageUrl, isAdultModeEnabled);
+        return PersonnageImageConfigService.GetDisplayPath(originalImageUrl, isAdultModeEnabled);
     }
 
     public int PuissanceTotal => PersonnagesSelectionnes.Sum(p => p?.Puissance ?? 0);

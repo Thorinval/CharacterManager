@@ -1,12 +1,12 @@
-using CharacterManager.Components; 
 using CharacterManager.Server.Data;
-using CharacterManager.Server.Services; 
-using Microsoft.EntityFrameworkCore; 
+using CharacterManager.Server.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using CharacterManager.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,7 +37,6 @@ builder.Services.AddScoped<HistoriqueClassementService>();
 builder.Services.AddScoped<HistoriqueLigueService>();
 builder.Services.AddScoped<CapaciteService>();
 builder.Services.AddScoped<ClientLocalizationService>();
-builder.Services.AddScoped<CsvImportService>();
 
 // AppImageService no longer used for categorization; DI registration removed
 builder.Services.AddSingleton<PersonnageImageConfigService>();
@@ -60,7 +59,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    var pmlImportService = scope.ServiceProvider.GetRequiredService<PmlImportService>();
+    const string AppSettingsTableName = "AppSettings";
     bool ColumnExists(string table, string column)
     {
         try
@@ -78,9 +77,14 @@ using (var scope = app.Services.CreateScope())
                     return true;
             }
         }
-        catch { }
+        catch
+        {
+            // Connection or query failed; column doesn't exist
+        }
         return false;
     }
+
+    const string ProfilesTableName = "Profiles";
 
     bool TableExists(string table)
     {
@@ -95,7 +99,10 @@ using (var scope = app.Services.CreateScope())
             var result = cmd.ExecuteScalar();
             return result != null;
         }
-        catch { }
+        catch
+        {
+            // Connection or query failed; table doesn't exist
+        }
         return false;
     }
 
@@ -135,17 +142,17 @@ using (var scope = app.Services.CreateScope())
     try
     {
         // Get pending migrations
-        var pendingMigrations = db.Database.GetPendingMigrations();
+        var pendingMigrations = await db.Database.GetPendingMigrationsAsync();
         if (pendingMigrations.Any())
         {
             // Apply pending migrations
-            db.Database.Migrate();
+            await db.Database.MigrateAsync();
             EnsureLuciePieceAspectColumns();
         }
         else
         {
             // Ensure database and tables exist
-            db.Database.EnsureCreated();
+            await db.Database.EnsureCreatedAsync();
 
             // Hotfix: Ensure 'AppSettings' table exists for legacy DBs
             var createAppSettingsSql = @"CREATE TABLE IF NOT EXISTS AppSettings (
@@ -156,12 +163,12 @@ using (var scope = app.Services.CreateScope())
                 IsAdultModeEnabled INTEGER NOT NULL DEFAULT 1,
                 ThumbnailHeightPx INTEGER NOT NULL DEFAULT 110
             );";
-            db.Database.ExecuteSqlRaw(createAppSettingsSql);
+            await db.Database.ExecuteSqlRawAsync(createAppSettingsSql);
             Console.WriteLine("[DB] Ensured AppSettings table exists.");
 
             try
             {
-                db.Database.ExecuteSqlRaw("ALTER TABLE AppSettings ADD COLUMN LastExportDate TEXT NULL;");
+                await db.Database.ExecuteSqlRawAsync("ALTER TABLE AppSettings ADD COLUMN LastExportDate TEXT NULL;");
             }
             catch
             {
@@ -179,7 +186,7 @@ using (var scope = app.Services.CreateScope())
                 DateModification TEXT NULL,
                 PersonnagesJson TEXT NOT NULL
             );";
-            db.Database.ExecuteSqlRaw(createTemplatesSql);
+            await db.Database.ExecuteSqlRawAsync(createTemplatesSql);
             Console.WriteLine("[DB] Ensured Templates table exists.");
 
             // Hotfix: Ensure 'HistoriquesEscouade' table exists
@@ -190,14 +197,14 @@ using (var scope = app.Services.CreateScope())
                 Classement INTEGER NULL,
                 DonneesEscouadeJson TEXT NOT NULL
             );";
-            db.Database.ExecuteSqlRaw(createHistoriquesEscouadeSql);
+            await db.Database.ExecuteSqlRawAsync(createHistoriquesEscouadeSql);
             Console.WriteLine("[DB] Ensured HistoriquesEscouade table exists.");
 
             // Hotfix: Ensure 'LucieHouses' table exists
             var createLucieHousesSql = @"CREATE TABLE IF NOT EXISTS LucieHouses (
                 Id INTEGER NOT NULL CONSTRAINT PK_LucieHouses PRIMARY KEY AUTOINCREMENT
             );";
-            db.Database.ExecuteSqlRaw(createLucieHousesSql);
+            await db.Database.ExecuteSqlRawAsync(createLucieHousesSql);
             Console.WriteLine("[DB] Ensured LucieHouses table exists.");
 
             // Hotfix: Ensure 'Pieces' table exists
@@ -214,12 +221,12 @@ using (var scope = app.Services.CreateScope())
                 LucieHouseId INTEGER,
                 FOREIGN KEY (LucieHouseId) REFERENCES LucieHouses (Id) ON DELETE CASCADE
             );";
-            db.Database.ExecuteSqlRaw(createPiecesSql);
+            await db.Database.ExecuteSqlRawAsync(createPiecesSql);
             Console.WriteLine("[DB] Ensured Pieces table exists.");
             EnsureLuciePieceAspectColumns();
 
-                // Ensure Profiles table exists
-                var createProfilesSql = @"CREATE TABLE IF NOT EXISTS Profiles (
+            // Ensure Profiles table exists
+            var createProfilesSql = @"CREATE TABLE IF NOT EXISTS Profiles (
                     Id INTEGER NOT NULL CONSTRAINT PK_Profiles PRIMARY KEY AUTOINCREMENT,
                     Username TEXT NOT NULL UNIQUE,
                     AdultMode INTEGER NOT NULL DEFAULT 0,
@@ -231,17 +238,17 @@ using (var scope = app.Services.CreateScope())
                     FailedLoginCount INTEGER NOT NULL DEFAULT 0,
                     LockoutUntil TEXT NULL
                 );";
-                db.Database.ExecuteSqlRaw(createProfilesSql);
-                Console.WriteLine("[DB] Ensured Profiles table exists.");
+            await db.Database.ExecuteSqlRawAsync(createProfilesSql);
+            Console.WriteLine("[DB] Ensured Profiles table exists.");
 
             // Hotfix: Add missing Profile columns if they don't exist
-            if (TableExists("Profiles"))
+            if (TableExists(ProfilesTableName))
             {
-                if (!ColumnExists("Profiles", "Role"))
+                if (!ColumnExists(ProfilesTableName, "Role"))
                 {
                     try
                     {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Profiles ADD COLUMN Role TEXT NOT NULL DEFAULT 'utilisateur';");
+                        await db.Database.ExecuteSqlRawAsync("ALTER TABLE Profiles ADD COLUMN Role TEXT NOT NULL DEFAULT 'utilisateur';");
                         Console.WriteLine("[DB] Added Role column to Profiles.");
                     }
                     catch (Microsoft.Data.Sqlite.SqliteException ex)
@@ -249,12 +256,12 @@ using (var scope = app.Services.CreateScope())
                         Console.WriteLine($"[DB] Could not add Role: {ex.Message}");
                     }
                 }
-                
-                if (!ColumnExists("Profiles", "PasswordHash"))
+
+                if (!ColumnExists(ProfilesTableName, "PasswordHash"))
                 {
                     try
                     {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Profiles ADD COLUMN PasswordHash TEXT NOT NULL DEFAULT '';");
+                        await db.Database.ExecuteSqlRawAsync("ALTER TABLE Profiles ADD COLUMN PasswordHash TEXT NOT NULL DEFAULT '';");
                         Console.WriteLine("[DB] Added PasswordHash column to Profiles.");
                     }
                     catch (Microsoft.Data.Sqlite.SqliteException ex)
@@ -262,12 +269,12 @@ using (var scope = app.Services.CreateScope())
                         Console.WriteLine($"[DB] Could not add PasswordHash: {ex.Message}");
                     }
                 }
-                
-                if (!ColumnExists("Profiles", "PasswordSalt"))
+
+                if (!ColumnExists(ProfilesTableName, "PasswordSalt"))
                 {
                     try
                     {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Profiles ADD COLUMN PasswordSalt TEXT NOT NULL DEFAULT '';");
+                        await db.Database.ExecuteSqlRawAsync("ALTER TABLE Profiles ADD COLUMN PasswordSalt TEXT NOT NULL DEFAULT '';");
                         Console.WriteLine("[DB] Added PasswordSalt column to Profiles.");
                     }
                     catch (Microsoft.Data.Sqlite.SqliteException ex)
@@ -275,12 +282,12 @@ using (var scope = app.Services.CreateScope())
                         Console.WriteLine($"[DB] Could not add PasswordSalt: {ex.Message}");
                     }
                 }
-                
-                if (!ColumnExists("Profiles", "HashAlgorithm"))
+
+                if (!ColumnExists(ProfilesTableName, "HashAlgorithm"))
                 {
                     try
                     {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Profiles ADD COLUMN HashAlgorithm TEXT NOT NULL DEFAULT 'PBKDF2';");
+                        await db.Database.ExecuteSqlRawAsync("ALTER TABLE Profiles ADD COLUMN HashAlgorithm TEXT NOT NULL DEFAULT 'PBKDF2';");
                         Console.WriteLine("[DB] Added HashAlgorithm column to Profiles.");
                     }
                     catch (Microsoft.Data.Sqlite.SqliteException ex)
@@ -288,12 +295,12 @@ using (var scope = app.Services.CreateScope())
                         Console.WriteLine($"[DB] Could not add HashAlgorithm: {ex.Message}");
                     }
                 }
-                
-                if (!ColumnExists("Profiles", "FailedLoginCount"))
+
+                if (!ColumnExists(ProfilesTableName, "FailedLoginCount"))
                 {
                     try
                     {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Profiles ADD COLUMN FailedLoginCount INTEGER NOT NULL DEFAULT 0;");
+                        await db.Database.ExecuteSqlRawAsync("ALTER TABLE Profiles ADD COLUMN FailedLoginCount INTEGER NOT NULL DEFAULT 0;");
                         Console.WriteLine("[DB] Added FailedLoginCount column to Profiles.");
                     }
                     catch (Microsoft.Data.Sqlite.SqliteException ex)
@@ -301,12 +308,12 @@ using (var scope = app.Services.CreateScope())
                         Console.WriteLine($"[DB] Could not add FailedLoginCount: {ex.Message}");
                     }
                 }
-                
-                if (!ColumnExists("Profiles", "LockoutUntil"))
+
+                if (!ColumnExists(ProfilesTableName, "LockoutUntil"))
                 {
                     try
                     {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Profiles ADD COLUMN LockoutUntil TEXT NULL;");
+                        await db.Database.ExecuteSqlRawAsync("ALTER TABLE Profiles ADD COLUMN LockoutUntil TEXT NULL;");
                         Console.WriteLine("[DB] Added LockoutUntil column to Profiles.");
                     }
                     catch (Microsoft.Data.Sqlite.SqliteException ex)
@@ -319,11 +326,11 @@ using (var scope = app.Services.CreateScope())
             // AppImages table initialization removed (unused)
         }
         // Hotfix: Add missing 'IsAdultModeEnabled' column to AppSettings table if it doesn't exist
-        if (TableExists("AppSettings") && !ColumnExists("AppSettings", "IsAdultModeEnabled"))
+        if (TableExists(AppSettingsTableName) && !ColumnExists(AppSettingsTableName, "IsAdultModeEnabled"))
         {
             try
             {
-                db.Database.ExecuteSqlRaw("ALTER TABLE AppSettings ADD COLUMN IsAdultModeEnabled INTEGER NOT NULL DEFAULT 1;");
+                await db.Database.ExecuteSqlRawAsync("ALTER TABLE AppSettings ADD COLUMN IsAdultModeEnabled INTEGER NOT NULL DEFAULT 1;");
                 Console.WriteLine("[DB] Added IsAdultModeEnabled to AppSettings.");
             }
             catch (Microsoft.Data.Sqlite.SqliteException ex)
@@ -331,13 +338,13 @@ using (var scope = app.Services.CreateScope())
                 Console.WriteLine($"[DB] Could not add IsAdultModeEnabled: {ex.Message}");
             }
         }
-        
+
         // Hotfix: Add missing 'Language' column to AppSettings table if it doesn't exist
-        if (TableExists("AppSettings") && !ColumnExists("AppSettings", "Language"))
+        if (TableExists(AppSettingsTableName) && !ColumnExists(AppSettingsTableName, "Language"))
         {
             try
             {
-                db.Database.ExecuteSqlRaw("ALTER TABLE AppSettings ADD COLUMN Language TEXT NOT NULL DEFAULT 'fr';");
+                await db.Database.ExecuteSqlRawAsync("ALTER TABLE AppSettings ADD COLUMN Language TEXT NOT NULL DEFAULT 'fr';");
                 Console.WriteLine("[DB] Added Language to AppSettings.");
             }
             catch (Microsoft.Data.Sqlite.SqliteException ex)
@@ -345,15 +352,15 @@ using (var scope = app.Services.CreateScope())
                 Console.WriteLine($"[DB] Could not add Language: {ex.Message}");
             }
         }
-        
+
         // Removed ThumbnailHeightPx column hotfix (unused)
-        
+
         // Hotfix: Add missing 'ImageUrlHeader' column to Personnages table if it doesn't exist
         if (TableExists("Personnages") && !ColumnExists("Personnages", "ImageUrlHeader"))
         {
             try
             {
-                db.Database.ExecuteSqlRaw("ALTER TABLE Personnages ADD COLUMN ImageUrlHeader TEXT NOT NULL DEFAULT '';");
+                await db.Database.ExecuteSqlRawAsync("ALTER TABLE Personnages ADD COLUMN ImageUrlHeader TEXT NOT NULL DEFAULT '';");
                 Console.WriteLine("[DB] Added ImageUrlHeader to Personnages.");
             }
             catch (Microsoft.Data.Sqlite.SqliteException ex)
@@ -369,7 +376,7 @@ using (var scope = app.Services.CreateScope())
         {
             try
             {
-                db.Database.ExecuteSqlRaw("DROP TABLE IF EXISTS AppImages;");
+                await db.Database.ExecuteSqlRawAsync("DROP TABLE IF EXISTS AppImages;");
                 Console.WriteLine("[DB] Dropped legacy AppImages table.");
             }
             catch (SqliteException ex)
@@ -386,7 +393,7 @@ using (var scope = app.Services.CreateScope())
     // Initialize default AppSettings and images
     try
     {
-        var settings = db.AppSettings.OrderBy(x => x.Id).FirstOrDefault();
+        var settings = await db.AppSettings.OrderBy(x => x.Id).FirstOrDefaultAsync();
         if (settings == null)
         {
             var newSettings = new CharacterManager.Server.Models.AppSettings
@@ -395,7 +402,8 @@ using (var scope = app.Services.CreateScope())
                 Language = "fr"
             };
             db.AppSettings.Add(newSettings);
-            db.SaveChanges();
+            await db.SaveChangesAsync();
+
             Console.WriteLine("[Init] Created default AppSettings - Adult Mode: Enabled, Language: fr");
         }
         else
@@ -407,22 +415,18 @@ using (var scope = app.Services.CreateScope())
             if (string.IsNullOrEmpty(settings.Language))
             {
                 settings.Language = "fr";
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 Console.WriteLine("[Init] Updated Language to default: fr");
             }
             Console.WriteLine($"[Init] Loaded AppSettings - Adult Mode: {adultModeStatus}, Language: {language}");
         }
 
         // Vérification si la base est vide (aucun personnage, template, historique ou profil)
-        bool dbIsEmpty = !db.Personnages.Any()
-            && !db.Templates.Any()
-            && !db.Profiles.Any();
+        bool dbIsEmpty = !await db.Personnages.AnyAsync() && !await db.LucieHouses.AnyAsync();
 
         if (dbIsEmpty)
         {
             Console.WriteLine("[Init] La base de données est vide. Préparez l'import d'un fichier .pml pour initialisation.");
-            // TODO: Ajouter ici la logique pour demander à l'utilisateur un fichier .pml et lancer l'import
-            // Exemple d'appel : await pmlImportService.ImportPmlAsync(stream, "import.pml");
         }
 
         // NOTE: PersonnageImageConfigService now uses filesystem-based detection
@@ -448,7 +452,7 @@ app.MapPost("/api/login", async (HttpContext context, ProfileService profileServ
     var form = await context.Request.ReadFormAsync();
     var username = form["username"].ToString();
     var password = form["password"].ToString();
-    
+
     if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
     {
         context.Response.Redirect("/login?error=required");
@@ -478,7 +482,7 @@ app.MapPost("/api/login", async (HttpContext context, ProfileService profileServ
         return;
     }
 
-    if (!profileService.VerifyPassword(profile, password))
+    if (!ProfileService.VerifyPassword(profile, password))
     {
         await profileService.RegisterLoginAttemptAsync(username, false);
         context.Response.Redirect("/login?error=invalid");
@@ -532,4 +536,4 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-app.Run();
+await app.RunAsync();

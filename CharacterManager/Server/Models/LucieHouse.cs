@@ -37,7 +37,6 @@ public class Piece
     public int PuissanceLegacy
     {
         get => (AspectsTactiques?.Puissance ?? 0) + (AspectsStrategiques?.Puissance ?? 0);
-        set { }
     }
 
     /// <summary>
@@ -68,6 +67,7 @@ public class Piece
             }
             catch
             {
+                // Ignore JSON deserialization errors for legacy data compatibility
             }
         }
     }
@@ -100,6 +100,7 @@ public class Piece
             }
             catch
             {
+                // Ignore JSON deserialization errors for legacy data compatibility
             }
         }
     }

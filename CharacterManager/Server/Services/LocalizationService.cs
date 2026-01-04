@@ -11,14 +11,12 @@ using Microsoft.Extensions.Logging;
 /// </summary>
 public class LocalizationService
 {
-    private readonly HttpClient _httpClient;
     private readonly string _basePath = "i18n";
     private readonly Dictionary<string, Dictionary<string, object>> _cache = new();
     private readonly ILogger<LocalizationService> _logger;
 
-    public LocalizationService(HttpClient httpClient, ILogger<LocalizationService> logger)
+    public LocalizationService(ILogger<LocalizationService> logger)
     {
-        _httpClient = httpClient;
         _logger = logger;
     }
 
@@ -40,7 +38,7 @@ public class LocalizationService
 
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"Fichier de langue non trouvé: {filePath}");
+                _logger.LogWarning("Fichier de langue non trouvé: {filePath}", filePath);
                 return new Dictionary<string, object>();
             }
 
@@ -56,7 +54,7 @@ public class LocalizationService
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Erreur lors du chargement de la langue {languageCode}: {ex.Message}");
+            _logger.LogError(ex, "Erreur lors du chargement de la langue {languageCode}", languageCode);
         }
 
         return new Dictionary<string, object>();
@@ -65,7 +63,7 @@ public class LocalizationService
     /// <summary>
     /// Récupère une chaîne de traduction par sa clé
     /// </summary>
-    public string GetString(Dictionary<string, object> resources, string key)
+    public static string GetString(Dictionary<string, object> resources, string key)
     {
         var keys = key.Split('.');
         object current = resources;

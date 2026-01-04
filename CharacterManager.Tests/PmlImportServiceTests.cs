@@ -16,7 +16,6 @@ namespace CharacterManager.Tests;
 public class PmlImportServiceTests : IDisposable
 {
   private readonly ApplicationDbContext _context;
-  private readonly PersonnageService _personnageService;
   private readonly PmlImportService _pmlImportService;
 
   public PmlImportServiceTests()
@@ -28,8 +27,7 @@ public class PmlImportServiceTests : IDisposable
     _context = new ApplicationDbContext(options);
     _context.Database.EnsureCreated();
 
-    _personnageService = new PersonnageService(_context);
-    _pmlImportService = new PmlImportService(_personnageService, _context);
+    _pmlImportService = new PmlImportService(_context);
 
     SeedPersonnages();
   }
