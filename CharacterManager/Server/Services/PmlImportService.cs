@@ -834,11 +834,7 @@ public class PmlImportService(ApplicationDbContext context)
                     if (personnage != null)
                     {
                         writer.WriteStartElement(AppConstants.XmlElements.Personnage);
-                        WritePersonnageData(writer, personnage,);
-                        writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
-                        writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
-                        writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
-                        writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
+                        WritePersonnageData(writer, personnage, isTemplate: true);
                         writer.WriteEndElement();
                     }
                 }
