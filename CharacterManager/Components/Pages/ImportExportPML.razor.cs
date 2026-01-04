@@ -6,7 +6,7 @@ using Microsoft.JSInterop;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
 
-public partial class ImportExportPML
+public partial class ImportExportPml
 {
     [Inject]
     public PmlImportService PmlImportService { get; set; } = null!;
@@ -19,74 +19,74 @@ public partial class ImportExportPML
 
     private IBrowserFile? selectedFile;
     private string? selectedFileName;
-    private bool isImporting = false;
-    private bool importComplete = false;
+    internal bool isImporting = false;
+    internal bool importComplete = false;
     private ImportResult? importResult;
-    private string? lastImportedFileName;
-    private string activeTab = "import";
+    internal string? lastImportedFileName;
+    internal string activeTab = "import";
 
     // Import/Export options
-    private PmlExportOptions exportOptions = new();
+    internal PmlExportOptions exportOptions = new();
 
     // Import checkboxes (mapped to PmlExportOptions)
-    private bool importInventory 
+    internal bool importInventory 
     { 
         get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_INVENTORY);
         set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_INVENTORY); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_INVENTORY); }
     }
-    private bool importTemplates
+    internal bool importTemplates
     {
         get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_TEMPLATES);
         set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_TEMPLATES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_TEMPLATES); }
     }
-    private bool importBestSquad
+    internal bool importBestSquad
     {
         get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD);
         set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD); }
     }
-    private bool importHistories
+    internal bool importHistories
     {
         get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_HISTORIES);
         set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_HISTORIES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_HISTORIES); }
     }
-    private bool importLeagueHistory
+    internal bool importLeagueHistory
     {
         get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY);
         set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY); }
     }
-    private bool importCapacites
+    internal bool importCapacites
     {
         get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_CAPACITES);
         set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_CAPACITES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_CAPACITES); }
     }
 
     // Export checkboxes (mapped to PmlExportOptions)
-    private bool exportInventory 
+    internal bool exportInventory 
     { 
         get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_INVENTORY);
         set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_INVENTORY); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_INVENTORY); }
     }
-    private bool exportTemplates
+    internal bool exportTemplates
     {
         get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_TEMPLATES);
         set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_TEMPLATES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_TEMPLATES); }
     }
-    private bool exportBestSquad
+    internal bool exportBestSquad
     {
         get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD);
         set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD); }
     }
-    private bool exportHistories
+    internal bool exportHistories
     {
         get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_HISTORIES);
         set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_HISTORIES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_HISTORIES); }
     }
-    private bool exportLeagueHistory
+    internal bool exportLeagueHistory
     {
         get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY);
         set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY); }
     }
-    private bool exportCapacites
+    internal bool exportCapacites
     {
         get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_CAPACITES);
         set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_CAPACITES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_CAPACITES); }
@@ -99,7 +99,7 @@ public partial class ImportExportPML
         lastImportedFileName = await PmlImportService.GetLastImportedFileName();
     }
 
-    private void OnFileSelected(InputFileChangeEventArgs e)
+    internal void OnFileSelected(InputFileChangeEventArgs e)
     {
         selectedFile = e.File;
         selectedFileName = e.File.Name;
@@ -115,7 +115,7 @@ public partial class ImportExportPML
         return exportOptions.HasSelectedExports();
     }
 
-    private async Task HandleImport()
+    internal async Task HandleImport()
     {
         if (selectedFile == null || !HasSelectedImportTypes())
             return;
@@ -174,7 +174,7 @@ public partial class ImportExportPML
         }
     }
 
-    private async Task HandleExport()
+    internal async Task HandleExport()
     {
         if (!HasSelectedExportTypes())
             return;
@@ -182,7 +182,7 @@ public partial class ImportExportPML
         await HandleExportInternal(downloadToClient: true);
     }
 
-    private async Task HandleExportInternal(bool downloadToClient)
+    internal async Task HandleExportInternal(bool downloadToClient)
     {
         try
         {
@@ -214,7 +214,7 @@ public partial class ImportExportPML
         }
     }
   
-    private void Reset()
+    internal void Reset()
     {
         selectedFile = null;
         selectedFileName = null;
@@ -222,7 +222,7 @@ public partial class ImportExportPML
         importResult = null;
         activeTab = "import";
     }
-    private async Task ExportAsConfigPml()
+    internal async Task ExportAsConfigPml()
     {
         try
         {

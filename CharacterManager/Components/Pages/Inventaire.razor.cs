@@ -88,7 +88,17 @@ public partial class Inventaire : IAsyncDisposable
     private bool SelectAllChecked
     {
         get => selectedPersonnages.Count == personnagesFiltres.Count && personnagesFiltres.Count > 0;
-        set => SelectAll();
+        set
+        {
+            if (value)
+            {
+                SelectAll();
+            }
+            else
+            {
+                selectedPersonnages.Clear();
+            }
+        }
     }
 
     private IEnumerable<IGrouping<TypePersonnage, Personnage>> GroupedPersonnages =>
