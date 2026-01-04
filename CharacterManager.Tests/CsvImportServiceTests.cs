@@ -76,7 +76,6 @@ BELLE;SSR;Mercenaire;3090;143;330;Distance;Sentinelle;8;3;Oui;Syndicat";
             PV = 100,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            Description = "Old description",
             Selectionne = false
         };
 

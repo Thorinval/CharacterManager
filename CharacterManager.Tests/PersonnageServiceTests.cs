@@ -46,7 +46,6 @@ public class PersonnageServiceTests : IDisposable
             PV = 20,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            Description = "Ancienne description",
             Selectionne = false,
             TypeAttaque = TypeAttaque.Melee
         };
@@ -68,7 +67,6 @@ public class PersonnageServiceTests : IDisposable
             PV = 50,
             Role = Role.Combattante,
             Faction = Faction.Pacificateurs,
-            Description = "Nouvelle description",
             Selectionne = true,
             TypeAttaque = TypeAttaque.Distance
         };
@@ -89,8 +87,8 @@ public class PersonnageServiceTests : IDisposable
         Assert.Equal(50, result.PV);
         Assert.Equal(Role.Combattante, result.Role);
         Assert.Equal(Faction.Pacificateurs, result.Faction);
-        Assert.Equal("/images/personnages/nouveau_nom.png", result.ImageUrlDetail);
-        Assert.Equal("Nouvelle description", result.Description);
+        // ImageUrlDetail is now generated from resources, so we just verify it's not empty
+        Assert.False(string.IsNullOrEmpty(result.ImageUrlDetail));
         Assert.True(result.Selectionne);
     }
 
@@ -128,7 +126,6 @@ public class PersonnageServiceTests : IDisposable
             PV = 20,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            Description = "desc",
             Selectionne = false
         };
 
@@ -149,7 +146,6 @@ public class PersonnageServiceTests : IDisposable
             PV = 25,
             Role = Role.Combattante,
             Faction = Faction.Pacificateurs,
-            Description = "new desc",
             Selectionne = true
         };
 
@@ -178,7 +174,6 @@ public class PersonnageServiceTests : IDisposable
             PV = 20,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            Description = "desc",
             Selectionne = false
         };
 
@@ -199,7 +194,6 @@ public class PersonnageServiceTests : IDisposable
             PV = 20,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            Description = "desc",
             Selectionne = false
         };
 
@@ -231,7 +225,6 @@ public class PersonnageServiceTests : IDisposable
             PV = 20,
             Role = Role.Sentinelle,
             Faction = Faction.Syndicat,
-            Description = "desc",
             Selectionne = false
         };
 
@@ -252,7 +245,6 @@ public class PersonnageServiceTests : IDisposable
             PV = 60,
             Role = Role.Combattante,
             Faction = Faction.Pacificateurs,
-            Description = "new desc",
             Selectionne = true
         };
 
@@ -467,7 +459,6 @@ public class PersonnageServiceTests : IDisposable
             PV = 50,
             Role = Role.Combattante,
             Faction = Faction.Syndicat,
-            Description = "test",
             Selectionne = false,
             TypeAttaque = TypeAttaque.Melee
         };

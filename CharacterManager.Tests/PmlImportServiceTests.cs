@@ -47,8 +47,7 @@ public class PmlImportServiceTests : IDisposable
       PA = 140,
       PV = 509,
       Role = Role.Sentinelle,
-      Faction = Faction.Syndicat,
-      Description = "SSR Mercenaire"
+      Faction = Faction.Syndicat
     });
 
     _context.Personnages.Add(new Personnage
@@ -62,8 +61,7 @@ public class PmlImportServiceTests : IDisposable
       PA = 0,
       PV = 20,
       Role = Role.Androide,
-      Faction = Faction.Inconnu,
-      Description = "SSR Androide"
+      Faction = Faction.Inconnu
     });
 
     _context.SaveChanges();
