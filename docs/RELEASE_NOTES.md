@@ -1,8 +1,40 @@
-# Release Notes - Character Manager
+# Character Manager
 
-> **Version actuelle**: 0.13.0
+> **Version actuelle**: 0.14.0
 
 ---
+
+## 0.14.0 (04 Janvier 2026)
+
+✨ - Modèle: Suppression de l'attribut `Description` du modèle Personnage (non utilisé)
+
+✨ - BDD: Migration EF Core pour la suppression de la colonne Description de la table Personnages
+
+✨ - UI/UX: Ajout d'une modale de sélection des capacités pour les personnages avec liste scrollable et recherche
+
+✨ - Modale: `PersonnageCapacitesModal` - Sélection et gestion des capacités assignées à un personnage
+
+✨ - Service: Méthode `UpdateCapacitesAsync` pour la mise à jour des capacités d'un personnage en base
+
+✨ - Architecture: Conversion de `ManageUsers` en modale `ManageUsersModal` accessible depuis la top bar (admin uniquement)
+
+✨ - Architecture: Conversion de `ImportExportPML` en modale `ImportExportPmlModal` accessible depuis la top bar
+
+✨ - Architecture: Conversion de `Settings` en modale `SettingsModal` avec injection du ModalService
+
+✨ - Navigation: Ajout d'icônes Material Symbols dans la top bar (settings, admin_panel_settings, cloud_upload)
+
+✨ - UI/UX: Toutes les modales affichent désormais l'icône Material Symbols correspondante dans leur en-tête
+
+✨ - UI/UX: Ajout de titres localisés "Notes de version" et "Feuille de route" dans les modales Changelog/Roadmap
+
+🔧 - Navigation: Suppression des entrées de menu pour "Import/Export PML" et "Gestion des utilisateurs" (déplacées en top bar)
+
+🔧 - Refactorisation: Suppression des boutons close redondants dans les modales (ModalHost gère déjà la fermeture)
+
+🔧 - Modal: Simplification de l'en-tête d'ImportExportPmlModal (titre affiché une seule fois)
+
+🔧 - Code: Nettoyage des méthodes `Close()` inutilisées dans les composants modaux
 
 ## 0.13.0 (03 Janvier 2026)
 

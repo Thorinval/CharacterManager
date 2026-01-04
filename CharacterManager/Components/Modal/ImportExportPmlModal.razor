@@ -1,0 +1,429 @@
+@using CharacterManager.Server.Services
+@using CharacterManager.Server.Models
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.JSInterop
+@using System.IO
+@using CharacterManager.Components
+@inject PmlImportService PmlImportService
+@inject IJSRuntime JS
+@inject IModalService ModalService
+
+<div class="modal-body">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="msr" style="font-size: 2rem; color: #0d6efd;">cloud_upload</span>
+        <h4 class="mb-0"><LocalizedText Key="importExportPml.cardTitle" /></h4>
+    </div>
+
+    <AuthorizeView>
+        <Authorized>
+            <div class="container-fluid px-0">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        @if (importComplete)
+                        {
+                            <span></span>
+                            <button class="btn btn-outline-light btn-sm" @onclick="Reset">Réinitialiser</button>
+                        }
+                    </div>
+                    <div class="card-body">
+                        @if (importComplete)
+                        {
+                            <div class="alert @(importResult?.IsSuccess == true ? "alert-success" : "alert-danger")" role="alert">
+                                @if (importResult?.IsSuccess == true)
+                                {
+                                    <h4 class="alert-heading">
+                                        <LocalizedText Key="importExportPml.success" />
+                                    </h4>
+                                    <p>@importResult?.SuccessCount <LocalizedText Key="importExportPml.imported" /></p>
+                                    @if (importResult?.Errors.Count > 0)
+                                    {
+                                        <hr>
+                                        <p><strong><LocalizedText Key="importExportPml.warnings" /></strong></p>
+                                        <ul>
+                                            @foreach (var error in importResult.Errors)
+                                            {
+                                                <li>@error</li>
+                                            }
+                                        </ul>
+                                    }
+                                }
+                                else
+                                {
+                                    <h4 class="alert-heading">
+                                        <LocalizedText Key="importExportPml.error" />
+                                    </h4>
+                                    <p>@importResult?.Error</p>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <ul class="nav nav-tabs mb-3" role="tablist">
+                                <li class="nav-item">
+                                    <button class="nav-link @(activeTab == "import" ? "active" : "")" @onclick='() => activeTab = "import"'>
+                                        <i class="bi bi-upload"></i>
+                                        <LocalizedText Key="importExportPml.import" />
+                                    </button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link @(activeTab == "export" ? "active" : "")" @onclick='() => activeTab = "export"'>
+                                        <i class="bi bi-download"></i>
+                                        <LocalizedText Key="importExportPml.export" />
+                                    </button>
+                                </li>
+                            </ul>
+
+                            @if (activeTab == "import")
+                            {
+                                <form @onsubmit="HandleImport">
+                                    @if (!string.IsNullOrEmpty(lastImportedFileName))
+                                    {
+                                        <div class="alert alert-secondary">
+                                            <strong><LocalizedText Key="importExportPml.lastFile" /></strong> @lastImportedFileName
+                                            <small class="d-block text-muted mt-1"><LocalizedText Key="importExportPml.selectInfo" /></small>
+                                        </div>
+                                    }
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold"><LocalizedText Key="importExportPml.selectTypes" /></label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" @bind="importInventory" id="importInventory">
+                                            <label class="form-check-label" for="importInventory"><LocalizedText Key="importExportPml.inventory" /></label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" @bind="importTemplates" id="importTemplates">
+                                            <label class="form-check-label" for="importTemplates"><LocalizedText Key="importExportPml.templates" /></label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" @bind="importBestSquad" id="importBestSquad">
+                                            <label class="form-check-label" for="importBestSquad"><LocalizedText Key="importExportPml.bestSquad" /></label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" @bind="importHistories" id="importHistories">
+                                            <label class="form-check-label" for="importHistories"><LocalizedText Key="importExportPml.rankings" /></label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" @bind="importLeagueHistory" id="importLeagueHistory">
+                                            <label class="form-check-label" for="importLeagueHistory"><LocalizedText Key="importExportPml.leagueHistory" /></label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" @bind="importCapacites" id="importCapacites">
+                                            <label class="form-check-label" for="importCapacites">Capacités</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="pmlFile" class="form-label"><LocalizedText Key="importExportPml.selectFile" /></label>
+                                        <InputFile class="form-control" id="pmlFile" accept=".pml,.xml" OnChange="@OnFileSelected" disabled="@isImporting" />
+                                        <small class="text-muted"><LocalizedText Key="importExportPml.expectedFormat" /></small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <p class="text-info"><strong><LocalizedText Key="importExportPml.infoTitle" /></strong></p>
+                                        <ul>
+                                            <li><LocalizedText Key="importExportPml.infoInventaire" /></li>
+                                            <li><LocalizedText Key="importExportPml.infoTemplate" /></li>
+                                            <li><LocalizedText Key="importExportPml.infoFormat" /></li>
+                                        </ul>
+                                    </div>
+
+                                    @if (selectedFileName != null)
+                                    {
+                                        <div class="alert alert-info">
+                                            <LocalizedText Key="importExportPml.selectedFile" /> <strong>@selectedFileName</strong>
+                                        </div>
+                                    }
+
+                                    <button type="submit" class="btn btn-success" disabled="@(selectedFile == null || isImporting || !HasSelectedImportTypes())">
+                                        @if (isImporting)
+                                        {
+                                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        }
+                                        <LocalizedText Key="importExportPml.importButton" />
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold"><LocalizedText Key="importExportPml.selectTypes" /></label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" @bind="exportInventory" id="exportInventory">
+                                        <label class="form-check-label" for="exportInventory"><LocalizedText Key="importExportPml.inventory" /></label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" @bind="exportTemplates" id="exportTemplates">
+                                        <label class="form-check-label" for="exportTemplates"><LocalizedText Key="importExportPml.templates" /></label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" @bind="exportBestSquad" id="exportBestSquad">
+                                        <label class="form-check-label" for="exportBestSquad"><LocalizedText Key="importExportPml.bestSquad" /></label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" @bind="exportHistories" id="exportHistories">
+                                        <label class="form-check-label" for="exportHistories"><LocalizedText Key="importExportPml.rankings" /></label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" @bind="exportLeagueHistory" id="exportLeagueHistory">
+                                        <label class="form-check-label" for="exportLeagueHistory"><LocalizedText Key="importExportPml.leagueHistory" /></label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" @bind="exportCapacites" id="exportCapacites">
+                                        <label class="form-check-label" for="exportCapacites">Capacités</label>
+                                    </div>
+                                </div>
+
+                                <button class="btn btn-primary" @onclick="HandleExport" disabled="@(!HasSelectedExportTypes())">
+                                    <i class="bi bi-download"></i>
+                                    <LocalizedText Key="importExportPml.exportButton" />
+                                </button>
+                                <button class="btn btn-secondary ms-2" @onclick="ExportAsConfigPml" disabled="@(!HasSelectedExportTypes())">
+                                    <i class="bi bi-save"></i> Exporter comme config.pml (serveur)
+                                </button>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </Authorized>
+        <NotAuthorized>
+            <div class="alert alert-warning mb-0">
+                <LocalizedText Key="importExportPml.accessDenied" />
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
+
+@code {
+    private IBrowserFile? selectedFile;
+    private string? selectedFileName;
+    private bool isImporting = false;
+    private bool importComplete = false;
+    private ImportResult? importResult;
+    private string? lastImportedFileName;
+    private string activeTab = "import";
+    private PmlExportOptions exportOptions = new();
+
+    // Import checkboxes
+    private bool importInventory
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_INVENTORY);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_INVENTORY); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_INVENTORY); }
+    }
+    private bool importTemplates
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_TEMPLATES);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_TEMPLATES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_TEMPLATES); }
+    }
+    private bool importBestSquad
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD); }
+    }
+    private bool importHistories
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_HISTORIES);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_HISTORIES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_HISTORIES); }
+    }
+    private bool importLeagueHistory
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY); }
+    }
+    private bool importCapacites
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_CAPACITES);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_CAPACITES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_CAPACITES); }
+    }
+
+    // Export checkboxes
+    private bool exportInventory
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_INVENTORY);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_INVENTORY); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_INVENTORY); }
+    }
+    private bool exportTemplates
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_TEMPLATES);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_TEMPLATES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_TEMPLATES); }
+    }
+    private bool exportBestSquad
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD); }
+    }
+    private bool exportHistories
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_HISTORIES);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_HISTORIES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_HISTORIES); }
+    }
+    private bool exportLeagueHistory
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY); }
+    }
+    private bool exportCapacites
+    {
+        get => exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_CAPACITES);
+        set { if (value) exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_CAPACITES); else exportOptions.RemoveExportType(PmlExportOptions.EXPORT_TYPE_CAPACITES); }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_INVENTORY);
+        lastImportedFileName = await PmlImportService.GetLastImportedFileName();
+    }
+
+    private void OnFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        selectedFileName = e.File.Name;
+    }
+
+    private bool HasSelectedImportTypes() => exportOptions.HasSelectedExports();
+    private bool HasSelectedExportTypes() => exportOptions.HasSelectedExports();
+
+    private async Task HandleImport()
+    {
+        if (selectedFile == null || !HasSelectedImportTypes())
+        {
+            return;
+        }
+
+        isImporting = true;
+
+        try
+        {
+            using var stream = selectedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            importResult = await PmlImportService.ImportPmlAsync(
+                stream,
+                selectedFileName ?? "",
+                exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_INVENTORY),
+                exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_TEMPLATES),
+                exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD),
+                exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_HISTORIES),
+                exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY)
+            );
+
+            if (exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_CAPACITES) && importResult?.IsSuccess == true)
+            {
+                using var capacitesStream = new MemoryStream();
+                await stream.CopyToAsync(capacitesStream);
+                capacitesStream.Position = 0;
+                var capacitesResult = await PmlImportService.ImportCapacitesAsync(capacitesStream, selectedFileName ?? "");
+                if (capacitesResult.IsSuccess)
+                {
+                    importResult.SuccessCount += capacitesResult.SuccessCount;
+                    importResult.Errors.AddRange(capacitesResult.Errors);
+                }
+                else if (!capacitesResult.IsSuccess && !capacitesResult.Error?.Contains("Aucune section") == true)
+                {
+                    importResult.Errors.Add(capacitesResult.Error ?? "Erreur lors de l'import des capacités");
+                }
+            }
+
+            importComplete = true;
+            lastImportedFileName = await PmlImportService.GetLastImportedFileName();
+        }
+        catch (Exception ex)
+        {
+            importResult = new ImportResult
+            {
+                IsSuccess = false,
+                Error = $"Erreur: {ex.Message}"
+            };
+            importComplete = true;
+        }
+        finally
+        {
+            isImporting = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task HandleExport()
+    {
+        if (!HasSelectedExportTypes())
+        {
+            return;
+        }
+
+        await HandleExportInternal(downloadToClient: true);
+    }
+
+    private async Task HandleExportInternal(bool downloadToClient)
+    {
+        try
+        {
+            var exportData = await PmlImportService.ExportPmlAsync(exportOptions);
+            var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            var fileName = $"export_{timestamp}.pml";
+
+            if (downloadToClient)
+            {
+                importResult = new ImportResult
+                {
+                    IsSuccess = true,
+                    SuccessCount = 1,
+                    Error = $"Export réussi: {fileName} ({exportData.Length} bytes)"
+                };
+                importComplete = true;
+                await JS.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(exportData));
+            }
+        }
+        catch (Exception ex)
+        {
+            importResult = new ImportResult
+            {
+                IsSuccess = false,
+                Error = $"Erreur: {ex.Message}"
+            };
+            importComplete = true;
+        }
+    }
+
+    private void Reset()
+    {
+        selectedFile = null;
+        selectedFileName = null;
+        importComplete = false;
+        importResult = null;
+        activeTab = "import";
+    }
+
+    private async Task ExportAsConfigPml()
+    {
+        try
+        {
+            var exportData = await PmlImportService.ExportPmlAsync(exportOptions);
+            var configPath = Path.Combine("wwwroot", "config.pml");
+            await File.WriteAllBytesAsync(configPath, exportData);
+
+            importResult = new ImportResult
+            {
+                IsSuccess = true,
+                SuccessCount = 1,
+                Error = $"Export serveur réussi : {configPath} ({exportData.Length} bytes)"
+            };
+            importComplete = true;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            importResult = new ImportResult
+            {
+                IsSuccess = false,
+                Error = $"Erreur export serveur : {ex.Message}"
+            };
+            importComplete = true;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void Close()
+    {
+        ModalService.Close();
+    }
+}

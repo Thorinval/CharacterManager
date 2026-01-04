@@ -329,7 +329,6 @@ public class PersonnageService
             existing.PV = personnage.PV;
             existing.Role = personnage.Role;
             existing.Faction = personnage.Faction;
-            existing.Description = personnage.Description;
             existing.Selectionne = personnage.Selectionne;
             existing.TypeAttaque = personnage.TypeAttaque;
             existing.HasRelation = personnage.HasRelation;
@@ -352,6 +351,31 @@ public class PersonnageService
             _context.Personnages.Remove(personnage);
             _context.SaveChanges();
         }
+    }
+
+    public async Task<bool> UpdateCapacitesAsync(int personnageId, IEnumerable<int> capaciteIds)
+    {
+        var personnage = await _context.Personnages
+            .Include(p => p.Capacites)
+            .FirstOrDefaultAsync(p => p.Id == personnageId);
+
+        if (personnage == null)
+        {
+            return false;
+        }
+
+        var capacites = await _context.Capacites
+            .Where(c => capaciteIds.Contains(c.Id))
+            .ToListAsync();
+
+        personnage.Capacites.Clear();
+        foreach (var capacite in capacites)
+        {
+            personnage.Capacites.Add(capacite);
+        }
+
+        await _context.SaveChangesAsync();
+        return true;
     }
 
     public void DeleteAll()
@@ -461,5 +485,29 @@ public class PersonnageService
         return await _context.Pieces
             .Where(p => p.GetType() == typeof(Piece))
             .ToListAsync();
+    }
+
+    /// <summary>
+    /// Met à jour le niveau d'affection de la Lucie House (créé une entrée par défaut si absente).
+    /// </summary>
+    public async Task<int> UpdateLucieAffectionAsync(int affection)
+    {
+        var boundedAffection = affection < 0 ? 0 : affection;
+        var lucieHouse = await _context.LucieHouses.Include(static l => l.Pieces).FirstOrDefaultAsync();
+
+        if (lucieHouse == null)
+        {
+            lucieHouse = LucieHouse.CreerDefaut();
+            lucieHouse.Affection = boundedAffection;
+            _context.LucieHouses.Add(lucieHouse);
+        }
+        else
+        {
+            lucieHouse.Affection = boundedAffection;
+            _context.LucieHouses.Update(lucieHouse);
+        }
+
+        await _context.SaveChangesAsync();
+        return lucieHouse.Affection;
     }
 }

@@ -1,9 +1,14 @@
-# Roadmap  - Character Manager
+# Character Manager
 
 > **JANVIER 2026**: A faire
 
-* Associer les catégories aux personnages et lucie
-* refonte graphique
+* Associer les catégories à lucie
+* Unifier le style graphique
+* Exporter et importer les associations de capacités
+
+## 0.14.0 (4 Janvier 2026)
+
+* Associer les catégories aux personnages
 * gestion relations des personnages
 
 ## 0.11.1 (2 Janvier 2026)

@@ -1,0 +1,198 @@
+@using CharacterManager.Server.Constants
+@using Microsoft.AspNetCore.Components.Authorization
+@using CharacterManager.Server.Services
+@using Microsoft.JSInterop
+@using Microsoft.AspNetCore.Components.Forms
+@inject ProfileService ProfileService
+@inject ClientLocalizationService LocalizationService
+@inject IModalService ModalService
+@inject IJSRuntime JS
+
+<div class="modal-body">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="msr" style="font-size: 2rem; color: #0d6efd;">admin_panel_settings</span>
+        <h4 class="mb-0"><LocalizedText Key="manageUsers.title" /></h4>
+    </div>
+
+    <AuthorizeView Roles="admin">
+        <Authorized Context="authContext">
+            <div class="container-fluid px-0" style="max-width: 860px;">
+                <div class="card p-3 mb-3">
+                    <EditForm Model="@this" OnValidSubmit="CreateUser" FormName="createUserForm">
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <label class="form-label"><LocalizedText Key="manageUsers.username" /></label>
+                                <InputText class="form-control" @bind-Value="newUsername" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label"><LocalizedText Key="manageUsers.password" /></label>
+                                <InputText class="form-control" type="password" @bind-Value="newPassword" autocomplete="new-password" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label"><LocalizedText Key="manageUsers.role" /></label>
+                                <InputSelect class="form-select" @bind-Value="newRole">
+                                    <option value="utilisateur">@LocalizationService.T("manageUsers.roleUser")</option>
+                                    <option value="admin">@LocalizationService.T("manageUsers.roleAdmin")</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-success" type="submit"><LocalizedText Key="manageUsers.create" /></button>
+                            <span class="text-muted ms-2">@message</span>
+                        </div>
+                    </EditForm>
+                    @if (!string.IsNullOrEmpty(tempPassword))
+                    {
+                        <div class="alert alert-info mt-3" role="alert">
+                            <strong><LocalizedText Key="manageUsers.tempPassword" /></strong>
+                            <code>@tempPassword</code>
+                            <button class="btn btn-sm btn-outline-primary ms-2" @onclick="CopyTempPassword"><LocalizedText Key="manageUsers.copy" /></button>
+                        </div>
+                    }
+                </div>
+                <div class="card p-3">
+                    <h5><LocalizedText Key="manageUsers.existing" /></h5>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th><LocalizedText Key="manageUsers.table.name" /></th>
+                                <th><LocalizedText Key="manageUsers.table.role" /></th>
+                                <th><LocalizedText Key="manageUsers.table.lockout" /></th>
+                                <th style="width:220px;"><LocalizedText Key="manageUsers.table.actions" /></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (users == null)
+                            {
+                                <tr><td colspan="4"><LocalizedText Key="common.loading" /></td></tr>
+                            }
+                            else if (!users.Any())
+                            {
+                                <tr><td colspan="4"><LocalizedText Key="manageUsers.noUsers" /></td></tr>
+                            }
+                            else
+                            {
+                                @foreach (var u in users)
+                                {
+                                    <tr>
+                                        <td>@u.Username</td>
+                                        <td>
+                                            <select class="form-select form-select-sm" @onchange="(e)=>ChangeRole(u.Username, e.Value?.ToString() ?? u.Role)">
+                                                <option value="utilisateur" selected="@(u.Role=="utilisateur")">@LocalizationService.T("manageUsers.roleUser")</option>
+                                                <option value="admin" selected="@(u.Role=="admin")">@LocalizationService.T("manageUsers.roleAdmin")</option>
+                                            </select>
+                                        </td>
+                                        <td>@(u.LockoutUntil.HasValue ? u.LockoutUntil.Value.ToLocalTime().ToString("g") : "-")</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-secondary" @onclick="() => ResetPassword(u.Username)"><LocalizedText Key="manageUsers.reset" /></button>
+                                                <button class="btn btn-outline-danger" @onclick="() => DeleteUser(u.Username)"><LocalizedText Key="common.delete" /></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </Authorized>
+        <NotAuthorized>
+            <div class="alert alert-warning mb-0">
+                <LocalizedText Key="manageUsers.accessDenied" />
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private string newUsername { get; set; } = string.Empty;
+
+    [SupplyParameterFromForm]
+    private string newPassword { get; set; } = string.Empty;
+
+    [SupplyParameterFromForm]
+    private string newRole { get; set; } = "utilisateur";
+    private string message = string.Empty;
+    private string? tempPassword = null;
+    private List<CharacterManager.Server.Models.Profile>? users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task CreateUser()
+    {
+        tempPassword = null;
+        if (string.IsNullOrWhiteSpace(newUsername) || string.IsNullOrWhiteSpace(newPassword))
+        {
+            message = LocalizationService.T("manageUsers.messageRequired");
+            return;
+        }
+        var strength = ProfileService.ValidatePasswordStrength(newPassword);
+        if (!strength.ok)
+        {
+            message = string.Format(LocalizationService.T("manageUsers.messageWeak"), strength.error);
+            return;
+        }
+        var ok = await ProfileService.CreateUserAsync(newUsername, newPassword, newRole);
+        message = ok ? LocalizationService.T("manageUsers.messageCreated") : LocalizationService.T("manageUsers.messageExists");
+        if (ok)
+        {
+            newUsername = string.Empty;
+            newPassword = string.Empty;
+            newRole = "utilisateur";
+            await LoadUsers();
+        }
+    }
+
+    private async Task LoadUsers()
+    {
+        users = await ProfileService.GetAllAsync();
+    }
+
+    private async Task ChangeRole(string username, string role)
+    {
+        await ProfileService.UpdateRoleAsync(username, role);
+        message = LocalizationService.T("manageUsers.messageRoleUpdated");
+    }
+
+    private async Task ResetPassword(string username)
+    {
+        var pwd = Guid.NewGuid().ToString("N").Substring(0, 12) + "!A1";
+        var ok = await ProfileService.ResetPasswordAsync(username, pwd);
+        if (ok)
+        {
+            tempPassword = pwd;
+            message = string.Format(LocalizationService.T("manageUsers.messageReset"), username);
+        }
+        else
+        {
+            message = LocalizationService.T("manageUsers.messageResetFailed");
+        }
+    }
+
+    private async Task CopyTempPassword()
+    {
+        if (!string.IsNullOrEmpty(tempPassword))
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", tempPassword);
+            message = LocalizationService.T("manageUsers.messageCopied");
+        }
+    }
+
+    private async Task DeleteUser(string username)
+    {
+        tempPassword = null;
+        await ProfileService.DeleteAsync(username);
+        message = LocalizationService.T("manageUsers.messageDeleted");
+        await LoadUsers();
+    }
+
+    private void Close()
+    {
+        ModalService.Close();
+    }
+}

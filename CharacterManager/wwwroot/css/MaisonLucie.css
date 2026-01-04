@@ -37,27 +37,44 @@
     align-items: center;
     gap: 12px;
     padding: 12px 20px;
-    background: linear-gradient(135deg, rgba(255, 105, 180, 0.1), rgba(219, 112, 147, 0.1));
-    border: 2px solid rgba(219, 112, 147, 0.3);
+    background: linear-gradient(135deg, #ff7aa2 0%, #e11d48 100%);
+    border: 2px solid #e11d48;
     border-radius: 12px;
     white-space: nowrap;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(225, 29, 72, 0.25);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
 }
 
 .affection-badge i {
     font-size: 1.5rem;
-    color: #db7093;
+    color: #fff;
 }
 
 .affection-value {
     font-size: 1.6rem;
     font-weight: 700;
-    color: #db7093;
+    color: #fff;
 }
 
 .affection-label {
     font-size: 0.85rem;
-    color: #db7093;
-    opacity: 0.9;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.affection-badge:hover,
+.affection-badge:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(225, 29, 72, 0.35);
+    filter: brightness(1.03);
+    outline: none;
+}
+
+.affection-badge:active {
+    transform: translateY(0);
+    box-shadow: 0 6px 16px rgba(225, 29, 72, 0.25);
+    filter: brightness(0.97);
 }
 
 .pieces-grid {
@@ -320,6 +337,40 @@
     color: #5d4037;
     font-size: 1.3rem;
     font-weight: 600;
+}
+
+.affection-editor {
+    margin-top: 12px;
+    padding: 12px;
+    background: #fff5f7;
+    border: 1px solid rgba(225, 29, 72, 0.2);
+    border-radius: 10px;
+    box-shadow: 0 6px 16px rgba(225, 29, 72, 0.08);
+}
+
+.affection-editor-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.affection-editor .input-group-text {
+    background: #ffe3ea;
+    border: 1px solid rgba(225, 29, 72, 0.25);
+    color: #c11b3d;
+    font-weight: 700;
+}
+
+.affection-editor .form-control {
+    max-width: 140px;
+    border: 1px solid rgba(225, 29, 72, 0.25);
+}
+
+.affection-editor-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
 .stats-grid {

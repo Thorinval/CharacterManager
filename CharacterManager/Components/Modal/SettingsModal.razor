@@ -1,0 +1,167 @@
+@using CharacterManager.Server.Constants
+@using CharacterManager.Server.Data
+@using CharacterManager.Server.Models
+@using CharacterManager.Server.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
+@inject AppVersionService AppVersionService
+@inject ClientLocalizationService LocalizationService
+@inject ApplicationDbContext AppDb
+@inject IJSRuntime JSRuntime
+@inject ProfileService ProfileService
+@inject AdultModeNotificationService AdultModeNotification
+@inject IModalService ModalService
+
+<link rel="stylesheet" href="/css/Settings.css" />
+
+<div class="modal-body">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="msr" style="font-size: 2rem; color: #0d6efd;">settings</span>
+        <h4 class="mb-0"><LocalizedText Key="settings.title" /></h4>
+    </div>
+
+    <AuthorizeView>
+        <Authorized Context="authContext">
+            <div class="settings-container">
+                <div class="settings-section">
+                    <div class="section-header">
+                        <h2><LocalizedText Key="settings.title" /></h2>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <h3><LocalizedText Key="settings.language" /></h3>
+                            <p class="setting-description">
+                                <LocalizedText Key="settings.languageDescription" />
+                            </p>
+                        </div>
+                        <div class="setting-control">
+                            <select class="form-select" @bind="currentLanguage" @bind:after="OnLanguageChanged">
+                                @foreach (var lang in availableLanguages)
+                                {
+                                    <option value="@lang.Code">@lang.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="section-header">
+                        <h2><LocalizedText Key="settings.contentMode" /></h2>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <h3><LocalizedText Key="settings.adultMode" /></h3>
+                            <p class="setting-description">
+                                <LocalizedText Key="settings.adultModeDescription" />
+                            </p>
+                        </div>
+                        <div class="setting-control">
+                            <div class="form-check form-switch">
+                                <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    id="adultModeToggle"
+                                    @bind:get="isAdultModeEnabled"
+                                    @bind:set="async (value) => { isAdultModeEnabled = value; await OnAdultModeChanged(); }"
+                                    disabled="@(!IsAdmin)" />
+                                <label class="form-check-label" for="adultModeToggle">
+                                    @(isAdultModeEnabled ? LocalizationService.T("settings.enabled") : LocalizationService.T("settings.disabled"))
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Authorized>
+        <NotAuthorized>
+            <div class="alert alert-warning mb-0">
+                <LocalizedText Key="settings.signInPrompt" />
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
+
+    private Profile? currentProfile;
+    private string userRole = "utilisateur";
+    public bool IsAdmin => string.Equals(userRole, "admin", StringComparison.OrdinalIgnoreCase);
+
+    private bool isAdultModeEnabled = true;
+    private string currentLanguage = "fr";
+    private string appVersion = "Unknown";
+    private List<LanguageOption> availableLanguages = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateTask;
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            var username = authState.User.Identity!.Name ?? "";
+            currentProfile = await ProfileService.GetOrCreateAsync(username);
+            isAdultModeEnabled = currentProfile.AdultMode;
+            currentLanguage = currentProfile.Language ?? "fr";
+            userRole = authState.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "utilisateur";
+        }
+
+        appVersion = AppVersionService.GetAppVersion();
+        await LocalizationService.InitializeAsync(currentLanguage);
+        
+        var locService = new LocalizationService(new HttpClient(), null!);
+        availableLanguages = locService.GetAvailableLanguages();
+    }
+
+    private async Task OnAdultModeChanged()
+    {
+        if (currentProfile != null)
+        {
+            currentProfile.AdultMode = isAdultModeEnabled;
+            await ProfileService.UpdateAsync(currentProfile);
+            AdultModeNotification.SetAdultMode(isAdultModeEnabled);
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnLanguageChanged()
+    {
+        var newLanguage = currentLanguage;
+
+        if (currentProfile != null)
+        {
+            currentProfile.Language = newLanguage;
+            await ProfileService.UpdateAsync(currentProfile);
+        }
+
+        await LocalizationService.SetLanguageAsync(newLanguage);
+
+        var settings = await AppDb.AppSettings.OrderBy(x => x.Id).FirstOrDefaultAsync();
+        if (settings == null)
+        {
+            settings = new CharacterManager.Server.Models.AppSettings
+            {
+                Language = newLanguage,
+                IsAdultModeEnabled = isAdultModeEnabled
+            };
+            AppDb.AppSettings.Add(settings);
+        }
+        else
+        {
+            settings.Language = newLanguage;
+        }
+        await AppDb.SaveChangesAsync();
+
+        StateHasChanged();
+        await JSRuntime.InvokeVoidAsync("eval", "window.location.reload(true);");
+    }
+
+    private void Close()
+    {
+        ModalService.Close();
+    }
+}

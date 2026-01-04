@@ -1,6 +1,7 @@
 ﻿@using CharacterManager.Components.Layout
 @using CharacterManager
 @using CharacterManager.Components
+@using CharacterManager.Components.Pages
 @using CharacterManager.Server.Services
 @using CharacterManager.Server.Constants
 @using Microsoft.AspNetCore.Components.Authorization
@@ -62,13 +63,6 @@
                 <span>Capacités</span>
             </NavLink>
 
-            <NavLink class="nav-rail-item" href="import-export-pml">
-                <i class="bi bi-upload"></i>
-                <span>
-                    <LocalizedText Key="navigation.importExportPml" />
-                </span>
-            </NavLink>
-
             <NavLink class="nav-rail-item" href="historique">
                 <i class="bi bi-graph-up"></i>
                 <span>
@@ -90,17 +84,6 @@
                 </span>
             </NavLink>
 
-            <AuthorizeView Roles="admin">
-                <Authorized>
-                    <NavLink class="nav-rail-item" href="admin/users">
-                        <i class="bi bi-shield-lock-fill"></i>
-                        <span>
-                            <LocalizedText Key="navigation.manageUsers" />
-                        </span>
-                    </NavLink>
-                </Authorized>
-            </AuthorizeView>
-
         </nav>
     </div>
 
@@ -112,10 +95,19 @@
             <!-- ZONE GAUCHE -->
             <div class="top-left">
                 <span class="msr" @onclick="ShowAboutModal" title="À propos">info</span>
-
                 <span class="msr" @onclick="ShowRoadmapModal" title="Feuille de route">flag</span>
                 <span class="msr" @onclick="ShowChangelogModal" title="Notes de version">update</span>
                 <span class="msr" @onclick="GoSettings" title="Paramètres">settings</span>
+                <AuthorizeView Roles="admin">
+                    <Authorized>
+                        <span class="msr" @onclick="OpenManageUsers" title="Gestion des utilisateurs">admin_panel_settings</span>
+                    </Authorized>
+                </AuthorizeView>
+                <AuthorizeView>
+                    <Authorized>
+                        <span class="msr" @onclick="OpenImportExport" title="Import / Export PML">cloud_upload</span>
+                    </Authorized>
+                </AuthorizeView>
 
                 <span class="badge">v @VersionService.GetAppVersion()</span>
             </div>
@@ -187,6 +179,16 @@
         ModalService.Open<ChangelogModal>(size: ModalSize.XL);
     }
 
+    private void OpenManageUsers()
+    {
+        ModalService.Open<ManageUsersModal>(size: ModalSize.Large);
+    }
+
+    private void OpenImportExport()
+    {
+        ModalService.Open<ImportExportPmlModal>(size: ModalSize.XL);
+    }
+
     private Profile? currentProfile;
     private string currentLanguage = AppConstants.Defaults.DefaultLanguage.ToUpper();
 
@@ -249,6 +251,6 @@
 
     private void GoSettings()
     {
-        Navigation.NavigateTo("settings");
+        ModalService.Open<SettingsModal>(size: ModalSize.Large);
     }
 }

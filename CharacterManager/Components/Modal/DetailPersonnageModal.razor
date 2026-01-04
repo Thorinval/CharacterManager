@@ -18,6 +18,9 @@
         <div class="page-header-banner mb-3">
             <h3 class="text-center">@currentPerso.Nom</h3>
             <div class="d-flex justify-content-center gap-2">
+                <button @onclick="OpenCapacitesModal" class="btn btn-outline-secondary">
+                    <span class="oi oi-list-rich"></span> Capacités
+                </button>
                 @if (!isEditing)
                 {
                     <button @onclick="EnterEditMode" class="btn btn-primary edit-button">
@@ -157,15 +160,27 @@
                                 </div>
                             </div>
 
-                            @if (!string.IsNullOrEmpty(currentPerso.Description))
-                            {
-                                <div class="row mt-4">
-                                    <div class="col-12">
-                                        <h5 class="section-title">@AppConstants.XmlElements.Description</h5>
-                                        <p class="description-text">@currentPerso.Description</p>
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5 class="section-title mb-0">Capacités</h5>
                                     </div>
+                                    @if (currentPerso.Capacites?.Any() == true)
+                                    {
+                                        <div class="d-flex flex-wrap gap-2">
+                                            @foreach (var cap in currentPerso.Capacites.OrderBy(c => c.Nom))
+                                            {
+                                                <span class="badge bg-info text-dark">@cap.Nom</span>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted mb-0">Aucune capacité associée.</p>
+                                    }
                                 </div>
-                            }
+                            </div>
+
                         }
                         else
                         {
@@ -292,15 +307,6 @@
                                     }
                                 </div>
                             </div>
-
-                            <div class="row mt-3">
-                                <div class="col-12">
-                                    <div class="mb-3">
-                                        <label class="form-label">@AppConstants.XmlElements.Description</label>
-                                        <textarea class="form-control" @bind="editedPerso.Description" rows="4"></textarea>
-                                    </div>
-                                </div>
-                            </div>
                         }
                     </div>
                 </div>
@@ -358,11 +364,43 @@ else
             Faction = currentPerso.Faction,
             TypeAttaque = currentPerso.TypeAttaque,
             Selectionne = currentPerso.Selectionne,
-            Description = currentPerso.Description,
             ImageUrlHeader = currentPerso.ImageUrlHeader,
             HasRelation = currentPerso.HasRelation,
-            NivRelation = currentPerso.NivRelation
+            NivRelation = currentPerso.NivRelation,
+            Capacites = currentPerso.Capacites.OrderBy(c => c.Nom).ToList()
         };
+    }
+
+    private void OpenCapacitesModal()
+    {
+        if (currentPerso == null)
+        {
+            return;
+        }
+
+        ModalService.Open<PersonnageCapacitesModal>(
+            new()
+            {
+                [nameof(PersonnageCapacitesModal.PersonnageId)] = currentPerso.Id,
+                [nameof(PersonnageCapacitesModal.OnSaved)] = EventCallback.Factory.Create<List<Capacite>>(this, UpdateCapacitesFromModal)
+            },
+            ModalSize.Large);
+    }
+
+    private Task UpdateCapacitesFromModal(List<Capacite> updated)
+    {
+        if (currentPerso != null)
+        {
+            currentPerso.Capacites = updated;
+        }
+
+        if (isEditing)
+        {
+            editedPerso.Capacites = updated;
+        }
+
+        StateHasChanged();
+        return Task.CompletedTask;
     }
 
     private async Task SaveChanges()

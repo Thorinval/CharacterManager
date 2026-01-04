@@ -97,8 +97,7 @@ public class Personnage
         return ImageUrlPreview;
     }
 
-    // Description et capacités
-    public string Description { get; set; } = string.Empty;
+    // Capacités associées
     public List<Capacite> Capacites { get; set; } = new();
 
     // Type d'attaque

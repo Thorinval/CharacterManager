@@ -92,9 +92,6 @@ public class CsvImportService(PersonnageService personnageService, ApplicationDb
         personnage.Selectionne = ParseBool(parts[10]);
         personnage.Faction = ParseFaction(parts[11]);
 
-        // Description par défaut si absente
-        personnage.Description = personnage.Description ?? $"Personnage {personnage.Nom}";
-
         return personnage;
     }
 
@@ -116,7 +113,6 @@ public class CsvImportService(PersonnageService personnageService, ApplicationDb
             existing.Faction = personnage.Faction;
             existing.Selectionne = personnage.Selectionne;
             existing.TypeAttaque = personnage.TypeAttaque;
-            existing.Description = personnage.Description;
             _context.Personnages.Update(existing);
         }
         else

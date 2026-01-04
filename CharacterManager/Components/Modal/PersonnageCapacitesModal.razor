@@ -1,0 +1,176 @@
+@using CharacterManager.Server.Models
+@using CharacterManager.Server.Services
+@using Microsoft.AspNetCore.Components
+
+@inject CapaciteService CapaciteService
+@inject PersonnageService PersonnageService
+@inject IModalService ModalService
+
+<div class="modal-body p-0">
+    <div class="capacites-header d-flex align-items-center justify-content-between px-3 py-2">
+        <div class="d-flex align-items-baseline gap-2 text-white">
+            <div class="fw-bold mb-0">Capacités du personnage</div>
+            @if (!string.IsNullOrEmpty(personnageName))
+            {
+                <small class="text-white-50">(@personnageName)</small>
+            }
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <button class="btn btn-outline-light btn-sm" @onclick="Close">Annuler</button>
+            <button class="btn btn-light btn-sm" @onclick="SaveAsync" disabled="@isSaving">
+                @if (isSaving)
+                {
+                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                }
+                Enregistrer
+            </button>
+        </div>
+    </div>
+
+    <div class="p-3 capacites-modal-body">
+        @if (isLoading)
+        {
+            <div class="d-flex align-items-center gap-2">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span>Chargement des capacités…</span>
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+        else
+        {
+            <div class="list-group mb-0 capacites-scroll">
+                @foreach (var cap in allCapacites)
+                {
+                    var isChecked = selectedCapaciteIds.Contains(cap.Id);
+                    <label class="list-group-item d-flex align-items-center gap-2">
+                        <input type="checkbox" class="form-check-input" checked="@isChecked" @onchange="(args) => ToggleCapacite(cap.Id, args.Value)" />
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold">@cap.Nom</div>
+                            @if (!string.IsNullOrWhiteSpace(cap.Description))
+                            {
+                                <small class="text-muted">@cap.Description</small>
+                            }
+                        </div>
+                    </label>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+.capacites-header {
+    background: #0d6efd;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.capacites-modal-body {
+    max-height: 70vh;
+}
+
+.capacites-scroll {
+    max-height: 65vh;
+    overflow: auto;
+}
+</style>
+
+@code {
+    [Parameter]
+    public int PersonnageId { get; set; }
+
+    [Parameter]
+    public EventCallback<List<Capacite>> OnSaved { get; set; }
+
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private string personnageName = string.Empty;
+    private string errorMessage = string.Empty;
+    private List<Capacite> allCapacites = [];
+    private HashSet<int> selectedCapaciteIds = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = string.Empty;
+
+            var personnage = await PersonnageService.GetByIdAsync(PersonnageId);
+            if (personnage == null)
+            {
+                errorMessage = "Personnage introuvable.";
+                return;
+            }
+
+            personnageName = personnage.Nom;
+            selectedCapaciteIds = personnage.Capacites.Select(c => c.Id).ToHashSet();
+
+            allCapacites = await CapaciteService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erreur lors du chargement : {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ToggleCapacite(int capaciteId, object? value)
+    {
+        if (value is bool isChecked && isChecked)
+        {
+            selectedCapaciteIds.Add(capaciteId);
+        }
+        else
+        {
+            selectedCapaciteIds.Remove(capaciteId);
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (isSaving)
+        {
+            return;
+        }
+
+        try
+        {
+            isSaving = true;
+            var success = await PersonnageService.UpdateCapacitesAsync(PersonnageId, selectedCapaciteIds);
+            if (!success)
+            {
+                errorMessage = "Impossible de mettre à jour les capacités.";
+                return;
+            }
+
+            var updated = allCapacites.Where(c => selectedCapaciteIds.Contains(c.Id)).ToList();
+            if (OnSaved.HasDelegate)
+            {
+                await OnSaved.InvokeAsync(updated);
+            }
+
+            ModalService.Close();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erreur lors de l'enregistrement : {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Close() => ModalService.Close();
+}

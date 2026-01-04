@@ -1,9 +1,29 @@
 @using Markdig
 
 <div class="modal-body">
-    <div class="app-icon mb-3 text-center">
-        <i class="bi bi-info-circle" style="font-size: 4rem; color: #0d6efd;"></i>
-    </div>
+    @if (!string.IsNullOrEmpty(Title))
+    {
+        <div class="d-flex align-items-center gap-2 mb-3">
+            @if (!string.IsNullOrEmpty(IconName))
+            {
+                <span class="msr" style="font-size: 2rem; color: #0d6efd;">@IconName</span>
+            }
+            <h4 class="mb-0">@Title</h4>
+        </div>
+    }
+    else
+    {
+        <div class="app-icon mb-3 text-center">
+            @if (!string.IsNullOrEmpty(IconName))
+            {
+                <span class="msr" style="font-size: 4rem; color: #0d6efd;">@IconName</span>
+            }
+            else
+            {
+                <i class="bi bi-info-circle" style="font-size: 4rem; color: #0d6efd;"></i>
+            }
+        </div>
+    }
     <div class="form-control changelog-content" style="max-height: 60vh; overflow-y: auto;">
         @((MarkupString)ContentHtml)
     </div>
@@ -11,6 +31,8 @@
 
 @code {
     [Parameter] public string FileName { get; set; } = string.Empty;
+    [Parameter] public string IconName { get; set; } = string.Empty;
+    [Parameter] public string Title { get; set; } = string.Empty;
     [Parameter] public string NotFoundMessage { get; set; } = "Aucun fichier trouvé.";
     [Parameter] public string ErrorMessage { get; set; } = "Erreur lors du chargement du fichier.";
 

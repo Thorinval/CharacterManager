@@ -219,7 +219,6 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
                 writer.WriteElementString("Role", personnage.Role.ToString());
                 writer.WriteElementString("Faction", personnage.Faction.ToString());
                 writer.WriteElementString("Selectionne", personnage.Selectionne.ToString());
-                writer.WriteElementString("Description", personnage.Description ?? "");
                 writer.WriteEndElement();
             }
             writer.WriteEndElement();

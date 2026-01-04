@@ -21,7 +21,7 @@
         @if (lucieHouse != null)
         {
             <div class="d-flex align-items-center gap-3">
-                <div class="affection-badge">
+                <div class="affection-badge" role="button" tabindex="0" title="Modifier l'affection" @onclick="StartAffectionEdit">
                     <i class="bi bi-heart-fill"></i>
                     <span class="affection-value">@lucieHouse.Affection</span>
                     <span class="affection-label">Affection</span>
@@ -37,6 +37,32 @@
                     <InputFile id="lucieImportFile" class="d-none" accept=".pml,.xml" OnChange="HandleLucieImport" />
                 </div>
             </div>
+
+            @if (editingAffection)
+            {
+                <div class="affection-editor">
+                    <div class="affection-editor-row">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-heart-fill"></i></span>
+                            <InputNumber @bind-Value="affectionDraft" class="form-control" min="0" step="1" />
+                        </div>
+                        <div class="affection-editor-actions">
+                            <button class="btn btn-primary" @onclick="SaveAffectionAsync" disabled="@savingAffection">
+                                @if (savingAffection)
+                                {
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                }
+                                <span class="ms-1">Enregistrer</span>
+                            </button>
+                            <button class="btn btn-outline-secondary" @onclick="CancelAffectionEdit" disabled="@savingAffection">Annuler</button>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(affectionError))
+                    {
+                        <div class="text-danger small mt-1">@affectionError</div>
+                    }
+                </div>
+            }
         }
     </div>
 
@@ -188,6 +214,10 @@
     private List<Server.Models.Piece> pieces = new();
     private bool lucieImporting;
     private bool lucieExporting;
+    private bool editingAffection;
+    private int affectionDraft;
+    private bool savingAffection;
+    private string? affectionError;
 
     [Inject]
     public PmlImportService PmlImportService { get; set; } = null!;
@@ -210,6 +240,7 @@
             {
                 // Récupérer les pièces avec leurs aspects
                 pieces = await PersonnageService.GetLuciePiecesAsync();
+                affectionDraft = lucieHouse.Affection;
             }
             else
             {
@@ -285,6 +316,58 @@
         finally
         {
             lucieImporting = false;
+        }
+    }
+
+    private void StartAffectionEdit()
+    {
+        if (lucieHouse == null)
+        {
+            return;
+        }
+
+        affectionDraft = lucieHouse.Affection;
+        affectionError = null;
+        editingAffection = true;
+    }
+
+    private void CancelAffectionEdit()
+    {
+        editingAffection = false;
+        affectionError = null;
+    }
+
+    private async Task SaveAffectionAsync()
+    {
+        if (lucieHouse == null || savingAffection)
+        {
+            return;
+        }
+
+        savingAffection = true;
+        affectionError = null;
+
+        try
+        {
+            var updatedValue = await PersonnageService.UpdateLucieAffectionAsync(affectionDraft);
+            // Rafraîchir depuis la source pour éviter tout décalage d'état
+            await LoadLucieHouseDataAsync();
+            if (lucieHouse != null)
+            {
+                lucieHouse.Affection = updatedValue;
+                affectionDraft = updatedValue;
+            }
+
+            editingAffection = false;
+        }
+        catch (Exception ex)
+        {
+            affectionError = $"Erreur lors de la mise à jour : {ex.Message}";
+        }
+        finally
+        {
+            savingAffection = false;
+            await InvokeAsync(StateHasChanged);
         }
     }
 }
