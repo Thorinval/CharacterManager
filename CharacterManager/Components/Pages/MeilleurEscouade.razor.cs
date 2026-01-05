@@ -44,7 +44,7 @@ public partial class MeilleurEscouade
         StateHasChanged();
     }
     
-    private void NavigateToDetail(int id, string filter, string? returnUrl = null)
+    private void NavigateToDetail(int id, string filter)
     {
         Console.WriteLine($"[MeilleurEscouade] NavigateToDetail appelé avec ID={id}, filter={filter}");
         var perso = topMercenaires.Concat(topAndroides).FirstOrDefault(p => p.Id == id) ?? topCommandant;
@@ -69,7 +69,7 @@ public partial class MeilleurEscouade
     {
         if (topCommandant != null)
         {
-            NavigateToDetail(topCommandant.Id, TemplateEscouade.GetFilterForCommandants(), "/meilleur-escouade");
+            NavigateToDetail(topCommandant.Id, TemplateEscouade.GetFilterForCommandants());
         }
     }
 

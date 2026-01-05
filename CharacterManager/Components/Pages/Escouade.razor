@@ -36,12 +36,11 @@
                                     TypePersonnage.Mercenaire).OrderByDescending(p => p.Puissance))
                     {
                         var currentId = perso.Id;
-                        var returnPath = AppConstants.Routes.Escouade;
                         <div class="escouade-member-preview clickable"
-                            @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForEscouade(), returnPath))"
+                            @onclick="@(() => NavigateToDetail(currentId))"
                             @onclick:stopPropagation="true">
                             <img src="@perso.ImageUrlSelected" alt="@perso.Nom" class="escouade-image"
-                                @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForEscouade(), returnPath))"
+                                @onclick="@(() => NavigateToDetail(currentId))"
                                 @onclick:stopPropagation="true" />
                             <div class="escouade-member-name">@perso.Nom</div>
                             <div class="escouade-member-power">@perso.Puissance</div>
@@ -70,9 +69,8 @@ else
         @foreach (var perso in commandants)
         {
             var currentId = perso.Id;
-            var returnPath = AppConstants.Routes.Escouade;
             <div class="personnage-card clickable"
-                @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForCommandants(), returnPath))">
+                @onclick="@(() => NavigateToDetail(currentId))">
                 <img src="@perso.ImageUrlPreview" alt="@perso.Nom" class="personnage-card-image" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
@@ -96,9 +94,8 @@ else
         @foreach (var perso in mercenaires)
         {
             var currentId = perso.Id;
-            var returnPath = AppConstants.Routes.Escouade;
             <div class="personnage-card clickable"
-                @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForMercenaires(), returnPath))">
+                @onclick="@(() => NavigateToDetail(currentId))">
                 <img src="@perso.GetImageUrl(true)" alt="@perso.Nom" class="personnage-card-image" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>
@@ -122,9 +119,8 @@ else
         @foreach (var perso in androides)
         {
             var currentId = perso.Id;
-            var returnPath = AppConstants.Routes.Escouade;
             <div class="personnage-card clickable"
-                @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForAndroides(), returnPath))">
+                @onclick="@(() => NavigateToDetail(currentId))">
                 <img src="@perso.GetImageUrl(true)" alt="@perso.Nom" class="personnage-card-image" />
                 <div class="personnage-card-info">
                     <div class="personnage-name">@perso.Nom</div>

@@ -66,7 +66,7 @@ public partial class Escouade
         StateHasChanged();
     }
 
-    private void NavigateToDetail(int id, string filter, string? returnUrl = null)
+    private void NavigateToDetail(int id)
     {
         ModalService.Open<Modal.DetailPersonnageModal>(
             new Dictionary<string, object> { { "PersonnageId", id } },
@@ -79,23 +79,23 @@ public partial class Escouade
     {
         if (commandants.Count != 0)
         {
-            var commandant = commandants.First();
+            var commandant = commandants.First(c => c.Selectionne);
             return TemplateEscouade.ResolveHeaderImage(commandant.Nom);
 
         }
         return AppConstants.Paths.GenericCommandantHeader;
     }
 
-    private void NavigateToCommandantDetail()
+    internal void NavigateToCommandantDetail()
     {
         if (commandants.Count != 0)
         {
-            var cmd = commandants.First();
-            NavigateToDetail(cmd.Id, TemplateEscouade.GetFilterForCommandants(), "/escouade");
+            var cmd = commandants.First(c => c.Selectionne);
+            NavigateToDetail(cmd.Id);
         }
     }
 
-    private void SavePersonnage()
+    internal void SavePersonnage()
     {
         if (currentPersonnage.Id > 0)
         {
@@ -109,12 +109,12 @@ public partial class Escouade
         CloseModal();
     }
 
-    private void ChangePuissanceEscouade(int delta)
+    internal void ChangePuissanceEscouade(int delta)
     {
         currentPersonnage.Puissance = Math.Max(0, currentPersonnage.Puissance + delta);
     }
 
-    private static int GetPiecePower(Piece piece) => piece.Puissance;
+    internal static int GetPiecePower(Piece piece) => piece.Puissance;
 
     private void EnsureLuciePieceAspectColumns()
     {
