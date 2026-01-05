@@ -21,16 +21,17 @@ public partial class Historique
     [Inject]
     public IModalService ModalService { get; set; } = null!;
 
-    private List<HistoriqueClassement>? historiques;
+    private const string Identifier = "alert";
+    internal List<HistoriqueClassement>? historiques;
     private DateTime dateDebut = DateTime.Today.AddMonths(-1);
     private DateTime dateFin = DateTime.Today.AddDays(1);
-    private int nbMercenairesMax = 0;
-    private int nbAndroidsMax = 0;
-    private InputFile? inputFileRef;
+    internal int nbMercenairesMax = 0;
+    internal int nbAndroidsMax = 0;
+    internal InputFile? inputFileRef;
 
-    private Personnage Commandant => historique.Commandant ?? new Personnage { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
+    internal Personnage Commandant => historique.Commandant ?? new Personnage { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
 
-    private HistoriqueClassement historique = new();
+    internal HistoriqueClassement historique = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -43,13 +44,13 @@ public partial class Historique
         MettreAJourTaillesColonnes();
     }
 
-    private async Task FiltrerHistorique()
+    internal async Task FiltrerHistorique()
     {
         historiques = await HistoriqueService.GetHistoriqueAsync(dateDebut, dateFin.AddDays(1));
         MettreAJourTaillesColonnes();
     }
 
-    private async Task ReinitialiserFiltres()
+    internal async Task ReinitialiserFiltres()
     {
         dateDebut = DateTime.Today.AddMonths(-1);
         dateFin = DateTime.Today.AddDays(1);
@@ -67,13 +68,13 @@ public partial class Historique
             : 0;
     }
 
-    private async Task SupprimerEnregistrement(int id)
+    internal async Task SupprimerEnregistrement(int id)
     {
         await HistoriqueService.SupprimerEnregistrementAsync(id);
         await ChargerHistorique();
     }
 
-    private async Task ViderHistorique()
+    internal async Task ViderHistorique()
     {
         if (await JSRuntime.InvokeAsync<bool>("confirm", "Êtes-vous CERTAIN de vouloir vider tout l'historique? Cette action est irréversible."))
         {
@@ -82,7 +83,7 @@ public partial class Historique
         }
     }
 
-    private static string GetImageUrl(string nomPersonnage)
+    internal static string GetImageUrl(string nomPersonnage)
     {
         // Normalize the name: remove spaces, convert to lowercase
         var normalized = nomPersonnage.ToLower().Replace(" ", "_").Replace("'", "");
@@ -91,7 +92,7 @@ public partial class Historique
 
     // ...removed duplicate RenderStars, use TemplateEscouade.GetRankStars instead
 
-    private async Task ExporterHistorique()
+    internal async Task ExporterHistorique()
     {
         try
         {
@@ -109,17 +110,17 @@ public partial class Historique
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de l'export: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync(Identifier, $"Erreur lors de l'export: {ex.Message}");
         }
     }
 
-    private async Task ImporterHistorique()
+    internal async Task ImporterHistorique()
     {
         // Déclenche le sélecteur de fichier XML caché
         await JSRuntime.InvokeVoidAsync("eval", "document.getElementById('historiqueFileInput')?.click();");
     }
 
-    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    internal async Task HandleFileSelected(InputFileChangeEventArgs e)
     {
         var file = e.File;
         if (file == null)
@@ -131,7 +132,7 @@ public partial class Historique
 
         if (!isSupported)
         {
-            await JSRuntime.InvokeVoidAsync("alert", "Veuillez sélectionner un fichier PML.");
+            await JSRuntime.InvokeVoidAsync(Identifier, "Veuillez sélectionner un fichier PML.");
             return;
         }
 
@@ -162,16 +163,16 @@ public partial class Historique
                 importMessage += $"\nDétails (aperçu):\n{preview}";
             }
 
-            await JSRuntime.InvokeVoidAsync("alert", importMessage);
+            await JSRuntime.InvokeVoidAsync(Identifier, importMessage);
             await ChargerHistorique();
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de l'import: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync(Identifier, $"Erreur lors de l'import: {ex.Message}");
         }
     }
 
-    private Task ShowCreerClassementModalAsync()
+    internal Task ShowCreerClassementModalAsync()
     {
         var parameters = new Dictionary<string, object>
         {
@@ -182,7 +183,7 @@ public partial class Historique
         return Task.CompletedTask;
     }
 
-    private void EditEnregistrement(HistoriqueClassement historique)
+    internal void EditEnregistrement(HistoriqueClassement historique)
     {
         var parameters = new Dictionary<string, object>
         {

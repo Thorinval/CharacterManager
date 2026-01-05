@@ -728,7 +728,7 @@ public class PmlImportService(ApplicationDbContext context)
 
             writer.WriteStartElement(AppConstants.XmlElements.Inventaire);
 
-            WritePersonnageDatas(personnages, writer);
+            WritePersonnagesDatas(personnages, writer);
 
             // Export Lucie House as part of the inventory payload (no extra checkbox/UI toggle)
             var lucieHouse = _context.LucieHouses.Include(l => l.Pieces).FirstOrDefault();
@@ -787,19 +787,16 @@ public class PmlImportService(ApplicationDbContext context)
         writer.WriteEndElement();
     }
 
-    private static void WritePersonnageDatas(IEnumerable<Personnage> personnages, System.Xml.XmlWriter writer)
+    private static void WritePersonnagesDatas(IEnumerable<Personnage> personnages, System.Xml.XmlWriter writer)
     {
         foreach (var personnage in personnages)
         {
+            writer.WriteStartElement(AppConstants.XmlElements.Personnage);
             WritePersonnageData(writer, personnage);
 
             writer.WriteEndElement();
         }
     }
-
-
-
-
 
     /// <summary>
     /// Exporte les templates au format PML
@@ -1149,8 +1146,7 @@ public class PmlImportService(ApplicationDbContext context)
     private async Task WritePersonnageDatas(System.Xml.XmlWriter writer)
     {
         var personnages = await _context.Personnages.ToListAsync();
-        WritePersonnageDatas(personnages, writer);
-        writer.WriteEndElement();
+        WritePersonnagesDatas(personnages, writer);
     }
 
     /// <summary>

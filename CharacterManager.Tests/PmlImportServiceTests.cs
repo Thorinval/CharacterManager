@@ -366,7 +366,7 @@ public class PmlImportServiceTests : IDisposable
     _context.LucieHouses.Add(lucieHouse);
     await _context.SaveChangesAsync();
 
-    var personnages = _context.Personnages.ToList();
+    var personnages = await _context.Personnages.ToListAsync();
 
     // Act
     var pmlBytes = await _pmlImportService.ExporterInventairePmlAsync(personnages);
@@ -383,7 +383,7 @@ public class PmlImportServiceTests : IDisposable
   public async Task ExporterTemplatesPmlAsync_ShouldExportTemplates()
   {
     // Arrange
-    var personnageIds = _context.Personnages.Select(p => p.Id).ToList();
+    var personnageIds = await _context.Personnages.Select(p => p.Id).ToListAsync();
     var template = new Template
     {
       Nom = "Export Test",

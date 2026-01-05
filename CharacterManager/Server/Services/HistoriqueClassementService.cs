@@ -1,3 +1,5 @@
+using CharacterManager.Components;
+using CharacterManager.Server.Constants;
 using CharacterManager.Server.Data;
 using CharacterManager.Server.Models;
 using Microsoft.EntityFrameworkCore;
@@ -153,16 +155,16 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
                 writer.WriteAttributeString("ID", historique.Id.ToString());
 
                 writer.WriteStartElement("informations");
-                writer.WriteElementString("Date", historique.DateEnregistrement.ToString("yyyy-MM-ddTHH:mm:ssZ"));
-                writer.WriteElementString("Ligue", historique.Ligue.ToString());
-                writer.WriteElementString("Score", historique.Score.ToString());
-                writer.WriteElementString("Puissance", historique.PuissanceTotale.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Date, historique.DateEnregistrement.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+                writer.WriteElementString(AppConstants.XmlElements.Ligue, historique.Ligue.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Score, historique.Score.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Puissance, historique.PuissanceTotale.ToString());
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("Classement");
-                writer.WriteElementString("Nutaku", historique.Classements.First(c => c.Type == TypeClassement.Nutaku).Valeur.ToString());
-                writer.WriteElementString("Top150", historique.Classements.First(c => c.Type == TypeClassement.Top150).Valeur.ToString());
-                writer.WriteElementString("Pays", historique.Classements.First(c => c.Type == TypeClassement.France).Valeur.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Nutaku, historique.Classements.First(c => c.Type == TypeClassement.Nutaku).Valeur.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Top150, historique.Classements.First(c => c.Type == TypeClassement.Top150).Valeur.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Pays, historique.Classements.First(c => c.Type == TypeClassement.France).Valeur.ToString());
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("Commandant");
@@ -193,8 +195,8 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
                 }
                 writer.WriteEndElement();
 
-                writer.WriteStartElement("Lucie");
-                writer.WriteElementString("Puissance", historique.Pieces.Sum(p => p.PuissanceLegacy).ToString());
+                writer.WriteStartElement( AppConstants.XmlElements.Lucie);
+                writer.WriteElementString(AppConstants.XmlElements.Puissance, historique.Pieces.Sum(p => p.PuissanceLegacy).ToString());
                 writer.WriteEndElement();
 
                 writer.WriteEndElement();
@@ -203,22 +205,22 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
             writer.WriteEndElement();
 
             // Écrire la section inventaire
-            writer.WriteStartElement("inventaire");
+            writer.WriteStartElement(AppConstants.XmlElements.Inventaire);
             var personnages = await dbContext.Personnages.AsNoTracking().ToListAsync();
             foreach (var personnage in personnages)
             {
-                writer.WriteStartElement("Personnage");
-                writer.WriteElementString("Nom", personnage.Nom);
-                writer.WriteElementString("Rarete", personnage.Rarete.ToString());
-                writer.WriteElementString("Type", personnage.Type.ToString());
-                writer.WriteElementString("Puissance", personnage.Puissance.ToString());
-                writer.WriteElementString("PA", personnage.PA.ToString());
-                writer.WriteElementString("PV", personnage.PV.ToString());
-                writer.WriteElementString("Niveau", personnage.Niveau.ToString());
-                writer.WriteElementString("Rang", personnage.Rang.ToString());
-                writer.WriteElementString("Role", personnage.Role.ToString());
-                writer.WriteElementString("Faction", personnage.Faction.ToString());
-                writer.WriteElementString("Selectionne", personnage.Selectionne.ToString());
+                writer.WriteStartElement(AppConstants.XmlElements.Personnage);
+                writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
+                writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Type, personnage.Type.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.PA, personnage.PA.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.PV, personnage.PV.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Rang, personnage.Rang.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Role, personnage.Role.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Faction, personnage.Faction.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Selectionne, personnage.Selectionne.ToString());
                 writer.WriteEndElement();
             }
             writer.WriteEndElement();
@@ -228,9 +230,9 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
             var templates = await dbContext.Templates.AsNoTracking().ToListAsync();
             foreach (var template in templates)
             {
-                writer.WriteStartElement("template");
-                writer.WriteElementString("Nom", template.Nom);
-                writer.WriteElementString("Description", template.Description ?? "");
+                writer.WriteStartElement( AppConstants.XmlElements.Template);
+                writer.WriteElementString(AppConstants.XmlElements.Nom, template.Nom);
+                writer.WriteElementString(AppConstants.XmlElements.Description, template.Description ?? "");
 
                 var personnageIds = template.GetPersonnageIds();
                 foreach (var personnageId in personnageIds)
@@ -238,11 +240,11 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
                     var personnage = await dbContext.Personnages.FirstOrDefaultAsync(p => p.Id == personnageId);
                     if (personnage != null)
                     {
-                        writer.WriteStartElement("Personnage");
-                        writer.WriteElementString("Nom", personnage.Nom);
-                        writer.WriteElementString("Rarete", personnage.Rarete.ToString());
-                        writer.WriteElementString("Puissance", personnage.Puissance.ToString());
-                        writer.WriteElementString("Niveau", personnage.Niveau.ToString());
+                        writer.WriteStartElement(AppConstants.XmlElements.Personnage);
+                        writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
+                        writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
+                        writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
+                        writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
                         writer.WriteEndElement();
                     }
                 }
@@ -262,17 +264,17 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
     {
         if (p == null)
         {
-            writer.WriteElementString("Nom", string.Empty);
-            writer.WriteElementString("Niveau", string.Empty);
-            writer.WriteElementString("Rang", string.Empty);
-            writer.WriteElementString("Puissance", string.Empty);
+            writer.WriteElementString(AppConstants.XmlElements.Nom, string.Empty);
+            writer.WriteElementString(AppConstants.XmlElements.Niveau, string.Empty);
+            writer.WriteElementString(AppConstants.XmlElements.Rang, string.Empty);
+            writer.WriteElementString(AppConstants.XmlElements.Puissance, string.Empty);
             return;
         }
 
-        writer.WriteElementString("Nom", p.Nom);
-        writer.WriteElementString("Niveau", p.Niveau.ToString());
-        writer.WriteElementString("Rang", p.Rang.ToString());
-        writer.WriteElementString("Puissance", p.Puissance.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Nom, p.Nom);
+        writer.WriteElementString(AppConstants.XmlElements.Niveau, p.Niveau.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Rang, p.Rang.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Puissance, p.Puissance.ToString());
     }
 
     private static int? ParseRequiredInt(string? value, string label, List<string> errors, int min, int? max = null)
@@ -320,7 +322,7 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
         return number;
     }
 
-    private static DateTime? ParseDate(string? value, List<string> errors, string label)
+    internal static DateTime? ParseDate(string? value, List<string> errors, string label)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
@@ -328,7 +330,7 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
             return null;
         }
 
-        if (DateTime.TryParse(value, out var date))
+        if (DateTime.TryParse(value, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var date))
         {
             return date;
         }
@@ -337,7 +339,7 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
         return null;
     }
 
-    private static int? ParseClassement(XElement? classementElement, List<string> errors)
+    internal static int? ParseClassement(XElement? classementElement, List<string> errors)
     {
         if (classementElement == null)
         {
@@ -432,7 +434,7 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
         };
     }
 
-    private static List<PersonnelHistorique> ParsePersons(
+    internal static List<PersonnelHistorique> ParsePersons(
         XElement? container,
         string elementName,
         TypePersonnage expectedType,
