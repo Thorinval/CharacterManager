@@ -6,8 +6,6 @@ using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
 using CharacterManager.Server.Constants;
 using CharacterManager.Server.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Data.Sqlite;
 
 public partial class MeilleurEscouade
 {
@@ -39,17 +37,17 @@ public partial class MeilleurEscouade
         topCommandant = PersonnageService.GetTopCommandant();
         topAndroides = [.. PersonnageService.GetTopAndroides(3)];
         puissanceMax = PersonnageService.GetPuissanceMaxEscouade();
-        luciePieces= [.. PersonnageService.GetTopLucieRooms(2)];
-        
+        luciePieces = [.. PersonnageService.GetTopLucieRooms(2)];
+
         StateHasChanged();
     }
-    
+
     private void NavigateToDetail(int id, string filter)
     {
         Console.WriteLine($"[MeilleurEscouade] NavigateToDetail appelé avec ID={id}, filter={filter}");
         var perso = topMercenaires.Concat(topAndroides).FirstOrDefault(p => p.Id == id) ?? topCommandant;
         Console.WriteLine($"[MeilleurEscouade] Personnage trouvé: {perso?.Nom} (ID={perso?.Id})");
-        
+
         ModalService.Open<CharacterManager.Components.Modal.DetailPersonnageModal>(
             new Dictionary<string, object> { { "PersonnageId", id } },
             ModalSize.XL
@@ -69,53 +67,9 @@ public partial class MeilleurEscouade
     {
         if (topCommandant != null)
         {
-            NavigateToDetail(topCommandant.Id, TemplateEscouade.GetFilterForCommandants());
+            NavigateToDetail(topCommandant.Id, TemplateEscouade.FilterCommandants);
         }
     }
 
     internal static int GetPiecePower(Piece piece) => piece.Puissance;
-
-    internal void EnsureLuciePieceAspectColumns()
-    {
-        try
-        {
-            const string hydratedTactiques = "{\"Nom\":\"Aspects tactiques\",\"Puissance\":0,\"Bonus\":[]}";
-            const string hydratedStrategiques = "{\"Nom\":\"Aspects stratégiques\",\"Puissance\":0,\"Bonus\":[]}";
-
-            using var conn = (SqliteConnection)DbContext.Database.GetDbConnection();
-            if (conn.State != System.Data.ConnectionState.Open)
-                conn.Open();
-            
-            var hasTactiques = false;
-            var hasStrategiques = false;
-            
-            using (var cmd = conn.CreateCommand())
-            {
-                cmd.CommandText = "PRAGMA table_info(Pieces);";
-                using var reader = cmd.ExecuteReader();
-                while (reader.Read())
-                {
-                    var name = reader.GetString(1);
-                    if (string.Equals(name, "AspectsTactiques", StringComparison.OrdinalIgnoreCase)) hasTactiques = true;
-                    if (string.Equals(name, "AspectsStrategiques", StringComparison.OrdinalIgnoreCase)) hasStrategiques = true;
-                }
-            }
-
-            if (!hasTactiques)
-            {
-                DbContext.Database.ExecuteSqlRaw("ALTER TABLE Pieces ADD COLUMN AspectsTactiques TEXT NOT NULL DEFAULT '';");
-            }
-            if (!hasStrategiques)
-            {
-                DbContext.Database.ExecuteSqlRaw("ALTER TABLE Pieces ADD COLUMN AspectsStrategiques TEXT NOT NULL DEFAULT '';");
-            }
-
-            DbContext.Database.ExecuteSql($"UPDATE Pieces SET AspectsTactiques = {hydratedTactiques} WHERE AspectsTactiques IS NULL OR AspectsTactiques = '';");
-            DbContext.Database.ExecuteSql($"UPDATE Pieces SET AspectsStrategiques = {hydratedStrategiques} WHERE AspectsStrategiques IS NULL OR AspectsStrategiques = '';");
-        }
-        catch (SqliteException ex)
-        {
-            Console.WriteLine($"[MeilleurEscouade] Failed to ensure aspect columns: {ex.Message}");
-        }
-    }
 }

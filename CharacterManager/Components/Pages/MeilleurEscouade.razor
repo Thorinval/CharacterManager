@@ -35,7 +35,7 @@
                         var index = i;
                         var perso = topMercenaires[index];
                         var personnageId = perso.Id;
-                        <div class="escouade-member-preview clickable" @onclick="@(() => NavigateToDetail(personnageId, TemplateEscouade.GetFilterForMercenaires()))" @onclick:stopPropagation="true">
+                        <div class="escouade-member-preview clickable" @onclick="@(() => NavigateToDetail(personnageId, TemplateEscouade.FilterMercenaires))" @onclick:stopPropagation="true">
                             <img src="@perso.GetImageUrl(true)" alt="@perso.Nom" class="escouade-image" />
                             <div class="escouade-member-name">@perso.Nom</div>
                             <div class="escouade-member-power">@perso.Puissance</div>
@@ -56,7 +56,7 @@
         @{
             var currentId = topCommandant.Id;
         }
-        <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.GetFilterForCommandants()))">
+        <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(currentId, TemplateEscouade.FilterCommandants))">
             <img src="@topCommandant.GetImageUrl(true)" alt="@topCommandant.Nom" class="personnage-card-image" />
             <div class="personnage-card-info">
                 <div class="personnage-name">@topCommandant.Nom</div>
@@ -78,7 +78,7 @@
     {
         var personnageId = perso.Id;
         var personnageNom = perso.Nom;
-        <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(personnageId, TemplateEscouade.GetFilterForMercenaires()))">
+        <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(personnageId, TemplateEscouade.FilterMercenaires))">
             <img src="@perso.GetImageUrl(true)" alt="@personnageNom" class="personnage-card-image" />
             <div class="personnage-card-info">
                 <div class="personnage-name">@personnageNom</div>
@@ -100,7 +100,7 @@
     {
         var androideId = perso.Id;
         var androideNom = perso.Nom;
-        <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(androideId,TemplateEscouade.GetFilterForAndroides()))">
+        <div class="personnage-card clickable" @onclick="@(() => NavigateToDetail(androideId,TemplateEscouade.FilterAndroides))">
             <img src="@perso.GetImageUrl(true)" alt="@androideNom" class="personnage-card-image" />
             <div class="personnage-card-info">
                 <div class="personnage-name">@androideNom</div>

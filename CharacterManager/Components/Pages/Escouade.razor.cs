@@ -51,7 +51,7 @@ public partial class Escouade
         }
         catch (SqliteException ex) when (ex.Message.Contains("no such column", StringComparison.OrdinalIgnoreCase))
         {
-            EnsureLuciePieceAspectColumns();
+            TemplateEscouade.EnsureLuciePieceAspectColumns(DbContext);
             var lucie = DbContext.LucieHouses
                 .Include(l => l.Pieces)
                 .FirstOrDefault();
@@ -115,48 +115,4 @@ public partial class Escouade
     }
 
     internal static int GetPiecePower(Piece piece) => piece.Puissance;
-
-    private void EnsureLuciePieceAspectColumns()
-    {
-        try
-        {
-            const string hydratedTactiques = "{\"Nom\":\"Aspects tactiques\",\"Puissance\":0,\"Bonus\":[]}";
-            const string hydratedStrategiques = "{\"Nom\":\"Aspects stratégiques\",\"Puissance\":0,\"Bonus\":[]}";
-
-            using var conn = (SqliteConnection)DbContext.Database.GetDbConnection();
-            if (conn.State != System.Data.ConnectionState.Open)
-                conn.Open();
-
-            var hasTactiques = false;
-            var hasStrategiques = false;
-
-            using (var cmd = conn.CreateCommand())
-            {
-                cmd.CommandText = "PRAGMA table_info(Pieces);";
-                using var reader = cmd.ExecuteReader();
-                while (reader.Read())
-                {
-                    var name = reader.GetString(1);
-                    if (string.Equals(name, "AspectsTactiques", StringComparison.OrdinalIgnoreCase)) hasTactiques = true;
-                    if (string.Equals(name, "AspectsStrategiques", StringComparison.OrdinalIgnoreCase)) hasStrategiques = true;
-                }
-            }
-
-            if (!hasTactiques)
-            {
-                DbContext.Database.ExecuteSqlRaw("ALTER TABLE Pieces ADD COLUMN AspectsTactiques TEXT NOT NULL DEFAULT '';");
-            }
-            if (!hasStrategiques)
-            {
-                DbContext.Database.ExecuteSqlRaw("ALTER TABLE Pieces ADD COLUMN AspectsStrategiques TEXT NOT NULL DEFAULT '';");
-            }
-
-            DbContext.Database.ExecuteSql($"UPDATE Pieces SET AspectsTactiques = {hydratedTactiques} WHERE AspectsTactiques IS NULL OR AspectsTactiques = '';");
-            DbContext.Database.ExecuteSql($"UPDATE Pieces SET AspectsStrategiques = {hydratedStrategiques} WHERE AspectsStrategiques IS NULL OR AspectsStrategiques = '';");
-        }
-        catch (SqliteException ex)
-        {
-            Console.WriteLine($"[Escouade] Failed to ensure aspect columns: {ex.Message}");
-        }
-    }
 }
