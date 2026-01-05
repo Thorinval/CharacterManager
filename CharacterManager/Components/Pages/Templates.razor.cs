@@ -23,23 +23,28 @@ public partial class Templates
     [Inject]
     public NavigationManager Navigation { get; set; } = null!;
 
-    private List<Template> templates = new();
-    private Toast? toastRef;
-    private int? editingTemplateId = null;
+    private const string success = "success";
+    private const string warning = "warning";
+    private const string error = "error";
+    private const string alert = "alert";
+
+    internal List<Template> templates = new();
+    internal Toast? toastRef;
+    internal int? editingTemplateId = null;
     private string editingName = string.Empty;
 
     // Template editor state
-    private bool showTemplateEditor = false;
+    internal bool showTemplateEditor = false;
     private string templateNom = string.Empty;
     private string templateDescription = string.Empty;
-    private List<Personnage?> templatePersonnages = [];
+    internal List<Personnage?> templatePersonnages = [];
     private List<int> templateSelectedIds = [];
     private int selectedTemplateId = 0;
     private string searchTerm = string.Empty;
-    private int? currentlyDraggedId;
+    internal int? currentlyDraggedId;
     private List<Personnage> personnagesFiltres = [];
 
-    private IEnumerable<IGrouping<string, Personnage>> GroupedPersonnages
+    internal IEnumerable<IGrouping<string, Personnage>> GroupedPersonnages
     {
         get
         {
@@ -63,7 +68,7 @@ public partial class Templates
             .ToList();
     }
 
-    private void OpenTemplateEditor()
+    internal void OpenTemplateEditor()
     {
         showTemplateEditor = true;
         templateNom = string.Empty;
@@ -103,13 +108,13 @@ public partial class Templates
         return Task.FromResult(PersonnageService.GetById(id));
     }
 
-    private void HandleSearchInput(ChangeEventArgs e)
+    internal void HandleSearchInput(ChangeEventArgs e)
     {
         searchTerm = e.Value?.ToString() ?? string.Empty;
         ApplyFilters();
     }
 
-    private void ClearSearch()
+    internal void ClearSearch()
     {
         searchTerm = string.Empty;
         ApplyFilters();
@@ -130,39 +135,39 @@ public partial class Templates
         }
     }
 
-    private void HandleDragStart(DragEventArgs e, Personnage personnage)
+    internal void HandleDragStart(DragEventArgs e, Personnage personnage)
     {
         currentlyDraggedId = personnage.Id;
     }
 
-    private void HandleInvalidDrop()
+    internal void HandleInvalidDrop()
     {
         currentlyDraggedId = null;
     }
 
-    private async Task SaveTemplate()
+    internal async Task SaveTemplate()
     {
         if (string.IsNullOrEmpty(templateNom) || templateSelectedIds.Count == 0)
             return;
 
         try
         {
-            var template = await PersonnageService.CreateTemplateAsync(
+            await PersonnageService.CreateTemplateAsync(
                 templateNom,
                 templateDescription,
                 templateSelectedIds
             );
-            toastRef?.Show($"Template '{templateNom}' créé avec succès", "success");
+            toastRef?.Show($"Template '{templateNom}' créé avec succès", error);
             CancelTemplateCreation();
             templates = PersonnageService.GetAllTemplates().ToList();
         }
         catch (Exception ex)
         {
-            toastRef?.Show($"Erreur lors de la création du template: {ex.Message}", "error");
+            toastRef?.Show($"Erreur lors de la création du template: {ex.Message}", error);
         }
     }
 
-    private async Task LoadSelectedTemplate()
+    internal async Task LoadSelectedTemplate()
     {
         if (selectedTemplateId == 0)
             return;
@@ -180,11 +185,11 @@ public partial class Templates
         }
         catch (Exception ex)
         {
-            toastRef?.Show($"Erreur lors du chargement du template: {ex.Message}", "error");
+            toastRef?.Show($"Erreur lors du chargement du template: {ex.Message}", error);
         }
     }
 
-    private async Task ExportTemplateAsPml()
+    internal async Task ExportTemplateAsPml()
     {
         if (string.IsNullOrEmpty(templateNom) || templateSelectedIds.Count == 0)
             return;
@@ -207,51 +212,52 @@ public partial class Templates
         }
         catch (Exception ex)
         {
-            toastRef?.Show($"Erreur lors de l'export: {ex.Message}", "error");
+            toastRef?.Show($"Erreur lors de l'export: {ex.Message}", error);
         }
     }
 
-    private void OpenInInventaire(int id)
+    internal void OpenInInventaire(int id)
     {
         Navigation.NavigateTo($"/inventaire?templateId={id}");
     }
 
-    private async Task ExportTemplate(int id)
+    internal async Task ExportTemplate(int id)
     {
         var template = await PersonnageService.GetTemplateAsync(id);
         if (template is null)
         {
-            toastRef?.Show("Template introuvable", "error");
+            toastRef?.Show("Template introuvable", error);
             return;
         }
         var pmlBytes = await PmlImportService.ExporterTemplatesPmlAsync(new[] { template });
         var fileName = $"{AppConstants.ExportPrefixes.Template}_{template.Nom}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
         await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pmlBytes));
-        toastRef?.Show($"Export de '{template.Nom}' effectué", "success");
+        toastRef?.Show($"Export de '{template.Nom}' effectué", success);
     }
 
-    private async Task DeleteTemplate(int id)
+    internal async Task DeleteTemplate(int id)
     {
-        var ok = await JSRuntime.InvokeAsync<bool>("confirm", "Supprimer ce template ?");
-        if (!ok) return;
-        var success = await PersonnageService.DeleteTemplateAsync(id);
-        if (success)
+        var reponseOk = await JSRuntime.InvokeAsync<bool>("confirm", "Supprimer ce template ?");
+        if (!reponseOk) return;
+        var deleteOk = await PersonnageService.DeleteTemplateAsync(id);
+
+        if (deleteOk)
         {
             templates = PersonnageService.GetAllTemplates().ToList();
             StateHasChanged();
         }
         else
         {
-            toastRef?.Show("Suppression échouée", "error");
+            toastRef?.Show("Suppression échouée", error);
         }
     }
 
-    private async Task DuplicateTemplate(int id)
+    internal async Task DuplicateTemplate(int id)
     {
         var template = await PersonnageService.GetTemplateAsync(id);
         if (template is null)
         {
-            await JSRuntime.InvokeVoidAsync("alert", "Template introuvable");
+            await JSRuntime.InvokeVoidAsync(alert, "Template introuvable");
             return;
         }
 
@@ -259,10 +265,10 @@ public partial class Templates
         var copyName = template.Nom + " (copie)";
         var newTemplate = await PersonnageService.CreateTemplateAsync(copyName, template.Description, ids);
         templates = PersonnageService.GetAllTemplates().ToList();
-        toastRef?.Show($"Template '{newTemplate.Nom}' créé.", "success");
+        toastRef?.Show($"Template '{newTemplate.Nom}' créé.", success);
     }
 
-    private void StartRename(Template t)
+    internal void StartRename(Template t)
     {
         editingTemplateId = t.Id;
         editingName = t.Nom;
@@ -274,24 +280,24 @@ public partial class Templates
         editingName = string.Empty;
     }
 
-    private async Task SaveRename(Template t)
+    internal async Task SaveRename(Template t)
     {
         if (string.IsNullOrWhiteSpace(editingName))
         {
-            toastRef?.Show("Le nom ne peut pas être vide", "warning");
+            toastRef?.Show("Le nom ne peut pas être vide", warning);
             return;
         }
         var ids = t.GetPersonnageIds();
         var ok = await PersonnageService.UpdateTemplateAsync(t.Id, editingName, t.Description, ids);
         if (ok)
         {
-            toastRef?.Show("Template renommé", "success");
+            toastRef?.Show("Template renommé", success);
             templates = PersonnageService.GetAllTemplates().ToList();
             CancelRename();
         }
         else
         {
-            toastRef?.Show("Échec du renommage", "error");
+            toastRef?.Show("Échec du renommage", error);
         }
     }
 }

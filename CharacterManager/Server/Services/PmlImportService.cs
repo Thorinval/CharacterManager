@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Xml.Linq;
 using System.Text;
 using System.Globalization;
+using System.Xml;
 
 namespace CharacterManager.Server.Services;
 
@@ -204,58 +205,16 @@ public class PmlImportService(ApplicationDbContext context)
                     continue;
                 }
 
-                var normalizedTemplate = NormalizeUpper(templateName);
-
-                // Chercher le template existant ou en créer un nouveau
-                var existingTemplate = await _context.Templates
-                    .FirstOrDefaultAsync(t => t.Nom.Equals(normalizedTemplate, StringComparison.OrdinalIgnoreCase));
-
-                if (existingTemplate == null)
-                {
-                    existingTemplate = new Template { Nom = templateName };
-                    _context.Templates.Add(existingTemplate);
-                    await _context.SaveChangesAsync();
-                }
-
-                // Mettre à jour la description si fournie
-                if (!string.IsNullOrWhiteSpace(description))
-                {
-                    existingTemplate.Description = description;
-                }
-
-                // Importer les personnages du template
-                var personnageIds = new List<int>();
-                var personnagesElements = template.Elements(AppConstants.XmlElements.Personnage);
-                foreach (var personElement in personnagesElements)
-                {
-                    try
-                    {
-                        var nom = personElement.Element(AppConstants.XmlElements.Nom)?.Value;
-                        if (string.IsNullOrWhiteSpace(nom))
-                            continue;
-
-                        var personnage = await _context.Personnages
-                            .FirstOrDefaultAsync(p => p.Nom.Equals(nom, StringComparison.OrdinalIgnoreCase));
-
-                        if (personnage != null && !personnageIds.Contains(personnage.Id))
-                        {
-                            personnageIds.Add(personnage.Id);
-                            importedCount++;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        errors.Add($"{AppConstants.Messages.ErrorImportPersonnageTemplate} '{templateName}': {ex.Message}");
-                    }
-                }
-
-                // Mettre à jour les IDs de personnages du template
+                var existingTemplate = await GetOrCreateTemplate(templateName, description);
+                var personnageIds = await ImportTemplatePersonnages(template, templateName, errors);
+                
                 if (personnageIds.Count > 0)
                 {
                     existingTemplate.SetPersonnageIds(personnageIds);
                 }
 
                 await _context.SaveChangesAsync();
+                importedCount += personnageIds.Count;
             }
             catch (Exception ex)
             {
@@ -264,6 +223,58 @@ public class PmlImportService(ApplicationDbContext context)
         }
 
         return importedCount;
+    }
+
+    private async Task<Template> GetOrCreateTemplate(string templateName, string? description)
+    {
+        var normalizedTemplate = NormalizeUpper(templateName);
+
+        var existingTemplate = await _context.Templates
+            .FirstOrDefaultAsync(t => t.Nom.Equals(normalizedTemplate, StringComparison.OrdinalIgnoreCase));
+
+        if (existingTemplate == null)
+        {
+            existingTemplate = new Template { Nom = templateName };
+            _context.Templates.Add(existingTemplate);
+            await _context.SaveChangesAsync();
+        }
+
+        if (!string.IsNullOrWhiteSpace(description))
+        {
+            existingTemplate.Description = description;
+        }
+
+        return existingTemplate;
+    }
+
+    private async Task<List<int>> ImportTemplatePersonnages(XElement template, string templateName, List<string> errors)
+    {
+        var personnageIds = new List<int>();
+        var personnagesElements = template.Elements(AppConstants.XmlElements.Personnage);
+
+        foreach (var personElement in personnagesElements)
+        {
+            try
+            {
+                var nom = personElement.Element(AppConstants.XmlElements.Nom)?.Value;
+                if (string.IsNullOrWhiteSpace(nom))
+                    continue;
+
+                var personnage = await _context.Personnages
+                    .FirstOrDefaultAsync(p => p.Nom.Equals(nom, StringComparison.OrdinalIgnoreCase));
+
+                if (personnage != null && !personnageIds.Contains(personnage.Id))
+                {
+                    personnageIds.Add(personnage.Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"{AppConstants.Messages.ErrorImportPersonnageTemplate} '{templateName}': {ex.Message}");
+            }
+        }
+
+        return personnageIds;
     }
 
     /// <summary>
@@ -277,41 +288,9 @@ public class PmlImportService(ApplicationDbContext context)
         {
             try
             {
-                // Import mercenaires
-                var mercenairesElements = bestSquad.Elements(AppConstants.XmlElements.Mercenaire);
-                foreach (var mercElement in mercenairesElements)
-                {
-                    var personnage = ParsePersonnageFromXml(mercElement);
-                    if (personnage != null)
-                    {
-                        ImportOrUpdatePersonnage(personnage);
-                        importedCount++;
-                    }
-                }
-
-                // Import commandant
-                var commandantElement = bestSquad.Element(AppConstants.XmlElements.Commandant);
-                if (commandantElement != null)
-                {
-                    var personnage = ParsePersonnageFromXml(commandantElement);
-                    if (personnage != null)
-                    {
-                        ImportOrUpdatePersonnage(personnage);
-                        importedCount++;
-                    }
-                }
-
-                // Import androides
-                var androidesElements = bestSquad.Elements(AppConstants.XmlElements.Androide);
-                foreach (var androidElement in androidesElements)
-                {
-                    var personnage = ParsePersonnageFromXml(androidElement);
-                    if (personnage != null)
-                    {
-                        ImportOrUpdatePersonnage(personnage);
-                        importedCount++;
-                    }
-                }
+                importedCount += ImportBestSquadMercenaires(bestSquad);
+                importedCount += ImportBestSquadCommandant(bestSquad);
+                importedCount += ImportBestSquadAndroides(bestSquad);
             }
             catch (Exception ex)
             {
@@ -322,7 +301,52 @@ public class PmlImportService(ApplicationDbContext context)
         return Task.FromResult(importedCount);
     }
 
+    private int ImportBestSquadMercenaires(XElement bestSquad)
+    {
+        int count = 0;
+        var mercenairesElements = bestSquad.Elements(AppConstants.XmlElements.Mercenaire);
+        foreach (var mercElement in mercenairesElements)
+        {
+            var personnage = ParsePersonnageFromXml(mercElement);
+            if (personnage != null)
+            {
+                ImportOrUpdatePersonnage(personnage);
+                count++;
+            }
+        }
+        return count;
+    }
 
+    private int ImportBestSquadCommandant(XElement bestSquad)
+    {
+        var commandantElement = bestSquad.Element(AppConstants.XmlElements.Commandant);
+        if (commandantElement == null)
+            return 0;
+
+        var personnage = ParsePersonnageFromXml(commandantElement);
+        if (personnage != null)
+        {
+            ImportOrUpdatePersonnage(personnage);
+            return 1;
+        }
+        return 0;
+    }
+
+    private int ImportBestSquadAndroides(XElement bestSquad)
+    {
+        int count = 0;
+        var androidesElements = bestSquad.Elements(AppConstants.XmlElements.Androide);
+        foreach (var androidElement in androidesElements)
+        {
+            var personnage = ParsePersonnageFromXml(androidElement);
+            if (personnage != null)
+            {
+                ImportOrUpdatePersonnage(personnage);
+                count++;
+            }
+        }
+        return count;
+    }
 
     /// <summary>
     /// Importe les données d'historiques de ligue
@@ -388,177 +412,15 @@ public class PmlImportService(ApplicationDbContext context)
         {
             try
             {
-                var dateStr = historiqueClassementElement.Element(AppConstants.XmlElements.DateEnregistrement)?.Value;
-                var ligueStr = historiqueClassementElement.Element(AppConstants.XmlElements.Ligue)?.Value;
-                var scoreStr = historiqueClassementElement.Element(AppConstants.XmlElements.Score)?.Value;
-                var puissanceTotalStr = historiqueClassementElement.Element(AppConstants.XmlElements.PuissanceTotal)?.Value;
-                var puissanceCommandantStr = historiqueClassementElement.Element(AppConstants.XmlElements.PuissanceCommandant)?.Value;
-                var puissanceMercenairesStr = historiqueClassementElement.Element(AppConstants.XmlElements.PuissanceMercenaires)?.Value;
-                var puissanceLucieStr = historiqueClassementElement.Element(AppConstants.XmlElements.PuissanceLucie)?.Value;
-
-                if (string.IsNullOrWhiteSpace(dateStr))
-                {
-                    errors.Add("Historique de classement invalide: date manquante");
+                var historiqueClassement = ParseHistoriqueClassementHeader(historiqueClassementElement, errors);
+                if (historiqueClassement == null)
                     continue;
-                }
 
-                if (!DateOnly.TryParse(dateStr, CultureInfo.InvariantCulture, out var dateEnregistrement))
-                {
-                    errors.Add($"Date d'enregistrement invalide: {dateStr}");
-                    continue;
-                }
-
-                var historiqueClassement = new HistoriqueClassement
-                {
-                    DateEnregistrement = dateEnregistrement,
-                    Ligue = int.TryParse(ligueStr, out var ligue) ? ligue : 0,
-                    Score = int.TryParse(scoreStr, out var score) ? score : 0,
-                    PuissanceTotale = int.TryParse(puissanceTotalStr, out var puissanceTotal) ? puissanceTotal : 0,
-                    PuissanceCommandant = int.TryParse(puissanceCommandantStr, out var puissanceCommandant) ? puissanceCommandant : 0,
-                    PuissanceMercenaires = int.TryParse(puissanceMercenairesStr, out var puissanceMercenaires) ? puissanceMercenaires : 0,
-                    PuissanceLucie = int.TryParse(puissanceLucieStr, out var puissanceLucie) ? puissanceLucie : 0
-                };
-
-                // Importer les classements
-                var classementsElement = historiqueClassementElement.Element(AppConstants.XmlElements.Classements);
-                if (classementsElement != null)
-                {
-                    foreach (var classementElement in classementsElement.Elements(AppConstants.XmlElements.ClassementItem))
-                    {
-                        var nom = classementElement.Element(AppConstants.XmlElements.Nom)?.Value ?? "";
-                        var typeStr = classementElement.Element(AppConstants.XmlElements.TypeClassement)?.Value;
-                        var valeurStr = classementElement.Element(AppConstants.XmlElements.Valeur)?.Value;
-
-                        if (Enum.TryParse<TypeClassement>(typeStr, out var type) && int.TryParse(valeurStr, out var valeur))
-                        {
-                            historiqueClassement.Classements.Add(new Classement
-                            {
-                                Nom = nom,
-                                Type = type,
-                                Valeur = valeur
-                            });
-                        }
-                    }
-                }
-
-                // Importer les mercenaires
-                var mercenairesElement = historiqueClassementElement.Element(AppConstants.XmlElements.Mercenaires);
-                if (mercenairesElement != null)
-                {
-                    foreach (var personnageElement in mercenairesElement.Elements(AppConstants.XmlElements.Personnage))
-                    {
-                        var personnage = ParsePersonnageFromXml(personnageElement);
-                        if (personnage != null)
-                        {
-                            var personnageHistorique = new PersonnageHistorique
-                            {
-                                Nom = personnage.Nom,
-                                Rarete = personnage.Rarete,
-                                Type = personnage.Type,
-                                Puissance = personnage.Puissance,
-                                PA = personnage.PA,
-                                PV = personnage.PV,
-                                Niveau = personnage.Niveau,
-                                Rang = personnage.Rang,
-                                Role = personnage.Role,
-                                Faction = personnage.Faction,
-                                TypeAttaque = personnage.TypeAttaque,
-                                Selectionne = personnage.Selectionne,
-                                IdOrigine = 0
-                            };
-                            historiqueClassement.Mercenaires.Add(personnageHistorique);
-                        }
-                    }
-                }
-
-                // Importer le commandant
-                var commandantElement = historiqueClassementElement.Element(AppConstants.XmlElements.Commandant);
-                if (commandantElement != null)
-                {
-                    var personnageElement = commandantElement.Element(AppConstants.XmlElements.Personnage) ?? commandantElement;
-                    var personnage = ParsePersonnageFromXml(personnageElement);
-                    if (personnage != null)
-                    {
-                        historiqueClassement.Commandant = new PersonnageHistorique
-                        {
-                            Nom = personnage.Nom,
-                            Rarete = personnage.Rarete,
-                            Type = personnage.Type,
-                            Puissance = personnage.Puissance,
-                            PA = personnage.PA,
-                            PV = personnage.PV,
-                            Niveau = personnage.Niveau,
-                            Rang = personnage.Rang,
-                            Role = personnage.Role,
-                            Faction = personnage.Faction,
-                            TypeAttaque = personnage.TypeAttaque,
-                            Selectionne = personnage.Selectionne,
-                            IdOrigine = 0
-                        };
-                    }
-                }
-
-                // Importer les androïdes
-                var androidesElement = historiqueClassementElement.Element(AppConstants.XmlElements.Androides);
-                if (androidesElement != null)
-                {
-                    foreach (var personnageElement in androidesElement.Elements(AppConstants.XmlElements.Personnage))
-                    {
-                        var personnage = ParsePersonnageFromXml(personnageElement);
-                        if (personnage != null)
-                        {
-                            var personnageHistorique = new PersonnageHistorique
-                            {
-                                Nom = personnage.Nom,
-                                Rarete = personnage.Rarete,
-                                Type = personnage.Type,
-                                Puissance = personnage.Puissance,
-                                PA = personnage.PA,
-                                PV = personnage.PV,
-                                Niveau = personnage.Niveau,
-                                Rang = personnage.Rang,
-                                Role = personnage.Role,
-                                Faction = personnage.Faction,
-                                TypeAttaque = personnage.TypeAttaque,
-                                Selectionne = personnage.Selectionne,
-                                IdOrigine = 0
-                            };
-                            historiqueClassement.Androides.Add(personnageHistorique);
-                        }
-                    }
-                }
-
-                // Importer les pièces
-                var piecesElement = historiqueClassementElement.Element(AppConstants.XmlElements.Pieces);
-                if (piecesElement != null)
-                {
-                    foreach (var pieceElement in piecesElement.Elements(AppConstants.XmlElements.Piece))
-                    {
-                        var nom = pieceElement.Element(AppConstants.XmlElements.Nom)?.Value;
-                        if (!string.IsNullOrWhiteSpace(nom))
-                        {
-                            var pieceHistorique = new PieceHistorique
-                            {
-                                Nom = nom,
-                                Niveau = int.TryParse(pieceElement.Element(AppConstants.XmlElements.Niveau)?.Value, out var niveau) ? niveau : 1,
-                                Selectionnee = ParseBool(pieceElement.Element(AppConstants.XmlElements.Selectionne)?.Value),
-                                IdOrigine = 0
-                            };
-
-                            if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceTactique)?.Value, out var pTact))
-                            {
-                                pieceHistorique.AspectsTactiques.Puissance = pTact;
-                            }
-
-                            if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceStrategique)?.Value, out var pStrat))
-                            {
-                                pieceHistorique.AspectsStrategiques.Puissance = pStrat;
-                            }
-
-                            historiqueClassement.Pieces.Add(pieceHistorique);
-                        }
-                    }
-                }
+                ImportHistoriqueClassements(historiqueClassementElement, historiqueClassement);
+                ImportHistoriqueMercenaires(historiqueClassementElement, historiqueClassement);
+                ImportHistoriqueCommandant(historiqueClassementElement, historiqueClassement);
+                ImportHistoriqueAndroides(historiqueClassementElement, historiqueClassement);
+                ImportHistoriquePieces(historiqueClassementElement, historiqueClassement);
 
                 _context.HistoriquesClassement.Add(historiqueClassement);
                 await _context.SaveChangesAsync();
@@ -573,6 +435,171 @@ public class PmlImportService(ApplicationDbContext context)
         return importedCount;
     }
 
+    private HistoriqueClassement? ParseHistoriqueClassementHeader(XElement element, List<string> errors)
+    {
+        var dateStr = element.Element(AppConstants.XmlElements.DateEnregistrement)?.Value;
+
+        if (string.IsNullOrWhiteSpace(dateStr))
+        {
+            errors.Add("Historique de classement invalide: date manquante");
+            return null;
+        }
+
+        if (!DateOnly.TryParse(dateStr, CultureInfo.InvariantCulture, out var dateEnregistrement))
+        {
+            errors.Add($"Date d'enregistrement invalide: {dateStr}");
+            return null;
+        }
+
+        var ligueStr = element.Element(AppConstants.XmlElements.Ligue)?.Value;
+        var scoreStr = element.Element(AppConstants.XmlElements.Score)?.Value;
+        var puissanceTotalStr = element.Element(AppConstants.XmlElements.PuissanceTotal)?.Value;
+        var puissanceCommandantStr = element.Element(AppConstants.XmlElements.PuissanceCommandant)?.Value;
+        var puissanceMercenairesStr = element.Element(AppConstants.XmlElements.PuissanceMercenaires)?.Value;
+        var puissanceLucieStr = element.Element(AppConstants.XmlElements.PuissanceLucie)?.Value;
+
+        return new HistoriqueClassement
+        {
+            DateEnregistrement = dateEnregistrement,
+            Ligue = int.TryParse(ligueStr, out var ligue) ? ligue : 0,
+            Score = int.TryParse(scoreStr, out var score) ? score : 0,
+            PuissanceTotale = int.TryParse(puissanceTotalStr, out var puissanceTotal) ? puissanceTotal : 0,
+            PuissanceCommandant = int.TryParse(puissanceCommandantStr, out var puissanceCommandant) ? puissanceCommandant : 0,
+            PuissanceMercenaires = int.TryParse(puissanceMercenairesStr, out var puissanceMercenaires) ? puissanceMercenaires : 0,
+            PuissanceLucie = int.TryParse(puissanceLucieStr, out var puissanceLucie) ? puissanceLucie : 0
+        };
+    }
+
+    private void ImportHistoriqueClassements(XElement element, HistoriqueClassement historiqueClassement)
+    {
+        var classementsElement = element.Element(AppConstants.XmlElements.Classements);
+        if (classementsElement == null)
+            return;
+
+        foreach (var classementElement in classementsElement.Elements(AppConstants.XmlElements.ClassementItem))
+        {
+            var nom = classementElement.Element(AppConstants.XmlElements.Nom)?.Value ?? "";
+            var typeStr = classementElement.Element(AppConstants.XmlElements.TypeClassement)?.Value;
+            var valeurStr = classementElement.Element(AppConstants.XmlElements.Valeur)?.Value;
+
+            if (Enum.TryParse<TypeClassement>(typeStr, out var type) && int.TryParse(valeurStr, out var valeur))
+            {
+                historiqueClassement.Classements.Add(new Classement
+                {
+                    Nom = nom,
+                    Type = type,
+                    Valeur = valeur
+                });
+            }
+        }
+    }
+
+    private void ImportHistoriqueMercenaires(XElement element, HistoriqueClassement historiqueClassement)
+    {
+        var mercenairesElement = element.Element(AppConstants.XmlElements.Mercenaires);
+        if (mercenairesElement == null)
+            return;
+
+        foreach (var personnageElement in mercenairesElement.Elements(AppConstants.XmlElements.Personnage))
+        {
+            var personnage = ParsePersonnageFromXml(personnageElement);
+            if (personnage != null)
+            {
+                historiqueClassement.Mercenaires.Add(ConvertToPersonnageHistorique(personnage));
+            }
+        }
+    }
+
+    private void ImportHistoriqueCommandant(XElement element, HistoriqueClassement historiqueClassement)
+    {
+        var commandantElement = element.Element(AppConstants.XmlElements.Commandant);
+        if (commandantElement == null)
+            return;
+
+        var personnageElement = commandantElement.Element(AppConstants.XmlElements.Personnage) ?? commandantElement;
+        var personnage = ParsePersonnageFromXml(personnageElement);
+        if (personnage != null)
+        {
+            historiqueClassement.Commandant = ConvertToPersonnageHistorique(personnage);
+        }
+    }
+
+    private void ImportHistoriqueAndroides(XElement element, HistoriqueClassement historiqueClassement)
+    {
+        var androidesElement = element.Element(AppConstants.XmlElements.Androides);
+        if (androidesElement == null)
+            return;
+
+        foreach (var personnageElement in androidesElement.Elements(AppConstants.XmlElements.Personnage))
+        {
+            var personnage = ParsePersonnageFromXml(personnageElement);
+            if (personnage != null)
+            {
+                historiqueClassement.Androides.Add(ConvertToPersonnageHistorique(personnage));
+            }
+        }
+    }
+
+    private static void ImportHistoriquePieces(XElement element, HistoriqueClassement historiqueClassement)
+    {
+        var piecesElement = element.Element(AppConstants.XmlElements.Pieces);
+        if (piecesElement == null)
+            return;
+
+        foreach (var pieceElement in piecesElement.Elements(AppConstants.XmlElements.Piece))
+        {
+            var nom = pieceElement.Element(AppConstants.XmlElements.Nom)?.Value;
+            if (!string.IsNullOrWhiteSpace(nom))
+            {
+                var pieceHistorique = ParsePieceHistorique(pieceElement, nom);
+                historiqueClassement.Pieces.Add(pieceHistorique);
+            }
+        }
+    }
+
+    private static PersonnageHistorique ConvertToPersonnageHistorique(Personnage personnage)
+    {
+        return new PersonnageHistorique
+        {
+            Nom = personnage.Nom,
+            Rarete = personnage.Rarete,
+            Type = personnage.Type,
+            Puissance = personnage.Puissance,
+            PA = personnage.PA,
+            PV = personnage.PV,
+            Niveau = personnage.Niveau,
+            Rang = personnage.Rang,
+            Role = personnage.Role,
+            Faction = personnage.Faction,
+            TypeAttaque = personnage.TypeAttaque,
+            Selectionne = personnage.Selectionne,
+            IdOrigine = 0
+        };
+    }
+
+    private static PieceHistorique ParsePieceHistorique(XElement pieceElement, string nom)
+    {
+        var pieceHistorique = new PieceHistorique
+        {
+            Nom = nom,
+            Niveau = int.TryParse(pieceElement.Element(AppConstants.XmlElements.Niveau)?.Value, out var niveau) ? niveau : 1,
+            Selectionnee = ParseBool(pieceElement.Element(AppConstants.XmlElements.Selectionne)?.Value),
+            IdOrigine = 0
+        };
+
+        if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceTactique)?.Value, out var pTact))
+        {
+            pieceHistorique.AspectsTactiques.Puissance = pTact;
+        }
+
+        if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceStrategique)?.Value, out var pStrat))
+        {
+            pieceHistorique.AspectsStrategiques.Puissance = pStrat;
+        }
+
+        return pieceHistorique;
+    }
+
     /// <summary>
     /// Importe les données de la Lucie House
     /// </summary>
@@ -585,11 +612,7 @@ public class PmlImportService(ApplicationDbContext context)
             var lucieHouse = new LucieHouse();
 
             // Importer l'affection
-            var affectionStr = lucieHouseElement.Element(AppConstants.XmlElements.Affection)?.Value;
-            if (!string.IsNullOrWhiteSpace(affectionStr) && int.TryParse(affectionStr, out var affection))
-            {
-                lucieHouse.Affection = affection;
-            }
+            ImportAffection(lucieHouseElement, lucieHouse);
 
             var piecesElements = lucieHouseElement.Elements(AppConstants.XmlElements.Piece);
 
@@ -597,55 +620,12 @@ public class PmlImportService(ApplicationDbContext context)
             {
                 try
                 {
-                    var nom = pieceElement.Element(AppConstants.XmlElements.Nom)?.Value;
-                    if (string.IsNullOrWhiteSpace(nom))
-                        continue;
-
-                    var piece = new Piece
+                    var piece = ParseLuciePiece(pieceElement);
+                    if (piece != null)
                     {
-                        Nom = nom,
-                        Niveau = int.TryParse(pieceElement.Element(AppConstants.XmlElements.Niveau)?.Value, out var niveau) ? niveau : 1,
-                        Selectionnee = ParseBool(pieceElement.Element(AppConstants.XmlElements.Selectionne)?.Value)
-                    };
-
-                    // Parser les bonus tactiques
-                    var bonusTactiquesElement = pieceElement.Element(AppConstants.XmlElements.BonusTactiques);
-                    if (bonusTactiquesElement != null)
-                    {
-                        piece.AspectsTactiques.Bonus = [.. bonusTactiquesElement.Elements(AppConstants.XmlElements.Bonus)
-                            .Select(b => b.Value)
-                            .Where(b => !string.IsNullOrWhiteSpace(b))];
-                        piece.AspectsTactiques.Puissance = piece.AspectsTactiques.Bonus.Count;
+                        lucieHouse.Pieces.Add(piece);
+                        importedCount++;
                     }
-
-                    // Parser les bonus stratégiques
-                    var bonusStrategiquesElement = pieceElement.Element(AppConstants.XmlElements.BonusStrategiques);
-                    if (bonusStrategiquesElement != null)
-                    {
-                        piece.AspectsStrategiques.Bonus = bonusStrategiquesElement.Elements(AppConstants.XmlElements.Bonus)
-                            .Select(b => b.Value)
-                            .Where(b => !string.IsNullOrWhiteSpace(b))
-                            .ToList();
-                        piece.AspectsStrategiques.Puissance = piece.AspectsStrategiques.Bonus.Count;
-                    }
-
-                    // Puissance tactiques et stratégiques (nouveau format). Fallback: ancienne balise "Puissance" alimente les tactiques.
-                    if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceTactique)?.Value, out var pTact))
-                    {
-                        piece.AspectsTactiques.Puissance = pTact;
-                    }
-                    else if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceLegacy)?.Value, out var pLegacy))
-                    {
-                        piece.AspectsTactiques.Puissance = pLegacy;
-                    }
-
-                    if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceStrategique)?.Value, out var pStrat))
-                    {
-                        piece.AspectsStrategiques.Puissance = pStrat;
-                    }
-
-                    lucieHouse.Pieces.Add(piece);
-                    importedCount++;
                 }
                 catch (Exception ex)
                 {
@@ -675,6 +655,76 @@ public class PmlImportService(ApplicationDbContext context)
         }
 
         return importedCount;
+    }
+
+    private static void ImportAffection(XElement lucieHouseElement, LucieHouse lucieHouse)
+    {
+        var affectionStr = lucieHouseElement.Element(AppConstants.XmlElements.Affection)?.Value;
+        if (!string.IsNullOrWhiteSpace(affectionStr) && int.TryParse(affectionStr, out var affection))
+        {
+            lucieHouse.Affection = affection;
+        }
+    }
+
+    private Piece? ParseLuciePiece(XElement pieceElement)
+    {
+        var nom = pieceElement.Element(AppConstants.XmlElements.Nom)?.Value;
+        if (string.IsNullOrWhiteSpace(nom))
+            return null;
+
+        var piece = new Piece
+        {
+            Nom = nom,
+            Niveau = int.TryParse(pieceElement.Element(AppConstants.XmlElements.Niveau)?.Value, out var niveau) ? niveau : 1,
+            Selectionnee = ParseBool(pieceElement.Element(AppConstants.XmlElements.Selectionne)?.Value)
+        };
+
+        ParseLuciePieceBonus(pieceElement, piece);
+        ParseLuciePiecePuissance(pieceElement, piece);
+
+        return piece;
+    }
+
+    private static void ParseLuciePieceBonus(XElement pieceElement, Piece piece)
+    {
+        // Parser les bonus tactiques
+        var bonusTactiquesElement = pieceElement.Element(AppConstants.XmlElements.BonusTactiques);
+        if (bonusTactiquesElement != null)
+        {
+            piece.AspectsTactiques.Bonus = [.. bonusTactiquesElement.Elements(AppConstants.XmlElements.Bonus)
+                .Select(b => b.Value)
+                .Where(b => !string.IsNullOrWhiteSpace(b))];
+            piece.AspectsTactiques.Puissance = piece.AspectsTactiques.Bonus.Count;
+        }
+
+        // Parser les bonus stratégiques
+        var bonusStrategiquesElement = pieceElement.Element(AppConstants.XmlElements.BonusStrategiques);
+        if (bonusStrategiquesElement != null)
+        {
+            piece.AspectsStrategiques.Bonus = bonusStrategiquesElement.Elements(AppConstants.XmlElements.Bonus)
+                .Select(b => b.Value)
+                .Where(b => !string.IsNullOrWhiteSpace(b))
+                .ToList();
+            piece.AspectsStrategiques.Puissance = piece.AspectsStrategiques.Bonus.Count;
+        }
+    }
+
+    private static void ParseLuciePiecePuissance(XElement pieceElement, Piece piece)
+    {
+        // Puissance tactiques et stratégiques (nouveau format). Fallback: ancienne balise "Puissance" alimente les tactiques.
+        if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceTactique)?.Value, out var pTact))
+        {
+            piece.AspectsTactiques.Puissance = pTact;
+        }
+        else if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceLegacy)?.Value, out var pLegacy))
+        {
+            piece.AspectsTactiques.Puissance = pLegacy;
+        }
+
+        if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceStrategique)?.Value, out var pStrat))
+        {
+            piece.AspectsStrategiques.Puissance = pStrat;
+        }
     }
 
     /// <summary>
@@ -944,6 +994,23 @@ public class PmlImportService(ApplicationDbContext context)
         writer.WriteEndElement();
     }
 
+    private static void ExportListClassements(System.Xml.XmlWriter writer, List<Classement> listClassements)
+    {
+        if (listClassements.Count != 0)
+        {
+            writer.WriteStartElement(AppConstants.XmlElements.Classements);
+            foreach (var classement in listClassements)
+            {
+                writer.WriteStartElement(AppConstants.XmlElements.ClassementItem);
+                writer.WriteElementString(AppConstants.XmlElements.Nom, classement.Nom);
+                writer.WriteElementString(AppConstants.XmlElements.TypeClassement, classement.Type.ToString());
+                writer.WriteElementString(AppConstants.XmlElements.Valeur, classement.Valeur.ToString());
+                writer.WriteEndElement();
+            }
+            writer.WriteEndElement();
+        }
+    }
+
     private async Task ExporterHistoriquesClassementPmlAsync(PmlExportOptions options, System.Xml.XmlWriter writer)
     {
         if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_HISTORIES))
@@ -971,32 +1038,10 @@ public class PmlImportService(ApplicationDbContext context)
                 writer.WriteElementString(AppConstants.XmlElements.PuissanceLucie, historiqueClassement.PuissanceLucie.ToString());
 
                 // Export des classements
-                if (historiqueClassement.Classements.Count != 0)
-                {
-                    writer.WriteStartElement(AppConstants.XmlElements.Classements);
-                    foreach (var classement in historiqueClassement.Classements)
-                    {
-                        writer.WriteStartElement(AppConstants.XmlElements.ClassementItem);
-                        writer.WriteElementString(AppConstants.XmlElements.Nom, classement.Nom);
-                        writer.WriteElementString(AppConstants.XmlElements.TypeClassement, classement.Type.ToString());
-                        writer.WriteElementString(AppConstants.XmlElements.Valeur, classement.Valeur.ToString());
-                        writer.WriteEndElement();
-                    }
-                    writer.WriteEndElement();
-                }
+                ExportListClassements(writer, historiqueClassement.Classements);
 
                 // Export des mercenaires
-                if (historiqueClassement.Mercenaires.Count != 0)
-                {
-                    writer.WriteStartElement(AppConstants.XmlElements.Mercenaires);
-                    foreach (var mercenaire in historiqueClassement.Mercenaires)
-                    {
-                        writer.WriteStartElement(AppConstants.XmlElements.Personnage);
-                        WritePersonnageData(writer, mercenaire);
-                        writer.WriteEndElement();
-                    }
-                    writer.WriteEndElement();
-                }
+                ExportListMercenaires(writer, historiqueClassement.Mercenaires);
 
                 // Export du commandant
                 if (historiqueClassement.Commandant != null)
@@ -1007,17 +1052,7 @@ public class PmlImportService(ApplicationDbContext context)
                 }
 
                 // Export des androïdes
-                if (historiqueClassement.Androides.Count != 0)
-                {
-                    writer.WriteStartElement(AppConstants.XmlElements.Androides);
-                    foreach (var androide in historiqueClassement.Androides)
-                    {
-                        writer.WriteStartElement(AppConstants.XmlElements.Personnage);
-                        WritePersonnageData(writer, androide);
-                        writer.WriteEndElement();
-                    }
-                    writer.WriteEndElement();
-                }
+                ExportListAndroides(writer, historiqueClassement.Androides);
 
                 // Export des pièces
                 if (historiqueClassement.Pieces.Count != 0)
@@ -1032,6 +1067,36 @@ public class PmlImportService(ApplicationDbContext context)
 
                 writer.WriteEndElement();
             }
+        }
+    }
+
+    private static void ExportListAndroides(XmlWriter writer, List<PersonnageHistorique> listAndroides)
+    {
+        if (listAndroides.Count != 0)
+        {
+            writer.WriteStartElement(AppConstants.XmlElements.Androides);
+            foreach (var androide in listAndroides)
+            {
+                writer.WriteStartElement(AppConstants.XmlElements.Personnage);
+                WritePersonnageData(writer, androide);
+                writer.WriteEndElement();
+            }
+            writer.WriteEndElement();
+        }
+    }
+
+    private static void ExportListMercenaires(XmlWriter writer, List<PersonnageHistorique> listMercenaires)
+    {
+        if (listMercenaires.Count != 0)
+        {
+            writer.WriteStartElement(AppConstants.XmlElements.Mercenaires);
+            foreach (var mercenaire in listMercenaires)
+            {
+                writer.WriteStartElement(AppConstants.XmlElements.Personnage);
+                WritePersonnageData(writer, mercenaire);
+                writer.WriteEndElement();
+            }
+            writer.WriteEndElement();
         }
     }
 

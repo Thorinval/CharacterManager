@@ -560,6 +560,10 @@ public partial class Inventaire : IAsyncDisposable
         }
     }
 
+    private const string BulkEditNiveau = "Niveau";
+    private const string BulkEditTypeAttaque = "TypeAttaque";
+    private const string BulkEditSelectionne = "Selectionne";
+
     internal async Task ApplyBulkEdit()
     {
         if (string.IsNullOrEmpty(bulkEditProperty) || selectedPersonnages.Count == 0)
@@ -570,25 +574,50 @@ public partial class Inventaire : IAsyncDisposable
             var personnage = personnages.FirstOrDefault(p => p.Id == id);
             if (personnage != null)
             {
-                switch (bulkEditProperty)
-                {
-                    case "Niveau":
-                        if (int.TryParse(bulkEditValue, out int niveau))
-                            personnage.Niveau = niveau;
-                        break;
-                    case "TypeAttaque":
-                        if (Enum.TryParse<TypeAttaque>(bulkEditValue, out var typeAttaqueValue))
-                            personnage.TypeAttaque = typeAttaqueValue;
-                        break;
-                    case "Selectionne":
-                        if (bool.TryParse(bulkEditValue, out var selectionValue))
-                            personnage.Selectionne = selectionValue;
-                        break;
-                }
+                ApplyBulkEditValue(personnage, bulkEditProperty, bulkEditValue);
                 PersonnageService.Update(personnage);
             }
         }
 
+        await ResetBulkEditState();
+    }
+
+    private static void ApplyBulkEditValue(Personnage personnage, string property, string value)
+    {
+        switch (property)
+        {
+            case BulkEditNiveau:
+                ApplyBulkEditNiveau(personnage, value);
+                break;
+            case BulkEditTypeAttaque:
+                ApplyBulkEditTypeAttaque(personnage, value);
+                break;
+            case BulkEditSelectionne:
+                ApplyBulkEditSelectionne(personnage, value);
+                break;
+        }
+    }
+
+    private static void ApplyBulkEditNiveau(Personnage personnage, string value)
+    {
+        if (int.TryParse(value, out int niveauValue))
+            personnage.Niveau = niveauValue;
+    }
+
+    private static void ApplyBulkEditTypeAttaque(Personnage personnage, string value)
+    {
+        if (Enum.TryParse<TypeAttaque>(value, out var typeAttaqueValue))
+            personnage.TypeAttaque = typeAttaqueValue;
+    }
+
+    private static void ApplyBulkEditSelectionne(Personnage personnage, string value)
+    {
+        if (bool.TryParse(value, out var selectionValue))
+            personnage.Selectionne = selectionValue;
+    }
+
+    private async Task ResetBulkEditState()
+    {
         await LoadPersonnagesAsync();
         selectedPersonnages.Clear();
         showBulkEditModal = false;
@@ -675,7 +704,7 @@ public partial class Inventaire : IAsyncDisposable
             selectedPersonnages.Clear();
             LuciePieces.Clear();
             lucieHouse = null;
-            
+
             await LoadPersonnagesAsync();
             await LoadLucieHouseAsync();
         }
