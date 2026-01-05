@@ -90,7 +90,7 @@ body {
     align-items: center;
     gap: 12px;
     padding: 10px 16px;
-    color: #d1d5db;
+    color: #e5e7eb;
     text-decoration: none;
     transition: background 0.2s, color 0.2s;
     white-space: nowrap;
@@ -98,12 +98,12 @@ body {
 
 .nav-rail-item:hover {
     background: rgba(255, 255, 255, 0.08);
-    color: white;
+    color: #f3f4f6;
 }
 
 .nav-rail-item.active {
     background: rgba(255, 255, 255, 0.12);
-    color: white;
+    color: #f3f4f6;
     border-left: 3px solid #60a5fa;
 }
 
@@ -145,28 +145,6 @@ body {
 }
 
 /* Le conteneur global occupe toute la hauteur */
-html,
-body {
-    height: 100%;
-    margin: 0;
-    overflow: auto;
-}
-
-/* Layout principal : rail + contenu */
-.layout-container {
-    display: flex;
-    height: 100%;
-}
-
-/* Contenu scrollable */
-.content {
-    flex: 1;
-    overflow-y: auto;
-    /* le scroll se fait ici */
-    padding: 0 40px 40px 40px;
-}
-
-.top-left,
 .top-right {
     display: flex;
     align-items: center;
@@ -181,7 +159,7 @@ body {
     font-family: "Material Symbols Rounded", sans-serif;
     font-size: 22px;
     font-weight: 300;
-    color: #d1d5db;
+    color: #f3f4f6;
     cursor: pointer;
     padding: 6px;
     border-radius: 6px;
@@ -212,14 +190,14 @@ body {
 
 
 .user-label {
-    color: #d1d5db;
+    color: #f3f4f6;
     font-size: 0.9rem;
 }
 
 .logout-btn {
     background: none;
     border: 1px solid #6b7280;
-    color: #d1d5db;
+    color: #f3f4f6;
     padding: 4px 10px;
     border-radius: 6px;
     cursor: pointer;
@@ -298,7 +276,7 @@ body {
 .top-row .settings-link {
     background: none;
     border: none;
-    color: #d1d5db;
+    color: #f3f4f6;
     font-size: 0.9rem;
     cursor: pointer;
     padding: 6px 10px;
@@ -319,33 +297,23 @@ body {
 .main-content {
     margin-left: 72px;
     /* Décalage en mode compact */
-    padding-top: 0px;
-    padding-left: 2px;
     transition: margin-left 0.25s ease;
     width: 100%;
     max-width: none;
     overflow: auto;
-}
-
-.layout-container.rail-expanded .main-content {
-    margin-left: 200px;
-    /* Décalage quand rail étendu */
-}
-
-.content {
     background: transparent;
     border-radius: 12px;
     padding: 0 40px 40px 40px;
     border: none;
     box-shadow: none;
-    width: 100%;
-    max-width: none;
-    /* ← augmente la largeur max */
-    margin: 0 auto;
-    /* ← centre le contenu */
     flex: 1;
     overflow-y: auto;
     /* scroll interne si nécessaire */
+}
+
+.layout-container.rail-expanded .main-content {
+    margin-left: 200px;
+    /* Décalage quand rail étendu */
 }
 
 /* ============================================================

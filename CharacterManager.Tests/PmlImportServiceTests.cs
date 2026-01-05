@@ -67,7 +67,21 @@ public class PmlImportServiceTests : IDisposable
 
   public void Dispose()
   {
-    _context?.Dispose();
+    Dispose(true);
+    GC.SuppressFinalize(this);
+  }
+
+  protected virtual void Dispose(bool disposing)
+  {
+    if (disposing)
+    {
+      _context?.Dispose();
+    }
+  }
+
+  ~PmlImportServiceTests()
+  {
+    Dispose(false);
   }
 
   [Fact]
@@ -103,7 +117,7 @@ public class PmlImportServiceTests : IDisposable
     Assert.True(result.IsSuccess);
     Assert.Equal(1, result.SuccessCount);
 
-    var belle = _context.Personnages.FirstOrDefault(p => p.Nom == "BELLE");
+    var belle = await _context.Personnages.FirstOrDefaultAsync(p => p.Nom == "BELLE");
     Assert.NotNull(belle);
     Assert.Equal(Rarete.SSR, belle.Rarete);
     Assert.Equal(TypePersonnage.Mercenaire, belle.Type);
@@ -143,7 +157,7 @@ public class PmlImportServiceTests : IDisposable
     Assert.True(result.IsSuccess);
     Assert.Equal(2, result.SuccessCount);
 
-    var template = _context.Templates.FirstOrDefault(t => t.Nom == "Mon Équipe");
+    var template = await _context.Templates.FirstOrDefaultAsync(t => t.Nom == "Mon Équipe");
     Assert.NotNull(template);
     Assert.Equal("Ma première équipe", template.Description);
   }
@@ -193,10 +207,10 @@ public class PmlImportServiceTests : IDisposable
     Assert.True(result.IsSuccess);
     Assert.Equal(2, result.SuccessCount); // 1 personnage + 1 template
 
-    var katara = _context.Personnages.FirstOrDefault(p => p.Nom == "KATARA");
+    var katara = await _context.Personnages.FirstOrDefaultAsync(p => p.Nom == "KATARA");
     Assert.NotNull(katara);
 
-    var testTeam = _context.Templates.FirstOrDefault(t => t.Nom == "Test Team");
+    var testTeam = await _context.Templates.FirstOrDefaultAsync(t => t.Nom == "Test Team");
     Assert.NotNull(testTeam);
   }
 
@@ -258,43 +272,12 @@ public class PmlImportServiceTests : IDisposable
     Assert.True(result.IsSuccess);
     Assert.Equal(3, result.SuccessCount);
 
-    Assert.NotNull(_context.Personnages.FirstOrDefault(p => p.Nom == "ALYA" && p.Type == TypePersonnage.Mercenaire));
-    Assert.NotNull(_context.Personnages.FirstOrDefault(p => p.Nom == "COMMANDRA" && p.Type == TypePersonnage.Commandant));
-    Assert.NotNull(_context.Personnages.FirstOrDefault(p => p.Nom == "OMEGA" && p.Type == TypePersonnage.Androide));
+    Assert.NotNull(await _context.Personnages.FirstOrDefaultAsync(p => p.Nom == "ALYA" && p.Type == TypePersonnage.Mercenaire));
+    Assert.NotNull(await _context.Personnages.FirstOrDefaultAsync(p => p.Nom == "COMMANDRA" && p.Type == TypePersonnage.Commandant));
+    Assert.NotNull(await _context.Personnages.FirstOrDefaultAsync(p => p.Nom == "OMEGA" && p.Type == TypePersonnage.Androide));
   }
 
   // Test désactivé : HistoriqueEscouade est obsolète, remplacé par HistoriqueClassement
-  /*
-  [Fact]
-  public async Task ImportPmlAsync_WithHistories_ShouldPersistEntries()
-  {
-    // Arrange
-    var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
-<CharacterManagerPML version=""1.0"" exportDate=""2025-12-20T15:30:00Z"">
-  <HistoriqueEscouade>
-    <DateEnregistrement>2025-01-01T10:00:00Z</DateEnregistrement>
-    <PuissanceTotal>5000</PuissanceTotal>
-    <Classement>12</Classement>
-    <DonneesEscouadeJson>{""escouade"":1}</DonneesEscouadeJson>
-  </HistoriqueEscouade>
-  <HistoriqueEscouade>
-    <DateEnregistrement>2025-01-02T11:00:00Z</DateEnregistrement>
-    <PuissanceTotal>6000</PuissanceTotal>
-    <DonneesEscouadeJson>{""escouade"":2}</DonneesEscouadeJson>
-  </HistoriqueEscouade>
-</CharacterManagerPML>";
-
-    var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
-
-    // Act
-    var result = await _pmlImportService.ImportPmlAsync(stream);
-
-    // Assert
-    Assert.True(result.IsSuccess);
-    Assert.Equal(2, result.SuccessCount);
-    Assert.Equal(2, _context.HistoriquesEscouade.Count());
-  }
-  */
 
   [Fact]
   public async Task ImportPmlAsync_WithFileName_ShouldPersistLastImportedName()
@@ -334,7 +317,7 @@ public class PmlImportServiceTests : IDisposable
   public async Task ExporterInventairePmlAsync_ShouldExportPersonnages()
   {
     // Arrange
-    var personnages = _context.Personnages.ToList();
+    var personnages = await _context.Personnages.ToListAsync();
 
     // Act
     var pmlBytes = await _pmlImportService.ExporterInventairePmlAsync(personnages);
@@ -492,9 +475,9 @@ public class PmlImportServiceTests : IDisposable
     Assert.True(result.IsSuccess);
     Assert.Equal(2, result.SuccessCount);
 
-    var lucieHouse = _context.LucieHouses.Include(l => l.Pieces).FirstOrDefault();
+    var lucieHouse = await _context.LucieHouses.Include(l => l.Pieces).FirstOrDefaultAsync();
     Assert.NotNull(lucieHouse);
-    Assert.Equal(2, lucieHouse!.Pieces.Count);
+    Assert.Equal(2, lucieHouse.Pieces.Count);
     Assert.Contains(lucieHouse.Pieces, p => p.Nom == "Hall" && p.Niveau==4);
     Assert.Contains(lucieHouse.Pieces, p => p.Nom == "Bibliothèque" && p.Niveau==2);
   }
@@ -511,7 +494,7 @@ public class PmlImportServiceTests : IDisposable
       LastImportedDate = DateTime.UtcNow
     };
     _context.AppSettings.Add(settings);
-    _context.SaveChanges();
+    await _context.SaveChangesAsync();
 
     // Act
     var result = await _pmlImportService.GetLastImportedFileName();
@@ -543,14 +526,14 @@ public class PmlImportServiceTests : IDisposable
       LastImportedDate = now
     };
     _context.AppSettings.Add(settings);
-    _context.SaveChanges();
+    await _context.SaveChangesAsync();
 
     // Act
     var result = await _pmlImportService.GetLastImportedDateAsync();
 
     // Assert
     Assert.NotNull(result);
-    Assert.Equal(now.Date, result?.Date);
+    Assert.Equal(now.Date, result.Value.Date);
   }
 
   [Fact]
@@ -565,14 +548,14 @@ public class PmlImportServiceTests : IDisposable
       LastExportDate = now
     };
     _context.AppSettings.Add(settings);
-    _context.SaveChanges();
+    await _context.SaveChangesAsync();
 
     // Act
     var result = await _pmlImportService.GetLastExportDate();
 
     // Assert
     Assert.NotNull(result);
-    Assert.Equal(now.Date, result?.Date);
+    Assert.Equal(now.Date, result.Value.Date);
   }
 
   [Fact]
@@ -606,8 +589,8 @@ public class PmlImportServiceTests : IDisposable
 
     // Assert
     Assert.True(result.IsSuccess);
-    var settings = _context.AppSettings.FirstOrDefault();
+    var settings = await _context.AppSettings.FirstOrDefaultAsync();
     Assert.NotNull(settings);
-    Assert.Equal("config_test.pml", settings!.LastImportedFileName);
+    Assert.Equal("config_test.pml", settings.LastImportedFileName);
   }
 }
