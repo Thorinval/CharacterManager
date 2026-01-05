@@ -119,6 +119,9 @@ public partial class Inventaire : IAsyncDisposable
     // Mode d'affichage
     internal string viewMode = AppConstants.Defaults.ViewModeGrid;
 
+    // JavaScript interop constants
+    private const string JsAlert = "alert";
+
     protected override async Task OnInitializedAsync()
     {
         await LoadPersonnagesAsync();
@@ -191,10 +194,7 @@ public partial class Inventaire : IAsyncDisposable
         return viewMode == AppConstants.Defaults.ViewModeGrid ? "personnages-grid" : "personnages-list";
     }
 
-    internal static string GetContainerClassCompact()
-    {
-        return "personnages-grid-compact";
-    }
+    internal const string ContainerClassCompact = "personnages-grid-compact";
 
     internal static string GetRarityClass(Rarete rarete)
     {
@@ -350,86 +350,128 @@ public partial class Inventaire : IAsyncDisposable
     }
     private void ApplyFiltersAndSorting()
     {
-        IEnumerable<Personnage> filtered = personnages;
+        IEnumerable<Personnage> filtered = ApplySearchFilter(personnages);
+        IEnumerable<Piece> filteredPieces = ApplySearchFilter(LuciePieces ?? []);
 
-        IEnumerable<Piece> filteredPieces = LuciePieces ?? [];
+        filtered = ApplyTypeFilter(filtered);
+        filteredPieces = ApplyTypeFilterToPieces(filteredPieces);
 
-        // 🔍 Filtre de recherche
-        if (!string.IsNullOrWhiteSpace(searchTerm))
-        {
-            filtered = filtered.Where(p =>
-                p.Nom.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-                || p.Rarete.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-                || p.Type.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-                || p.Role.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-                || p.Faction.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-                || p.TypeAttaque.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-                || p.Selectionne.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-            );
-
-            filteredPieces = filteredPieces.Where(p =>
-                p.Nom.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-            );
-        }
-
-        filtered = SelectedFilter switch
-        {
-            InventoryFilter.Tous => filtered,
-            InventoryFilter.Commandants => filtered.Where(p => p.Type == TypePersonnage.Commandant),
-            InventoryFilter.Mercenaires => filtered.Where(p => p.Type == TypePersonnage.Mercenaire),
-            InventoryFilter.Androides => filtered.Where(p => p.Type == TypePersonnage.Androide),
-            InventoryFilter.LucyRooms => filtered.Where(p => p.Type == TypePersonnage.Inconnu),
-            _ => filtered
-        };
-
-        filteredPieces = SelectedFilter switch
-        {
-            InventoryFilter.Tous => filteredPieces,
-            InventoryFilter.LucyRooms => filteredPieces,
-            _ => filteredPieces.Where(p => false) // Empty
-        };
-
-        // On matérialise la liste
         personnagesFiltres = [.. filtered];
-
         luciePiecesFiltres = [.. filteredPieces];
 
-        // 📊 Tri : ordre par type puis par colonne
-        var typeOrder = new Dictionary<TypePersonnage, int>
+        personnagesFiltres = ApplySorting(personnagesFiltres);
+    }
+
+    private IEnumerable<Personnage> ApplySearchFilter(IEnumerable<Personnage> source)
     {
-        { TypePersonnage.Commandant, 1 },
-        { TypePersonnage.Mercenaire, 2 },
-        { TypePersonnage.Androide, 3 }
-    };
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return source;
 
-        personnagesFiltres = sortColumn switch
+        return source.Where(p =>
+            p.Nom.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            || p.Rarete.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            || p.Type.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            || p.Role.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            || p.Faction.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            || p.TypeAttaque.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            || p.Selectionne.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+        );
+    }
+
+    private IEnumerable<Piece> ApplySearchFilter(IEnumerable<Piece> source)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return source;
+
+        return source.Where(p =>
+            p.Nom.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+        );
+    }
+
+    private IEnumerable<Personnage> ApplyTypeFilter(IEnumerable<Personnage> source)
+    {
+        return SelectedFilter switch
         {
-            AppConstants.XmlElements.Puissance => sortAscending
-                ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Type == TypePersonnage.Commandant ? p.Puissance + p.Rang * 20 : p.Puissance)]
-                : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Type == TypePersonnage.Commandant ? p.Puissance + p.Rang * 20 : p.Puissance)],
-
-            AppConstants.XmlElements.Nom => sortAscending
-                ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Nom)]
-                : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Nom)],
-
-            AppConstants.XmlElements.Rarete => sortAscending
-                ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Rarete)]
-                : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Rarete)],
-
-            AppConstants.XmlElements.Niveau => sortAscending
-                ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Niveau)]
-                : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Niveau)],
-
-            AppConstants.XmlElements.Type => sortAscending
-                ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Type)]
-                : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Type)],
-
-            AppConstants.XmlElements.Rang => sortAscending
-                ? [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Rang)]
-                : [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Rang)],
-
-            _ => [.. personnagesFiltres.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Nom)]
+            InventoryFilter.Tous => source,
+            InventoryFilter.Commandants => source.Where(p => p.Type == TypePersonnage.Commandant),
+            InventoryFilter.Mercenaires => source.Where(p => p.Type == TypePersonnage.Mercenaire),
+            InventoryFilter.Androides => source.Where(p => p.Type == TypePersonnage.Androide),
+            InventoryFilter.LucyRooms => source.Where(p => p.Type == TypePersonnage.Inconnu),
+            _ => source
         };
+    }
+
+    private IEnumerable<Piece> ApplyTypeFilterToPieces(IEnumerable<Piece> source)
+    {
+        return SelectedFilter switch
+        {
+            InventoryFilter.Tous => source,
+            InventoryFilter.LucyRooms => source,
+            _ => source.Where(p => false)
+        };
+    }
+
+    private List<Personnage> ApplySorting(List<Personnage> source)
+    {
+        var typeOrder = new Dictionary<TypePersonnage, int>
+        {
+            { TypePersonnage.Commandant, 1 },
+            { TypePersonnage.Mercenaire, 2 },
+            { TypePersonnage.Androide, 3 }
+        };
+
+        return sortColumn switch
+        {
+            AppConstants.XmlElements.Puissance => SortByPuissance(source, typeOrder),
+            AppConstants.XmlElements.Nom => SortByName(source, typeOrder),
+            AppConstants.XmlElements.Rarete => SortByRarity(source, typeOrder),
+            AppConstants.XmlElements.Niveau => SortByLevel(source, typeOrder),
+            AppConstants.XmlElements.Type => SortByType(source, typeOrder),
+            AppConstants.XmlElements.Rang => SortByRank(source, typeOrder),
+            _ => SortByName(source, typeOrder)
+        };
+    }
+
+    private List<Personnage> SortByPuissance(List<Personnage> source, Dictionary<TypePersonnage, int> typeOrder)
+    {
+        return sortAscending
+            ? [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Type == TypePersonnage.Commandant ? p.Puissance + p.Rang * 20 : p.Puissance)]
+            : [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Type == TypePersonnage.Commandant ? p.Puissance + p.Rang * 20 : p.Puissance)];
+    }
+
+    private List<Personnage> SortByName(List<Personnage> source, Dictionary<TypePersonnage, int> typeOrder)
+    {
+        return sortAscending
+            ? [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Nom)]
+            : [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Nom)];
+    }
+
+    private List<Personnage> SortByRarity(List<Personnage> source, Dictionary<TypePersonnage, int> typeOrder)
+    {
+        return sortAscending
+            ? [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Rarete)]
+            : [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Rarete)];
+    }
+
+    private List<Personnage> SortByLevel(List<Personnage> source, Dictionary<TypePersonnage, int> typeOrder)
+    {
+        return sortAscending
+            ? [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Niveau)]
+            : [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Niveau)];
+    }
+
+    private List<Personnage> SortByType(List<Personnage> source, Dictionary<TypePersonnage, int> typeOrder)
+    {
+        return sortAscending
+            ? [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Type)]
+            : [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Type)];
+    }
+
+    private List<Personnage> SortByRank(List<Personnage> source, Dictionary<TypePersonnage, int> typeOrder)
+    {
+        return sortAscending
+            ? [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Rang)]
+            : [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Rang)];
     }
 
     private void SortBy(string column)
@@ -445,6 +487,12 @@ public partial class Inventaire : IAsyncDisposable
         }
         ApplyFiltersAndSorting();
     }
+
+    internal void SortByPuissance() => SortBy(AppConstants.XmlElements.Puissance);
+    internal void SortByNom() => SortBy(AppConstants.XmlElements.Nom);
+    internal void SortByRarete() => SortBy(AppConstants.XmlElements.Rarete);
+    internal void SortByNiveau() => SortBy(AppConstants.XmlElements.Niveau);
+    internal void SortByRang() => SortBy(AppConstants.XmlElements.Rang);
 
     internal void HandleSearchInput(ChangeEventArgs e)
     {
@@ -512,7 +560,7 @@ public partial class Inventaire : IAsyncDisposable
         }
     }
 
-    private async Task ApplyBulkEdit()
+    internal async Task ApplyBulkEdit()
     {
         if (string.IsNullOrEmpty(bulkEditProperty) || selectedPersonnages.Count == 0)
             return;
@@ -548,7 +596,7 @@ public partial class Inventaire : IAsyncDisposable
         bulkEditValue = "";
     }
 
-    private void ShowAddModal()
+    internal void ShowAddModal()
     {
         currentPersonnage = new Personnage();
         isEditing = false;
@@ -556,7 +604,7 @@ public partial class Inventaire : IAsyncDisposable
         StateHasChanged();
     }
 
-    private void EditPersonnage(Personnage personnage)
+    internal void EditPersonnage(Personnage personnage)
     {
         // Ouvrir la modale de détail directement en mode édition
         ModalService.Open<CharacterManager.Components.Modal.DetailPersonnageModal>(
@@ -569,13 +617,13 @@ public partial class Inventaire : IAsyncDisposable
         );
     }
 
-    private void DeletePersonnage(int id)
+    internal void DeletePersonnage(int id)
     {
         PersonnageService.Delete(id);
         _ = InvokeAsync(async () => await LoadPersonnagesAsync());
     }
 
-    private void SavePersonnage()
+    internal void SavePersonnage()
     {
         if (isEditing)
         {
@@ -600,13 +648,8 @@ public partial class Inventaire : IAsyncDisposable
         StateHasChanged();
     }
 
-    private void SortByNom() => SortBy("Nom");
-    private void SortByRarete() => SortBy("Rarete");
-    private void SortByNiveau() => SortBy("Niveau");
-    private void SortByRang() => SortBy("Rang");
-    private void SortByPuissance() => SortBy("Puissance");
 
-    private async Task DeleteSelectedPersonnages()
+    internal async Task DeleteSelectedPersonnages()
     {
         if (selectedPersonnages.Count != 0)
         {
@@ -623,7 +666,7 @@ public partial class Inventaire : IAsyncDisposable
         }
     }
 
-    private async Task ResetAll()
+    internal async Task ResetAll()
     {
         var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Êtes-vous sûr de vouloir supprimer toutes les données ? Cette action est irréversible.");
         if (confirmed)
@@ -638,7 +681,7 @@ public partial class Inventaire : IAsyncDisposable
         }
     }
 
-    private void ViewPersonnage(int id)
+    internal void ViewPersonnage(int id)
     {
         ModalService.Open<CharacterManager.Components.Modal.DetailPersonnageModal>(
             new Dictionary<string, object> { { "PersonnageId", id } },
@@ -646,7 +689,7 @@ public partial class Inventaire : IAsyncDisposable
         );
     }
 
-    private async Task ExportToPML()
+    internal async Task ExportToPML()
     {
         try
         {
@@ -663,11 +706,11 @@ public partial class Inventaire : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de l'export: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync(JsAlert, $"Erreur lors de l'export: {ex.Message}");
         }
     }
 
-    private async Task HandleImportInventaire(InputFileChangeEventArgs e)
+    internal async Task HandleImportInventaire(InputFileChangeEventArgs e)
     {
         var file = e.File;
         if (file == null)
@@ -680,7 +723,7 @@ public partial class Inventaire : IAsyncDisposable
 
         if (!isSupported)
         {
-            await JSRuntime.InvokeVoidAsync("alert", "Veuillez sélectionner un fichier PML ou XML.");
+            await JSRuntime.InvokeVoidAsync(JsAlert, "Veuillez sélectionner un fichier PML ou XML.");
             return;
         }
 
@@ -711,20 +754,20 @@ public partial class Inventaire : IAsyncDisposable
                 importMessage += $"\nDétails (aperçu):\n{preview}";
             }
 
-            await JSRuntime.InvokeVoidAsync("alert", importMessage);
+            await JSRuntime.InvokeVoidAsync(JsAlert, importMessage);
             await LoadPersonnagesAsync();
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de l'import: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync(JsAlert, $"Erreur lors de l'import: {ex.Message}");
         }
     }
 
     // ===== Lucie House Management =====
 
-    private Toast? toastRef;
+    internal Toast? toastRef;
 
-    private async Task LoadLucieHouseAsync()
+    internal async Task LoadLucieHouseAsync()
     {
         await EnsureLuciePieceAspectColumnsAsync(force: false);
 
@@ -960,12 +1003,12 @@ public partial class Inventaire : IAsyncDisposable
         toastRef?.Show($"{piece.Nom} - {field} mis à jour: {value}", "success");
     }
 
-    private async Task UpdatePiecePuissance(int pieceId, string value)
+    internal async Task UpdatePiecePuissance(int pieceId, string value)
     {
         if (lucieHouse == null) return;
 
         var piece = lucieHouse.Pieces.FirstOrDefault(p => p.Id == pieceId);
-        if (piece != null && int.TryParse(value, out var puissance))
+        if (piece != null && int.TryParse(value, out _))
         {
             await EnsureLuciePieceAspectColumnsAsync(force: false);
             DbContext.Pieces.Update(piece);
@@ -974,7 +1017,7 @@ public partial class Inventaire : IAsyncDisposable
         }
     }
 
-    private async Task TogglePieceSelection(int pieceId)
+    internal async Task TogglePieceSelection(int pieceId)
     {
         if (lucieHouse == null) return;
 
@@ -1004,16 +1047,16 @@ public partial class Inventaire : IAsyncDisposable
         await InvokeAsync(StateHasChanged);
     }
 
-    private Task HandleInvalidDrop(string message)
+    internal Task HandleInvalidDrop(string message)
     {
         toastRef?.Show(message, "warning");
         return Task.CompletedTask;
     }
 
     // Drag & Drop depuis les cartes
-    private int? currentlyDraggedId;
+    internal int? currentlyDraggedId;
 
-    private void HandleDragStart(DragEventArgs e, Personnage personnage)
+    internal void HandleDragStart(DragEventArgs e, Personnage personnage)
     {
         currentlyDraggedId = personnage.Id;
         StateHasChanged();

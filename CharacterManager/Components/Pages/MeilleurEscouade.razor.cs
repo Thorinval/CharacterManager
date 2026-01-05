@@ -14,8 +14,8 @@ public partial class MeilleurEscouade
     private List<Personnage> topMercenaires = new();
     private Personnage? topCommandant;
     private List<Personnage> topAndroides = new();
-    private int puissanceMax = 0;
-    private List<Piece> luciePieces = [];
+    internal int puissanceMax = 0;
+    internal List<Piece> luciePieces = new();
 
     [Inject]
     public ApplicationDbContext DbContext { get; set; } = null!;
@@ -56,7 +56,7 @@ public partial class MeilleurEscouade
         );
     }
 
-    private string GetCommandantHeaderImage()
+    internal string GetCommandantHeaderImage()
     {
         if (topCommandant != null)
         {
@@ -65,7 +65,7 @@ public partial class MeilleurEscouade
         return AppConstants.Paths.GenericCommandantHeader;
     }
 
-    private void NavigateToCommandantDetail()
+    internal void NavigateToCommandantDetail()
     {
         if (topCommandant != null)
         {
@@ -73,9 +73,9 @@ public partial class MeilleurEscouade
         }
     }
 
-    private static int GetPiecePower(Piece piece) => piece.Puissance;
+    internal static int GetPiecePower(Piece piece) => piece.Puissance;
 
-    private void EnsureLuciePieceAspectColumns()
+    internal void EnsureLuciePieceAspectColumns()
     {
         try
         {
