@@ -5,6 +5,7 @@ using CharacterManager.Server.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Text.Json;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace CharacterManager.Server.Services;
@@ -54,7 +55,7 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
             .ToListAsync();
     }
 
-    public DonneesEscouadeSerialisees? DeserializerEscouade(string json)
+    public static DonneesEscouadeSerialisees? DeserializerEscouade(string json)
     {
         try
         {
@@ -195,7 +196,7 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
                 }
                 writer.WriteEndElement();
 
-                writer.WriteStartElement( AppConstants.XmlElements.Lucie);
+                writer.WriteStartElement(AppConstants.XmlElements.Lucie);
                 writer.WriteElementString(AppConstants.XmlElements.Puissance, historique.Pieces.Sum(p => p.PuissanceLegacy).ToString());
                 writer.WriteEndElement();
 
@@ -205,59 +206,71 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
             writer.WriteEndElement();
 
             // Écrire la section inventaire
-            writer.WriteStartElement(AppConstants.XmlElements.Inventaire);
-            var personnages = await dbContext.Personnages.AsNoTracking().ToListAsync();
-            foreach (var personnage in personnages)
-            {
-                writer.WriteStartElement(AppConstants.XmlElements.Personnage);
-                writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
-                writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.Type, personnage.Type.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.PA, personnage.PA.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.PV, personnage.PV.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.Rang, personnage.Rang.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.Role, personnage.Role.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.Faction, personnage.Faction.ToString());
-                writer.WriteElementString(AppConstants.XmlElements.Selectionne, personnage.Selectionne.ToString());
-                writer.WriteEndElement();
-            }
-            writer.WriteEndElement();
+            await EcrireInventaire(writer);
 
             // Écrire la section templates
-            writer.WriteStartElement("templates");
-            var templates = await dbContext.Templates.AsNoTracking().ToListAsync();
-            foreach (var template in templates)
-            {
-                writer.WriteStartElement( AppConstants.XmlElements.Template);
-                writer.WriteElementString(AppConstants.XmlElements.Nom, template.Nom);
-                writer.WriteElementString(AppConstants.XmlElements.Description, template.Description ?? "");
+            await EcrireTemplates(writer);
 
-                var personnageIds = template.GetPersonnageIds();
-                foreach (var personnageId in personnageIds)
-                {
-                    var personnage = await dbContext.Personnages.FirstOrDefaultAsync(p => p.Id == personnageId);
-                    if (personnage != null)
-                    {
-                        writer.WriteStartElement(AppConstants.XmlElements.Personnage);
-                        writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
-                        writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
-                        writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
-                        writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
-                        writer.WriteEndElement();
-                    }
-                }
 
-                writer.WriteEndElement();
-            }
-            writer.WriteEndElement();
 
             writer.WriteEndElement();
             writer.WriteEndDocument();
         }
 
         return memoryStream.ToArray();
+    }
+
+    private async Task EcrireTemplates(XmlWriter writer)
+    {
+        writer.WriteStartElement("templates");
+        var templates = await dbContext.Templates.AsNoTracking().ToListAsync();
+        foreach (var template in templates)
+        {
+            writer.WriteStartElement(AppConstants.XmlElements.Template);
+            writer.WriteElementString(AppConstants.XmlElements.Nom, template.Nom);
+            writer.WriteElementString(AppConstants.XmlElements.Description, template.Description ?? "");
+
+            var personnageIds = template.GetPersonnageIds();
+            foreach (var personnageId in personnageIds)
+            {
+                var personnage = await dbContext.Personnages.FirstOrDefaultAsync(p => p.Id == personnageId);
+                if (personnage != null)
+                {
+                    writer.WriteStartElement(AppConstants.XmlElements.Personnage);
+                    writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
+                    writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
+                    writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
+                    writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
+                    writer.WriteEndElement();
+                }
+            }
+
+            writer.WriteEndElement();
+        }
+        writer.WriteEndElement();
+    }
+
+    private async Task EcrireInventaire(XmlWriter writer)
+    {
+        writer.WriteStartElement(AppConstants.XmlElements.Inventaire);
+        var personnages = await dbContext.Personnages.AsNoTracking().ToListAsync();
+        foreach (var personnage in personnages)
+        {
+            writer.WriteStartElement(AppConstants.XmlElements.Personnage);
+            writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
+            writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.Type, personnage.Type.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.PA, personnage.PA.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.PV, personnage.PV.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.Rang, personnage.Rang.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.Role, personnage.Role.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.Faction, personnage.Faction.ToString());
+            writer.WriteElementString(AppConstants.XmlElements.Selectionne, personnage.Selectionne.ToString());
+            writer.WriteEndElement();
+        }
+        writer.WriteEndElement();
     }
 
     private static void WritePerson(System.Xml.XmlWriter writer, Personnage? p)

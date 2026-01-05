@@ -4,41 +4,6 @@ using System.Text.Json.Serialization;
 namespace CharacterManager.Server.Models;
 
 /// <summary>
-/// [OBSOLÈTE] Représente un enregistrement historique de l'escouade à une date donnée (ancien format JSON).
-/// Ce modèle est conservé uniquement pour compatibilité avec les anciennes données et l'import XML legacy.
-/// Pour les nouveaux enregistrements, utiliser HistoriqueClassement qui offre une structure relationnelle complète.
-/// </summary>
-[Obsolete("Ce modèle utilise un format JSON sérialisé obsolète. Utiliser HistoriqueClassement pour les nouveaux enregistrements.")]
-public class HistoriqueEscouade
-{
-    [Key]
-    public int Id { get; set; }
-
-    /// <summary>
-    /// Date de l'enregistrement
-    /// </summary>
-    [Required]
-    public DateTime DateEnregistrement { get; set; } = DateTime.UtcNow;
-
-    /// <summary>
-    /// Puissance totale de l'escouade
-    /// </summary>
-    public int PuissanceTotal { get; set; }
-
-    /// <summary>
-    /// Classement de l'escouade (si applicable)
-    /// </summary>
-    public int? Classement { get; set; }
-
-    /// <summary>
-    /// JSON contenant les données des personnages de l'escouade
-    /// Format: { mercenaires: [...], commandant: {...}, androides: [...] }
-    /// </summary>
-    [Required]
-    public string DonneesEscouadeJson { get; set; } = "{}";
-}
-
-/// <summary>
 /// Données de personnel pour l'historique
 /// </summary>
 public class PersonnelHistorique
