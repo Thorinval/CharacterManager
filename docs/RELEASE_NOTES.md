@@ -1,6 +1,14 @@
 # Character Manager
 
-> **Version actuelle**: 0.14.1
+> **Version actuelle**: 0.14.2
+
+---
+
+## 0.14.2 (06 Janvier 2026)
+
+🐛 - Import/BDD: Correction de l'erreur SQLite "NOT NULL constraint failed: Pieces.Puissance" en configurant `PuissanceLegacy` comme colonne calculée et utilisable par EF
+
+🔧 - Import PML: Sécurisation de l'initialisation des pièces Lucie (valeurs par défaut tactique/stratégique) pour garantir des insertions sans rupture
 
 ---
 

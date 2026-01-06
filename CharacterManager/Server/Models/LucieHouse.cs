@@ -37,6 +37,12 @@ public class Piece
     public int PuissanceLegacy
     {
         get => (AspectsTactiques?.Puissance ?? 0) + (AspectsStrategiques?.Puissance ?? 0);
+        private set
+        {
+            // Intentionally empty: this setter is required by Entity Framework for legacy column mapping.
+            // The actual power is calculated from AspectsTactiques and AspectsStrategiques.
+            _ = value;
+        }
     }
 
     /// <summary>

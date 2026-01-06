@@ -1,7 +1,6 @@
 @implements IDisposable
 @using CharacterManager.Server.Models
 @using CharacterManager.Server.Services
-@inject PersonnageImageConfigService ImageConfigService
 @inject AdultModeNotificationService AdultModeNotification
 
 <div class="escouade-preview-editor-container">
@@ -25,7 +24,7 @@
                 {
                     <div class="preview-card" @onclick="@(() => RemovePersonnage(0))">
                         @{
-                            var displayUrl = GetDisplayImage(PersonnagesSelectionnes[0]!.ImageUrlPreview);
+                            var displayUrl = PersonnagesSelectionnes[0]!.ImageUrlPreview;
                         }
                         @if (IsImageBlocked(displayUrl))
                         {
@@ -64,7 +63,7 @@
                         {
                             <div class="preview-card" @onclick="@(() => RemovePersonnage(index))">
                                 @{
-                                    var displayUrl = GetDisplayImage(PersonnagesSelectionnes[index]!.ImageUrlPreview);
+                                    var displayUrl = PersonnagesSelectionnes[index]!.ImageUrlPreview;
                                 }
                                 @if (IsImageBlocked(displayUrl))
                                 {
@@ -104,7 +103,7 @@
                         {
                             <div class="preview-card" @onclick="@(() => RemovePersonnage(index))">
                                 @{
-                                    var displayUrl = GetDisplayImage(PersonnagesSelectionnes[index]!.ImageUrlPreview);
+                                    var displayUrl = PersonnagesSelectionnes[index]!.ImageUrlPreview;
                                 }
                                 @if (IsImageBlocked(displayUrl))
                                 {
@@ -321,11 +320,6 @@
     private bool IsImageBlocked(string imageUrl)
     {
         return string.IsNullOrEmpty(imageUrl);
-    }
-
-    private string GetDisplayImage(string originalImageUrl)
-    {
-        return PersonnageImageConfigService.GetDisplayPath(originalImageUrl, isAdultModeEnabled);
     }
 
     public int PuissanceTotal => PersonnagesSelectionnes.Sum(p => p?.Puissance ?? 0);

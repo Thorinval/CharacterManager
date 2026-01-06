@@ -67,6 +67,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasConversion(aspectConverter)
             .Metadata.SetValueComparer(aspectComparer);
 
+        // Configuration de PuissanceLegacy comme propriété calculée
+        modelBuilder.Entity<Piece>()
+            .Property(p => p.PuissanceLegacy)
+            .ValueGeneratedOnAddOrUpdate();
+
         modelBuilder.Entity<Classement>().HasKey(c => c.Id);
 
         modelBuilder.Entity<HistoriqueClassement>()

@@ -38,8 +38,6 @@ builder.Services.AddScoped<HistoriqueLigueService>();
 builder.Services.AddScoped<CapaciteService>();
 builder.Services.AddScoped<ClientLocalizationService>();
 
-// AppImageService no longer used for categorization; DI registration removed
-builder.Services.AddSingleton<PersonnageImageConfigService>();
 builder.Services.AddSingleton<AppVersionService>();
 builder.Services.AddSingleton<LocalizationService>();
 builder.Services.AddSingleton<LanguageContextService>();  // Service de contexte de langue

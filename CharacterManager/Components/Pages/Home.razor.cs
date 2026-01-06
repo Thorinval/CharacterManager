@@ -15,9 +15,6 @@ using System.Diagnostics.CodeAnalysis;
 public partial class Home : IAsyncDisposable
 {
     [Inject]
-    public PersonnageImageConfigService ImageConfigService { get; set; } = null!;
-
-    [Inject]
     public PersonnageService PersonnageService { get; set; } = null!;
 
     [Inject]

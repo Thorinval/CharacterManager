@@ -106,6 +106,7 @@ public static class AppConstants
         public const string HistoriqueClassements = "HistoriqueClassements";
         public const string LucieHouse = "LucieHouse";
         public const string MeilleurEscouade = "meilleurEscouade";
+        public const string Id = "Id";
         public const string Capacites = "Capacites";
         public const string Capacite = "Capacite";
 
