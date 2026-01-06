@@ -1,6 +1,16 @@
 # Character Manager
 
-> **Version actuelle**: 0.14.0
+> **Version actuelle**: 0.14.1
+
+---
+
+## 0.14.1 (06 Janvier 2026)
+
+✨ - Import/Export: Les personnages exportés depuis l'inventaire ou la modale Import/Export incluent désormais `HasRelation` et `NivRelation`
+
+✨ - Import/Export: Les capacités associées aux personnages sont exportées/importées (inventaire, meilleure escouade, templates, historiques)
+
+🔧 - PML: Ajout des balises `Capacites/Capacite` avec nom/description/icône par personnage
 
 ---
 

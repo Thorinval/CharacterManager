@@ -573,6 +573,16 @@ public class PmlImportService(ApplicationDbContext context)
             Faction = personnage.Faction,
             TypeAttaque = personnage.TypeAttaque,
             Selectionne = personnage.Selectionne,
+            HasRelation = personnage.HasRelation,
+            NivRelation = personnage.NivRelation,
+            Capacites = personnage.Capacites
+                .Select(c => new Capacite
+                {
+                    Nom = c.Nom,
+                    Description = c.Description,
+                    Icon = c.Icon
+                })
+                .ToList(),
             IdOrigine = 0
         };
     }
@@ -752,9 +762,42 @@ public class PmlImportService(ApplicationDbContext context)
             Selectionne = ParseBool(element.Element(AppConstants.XmlElements.Selectionne)?.Value),
             HasRelation = ParseBool(element.Element(AppConstants.XmlElements.HasRelation)?.Value),
             NivRelation = int.TryParse(element.Element(AppConstants.XmlElements.NivRelation)?.Value, out var nivRel) ? nivRel : 0,
+            Capacites = ParseCapacites(element)
         };
 
         return personnage;
+    }
+
+    private static List<Capacite> ParseCapacites(XElement element)
+    {
+        var capacitesElement = element.Element(AppConstants.XmlElements.Capacites);
+        if (capacitesElement == null)
+        {
+            return [];
+        }
+
+        var capacites = new List<Capacite>();
+
+        foreach (var capaciteElement in capacitesElement.Elements(AppConstants.XmlElements.Capacite))
+        {
+            var nom = capaciteElement.Element(AppConstants.XmlElements.Nom)?.Value ?? capaciteElement.Value;
+            if (string.IsNullOrWhiteSpace(nom))
+            {
+                continue;
+            }
+
+            var description = capaciteElement.Element(AppConstants.XmlElements.Description)?.Value ?? string.Empty;
+            var icon = capaciteElement.Element(AppConstants.XmlElements.Icon)?.Value ?? string.Empty;
+
+            capacites.Add(new Capacite
+            {
+                Nom = nom.Trim(),
+                Description = description,
+                Icon = icon
+            });
+        }
+
+        return capacites;
     }
 
     /// <summary>
@@ -877,7 +920,9 @@ public class PmlImportService(ApplicationDbContext context)
                 var personnageIds = template.GetPersonnageIds();
                 foreach (var personnageId in personnageIds)
                 {
-                    var personnage = _context.Personnages.FirstOrDefault(p => p.Id == personnageId);
+                    var personnage = _context.Personnages
+                        .Include(p => p.Capacites)
+                        .FirstOrDefault(p => p.Id == personnageId);
                     if (personnage != null)
                     {
                         writer.WriteStartElement(AppConstants.XmlElements.Personnage);
@@ -1108,6 +1153,7 @@ public class PmlImportService(ApplicationDbContext context)
 
             // Mercenaires (top 10 par puissance)
             var topMercenaires = await _context.Personnages
+                .Include(p => p.Capacites)
                 .Where(p => p.Type == TypePersonnage.Mercenaire)
                 .OrderByDescending(p => p.Puissance)
                 .Take(10)
@@ -1122,6 +1168,7 @@ public class PmlImportService(ApplicationDbContext context)
 
             // Commandant (le plus puissant)
             var topCommandant = await _context.Personnages
+                .Include(p => p.Capacites)
                 .Where(p => p.Type == TypePersonnage.Commandant)
                 .OrderByDescending(p => p.Puissance)
                 .FirstOrDefaultAsync();
@@ -1135,6 +1182,7 @@ public class PmlImportService(ApplicationDbContext context)
 
             // Androides (top 5 par puissance)
             var topAndroides = await _context.Personnages
+                .Include(p => p.Capacites)
                 .Where(p => p.Type == TypePersonnage.Androide)
                 .OrderByDescending(p => p.Puissance)
                 .Take(5)
@@ -1165,7 +1213,9 @@ public class PmlImportService(ApplicationDbContext context)
                 var personnageIds = template.GetPersonnageIds();
                 foreach (var personnageId in personnageIds)
                 {
-                    var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.Id == personnageId);
+                    var personnage = await _context.Personnages
+                        .Include(p => p.Capacites)
+                        .FirstOrDefaultAsync(p => p.Id == personnageId);
                     if (personnage != null)
                     {
                         writer.WriteStartElement(AppConstants.XmlElements.Personnage);
@@ -1210,7 +1260,9 @@ public class PmlImportService(ApplicationDbContext context)
 
     private async Task WritePersonnageDatas(System.Xml.XmlWriter writer)
     {
-        var personnages = await _context.Personnages.ToListAsync();
+        var personnages = await _context.Personnages
+            .Include(static p => p.Capacites)
+            .ToListAsync();
         WritePersonnagesDatas(personnages, writer);
     }
 
@@ -1224,6 +1276,32 @@ public class PmlImportService(ApplicationDbContext context)
         writer.WriteElementString(AppConstants.XmlElements.Type, personnage.Type.ToString());
         writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
         writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.HasRelation, personnage.HasRelation.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.NivRelation, personnage.NivRelation.ToString());
+
+        if (personnage.Capacites?.Count > 0)
+        {
+            writer.WriteStartElement(AppConstants.XmlElements.Capacites);
+            foreach (var capacite in personnage.Capacites)
+            {
+                writer.WriteStartElement(AppConstants.XmlElements.Capacite);
+                writer.WriteElementString(AppConstants.XmlElements.Nom, capacite.Nom);
+
+                if (!string.IsNullOrWhiteSpace(capacite.Description))
+                {
+                    writer.WriteElementString(AppConstants.XmlElements.Description, capacite.Description);
+                }
+
+                if (!string.IsNullOrWhiteSpace(capacite.Icon))
+                {
+                    writer.WriteElementString(AppConstants.XmlElements.Icon, capacite.Icon);
+                }
+
+                writer.WriteEndElement();
+            }
+
+            writer.WriteEndElement();
+        }
 
         if (!isTemplate)
         {
@@ -1242,8 +1320,10 @@ public class PmlImportService(ApplicationDbContext context)
     {
 
         var normalizedName = NormalizeUpper(nouveauPersonnage.Nom);
+        var resolvedCapacites = ResolveCapacites(nouveauPersonnage.Capacites);
 
         var existing = _context.Personnages
+            .Include(p => p.Capacites)
             .FirstOrDefault(p => p.Nom == normalizedName);
 
         if (existing != null)
@@ -1261,6 +1341,14 @@ public class PmlImportService(ApplicationDbContext context)
             existing.Faction = nouveauPersonnage.Faction;
             existing.Selectionne = nouveauPersonnage.Selectionne;
             existing.TypeAttaque = nouveauPersonnage.TypeAttaque;
+            existing.HasRelation = nouveauPersonnage.HasRelation;
+            existing.NivRelation = nouveauPersonnage.NivRelation;
+
+            existing.Capacites.Clear();
+            foreach (var capacite in resolvedCapacites)
+            {
+                existing.Capacites.Add(capacite);
+            }
 
             _context.Personnages.Update(existing);
         }
@@ -1268,10 +1356,54 @@ public class PmlImportService(ApplicationDbContext context)
         {
             // Ajouter le nouveau personnage
             nouveauPersonnage.Nom = normalizedName;
+            nouveauPersonnage.Capacites = resolvedCapacites;
             _context.Personnages.Add(nouveauPersonnage);
         }
 
         _context.SaveChanges();
+    }
+
+    private List<Capacite> ResolveCapacites(IEnumerable<Capacite> importedCapacites)
+    {
+        var resolved = new List<Capacite>();
+
+        foreach (var capacite in importedCapacites)
+        {
+            if (string.IsNullOrWhiteSpace(capacite.Nom))
+            {
+                continue;
+            }
+
+            var existing = _context.Capacites.FirstOrDefault(c => c.Nom.Equals(capacite.Nom, StringComparison.OrdinalIgnoreCase));
+            if (existing != null)
+            {
+                if (!string.IsNullOrWhiteSpace(capacite.Description) && string.IsNullOrWhiteSpace(existing.Description))
+                {
+                    existing.Description = capacite.Description;
+                }
+
+                if (!string.IsNullOrWhiteSpace(capacite.Icon) && string.IsNullOrWhiteSpace(existing.Icon))
+                {
+                    existing.Icon = capacite.Icon;
+                }
+
+                resolved.Add(existing);
+            }
+            else
+            {
+                var newCapacite = new Capacite
+                {
+                    Nom = capacite.Nom.Trim(),
+                    Description = capacite.Description ?? string.Empty,
+                    Icon = capacite.Icon ?? string.Empty
+                };
+
+                _context.Capacites.Add(newCapacite);
+                resolved.Add(newCapacite);
+            }
+        }
+
+        return resolved;
     }
 
     private static string NormalizeUpper(string? value) => (value ?? string.Empty).Trim().ToUpper();

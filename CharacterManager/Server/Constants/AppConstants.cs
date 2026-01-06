@@ -106,6 +106,8 @@ public static class AppConstants
         public const string HistoriqueClassements = "HistoriqueClassements";
         public const string LucieHouse = "LucieHouse";
         public const string MeilleurEscouade = "meilleurEscouade";
+        public const string Capacites = "Capacites";
+        public const string Capacite = "Capacite";
 
         // Valeurs pour parsing (switch)
         public const string SSR = "SSR";
@@ -140,6 +142,7 @@ public static class AppConstants
         public const string Description = "Description";
         public const string HasRelation = "HasRelation";
         public const string NivRelation = "NivRelation";
+        public const string Icon = "Icon";
         public const string Mercenaire = "Mercenaire";
         public const string Commandant = "Commandant";
         public const string Androide = "Androide";
