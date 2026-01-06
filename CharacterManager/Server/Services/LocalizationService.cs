@@ -38,7 +38,7 @@ public class LocalizationService
 
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning("Fichier de langue non trouvé: {filePath}", filePath);
+                _logger.LogWarning("Fichier de langue non trouvé: {FilePath}", filePath);
                 return new Dictionary<string, object>();
             }
 
@@ -54,7 +54,7 @@ public class LocalizationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erreur lors du chargement de la langue {languageCode}", languageCode);
+            _logger.LogError(ex, "Erreur lors du chargement de la langue {LanguageCode}", languageCode);
         }
 
         return new Dictionary<string, object>();

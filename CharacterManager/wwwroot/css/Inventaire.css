@@ -382,14 +382,14 @@
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
-.card-checkbox-grid {
+.personnage-card-grid .card-checkbox-grid {
     position: absolute;
     top: 0.5rem;
     left: 0.5rem;
     z-index: 10;
 }
 
-.card-checkbox-grid input[type="checkbox"] {
+.personnage-card-grid .card-checkbox-grid input[type="checkbox"] {
     width: 18px;
     height: 18px;
     cursor: pointer;
@@ -413,7 +413,7 @@
     min-width: 0;
 }
 
-.personnage-name {
+.personnage-card-grid .personnage-name {
     font-weight: 700;
     color: #2c3e50;
     font-size: 0.8rem;
@@ -421,6 +421,7 @@
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
 }
 
@@ -430,6 +431,7 @@
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
 }
 
