@@ -94,26 +94,31 @@ public class PmlExportService(ApplicationDbContext context) : PmlServiceBase(con
         if (options.IsExporting(PmlExportOptions.EXPORT_TYPE_CAPACITES))
         {
             var capacites = await _context.Capacites.ToListAsync();
-            if (capacites.Any())
+            if (capacites.Count > 0)
             {
                 writer.WriteStartElement("Capacites");
-                foreach (var capacite in capacites)
-                {
-                    writer.WriteStartElement("Capacite");
-                    if (capacite.Id > 0)
-                    {
-                        writer.WriteAttributeString(AppConstants.XmlElements.Id, capacite.Id.ToString());
-                    }
-                    writer.WriteElementString("Nom", capacite.Nom);
-                    writer.WriteElementString("Description", capacite.Description ?? "");
-                    writer.WriteElementString("Icon", capacite.Icon ?? "");
-                    writer.WriteEndElement();
-                }
+                WriteCapacites(writer, capacites);
                 writer.WriteEndElement();
             }
         }
 
         writer.WriteEndElement();
+    }
+
+    private static void WriteCapacites(XmlWriter writer, IEnumerable<Capacite> capacites)
+    {
+        foreach (var capacite in capacites)
+        {
+            writer.WriteStartElement("Capacite");
+            if (capacite.Id > 0)
+            {
+                writer.WriteAttributeString(AppConstants.XmlElements.Id, capacite.Id.ToString());
+            }
+            writer.WriteElementString("Nom", capacite.Nom);
+            writer.WriteElementString("Description", capacite.Description ?? "");
+            writer.WriteElementString("Icon", capacite.Icon ?? "");
+            writer.WriteEndElement();
+        }
     }
 
     private static void ExportListClassements(XmlWriter writer, List<Classement> listClassements)
@@ -623,18 +628,7 @@ public class PmlExportService(ApplicationDbContext context) : PmlServiceBase(con
             writer.WriteAttributeString("exportDate", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
 
             writer.WriteStartElement("Capacites");
-            foreach (var capacite in capacites)
-            {
-                writer.WriteStartElement("Capacite");
-                if (capacite.Id > 0)
-                {
-                    writer.WriteAttributeString(AppConstants.XmlElements.Id, capacite.Id.ToString());
-                }
-                writer.WriteElementString("Nom", capacite.Nom);
-                writer.WriteElementString("Description", capacite.Description ?? "");
-                writer.WriteElementString("Icon", capacite.Icon ?? "");
-                writer.WriteEndElement();
-            }
+            WriteCapacites(writer, capacites);
             writer.WriteEndElement();
 
             writer.WriteEndElement();
