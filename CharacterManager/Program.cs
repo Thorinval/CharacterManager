@@ -33,6 +33,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<ProfileService>();
 builder.Services.AddScoped<PersonnageService>();
 builder.Services.AddScoped<PmlImportService>();
+builder.Services.AddScoped<PmlExportService>();
 builder.Services.AddScoped<HistoriqueClassementService>();
 builder.Services.AddScoped<HistoriqueLigueService>();
 builder.Services.AddScoped<CapaciteService>();

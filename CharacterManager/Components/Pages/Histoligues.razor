@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using System.Linq
 @inject HistoriqueLigueService HistoriqueLigueService
+@inject PmlExportService PmlExportService
 @inject PmlImportService PmlImportService
 @inject IJSRuntime JS
 
@@ -216,7 +217,7 @@
                 exportHistories: false,
                 exportLeagueHistory: true);
 
-            var bytes = await PmlImportService.ExportPmlAsync(options);
+            var bytes = await PmlExportService.ExportPmlAsync(options);
             var fileName = $"{AppConstants.ExportPrefixes.HistoriqueLigues}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
             var base64 = Convert.ToBase64String(bytes);
             await JS.InvokeVoidAsync("downloadFile", fileName, base64);

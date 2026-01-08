@@ -18,6 +18,9 @@ public partial class Templates
     public PmlImportService PmlImportService { get; set; } = null!;
 
     [Inject]
+    public PmlExportService PmlExportService { get; set; } = null!;
+
+    [Inject]
     public IJSRuntime JSRuntime { get; set; } = null!;
 
     [Inject]
@@ -206,7 +209,7 @@ public partial class Templates
             };
             template.SetPersonnageIds(templateSelectedIds);
 
-            var pmlBytes = await PmlImportService.ExporterTemplatesPmlAsync(new[] { template });
+            var pmlBytes = await PmlExportService.ExporterTemplatesPmlAsync(new[] { template });
             var fileName = $"{AppConstants.ExportPrefixes.Template}_{templateNom}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
             await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pmlBytes));
         }
@@ -229,7 +232,7 @@ public partial class Templates
             toastRef?.Show("Template introuvable", error);
             return;
         }
-        var pmlBytes = await PmlImportService.ExporterTemplatesPmlAsync(new[] { template });
+        var pmlBytes = await PmlExportService.ExporterTemplatesPmlAsync(new[] { template });
         var fileName = $"{AppConstants.ExportPrefixes.Template}_{template.Nom}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
         await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pmlBytes));
         toastRef?.Show($"Export de '{template.Nom}' effectué", success);

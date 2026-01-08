@@ -33,6 +33,9 @@ public partial class Home : IAsyncDisposable
     public PmlImportService PmlImportService { get; set; } = null!;
 
     [Inject]
+    public PmlExportService PmlExportService { get; set; } = null!;
+
+    [Inject]
     public HistoriqueLigueService HistoriqueLigueService { get; set; } = null!;
 
     [Inject]
@@ -86,7 +89,7 @@ public partial class Home : IAsyncDisposable
         highestLigueLabel = FormatLigueLabel(highestLigue);
 
         lastImportDate = await PmlImportService.GetLastImportedDateAsync();
-        lastExportDate = await PmlImportService.GetLastExportDate();
+        lastExportDate = await PmlExportService.GetLastExportDate();
         lastImportFileName = await PmlImportService.GetLastImportedFileName();
 
         // Composition de la meilleure escouade (top mercenaires/androides/commandant)

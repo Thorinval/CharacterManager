@@ -28,6 +28,9 @@ public partial class Inventaire : IAsyncDisposable
     public PmlImportService PmlImportService { get; set; } = null!;
 
     [Inject]
+    public PmlExportService PmlExportService { get; set; } = null!;
+
+    [Inject]
     public IModalService ModalService { get; set; } = null!;
 
     [Inject]
@@ -727,7 +730,7 @@ public partial class Inventaire : IAsyncDisposable
                 ? personnagesFiltres.Where(p => selectedPersonnages.Contains(p.Id))
                 : personnagesFiltres;
 
-            var pmlBytes = await PmlImportService.ExporterInventairePmlAsync(personnagesAExporter);
+            var pmlBytes = await PmlExportService.ExporterInventairePmlAsync(personnagesAExporter);
             var fileName = $"{AppConstants.ExportPrefixes.Inventaire}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
 
             // Utiliser JavaScript pour télécharger le fichier

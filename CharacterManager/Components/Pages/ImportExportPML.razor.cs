@@ -12,6 +12,9 @@ public partial class ImportExportPml
     public PmlImportService PmlImportService { get; set; } = null!;
 
     [Inject]
+    public PmlExportService PmlExportService { get; set; } = null!;
+
+    [Inject]
     public NavigationManager NavigationManager { get; set; } = null!;
 
     [Inject]
@@ -186,7 +189,7 @@ public partial class ImportExportPml
     {
         try
         {
-            var exportData = await PmlImportService.ExportPmlAsync(exportOptions);
+            var exportData = await PmlExportService.ExportPmlAsync(exportOptions);
 
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             var fileName = $"export_{timestamp}.pml";
@@ -226,7 +229,7 @@ public partial class ImportExportPml
     {
         try
         {
-            var exportData = await PmlImportService.ExportPmlAsync(exportOptions);
+            var exportData = await PmlExportService.ExportPmlAsync(exportOptions);
 
             var configPath = Path.Combine("wwwroot", "config.pml");
             await File.WriteAllBytesAsync(configPath, exportData);

@@ -16,6 +16,9 @@ public partial class Historique
     public PmlImportService PmlImportService { get; set; } = null!;
 
     [Inject]
+    public PmlExportService PmlExportService { get; set; } = null!;
+
+    [Inject]
     public IJSRuntime JSRuntime { get; set; } = null!;
 
     [Inject]
@@ -103,7 +106,7 @@ public partial class Historique
                 exportHistories: true,
                 exportLeagueHistory: false);
 
-            var bytes = await PmlImportService.ExportPmlAsync(options);
+            var bytes = await PmlExportService.ExportPmlAsync(options);
             var fileName = $"{AppConstants.ExportPrefixes.HistoriqueClassements}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
             var base64 = Convert.ToBase64String(bytes);
             await JSRuntime.InvokeVoidAsync("downloadFile", fileName, base64);

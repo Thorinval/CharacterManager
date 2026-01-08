@@ -6,6 +6,7 @@
 @using Microsoft.AspNetCore.Components.Forms
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inject CapaciteService CapaciteService
+@inject PmlExportService PmlExportService
 @inject PmlImportService PmlImportService
 @inject IJSRuntime JSRuntime
 
@@ -225,7 +226,7 @@
                 return;
             }
 
-            var pmlBytes = await PmlImportService.ExporterCapacitesPmlAsync(capacites ?? new());
+            var pmlBytes = await PmlExportService.ExporterCapacitesPmlAsync(capacites ?? new());
             var fileName = $"Capacites_{DateTime.Now:yyyyMMdd_HHmmss}.pml";
             await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pmlBytes));
         }

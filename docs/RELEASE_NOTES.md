@@ -1,6 +1,26 @@
 # Character Manager
 
-> **Version actuelle**: 0.14.2
+> **Version actuelle**: 0.14.3
+
+---
+
+## 0.14.3 (07 Janvier 2026)
+
+🏗️ - Architecture: Refactorisation majeure du service PML - Division en 3 fichiers distincts pour une meilleure maintenabilité
+
+✨ - Services: Création de `PmlServiceBase` (385 lignes) - Classe de base avec code partagé (parsing, helpers, gestion dates)
+
+✨ - Services: `PmlImportService` (770 lignes) - Service dédié aux imports (ImportPmlAsync, ImportCapacitesAsync)
+
+✨ - Services: `PmlExportService` (646 lignes) - Service dédié aux exports (ExportPmlAsync, ExporterInventairePmlAsync, etc.)
+
+🔧 - DI: Enregistrement des deux services `PmlImportService` et `PmlExportService` dans Program.cs
+
+🔧 - Composants: Mise à jour de tous les composants pour injecter le service approprié (ImportExportPml, Inventaire, Templates, etc.)
+
+🔧 - Tests: Adaptation des tests unitaires pour utiliser les deux services séparés
+
+📦 - Publication: La base de données `charactermanager.db` est maintenant automatiquement incluse lors de la publication
 
 ---
 

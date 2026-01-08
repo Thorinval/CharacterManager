@@ -223,6 +223,9 @@
     public PmlImportService PmlImportService { get; set; } = null!;
 
     [Inject]
+    public PmlExportService PmlExportService { get; set; } = null!;
+
+    [Inject]
     public IJSRuntime JSRuntime { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
@@ -263,7 +266,7 @@
         try
         {
             // Réutilise l'export existant (Lucie House incluse dans l'export inventaire)
-            var payload = await PmlImportService.ExporterInventairePmlAsync(Enumerable.Empty<Personnage>());
+            var payload = await PmlExportService.ExporterInventairePmlAsync(Enumerable.Empty<Personnage>());
             var fileName = $"LucieHouse_{DateTime.Now:yyyyMMdd_HHmmss}.pml";
             await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(payload));
         }

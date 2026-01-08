@@ -17,6 +17,7 @@ public class PmlImportServiceTests : IDisposable
 {
   private readonly ApplicationDbContext _context;
   private readonly PmlImportService _pmlImportService;
+  private readonly PmlExportService _pmlExportService;
 
   public PmlImportServiceTests()
   {
@@ -28,6 +29,7 @@ public class PmlImportServiceTests : IDisposable
     _context.Database.EnsureCreated();
 
     _pmlImportService = new PmlImportService(_context);
+    _pmlExportService = new PmlExportService(_context);
 
     SeedPersonnages();
   }
@@ -320,7 +322,7 @@ public class PmlImportServiceTests : IDisposable
     var personnages = await _context.Personnages.ToListAsync();
 
     // Act
-    var pmlBytes = await _pmlImportService.ExporterInventairePmlAsync(personnages);
+    var pmlBytes = await _pmlExportService.ExporterInventairePmlAsync(personnages);
 
     // Assert
     Assert.NotNull(pmlBytes);
@@ -352,7 +354,7 @@ public class PmlImportServiceTests : IDisposable
     var personnages = await _context.Personnages.ToListAsync();
 
     // Act
-    var pmlBytes = await _pmlImportService.ExporterInventairePmlAsync(personnages);
+    var pmlBytes = await _pmlExportService.ExporterInventairePmlAsync(personnages);
 
     // Assert
     var content = Encoding.UTF8.GetString(pmlBytes);
@@ -375,7 +377,7 @@ public class PmlImportServiceTests : IDisposable
     template.SetPersonnageIds(personnageIds);
 
     // Act
-    var pmlBytes = await _pmlImportService.ExporterTemplatesPmlAsync(new[] { template });
+    var pmlBytes = await _pmlExportService.ExporterTemplatesPmlAsync(new[] { template });
 
     // Assert
     Assert.NotNull(pmlBytes);
@@ -407,7 +409,7 @@ public class PmlImportServiceTests : IDisposable
     // Act
     var exportOptions = new PmlExportOptions();
     exportOptions.AddExportType(PmlExportOptions.EXPORT_TYPE_INVENTORY);
-    var pmlBytes = await _pmlImportService.ExportPmlAsync(exportOptions);
+    var pmlBytes = await _pmlExportService.ExportPmlAsync(exportOptions);
 
     // Assert
     var content = Encoding.UTF8.GetString(pmlBytes);
@@ -551,7 +553,7 @@ public class PmlImportServiceTests : IDisposable
     await _context.SaveChangesAsync();
 
     // Act
-    var result = await _pmlImportService.GetLastExportDate();
+    var result = await _pmlExportService.GetLastExportDate();
 
     // Assert
     Assert.NotNull(result);
