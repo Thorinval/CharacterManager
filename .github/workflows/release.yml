@@ -107,6 +107,7 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
+        tag_name: v${{ steps.get_version.outputs.VERSION }}
         files: |
           CharacterManager-${{ steps.get_version.outputs.VERSION }}-win-x64.zip
           CharacterManager-${{ steps.get_version.outputs.VERSION }}-linux-x64.tar.gz
