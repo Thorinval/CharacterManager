@@ -65,14 +65,8 @@ public class AppVersionService
         }
 
         // Fallback: utiliser la date de build à partir du chemin réel (compatible single-file)
-        var assembly = Assembly.GetExecutingAssembly();
-        var assemblyPath = assembly.Location;
-
-        // En single-file, assembly.Location est vide: on utilise le binaire en cours d'exécution
-        if (string.IsNullOrWhiteSpace(assemblyPath))
-        {
-            assemblyPath = Process.GetCurrentProcess().MainModule?.FileName ?? AppContext.BaseDirectory;
-        }
+        // Utiliser Process.MainModule pour éviter l'avertissement Assembly.Location dans single-file apps
+        var assemblyPath = Process.GetCurrentProcess().MainModule?.FileName ?? AppContext.BaseDirectory;
 
         var lastWrite = File.GetLastWriteTime(assemblyPath);
         return $"Build {lastWrite:yyyyMMdd}";
