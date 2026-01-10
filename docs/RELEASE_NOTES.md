@@ -1,6 +1,18 @@
 # Character Manager
 
-> **Version actuelle**: 0.14.3
+> **Version actuelle**: 0.14.4
+
+---
+
+## 0.14.4 (10 Janvier 2026)
+
+🐛 - BDD: Correction de l'erreur "NOT NULL constraint failed: Pieces.Puissance" lors du chargement de l'inventaire après import de capacités
+
+🔧 - EF Core: Configuration de `PuissanceLegacy` avec `ValueGeneratedNever()` pour permettre le calcul côté application au lieu de la génération automatique par la base de données
+
+🐛 - Import: Correction de l'erreur LINQ "could not be translated" lors de l'import de personnages avec capacités
+
+🔧 - Services: Remplacement de `StringComparison.OrdinalIgnoreCase` par `ToUpper()` dans la recherche de capacités pour compatibilité avec SQLite
 
 ---
 

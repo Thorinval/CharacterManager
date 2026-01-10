@@ -67,10 +67,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasConversion(aspectConverter)
             .Metadata.SetValueComparer(aspectComparer);
 
-        // Configuration de PuissanceLegacy comme propriété calculée
+        // Configuration de PuissanceLegacy comme propriété calculée côté application
+        // Ne pas utiliser ValueGeneratedOnAddOrUpdate car SQLite ne peut pas calculer automatiquement
         modelBuilder.Entity<Piece>()
             .Property(p => p.PuissanceLegacy)
-            .ValueGeneratedOnAddOrUpdate();
+            .ValueGeneratedNever();
 
         modelBuilder.Entity<Classement>().HasKey(c => c.Id);
 

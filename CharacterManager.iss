@@ -4,14 +4,14 @@
 
 [Setup]
 AppName=Character Manager
-AppVersion=0.14.3
+AppVersion=0.14.4
 AppPublisher=CharacterManager
 AppPublisherURL=https://github.com/Thorinval/CharacterManager
 DefaultDirName={autopf}\CharacterManager
 DefaultGroupName=Character Manager
 AllowNoIcons=yes
 OutputDir=publish\installer
-OutputBaseFilename=CharacterManager-0.14.3-Setup
+OutputBaseFilename=CharacterManager-0.14.4-Setup
 Compression=lzma
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64
@@ -60,6 +60,7 @@ Type: dirifempty; Name: "{app}"
 [Code]
 // Au lieu de modifier le Registre, on peut ajouter du code personnalisÃ© ici si besoin
 // Pour plus tard: vÃ©rifier les prÃ©requis .NET, etc.
+
 
 
 

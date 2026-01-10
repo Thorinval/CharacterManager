@@ -306,7 +306,10 @@ public abstract class PmlServiceBase(ApplicationDbContext context)
             return _context.Capacites.FirstOrDefault(c => c.Id == capacite.Id);
         }
 
-        return _context.Capacites.FirstOrDefault(c => c.Nom.Equals(capacite.Nom, StringComparison.OrdinalIgnoreCase));
+        // EF Core ne peut pas traduire StringComparison.OrdinalIgnoreCase en SQL
+        // Utiliser ToUpper() qui est supporté par SQLite
+        var normalizedName = capacite.Nom.ToUpper();
+        return _context.Capacites.FirstOrDefault(c => c.Nom.ToUpper() == normalizedName);
     }
 
     protected static void UpdateExistingCapacite(Capacite existing, Capacite capacite)
