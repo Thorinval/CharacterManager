@@ -76,9 +76,7 @@ jobs:
         run: dotnet test --configuration Release --no-build --verbosity normal
 
       - name: Publish
-        run: dotnet publish CharacterManager/CharacterManager.csproj \
-          --configuration Release \
-          --output publish
+        run: dotnet publish CharacterManager/CharacterManager.csproj --configuration Release --output publish
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
