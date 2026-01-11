@@ -71,7 +71,7 @@ public class ClientLocalizationService
     /// Récupère une chaîne de traduction par sa clé
     /// Utilise la notation pointée : "section.key"
     /// </summary>
-    public string T(string key)
+    public string GetKeyValue(string key)
     {
         EnsureResourcesLoaded();
 

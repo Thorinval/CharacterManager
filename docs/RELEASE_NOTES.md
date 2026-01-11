@@ -1,6 +1,34 @@
 # Character Manager
 
-> **Version actuelle**: 0.14.4
+> **Version actuelle**: 0.15.0
+
+---
+
+## 0.15.0 (11 Janvier 2026)
+
+📊 - Nouvelle page: Page Statistiques (`/statistiques`) avec visualisation graphique complète des données mercenaires
+
+✨ - Graphiques: Trois graphiques camembert interactifs (Type d'Attaque, Faction, Rang) utilisant Chart.js 4.4.1
+
+📈 - Statistiques: Quatre cartes récapitulatives (Total, Puissance Moyenne, Plus Puissant, Moins Puissant)
+
+🎨 - UI/UX: Design responsive avec grille adaptative (4/3/2/1 colonnes selon la taille d'écran)
+
+🎨 - UI/UX: Utilisation complète de la largeur de la page, cartes avec effets glassmorphism et animations hover
+
+🌍 - I18n: Ajout de 11 nouvelles clés de traduction (fr/en) pour la page statistiques
+
+🧭 - Navigation: Nouvel élément "Statistiques" dans le menu latéral avec icône bar-chart-fill
+
+🏠 - Accueil: Nouvelle carte dans la section Classements pour accès rapide aux statistiques
+
+📦 - Assets: Module JavaScript `charts.js` pour gestion des graphiques avec chargement dynamique Chart.js
+
+🎨 - CSS: Fichier `Statistiques.css` avec design cohérent et responsive (198 lignes)
+
+⚡ - Performance: Optimisations avec lazy loading Chart.js, calculs statistiques uniques, et cleanup mémoire
+
+🔐 - Sécurité: Page protégée par authentification avec filtre via PersonnageService
 
 ---
 

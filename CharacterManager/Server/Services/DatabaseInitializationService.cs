@@ -104,15 +104,6 @@ public class DatabaseInitializationService
         await _db.Database.ExecuteSqlRawAsync(appSettingsSql);
         Console.WriteLine("[DB] Ensured AppSettings table exists.");
 
-        try
-        {
-            await _db.Database.ExecuteSqlRawAsync("ALTER TABLE AppSettings ADD COLUMN LastExportDate TEXT NULL;");
-        }
-        catch
-        {
-            // Column already exists
-        }
-
         const string templatesSql = @"CREATE TABLE IF NOT EXISTS Templates (
             Id INTEGER NOT NULL CONSTRAINT PK_Templates PRIMARY KEY AUTOINCREMENT,
             Nom TEXT NOT NULL,

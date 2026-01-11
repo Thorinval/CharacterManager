@@ -29,6 +29,7 @@
     "rankings": "Rankings",
     "leagueHistory": "League History",
     "bestSquad": "Best squad",
+    "statistics": "Statistics",
     "settings": "Settings",
     "importExportPml": "Import / export PML",
     "manageUsers": "User management",
@@ -331,5 +332,18 @@
   },
   "creerClassement": {
     "title": "Create Squad History Entry"
+  },
+  "statistics": {
+    "title": "Statistics",
+    "loading": "Loading statistics...",
+    "noData": "No mercenaries available to generate statistics.",
+    "chartTitleAttackType": "Mercenaries by Attack Type",
+    "chartTitleFaction": "Mercenaries by Faction",
+    "chartTitleRank": "Mercenaries by Rank",
+    "rankLabel": "Rank",
+    "totalMercenaries": "Total Mercenaries",
+    "averagePower": "Average Power",
+    "mostPowerful": "Most Powerful",
+    "leastPowerful": "Least Powerful"
   }
 }

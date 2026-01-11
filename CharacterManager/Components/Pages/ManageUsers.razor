@@ -32,8 +32,8 @@
                         <div class="col-md-4">
                             <label class="form-label"><LocalizedText Key="manageUsers.role" /></label>
                             <InputSelect class="form-select" @bind-Value="newRole">
-                                <option value="utilisateur">@LocalizationService.T("manageUsers.roleUser")</option>
-                                <option value="admin">@LocalizationService.T("manageUsers.roleAdmin")</option>
+                                <option value="utilisateur">@LocalizationService.GetKeyValue("manageUsers.roleUser")</option>
+                                <option value="admin">@LocalizationService.GetKeyValue("manageUsers.roleAdmin")</option>
                             </InputSelect>
                         </div>
                     </div>
@@ -79,8 +79,8 @@
                                     <td>@u.Username</td>
                                     <td>
                                         <select class="form-select form-select-sm" @onchange="(e)=>ChangeRole(u.Username, e.Value?.ToString() ?? u.Role)">
-                                            <option value="utilisateur" selected="@(u.Role=="utilisateur")">@LocalizationService.T("manageUsers.roleUser")</option>
-                                            <option value="admin" selected="@(u.Role=="admin")">@LocalizationService.T("manageUsers.roleAdmin")</option>
+                                            <option value="utilisateur" selected="@(u.Role=="utilisateur")">@LocalizationService.GetKeyValue("manageUsers.roleUser")</option>
+                                            <option value="admin" selected="@(u.Role=="admin")">@LocalizationService.GetKeyValue("manageUsers.roleAdmin")</option>
                                         </select>
                                     </td>
                                     <td>@(u.LockoutUntil.HasValue ? u.LockoutUntil.Value.ToLocalTime().ToString("g") : "-")</td>
@@ -125,13 +125,13 @@
         tempPassword = null;
         if (string.IsNullOrWhiteSpace(newUsername) || string.IsNullOrWhiteSpace(newPassword))
         {
-            message = LocalizationService.T("manageUsers.messageRequired");
+            message = LocalizationService.GetKeyValue("manageUsers.messageRequired");
             return;
         }
         var strength = ProfileService.ValidatePasswordStrength(newPassword);
-        if (!strength.ok) { message = string.Format(LocalizationService.T("manageUsers.messageWeak"), strength.error); return; }
+        if (!strength.ok) { message = string.Format(LocalizationService.GetKeyValue("manageUsers.messageWeak"), strength.error); return; }
         var ok = await ProfileService.CreateUserAsync(newUsername, newPassword, newRole);
-        message = ok ? LocalizationService.T("manageUsers.messageCreated") : LocalizationService.T("manageUsers.messageExists");
+        message = ok ? LocalizationService.GetKeyValue("manageUsers.messageCreated") : LocalizationService.GetKeyValue("manageUsers.messageExists");
         if (ok)
         {
             newUsername = string.Empty;
@@ -154,7 +154,7 @@
     private async Task ChangeRole(string username, string role)
     {
         await ProfileService.UpdateRoleAsync(username, role);
-        message = LocalizationService.T("manageUsers.messageRoleUpdated");
+        message = LocalizationService.GetKeyValue("manageUsers.messageRoleUpdated");
     }
 
     private async Task ResetPassword(string username)
@@ -165,11 +165,11 @@
         if (ok)
         {
             tempPassword = pwd;
-            message = string.Format(LocalizationService.T("manageUsers.messageReset"), username);
+            message = string.Format(LocalizationService.GetKeyValue("manageUsers.messageReset"), username);
         }
         else
         {
-            message = LocalizationService.T("manageUsers.messageResetFailed");
+            message = LocalizationService.GetKeyValue("manageUsers.messageResetFailed");
         }
     }
 
@@ -178,7 +178,7 @@
         if (JS != null && !string.IsNullOrEmpty(tempPassword))
         {
             await JS.InvokeVoidAsync("navigator.clipboard.writeText", tempPassword);
-            message = LocalizationService.T("manageUsers.messageCopied");
+            message = LocalizationService.GetKeyValue("manageUsers.messageCopied");
         }
     }
 
@@ -186,7 +186,7 @@
     {
         tempPassword = null;
         await ProfileService.DeleteAsync(username);
-        message = LocalizationService.T("manageUsers.messageDeleted");
+        message = LocalizationService.GetKeyValue("manageUsers.messageDeleted");
         await LoadUsers();
     }
 }

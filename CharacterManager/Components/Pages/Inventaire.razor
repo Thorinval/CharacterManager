@@ -47,10 +47,10 @@
             <div class="col-lg-4 col-md-6">
                 <div class="input-group">
                     <input id="searchInput" type="text" class="form-control"
-                        placeholder="@LocalizationService.T("inventory.searchPlaceholder")" @bind="searchTerm"
+                        placeholder="@LocalizationService.GetKeyValue("inventory.searchPlaceholder")" @bind="searchTerm"
                         @oninput="HandleSearchInput" />
                     <button class="btn btn-outline-secondary" type="button" @onclick="ClearSearch"
-                        title="@LocalizationService.T("inventory.clearSearch")">
+                        title="@LocalizationService.GetKeyValue("inventory.clearSearch")">
                         <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
@@ -72,7 +72,7 @@
                         <i class="bi bi-download"></i>
                         <LocalizedText Key="inventory.export" />
                     </button>
-                    <label class="btn btn-info mb-0" for="importInventaireFile" title="@LocalizationService.T("inventory.import")">
+                    <label class="btn btn-info mb-0" for="importInventaireFile" title="@LocalizationService.GetKeyValue("inventory.import")">
                         <i class="bi bi-upload"></i>
                         <LocalizedText Key="inventory.import" />
                     </label>
@@ -93,13 +93,13 @@
         <div class="d-flex justify-content-end align-items-center gap-2 view-mode-controls mt-2">
             <button class="btn btn-sm @GetViewModeClass(AppConstants.Defaults.ViewModeGrid)"
                 @onclick="@(() => viewMode = AppConstants.Defaults.ViewModeGrid)"
-                title="@LocalizationService.T("inventory.grid")">
+                title="@LocalizationService.GetKeyValue("inventory.grid")">
                 <i class="bi bi-grid-3x3-gap"></i>
                 <LocalizedText Key="inventory.grid" />
             </button>
             <button class="btn btn-sm @GetViewModeClass(AppConstants.Defaults.ViewModeList)"
                 @onclick="@(() => viewMode = AppConstants.Defaults.ViewModeList)"
-                title="@LocalizationService.T("inventory.list")">
+                title="@LocalizationService.GetKeyValue("inventory.list")">
                 <i class="bi bi-list-ul"></i>
                 <LocalizedText Key="inventory.list" />
             </button>
@@ -225,12 +225,12 @@
 
                                 <div class="card-actions-editable" @onclick:stopPropagation="true">
                                     <button class="btn btn-sm btn-warning" @onclick="() => EditPersonnage(personnage)"
-                                        title="@LocalizationService.T("inventory.edit")">
+                                        title="@LocalizationService.GetKeyValue("inventory.edit")">
                                         <i class="bi bi-pencil"></i>
                                         <LocalizedText Key="inventory.edit" />
                                     </button>
                                     <button class="btn btn-sm btn-danger" @onclick="() => DeletePersonnage(personnage.Id)"
-                                        title="@LocalizationService.T("inventory.delete")">
+                                        title="@LocalizationService.GetKeyValue("inventory.delete")">
                                         <i class="bi bi-trash"></i>
                                         <LocalizedText Key="inventory.delete" />
                                     </button>

@@ -224,15 +224,15 @@ public partial class Home : IAsyncDisposable
     {
         if (!ligue.HasValue)
         {
-            return this.LocalizationService.T("home.highestLeagueNone");
+            return this.LocalizationService.GetKeyValue("home.highestLeagueNone");
         }
 
         if (ligue.Value == 50)
         {
-            return this.LocalizationService.T("home.eliteTop50");
+            return this.LocalizationService.GetKeyValue("home.eliteTop50");
         }
 
-        return $"{this.LocalizationService.T("history.table.league")} {ligue.Value}";
+        return $"{this.LocalizationService.GetKeyValue("history.table.league")} {ligue.Value}";
     }
 
     private static Dictionary<Faction, int> CalculerMercenairesParFaction(IEnumerable<Personnage> mercenaires)
@@ -251,19 +251,19 @@ public partial class Home : IAsyncDisposable
 
     internal string GetFactionLabel(Faction faction) => faction switch
     {
-        Faction.Syndicat => this.LocalizationService.T("home.faction.syndicat"),
-        Faction.Pacificateurs => this.LocalizationService.T("home.faction.pacificateurs"),
-        Faction.HommesLibres => this.LocalizationService.T("home.faction.hommesLibres"),
-        _ => this.LocalizationService.T("home.faction.inconnu")
+        Faction.Syndicat => this.LocalizationService.GetKeyValue("home.faction.syndicat"),
+        Faction.Pacificateurs => this.LocalizationService.GetKeyValue("home.faction.pacificateurs"),
+        Faction.HommesLibres => this.LocalizationService.GetKeyValue("home.faction.hommesLibres"),
+        _ => this.LocalizationService.GetKeyValue("home.faction.inconnu")
     };
 
     internal string GetTypeAttaqueLabel(TypeAttaque typeAttaque) => typeAttaque switch
     {
-        TypeAttaque.Melee => this.LocalizationService.T("home.attackType.melee"),
-        TypeAttaque.Distance => this.LocalizationService.T("home.attackType.distance"),
-        TypeAttaque.Androide => this.LocalizationService.T("home.attackType.android"),
-        TypeAttaque.Commandant => this.LocalizationService.T("home.attackType.commander"),
-        _ => this.LocalizationService.T("home.attackType.unknown")
+        TypeAttaque.Melee => this.LocalizationService.GetKeyValue("home.attackType.melee"),
+        TypeAttaque.Distance => this.LocalizationService.GetKeyValue("home.attackType.distance"),
+        TypeAttaque.Androide => this.LocalizationService.GetKeyValue("home.attackType.android"),
+        TypeAttaque.Commandant => this.LocalizationService.GetKeyValue("home.attackType.commander"),
+        _ => this.LocalizationService.GetKeyValue("home.attackType.unknown")
     };
 
     internal static string GetFactionShapeClass(Faction faction) => faction switch

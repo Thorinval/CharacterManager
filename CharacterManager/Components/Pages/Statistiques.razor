@@ -1,0 +1,153 @@
+@page "/statistiques"
+@using CharacterManager.Server.Constants
+@using CharacterManager.Server.Services
+@using CharacterManager.Server.Models
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@rendermode InteractiveServer
+
+<PageTitle>Statistiques</PageTitle>
+
+<link rel="stylesheet" href="/css/Statistiques.css" />
+
+<div class="page-header-banner">
+    <a href="@AppConstants.Routes.Home" class="back-button" aria-label="Retour" title="Back to home"></a>
+    <h1 class="page-title">
+        <i class="bi bi-bar-chart-fill"></i> <LocalizedText Key="statistics.title" />
+    </h1>
+</div>
+
+<div class="statistiques-container">
+    @if (mercenaires == null)
+    {
+        <div class="loading-container">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden"><LocalizedText Key="common.loading" /></span>
+            </div>
+            <p><LocalizedText Key="statistics.loading" /></p>
+        </div>
+    }
+    else if (!mercenaires.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <p><LocalizedText Key="statistics.noData" /></p>
+        </div>
+    }
+    else
+    {
+        <div class="stats-grid">
+            <!-- Graphique par Type d'Attaque -->
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <i class="bi bi-crosshair"></i>
+                    <h2><LocalizedText Key="statistics.chartTitleAttackType" /></h2>
+                </div>
+                <div class="stat-card-body">
+                    <canvas id="chartTypeAttaque"></canvas>
+                </div>
+                <div class="stat-card-footer">
+                    <div class="stat-summary">
+                        @foreach (var stat in statsTypeAttaque)
+                        {
+                            <div class="stat-item">
+                                <span class="stat-label">@GetTypeAttaqueLabel(stat.Key):</span>
+                                <span class="stat-value">@stat.Value</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphique par Faction -->
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <i class="bi bi-flag-fill"></i>
+                    <h2><LocalizedText Key="statistics.chartTitleFaction" /></h2>
+                </div>
+                <div class="stat-card-body">
+                    <canvas id="chartFaction"></canvas>
+                </div>
+                <div class="stat-card-footer">
+                    <div class="stat-summary">
+                        @foreach (var stat in statsFaction)
+                        {
+                            <div class="stat-item">
+                                <span class="stat-label">@GetFactionLabel(stat.Key):</span>
+                                <span class="stat-value">@stat.Value</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphique par Rang -->
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <i class="bi bi-star-fill"></i>
+                    <h2><LocalizedText Key="statistics.chartTitleRank" /></h2>
+                </div>
+                <div class="stat-card-body">
+                    <canvas id="chartRang"></canvas>
+                </div>
+                <div class="stat-card-footer">
+                    <div class="stat-summary">
+                        @foreach (var stat in statsRang.OrderByDescending(s => s.Key))
+                        {
+                            <div class="stat-item">
+                                <span class="stat-label"><LocalizedText Key="statistics.rankLabel" /> @stat.Key:</span>
+                                <span class="stat-value">@stat.Value</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques additionnelles -->
+        <div class="additional-stats">
+            <div class="stat-box">
+                <i class="bi bi-people-fill"></i>
+                <div class="stat-box-content">
+                    <h3><LocalizedText Key="statistics.totalMercenaries" /></h3>
+                    <p class="stat-box-value">@mercenaires.Count()</p>
+                </div>
+            </div>
+            <div class="stat-box">
+                <i class="bi bi-star-fill"></i>
+                <div class="stat-box-content">
+                    <h3><LocalizedText Key="statistics.averagePower" /></h3>
+                    <p class="stat-box-value">@((int)mercenaires.Average(m => m.Puissance))</p>
+                </div>
+            </div>
+            <div class="stat-box">
+                <i class="bi bi-trophy-fill"></i>
+                <div class="stat-box-content">
+                    <h3><LocalizedText Key="statistics.mostPowerful" /></h3>
+                    <p class="stat-box-value">@mercenaires.OrderByDescending(m => m.Puissance).First().Nom</p>
+                    <p class="stat-box-subvalue">(@mercenaires.Max(m => m.Puissance))</p>
+                </div>
+            </div>
+            <div class="stat-box">
+                <i class="bi bi-arrow-down-circle-fill"></i>
+                <div class="stat-box-content">
+                    <h3><LocalizedText Key="statistics.leastPowerful" /></h3>
+                    <p class="stat-box-value">@mercenaires.OrderBy(m => m.Puissance).First().Nom</p>
+                    <p class="stat-box-subvalue">(@mercenaires.Min(m => m.Puissance))</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Inject]
+    public PersonnageService PersonnageService { get; set; } = null!;
+    
+    [Inject]
+    public ClientLocalizationService LocalizationService { get; set; } = null!;
+
+    private IEnumerable<Personnage>? mercenaires;
+    private Dictionary<TypeAttaque, int> statsTypeAttaque = new();
+    private Dictionary<Faction, int> statsFaction = new();
+    private Dictionary<int, int> statsRang = new();
+}

@@ -47,10 +47,10 @@
         {
             errorMessage = error switch
             {
-                "required" => LocalizationService.T("login.error.required"),
-                "invalid" => LocalizationService.T("login.error.invalid"),
-                "locked" => string.Format(LocalizationService.T("login.error.locked"), query["minutes"]),
-                _ => LocalizationService.T("login.error.default")
+                "required" => LocalizationService.GetKeyValue("login.error.required"),
+                "invalid" => LocalizationService.GetKeyValue("login.error.invalid"),
+                "locked" => string.Format(LocalizationService.GetKeyValue("login.error.locked"), query["minutes"]),
+                _ => LocalizationService.GetKeyValue("login.error.default")
             };
         }
     }

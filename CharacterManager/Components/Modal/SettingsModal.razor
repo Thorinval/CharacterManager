@@ -69,7 +69,7 @@
                                     @bind:set="async (value) => { isAdultModeEnabled = value; await OnAdultModeChanged(); }"
                                     disabled="@(!IsAdmin)" />
                                 <label class="form-check-label" for="adultModeToggle">
-                                    @(isAdultModeEnabled ? LocalizationService.T("settings.enabled") : LocalizationService.T("settings.disabled"))
+                                    @(isAdultModeEnabled ? LocalizationService.GetKeyValue("settings.enabled") : LocalizationService.GetKeyValue("settings.disabled"))
                                 </label>
                             </div>
                         </div>

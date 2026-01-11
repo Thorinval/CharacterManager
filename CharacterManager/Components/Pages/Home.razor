@@ -374,6 +374,34 @@
                         </div>
                     </div>
                     </div>
+
+                    <div class="hub-card" @onclick="@(() => GoTo(url: "statistiques"))">
+                    <div class="hub-card-head">
+                        <i class="bi bi-bar-chart-fill hub-icon"></i>
+                        <h3>
+                            <LocalizedText Key="navigation.statistics" />
+                        </h3>
+                    </div>
+                    <p>Visualisez vos mercenaires en graphiques</p>
+                    <div class="hub-meta-grid">
+                        <div class="hub-meta-block">
+                            <div class="metric-chips">
+                                <span class="metric-chip">
+                                    <i class="bi bi-pie-chart-fill"></i>
+                                    <span>Par type d'attaque</span>
+                                </span>
+                                <span class="metric-chip">
+                                    <i class="bi bi-pie-chart-fill"></i>
+                                    <span>Par faction</span>
+                                </span>
+                                <span class="metric-chip">
+                                    <i class="bi bi-pie-chart-fill"></i>
+                                    <span>Par rang</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
                 </div>
             </div>
 
