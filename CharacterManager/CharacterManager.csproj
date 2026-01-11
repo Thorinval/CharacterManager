@@ -21,6 +21,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
   </ItemGroup>
 
   <!-- Copier wwwroot (CSS, i18n, images) dans le dossier de sortie pour exécution via l'exe -->
@@ -29,6 +33,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
+  <!-- Ensure logs directory is created on publish/run -->
+  <Target Name="CreateLogsDirectory" AfterTargets="Build">
+    <MakeDir Directories="$(OutDir)logs" Condition="!Exists('$(OutDir)logs')" />
+  </Target>
 
   <ItemGroup>
     <ProjectReference Include="..\CharacterManager.Resources.Interface\CharacterManager.Resources.Interface.csproj" />
