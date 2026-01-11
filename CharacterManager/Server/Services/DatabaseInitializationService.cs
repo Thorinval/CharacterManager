@@ -2,6 +2,7 @@ using CharacterManager.Server.Data;
 using CharacterManager.Server.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace CharacterManager.Server.Services;
 
@@ -11,10 +12,12 @@ namespace CharacterManager.Server.Services;
 public class DatabaseInitializationService
 {
     private readonly ApplicationDbContext _db;
+    private readonly ILogger<DatabaseInitializationService> _logger;
 
-    public DatabaseInitializationService(ApplicationDbContext db)
+    public DatabaseInitializationService(ApplicationDbContext db, ILogger<DatabaseInitializationService> logger)
     {
         _db = db;
+        _logger = logger;
     }
 
     /// <summary>
@@ -41,7 +44,7 @@ public class DatabaseInitializationService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Migration error: {ex.Message}");
+            _logger.LogError(ex, "Migration error during InitializeDatabaseAsync");
         }
     }
 
@@ -85,7 +88,7 @@ public class DatabaseInitializationService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Initialization error: {ex.Message}");
+            _logger.LogError(ex, "Initialization error during InitializeAppSettingsAndCheckStateAsync");
         }
     }
 
@@ -102,7 +105,7 @@ public class DatabaseInitializationService
             ThumbnailHeightPx INTEGER NOT NULL DEFAULT 110
         );";
         await _db.Database.ExecuteSqlRawAsync(appSettingsSql);
-        Console.WriteLine("[DB] Ensured AppSettings table exists.");
+        _logger.LogInformation("[DB] Ensured AppSettings table exists.");
 
         const string templatesSql = @"CREATE TABLE IF NOT EXISTS Templates (
             Id INTEGER NOT NULL CONSTRAINT PK_Templates PRIMARY KEY AUTOINCREMENT,
@@ -114,7 +117,7 @@ public class DatabaseInitializationService
             PersonnagesJson TEXT NOT NULL
         );";
         await _db.Database.ExecuteSqlRawAsync(templatesSql);
-        Console.WriteLine("[DB] Ensured Templates table exists.");
+        _logger.LogInformation("[DB] Ensured Templates table exists.");
 
         const string historiquesEscouadeSql = @"CREATE TABLE IF NOT EXISTS HistoriquesEscouade (
             Id INTEGER NOT NULL CONSTRAINT PK_HistoriquesEscouade PRIMARY KEY AUTOINCREMENT,
@@ -124,13 +127,13 @@ public class DatabaseInitializationService
             DonneesEscouadeJson TEXT NOT NULL
         );";
         await _db.Database.ExecuteSqlRawAsync(historiquesEscouadeSql);
-        Console.WriteLine("[DB] Ensured HistoriquesEscouade table exists.");
+        _logger.LogInformation("[DB] Ensured HistoriquesEscouade table exists.");
 
         const string lucieHousesSql = @"CREATE TABLE IF NOT EXISTS LucieHouses (
             Id INTEGER NOT NULL CONSTRAINT PK_LucieHouses PRIMARY KEY AUTOINCREMENT
         );";
         await _db.Database.ExecuteSqlRawAsync(lucieHousesSql);
-        Console.WriteLine("[DB] Ensured LucieHouses table exists.");
+        _logger.LogInformation("[DB] Ensured LucieHouses table exists.");
 
         const string piecesSql = @"CREATE TABLE IF NOT EXISTS Pieces (
             Id INTEGER NOT NULL CONSTRAINT PK_Pieces PRIMARY KEY AUTOINCREMENT,
@@ -146,7 +149,7 @@ public class DatabaseInitializationService
             FOREIGN KEY (LucieHouseId) REFERENCES LucieHouses (Id) ON DELETE CASCADE
         );";
         await _db.Database.ExecuteSqlRawAsync(piecesSql);
-        Console.WriteLine("[DB] Ensured Pieces table exists.");
+        _logger.LogInformation("[DB] Ensured Pieces table exists.");
         await EnsureLuciePieceAspectColumnsAsync();
 
         const string profilesSql = @"CREATE TABLE IF NOT EXISTS Profiles (
@@ -180,13 +183,13 @@ public class DatabaseInitializationService
             if (!await ColumnExistsAsync("Pieces", "AspectsTactiques"))
             {
                 await _db.Database.ExecuteSqlRawAsync("ALTER TABLE Pieces ADD COLUMN AspectsTactiques TEXT NOT NULL DEFAULT '';");
-                Console.WriteLine("[DB] Added AspectsTactiques column to Pieces.");
+                _logger.LogInformation("[DB] Added AspectsTactiques column to Pieces.");
             }
 
             if (!await ColumnExistsAsync("Pieces", "AspectsStrategiques"))
             {
                 await _db.Database.ExecuteSqlRawAsync("ALTER TABLE Pieces ADD COLUMN AspectsStrategiques TEXT NOT NULL DEFAULT '';");
-                Console.WriteLine("[DB] Added AspectsStrategiques column to Pieces.");
+                _logger.LogInformation("[DB] Added AspectsStrategiques column to Pieces.");
             }
 
             await _db.Database.ExecuteSqlAsync($"UPDATE Pieces SET AspectsTactiques = {hydratedTactiques} WHERE AspectsTactiques IS NULL OR AspectsTactiques = '';");
@@ -194,7 +197,7 @@ public class DatabaseInitializationService
         }
         catch (SqliteException ex)
         {
-            Console.WriteLine($"[DB] Error ensuring Lucie aspects columns: {ex.Message}");
+            _logger.LogError(ex, "[DB] Error ensuring Lucie aspects columns");
         }
     }
 
@@ -210,11 +213,11 @@ public class DatabaseInitializationService
             try
             {
                 await _db.Database.ExecuteSqlRawAsync("ALTER TABLE AppSettings ADD COLUMN IsAdultModeEnabled INTEGER NOT NULL DEFAULT 1;");
-                Console.WriteLine("[DB] Added IsAdultModeEnabled to AppSettings.");
+                _logger.LogInformation("[DB] Added IsAdultModeEnabled to AppSettings.");
             }
             catch (SqliteException ex)
             {
-                Console.WriteLine($"[DB] Could not add IsAdultModeEnabled: {ex.Message}");
+                _logger.LogError(ex, "[DB] Could not add IsAdultModeEnabled");
             }
         }
 
@@ -223,11 +226,11 @@ public class DatabaseInitializationService
             try
             {
                 await _db.Database.ExecuteSqlRawAsync("ALTER TABLE AppSettings ADD COLUMN Language TEXT NOT NULL DEFAULT 'fr';");
-                Console.WriteLine("[DB] Added Language to AppSettings.");
+                _logger.LogInformation("[DB] Added Language to AppSettings.");
             }
             catch (SqliteException ex)
             {
-                Console.WriteLine($"[DB] Could not add Language: {ex.Message}");
+                _logger.LogError(ex, "[DB] Could not add Language");
             }
         }
     }
@@ -242,11 +245,11 @@ public class DatabaseInitializationService
             try
             {
                 await _db.Database.ExecuteSqlRawAsync("ALTER TABLE Personnages ADD COLUMN ImageUrlHeader TEXT NOT NULL DEFAULT '';");
-                Console.WriteLine("[DB] Added ImageUrlHeader to Personnages.");
+                _logger.LogInformation("[DB] Added ImageUrlHeader to Personnages.");
             }
             catch (SqliteException ex)
             {
-                Console.WriteLine($"[DB] Could not add ImageUrlHeader: {ex.Message}");
+                _logger.LogError(ex, "[DB] Could not add ImageUrlHeader");
             }
         }
     }
@@ -275,11 +278,11 @@ public class DatabaseInitializationService
                 try
                 {
                     await _db.Database.ExecuteSqlRawAsync(sql);
-                    Console.WriteLine($"[DB] Added {displayName} column to Profiles.");
+                    _logger.LogInformation($"[DB] Added {displayName} column to Profiles.");
                 }
                 catch (SqliteException ex)
                 {
-                    Console.WriteLine($"[DB] Could not add {displayName}: {ex.Message}");
+                    _logger.LogError(ex, $"[DB] Could not add {displayName}");
                 }
             }
         }
@@ -292,11 +295,11 @@ public class DatabaseInitializationService
             try
             {
                 await _db.Database.ExecuteSqlRawAsync("DROP TABLE IF EXISTS AppImages;");
-                Console.WriteLine("[DB] Dropped legacy AppImages table.");
+                _logger.LogInformation("[DB] Dropped legacy AppImages table.");
             }
             catch (SqliteException ex)
             {
-                Console.WriteLine($"[DB] Could not drop AppImages: {ex.Message}");
+                _logger.LogError(ex, "[DB] Could not drop AppImages");
             }
         }
     }
@@ -318,9 +321,9 @@ public class DatabaseInitializationService
                     return true;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Connection or query failed
+            _logger.LogError(ex, "[DB] ColumnExistsAsync failed for table {Table} column {Column}", table, column);
         }
         return false;
     }
@@ -338,9 +341,9 @@ public class DatabaseInitializationService
             var result = await cmd.ExecuteScalarAsync();
             return result != null;
         }
-        catch
+        catch (Exception ex)
         {
-            // Connection or query failed
+            _logger.LogError(ex, "[DB] TableExistsAsync failed for table {Table}", table);
         }
         return false;
     }

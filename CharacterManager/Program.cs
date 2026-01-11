@@ -7,8 +7,13 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using CharacterManager.Components;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog from appsettings
+builder.Host.UseSerilog((ctx, services, lc) =>
+    lc.ReadFrom.Configuration(ctx.Configuration));
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
