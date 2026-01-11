@@ -649,21 +649,21 @@ public partial class Inventaire : IAsyncDisposable
         );
     }
 
-    internal void DeletePersonnage(int id)
+    internal async Task DeletePersonnage(int id)
     {
-        PersonnageService.Delete(id);
-        _ = InvokeAsync(async () => await LoadPersonnagesAsync());
+        await PersonnageService.DeleteAsync(id);
+        await InvokeAsync(async () => await LoadPersonnagesAsync());
     }
 
-    internal void SavePersonnage()
+    internal async Task SavePersonnage()
     {
         if (isEditing)
         {
-            PersonnageService.Update(currentPersonnage);
+            await PersonnageService.UpdateAsync(currentPersonnage);
         }
         else
         {
-            PersonnageService.Add(currentPersonnage);
+            await PersonnageService.AddAsync(currentPersonnage);
         }
 
         _ = InvokeAsync(async () =>

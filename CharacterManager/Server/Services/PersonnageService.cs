@@ -1,7 +1,6 @@
 using CharacterManager.Server.Data;
 using CharacterManager.Server.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace CharacterManager.Server.Services;
 
@@ -9,13 +8,11 @@ public class PersonnageService
 {
     private readonly ApplicationDbContext _context;
     private readonly HistoriqueModificationService _historiqueService;
-    private readonly ILogger<PersonnageService> _logger;
 
-    public PersonnageService(ApplicationDbContext context, HistoriqueModificationService historiqueService, ILogger<PersonnageService> logger)
+    public PersonnageService(ApplicationDbContext context, HistoriqueModificationService historiqueService)
     {
         _context = context;
         _historiqueService = historiqueService;
-        _logger = logger;
     }
 
     public Task<IEnumerable<Personnage>> GetAllAsync()
@@ -309,16 +306,6 @@ public class PersonnageService
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
-    public void Add(Personnage personnage)
-    {
-        // Remplir les colonnes stockées pour compatibilité base de données (v0.12.1+: API de ressources)
-        personnage.ImageUrlDetailStored = PersonnageImageUrlHelper.GetImageDetailUrl(personnage.Nom);
-        personnage.ImageUrlPreviewStored = PersonnageImageUrlHelper.GetImageSmallPortraitUrl(personnage.Nom);
-        personnage.ImageUrlSelectedStored = PersonnageImageUrlHelper.GetImageSmallSelectUrl(personnage.Nom);
-        _context.Personnages.Add(personnage);
-        _context.SaveChanges();
-    }
-
     public async Task AddAsync(Personnage personnage)
     {
         // Remplir les colonnes stockées pour compatibilité base de données (v0.12.1+: API de ressources)
@@ -337,39 +324,8 @@ public class PersonnageService
             "Création d'un personnage");
     }
 
-    public void Update(Personnage personnage)
-    {
-        var existing = _context.Personnages.Find(personnage.Id);
-        if (existing != null)
-        {
-            existing.Nom = personnage.Nom;
-            existing.Rarete = personnage.Rarete;
-            existing.Niveau = personnage.Niveau;
-            existing.Type = personnage.Type;
-            existing.Rang = personnage.Rang;
-            existing.Puissance = personnage.Puissance;
-            existing.PA = personnage.PA;
-            existing.PV = personnage.PV;
-            existing.Role = personnage.Role;
-            existing.Faction = personnage.Faction;
-            existing.Selectionne = personnage.Selectionne;
-            existing.TypeAttaque = personnage.TypeAttaque;
-            existing.HasRelation = personnage.HasRelation;
-            existing.NivRelation = personnage.NivRelation;
-
-            // Mettre à jour les colonnes stockées si le nom change (v0.12.1+: API de ressources)
-            existing.ImageUrlDetailStored = PersonnageImageUrlHelper.GetImageDetailUrl(existing.Nom);
-            existing.ImageUrlPreviewStored = PersonnageImageUrlHelper.GetImageSmallPortraitUrl(existing.Nom);
-            existing.ImageUrlSelectedStored = PersonnageImageUrlHelper.GetImageSmallSelectUrl(existing.Nom);
-
-            _context.SaveChanges();
-        }
-    }
-
     public async Task UpdateAsync(Personnage personnage)
     {
-        _logger.LogInformation("UpdateAsync appelée pour personnage {PersonnageId}", personnage.Id);
-        
         // Récupérer les anciennes valeurs depuis la BDD (sans tracking pour éviter les conflits)
         var oldValues = await _context.Personnages
             .AsNoTracking()
@@ -377,7 +333,6 @@ public class PersonnageService
         
         if (oldValues == null) 
         {
-            _logger.LogWarning("Personnage {PersonnageId} not found", personnage.Id);
             return;
         }
 
@@ -387,8 +342,6 @@ public class PersonnageService
         {
             // Capturer les anciennes valeurs pour l'historique en comparant avec oldValues
             var modifications = DetectPersonnageModifications(oldValues, personnage);
-
-            _logger.LogInformation("{Count} modifications détectées", modifications.Count);
 
             existing.Nom = personnage.Nom;
             existing.Rarete = personnage.Rarete;
@@ -415,7 +368,6 @@ public class PersonnageService
             // Enregistrer chaque modification dans l'historique
             foreach (var (champ, ancienne, nouvelle) in modifications)
             {
-                _logger.LogInformation("Enregistrement historique: {Champ} {Ancienne} -> {Nouvelle}", champ, ancienne, nouvelle);
                 await _historiqueService.EnregistrerModificationAsync(
                     TypeEntite.Personnage,
                     personnage.Id,
@@ -450,16 +402,6 @@ public class PersonnageService
             modifications.Add(("NivRelation", oldValues.NivRelation, newValues.NivRelation));
 
         return modifications;
-    }
-
-    public void Delete(int id)
-    {
-        var personnage = _context.Personnages.Find(id);
-        if (personnage != null)
-        {
-            _context.Personnages.Remove(personnage);
-            _context.SaveChanges();
-        }
     }
 
     public async Task DeleteAsync(int id)

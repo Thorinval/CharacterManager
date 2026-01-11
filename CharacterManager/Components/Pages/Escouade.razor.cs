@@ -95,15 +95,15 @@ public partial class Escouade
         }
     }
 
-    internal void SavePersonnage()
+    internal async Task SavePersonnage()
     {
         if (currentPersonnage.Id > 0)
         {
-            PersonnageService.Update(currentPersonnage);
+            await PersonnageService.UpdateAsync(currentPersonnage);
         }
         else
         {
-            PersonnageService.Add(currentPersonnage);
+            await PersonnageService.AddAsync(currentPersonnage);
         }
         LoadPersonnages();
         CloseModal();
