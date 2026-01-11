@@ -86,8 +86,15 @@ app.MapPost("/api/login", async (HttpContext context, ProfileService profileServ
     var allProfiles = await profileService.GetAllAsync();
     if (allProfiles == null || !allProfiles.Any())
     {
-        await profileService.CreateUserAsync("admin", "admin", "admin");
-        Console.WriteLine("[Login] No profiles found - created default admin account (admin/admin)");
+        // Generate secure random password for default admin
+        var randomPassword = GenerateSecurePassword();
+        await profileService.CreateUserAsync("admin", randomPassword, "admin");
+        Console.WriteLine("\n" + new string('=', 80));
+        Console.WriteLine("[SECURITY] No profiles found - created default admin account");
+        Console.WriteLine("[SECURITY] Username: admin");
+        Console.WriteLine($"[SECURITY] Password: {randomPassword}");
+        Console.WriteLine("[SECURITY] IMPORTANT: Change this password immediately after first login!");
+        Console.WriteLine(new string('=', 80) + "\n");
     }
 
     var profile = await profileService.GetByUsernameAsync(username);
@@ -160,3 +167,31 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 await app.RunAsync();
+
+// Helper method to generate secure random password
+static string GenerateSecurePassword()
+{
+    const string upperChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const string lowerChars = "abcdefghijklmnopqrstuvwxyz";
+    const string digitChars = "0123456789";
+    const string specialChars = "!@#$%^&*()-_=+";
+    const string allChars = upperChars + lowerChars + digitChars + specialChars;
+    
+    var random = new Random();
+    var password = new char[16];
+    
+    // Ensure at least one of each required character type
+    password[0] = upperChars[random.Next(upperChars.Length)];
+    password[1] = lowerChars[random.Next(lowerChars.Length)];
+    password[2] = digitChars[random.Next(digitChars.Length)];
+    password[3] = specialChars[random.Next(specialChars.Length)];
+    
+    // Fill the rest with random characters from all sets
+    for (int i = 4; i < password.Length; i++)
+    {
+        password[i] = allChars[random.Next(allChars.Length)];
+    }
+    
+    // Shuffle the password to avoid predictable pattern
+    return new string(password.OrderBy(_ => random.Next()).ToArray());
+}

@@ -1,6 +1,6 @@
 # 🗺️ Character Manager - Roadmap 2026
 
-> **Version actuelle** : 0.16.0  
+> **Version actuelle** : 1.0.0 🎉  
 > **Dernière mise à jour** : 11 janvier 2026
 
 ---
@@ -13,7 +13,7 @@ Cette roadmap présente les fonctionnalités prévues et les améliorations futu
 
 ## 🚀 T1 2026 (Janvier - Mars)
 
-### ✅ Janvier 2026 - Visualisation & Statistiques
+### ✅ Janvier 2026 - Production Ready & Release
 **Version 0.15.0** ✓ *Terminé*
 - [x] Page de statistiques avec graphiques camembert
 - [x] Visualisation par type d'attaque, faction et rang
@@ -27,7 +27,14 @@ Cette roadmap présente les fonctionnalités prévues et les améliorations futu
 - [x] Enregistrement automatique dans PersonnageService
 - [x] Corrections de bugs async/await et dependency injection
 
-**Version 0.17.0** - *Prévu fin janvier*
+**Version 1.0.0** ✓ *Terminé - Production Ready*
+- [x] 🔐 Sécurité renforcée : Génération de mot de passe aléatoire sécurisé pour compte admin
+- [x] 📖 Documentation complète : README.md principal avec guide d'installation et démarrage rapide
+- [x] 🧹 Nettoyage : Suppression des configurations sensibles hardcodées
+- [x] ✅ Validation : 78 tests unitaires passent
+- [x] 🚀 Application prête pour la production
+
+**Version 1.1.0** - *Prévu fin janvier*
 - [ ] Associer les capacités aux pièces Lucie
 - [ ] Export/Import des associations capacités-personnages
 - [ ] Amélioration de l'interface utilisateur (unification du style)

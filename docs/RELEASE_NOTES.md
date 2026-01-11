@@ -1,6 +1,52 @@
 # Character Manager
 
-> **Version actuelle**: 0.16.0
+> **Version actuelle**: 1.0.0 🎉
+
+---
+
+## 🎉 1.0.0 (11 Janvier 2026) - Production Release
+
+### 🔐 Sécurité
+
+🔒 - **Génération de mot de passe aléatoire sécurisé** : Le compte admin par défaut utilise désormais un mot de passe aléatoire de 16 caractères (majuscules, minuscules, chiffres, symboles spéciaux)
+
+🔒 - **Affichage sécurisé au démarrage** : Le mot de passe admin est affiché clairement dans la console au premier démarrage avec avertissement de changement obligatoire
+
+🔒 - **Suppression des credentials hardcodés** : Section Admin retirée du fichier appsettings.json
+
+### 📖 Documentation
+
+📚 - **README.md principal créé** : Documentation complète à la racine du projet incluant :
+  - Description et fonctionnalités de l'application
+  - 3 options d'installation (Windows Installer, Docker, Build sources)
+  - Guide de démarrage rapide avec premier login
+  - Navigation et utilisation
+  - Stack technique et dépendances
+  - Instructions de mise à jour
+  - Guide de contribution
+  - Badges GitHub et support
+
+### ✅ Qualité
+
+✅ - **Tests unitaires** : 78/78 tests passent sans erreur
+
+✅ - **Build** : Compilation réussie sans warnings
+
+✅ - **Validation sécurité** : Aucune vulnérabilité critique identifiée
+
+### 🚀 Production Ready
+
+🎯 - **Application stable** : Prête pour déploiement en production
+
+🎯 - **Base solide** : Architecture éprouvée (Blazor Server + EF Core + SQLite)
+
+🎯 - **Fonctionnalités complètes** : Toutes les fonctionnalités core implémentées et testées
+
+### 📦 Migration depuis 0.16.0
+
+- ✅ **Compatibilité ascendante** : Base de données compatible sans migration nécessaire
+- ✅ **Mise à jour transparente** : Aucune action utilisateur requise
+- ⚠️ **Changement de comportement** : Premier démarrage génère maintenant un mot de passe aléatoire (consultez les logs)
 
 ---
 
