@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using CharacterManager.Components;
 using Serilog;
+using System.Security.Cryptography;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,7 +66,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbInitService = scope.ServiceProvider.GetRequiredService<DatabaseInitializationService>();
-    
+
     await dbInitService.InitializeDatabaseAsync();
     await dbInitService.InitializeAppSettingsAndCheckStateAsync();
 }
@@ -89,7 +90,7 @@ app.MapPost("/api/login", async (HttpContext context, ProfileService profileServ
 
     // Bootstrap default admin if no profiles exist
     var allProfiles = await profileService.GetAllAsync();
-    if (allProfiles == null || !allProfiles.Any())
+    if (allProfiles == null || allProfiles.Count == 0)
     {
         // Generate secure random password for default admin
         var randomPassword = GenerateSecurePassword();
@@ -176,27 +177,10 @@ await app.RunAsync();
 // Helper method to generate secure random password
 static string GenerateSecurePassword()
 {
-    const string upperChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const string lowerChars = "abcdefghijklmnopqrstuvwxyz";
-    const string digitChars = "0123456789";
-    const string specialChars = "!@#$%^&*()-_=+";
-    const string allChars = upperChars + lowerChars + digitChars + specialChars;
-    
-    var random = new Random();
-    var password = new char[16];
-    
-    // Ensure at least one of each required character type
-    password[0] = upperChars[random.Next(upperChars.Length)];
-    password[1] = lowerChars[random.Next(lowerChars.Length)];
-    password[2] = digitChars[random.Next(digitChars.Length)];
-    password[3] = specialChars[random.Next(specialChars.Length)];
-    
-    // Fill the rest with random characters from all sets
-    for (int i = 4; i < password.Length; i++)
-    {
-        password[i] = allChars[random.Next(allChars.Length)];
-    }
-    
+    var randomGenerator = RandomNumberGenerator.Create();
+    byte[] data = new byte[16];
+    randomGenerator.GetBytes(data);
+
     // Shuffle the password to avoid predictable pattern
-    return new string(password.OrderBy(_ => random.Next()).ToArray());
+    return BitConverter.ToString(data);
 }
