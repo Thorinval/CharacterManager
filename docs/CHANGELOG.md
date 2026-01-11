@@ -104,13 +104,13 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
   - Petit select (état sélectionné)
 
 #### 2. **API REST pour les Ressources**
-- Nouveau endpoint : `/api/resources/personnages/{personnage}/{fichier}`
+- Nouveau endpoint : `/api/v1/resources/personnages/{personnage}/{fichier}`
 - Livraison efficace des images avec cache HTTP (1 heure)
 - Streaming direct depuis les ressources embarquées
 - Exemples :
-  - `GET /api/resources/personnages/Alexa/alexa_small_portrait.png`
-  - `GET /api/resources/personnages/Hunter/hunter_small_select.png`
-  - `GET /api/resources/personnages/list` (endpoint de debug)
+  - `GET /api/v1/resources/personnages/Alexa/alexa_small_portrait.png`
+  - `GET /api/v1/resources/personnages/Hunter/hunter_small_select.png`
+  - `GET /api/v1/resources/personnages/list` (endpoint de debug)
 
 #### 3. **Gestion Intelligente des Ressources**
 - `PersonnageResourceManager` pour accès programmatique
@@ -195,7 +195,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - **Projet .NET 9.0** dédié aux ressources
 - **25 images embarquées** (auto-contenues dans la DLL)
 - Pas de dépendance externe aux fichiers wwwroot
-- **API REST** pour servir les ressources : `/api/resources/interface/{fileName}`
+- **API REST** pour servir les ressources : `/api/v1/resources/interface/{fileName}`
 
 #### 3. **Déploiement Portable**
 - Application **100% auto-contenue**
@@ -228,8 +228,8 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 #### API REST
 - Nouveau contrôleur : `ResourcesController`
 - Endpoints :
-  - `GET /api/resources/interface/{fileName}` - Servir image avec type MIME
-  - `GET /api/resources/interface` - Lister images disponibles
+  - `GET /api/v1/resources/interface/{fileName}` - Servir image avec type MIME
+  - `GET /api/v1/resources/interface` - Lister images disponibles
 - Détection MIME : png, jpg, gif, webp, svg
 
 #### UI / Icônes Bootstrap

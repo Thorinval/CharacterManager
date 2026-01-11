@@ -28,7 +28,7 @@
 - ✅ Dossier Images avec 25+ fichiers PNG
 - ✅ Images embarquées dans la DLL
 - ✅ API ResourcesController fonctionnelle
-- ✅ Endpoints `/api/resources/interface` accessible
+- ✅ Endpoints `/api/v1/resources/interface` accessible
 
 ### Base de Données
 - ✅ Dossier Migrations existe
@@ -61,7 +61,7 @@
 | Build Release | ✅ PASS | 0 erreurs, 9 warnings (non-bloquants) |
 | Tests unitaires | ✅ PASS | 61/61 tests passing |
 | Publication | ✅ PASS | Tous les fichiers générés |
-| API Endpoints | ✅ PASS | /api/resources/interface actif |
+| API Endpoints | ✅ PASS | /api/v1/resources/interface actif |
 | Ressources | ✅ PASS | 25 images embarquées |
 | Configuration | ✅ PASS | Tous les fichiers en place |
 

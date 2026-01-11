@@ -161,7 +161,7 @@ else
                                 <div class="personnage-card-grid-compact" @ondragstart="@(e => HandleDragStart(e, personnage))"
                                     draggable="true">
                                     <img src="@personnage.GetImageUrl(true)" alt="@personnage.Nom" class="personnage-card-image-compact"
-                                        onerror="this.onerror=null; this.src='/api/resources/interface/default_portrait.png';" />
+                                        onerror="this.onerror=null; this.src='/api/v1/resources/interface/default_portrait.png';" />
                                     <div class="card-overlay-compact">
                                         <span class="card-name-compact">@personnage.Nom</span>
                                         <span class="card-puissance-compact">@personnage.Puissance</span>

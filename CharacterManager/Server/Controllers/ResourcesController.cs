@@ -7,7 +7,7 @@ using CharacterManager.Resources.Interface;
 /// Contrôleur pour servir les ressources d'interface (images) depuis la DLL.
 /// </summary>
 [ApiController]
-[Route("api/resources")]
+[Route("api/v1/resources")]
 public class ResourcesController : ControllerBase
 {
     /// <summary>

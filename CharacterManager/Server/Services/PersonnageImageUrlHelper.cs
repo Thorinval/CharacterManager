@@ -5,13 +5,13 @@ using CharacterManager.Server.Constants;
 /// <summary>
 /// Service helper pour générer les URLs des images de personnages.
 /// Depuis la v0.12.1, les images sont servies depuis la DLL CharacterManager.Resources.Personnages
-/// via l'API /api/resources/personnages/{personnage}/{fichier}
+/// via l'API versionnée /api/v1/resources/personnages/{personnage}/{fichier}
 /// </summary>
 public static class PersonnageImageUrlHelper
 {
     /// <summary>
     /// Génère l'URL de l'image détaillée d'un personnage.
-    /// Format: /api/resources/personnages/{PersonnageFolder}/{nom}.png
+    /// Format: /api/v1/resources/personnages/{PersonnageFolder}/{nom}.png
     /// </summary>
     /// <param name="nomPersonnage">Nom du personnage (ex: "Alexa", "Hunter")</param>
     /// <returns>URL complète de l'image détaillée</returns>
@@ -24,7 +24,7 @@ public static class PersonnageImageUrlHelper
 
     /// <summary>
     /// Génère l'URL de l'image d'en-tête d'un personnage.
-    /// Format: /api/resources/personnages/{PersonnageFolder}/{nom}_header.png
+    /// Format: /api/v1/resources/personnages/{PersonnageFolder}/{nom}_header.png
     /// </summary>
     /// <param name="nomPersonnage">Nom du personnage</param>
     /// <returns>URL complète de l'image d'en-tête</returns>
@@ -37,7 +37,7 @@ public static class PersonnageImageUrlHelper
 
     /// <summary>
     /// Génère l'URL du petit portrait d'un personnage.
-    /// Format: /api/resources/personnages/{PersonnageFolder}/{nom}_small_portrait.png
+    /// Format: /api/v1/resources/personnages/{PersonnageFolder}/{nom}_small_portrait.png
     /// </summary>
     /// <param name="nomPersonnage">Nom du personnage</param>
     /// <returns>URL complète du petit portrait</returns>
@@ -50,7 +50,7 @@ public static class PersonnageImageUrlHelper
 
     /// <summary>
     /// Génère l'URL du portrait en mode sélectionné d'un personnage.
-    /// Format: /api/resources/personnages/{PersonnageFolder}/{nom}_small_select.png
+    /// Format: /api/v1/resources/personnages/{PersonnageFolder}/{nom}_small_select.png
     /// </summary>
     /// <param name="nomPersonnage">Nom du personnage</param>
     /// <returns>URL complète du portrait sélectionné</returns>

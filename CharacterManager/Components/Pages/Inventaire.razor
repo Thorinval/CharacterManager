@@ -168,7 +168,7 @@
 
                             <img src="@personnage.GetImageUrl(true)" alt="@personnage.Nom" class="personnage-card-image-editable"
                                 @onclick="() => ViewPersonnage(personnage.Id)" style="cursor: pointer;"
-                                onerror="this.onerror=null; this.src='/api/resources/interface/default_portrait.png';" />
+                                    onerror="this.onerror=null; this.src='/api/v1/resources/interface/default_portrait.png';" />
                             <div class="personnage-card-info">
                                 <div class="editable-field">
                                     <label for=@( $"niveauInput_p{personnage.Id}")>
@@ -247,7 +247,7 @@
                                     @onchange="() => ToggleSelection(personnage.Id)" />
                             </div>
                             <img src="@personnage.GetImageUrl(true)" alt="@personnage.Nom" class="personnage-card-image-list"
-                                onerror="this.onerror=null; this.src='/api/resources/interface/default_portrait.png';" />
+                                  onerror="this.onerror=null; this.src='/api/v1/resources/interface/default_portrait.png';" />
                             <div class="personnage-info-list">
                                 <span class="personnage-name" style="font-weight: 700;">@personnage.Nom</span>
                                 <span class="list-separator">|</span>

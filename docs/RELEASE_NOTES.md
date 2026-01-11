@@ -243,7 +243,7 @@
 
 ✨ - Architecture: DLL `CharacterManager.Resources.Personnages` avec 126 images embarquées
 
-✨ - API: Endpoint `/api/resources/personnages/{personnage}/{fichier}` pour servir les images
+✨ - API: Endpoint `/api/v1/resources/personnages/{personnage}/{fichier}` pour servir les images
 
 ✨ - Services: `PersonnageResourceManager` pour accès aux ressources
 
