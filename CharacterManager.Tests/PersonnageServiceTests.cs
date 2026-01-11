@@ -21,242 +21,24 @@ public class PersonnageServiceTests : IDisposable
 
         _context = new ApplicationDbContext(options);
         _context.Database.EnsureCreated();
-        
-        _service = new PersonnageService(_context);
+
+        // Create a real HistoriqueModificationService for integration tests
+        var historiqueService = new HistoriqueModificationService(_context);
+        _service = new PersonnageService(_context, historiqueService);
     }
 
     public void Dispose()
     {
-        _context?.Dispose();
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 
-    [Fact]
-    public void Update_WithValidPersonnage_ShouldUpdateAllProperties()
+    protected virtual void Dispose(bool disposing)
     {
-        // Arrange
-        var existingPersonnage = new Personnage
+        if (disposing)
         {
-            Nom = "Ancien Nom",
-            Rarete = Rarete.R,
-            Niveau = 1,
-            Type = TypePersonnage.Mercenaire,
-            Rang = 1,
-            Puissance = 10,
-            PA = 5,
-            PV = 20,
-            Role = Role.Sentinelle,
-            Faction = Faction.Syndicat,
-            Selectionne = false,
-            TypeAttaque = TypeAttaque.Melee
-        };
-
-        _context.Personnages.Add(existingPersonnage);
-        _context.SaveChanges();
-        int personId = existingPersonnage.Id;
-
-        var updatedPersonnage = new Personnage
-        {
-            Id = personId,
-            Nom = "Nouveau Nom",
-            Rarete = Rarete.SSR,
-            Niveau = 50,
-            Type = TypePersonnage.Commandant,
-            Rang = 5,
-            Puissance = 100,
-            PA = 15,
-            PV = 50,
-            Role = Role.Combattante,
-            Faction = Faction.Pacificateurs,
-            Selectionne = true,
-            TypeAttaque = TypeAttaque.Distance
-        };
-
-        // Act
-        _service.Update(updatedPersonnage);
-
-        // Assert
-        var result = _context.Personnages.Find(personId);
-        Assert.NotNull(result);
-        Assert.Equal("Nouveau Nom", result.Nom);
-        Assert.Equal(Rarete.SSR, result.Rarete);
-        Assert.Equal(50, result.Niveau);
-        Assert.Equal(TypePersonnage.Commandant, result.Type);
-        Assert.Equal(5, result.Rang);
-        Assert.Equal(100, result.Puissance);
-        Assert.Equal(15, result.PA);
-        Assert.Equal(50, result.PV);
-        Assert.Equal(Role.Combattante, result.Role);
-        Assert.Equal(Faction.Pacificateurs, result.Faction);
-        // ImageUrlDetail is now generated from resources, so we just verify it's not empty
-        Assert.False(string.IsNullOrEmpty(result.ImageUrlDetail));
-        Assert.True(result.Selectionne);
-    }
-
-    [Fact]
-    public void Update_WithNonExistentPersonnage_ShouldDoNothing()
-    {
-        // Arrange
-        var personnageToUpdate = new Personnage
-        {
-            Id = 999,
-            Nom = "Non-existent"
-        };
-
-        // Act & Assert - Should not throw an exception
-        _service.Update(personnageToUpdate);
-
-        // Verify the non-existent personnage is not in the database
-        var result = _context.Personnages.Find(999);
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public void Update_ShouldNotModifyId()
-    {
-        // Arrange
-        var existingPersonnage = new Personnage
-        {
-            Nom = "Original",
-            Rarete = Rarete.R,
-            Niveau = 1,
-            Type = TypePersonnage.Mercenaire,
-            Rang = 1,
-            Puissance = 10,
-            PA = 5,
-            PV = 20,
-            Role = Role.Sentinelle,
-            Faction = Faction.Syndicat,
-            Selectionne = false
-        };
-
-        _context.Personnages.Add(existingPersonnage);
-        _context.SaveChanges();
-        int originalId = existingPersonnage.Id;
-
-        var updatedPersonnage = new Personnage
-        {
-            Id = originalId,
-            Nom = "Updated",
-            Rarete = Rarete.SR,
-            Niveau = 2,
-            Type = TypePersonnage.Commandant,
-            Rang = 2,
-            Puissance = 20,
-            PA = 10,
-            PV = 25,
-            Role = Role.Combattante,
-            Faction = Faction.Pacificateurs,
-            Selectionne = true
-        };
-
-        // Act
-        _service.Update(updatedPersonnage);
-
-        // Assert
-        var result = _context.Personnages.Find(originalId);
-        Assert.NotNull(result);
-        Assert.Equal(originalId, result.Id);
-    }
-
-    [Fact]
-    public void Update_WithPartialChanges_ShouldUpdateAllSpecifiedFields()
-    {
-        // Arrange
-        var existingPersonnage = new Personnage
-        {
-            Nom = "Original Nom",
-            Rarete = Rarete.R,
-            Niveau = 1,
-            Type = TypePersonnage.Mercenaire,
-            Rang = 1,
-            Puissance = 10,
-            PA = 5,
-            PV = 20,
-            Role = Role.Sentinelle,
-            Faction = Faction.Syndicat,
-            Selectionne = false
-        };
-
-        _context.Personnages.Add(existingPersonnage);
-        _context.SaveChanges();
-        int personId = existingPersonnage.Id;
-
-        var updatedPersonnage = new Personnage
-        {
-            Id = personId,
-            Nom = "Nouveau Nom",
-            Rarete = Rarete.R,
-            Niveau = 1,
-            Type = TypePersonnage.Mercenaire,
-            Rang = 1,
-            Puissance = 10,
-            PA = 5,
-            PV = 20,
-            Role = Role.Sentinelle,
-            Faction = Faction.Syndicat,
-            Selectionne = false
-        };
-
-        // Act
-        _service.Update(updatedPersonnage);
-
-        // Assert
-        var result = _context.Personnages.Find(personId);
-        Assert.NotNull(result);
-        Assert.Equal("Nouveau Nom", result.Nom);
-        Assert.Equal(Rarete.R, result.Rarete);
-        Assert.Equal(1, result.Niveau);
-        Assert.Equal(TypePersonnage.Mercenaire, result.Type);
-    }
-
-    [Fact]
-    public void Update_ShouldCallSaveChanges()
-    {
-        // Arrange
-        var existingPersonnage = new Personnage
-        {
-            Nom = "Test",
-            Rarete = Rarete.R,
-            Niveau = 1,
-            Type = TypePersonnage.Mercenaire,
-            Rang = 1,
-            Puissance = 10,
-            PA = 5,
-            PV = 20,
-            Role = Role.Sentinelle,
-            Faction = Faction.Syndicat,
-            Selectionne = false
-        };
-
-        _context.Personnages.Add(existingPersonnage);
-        _context.SaveChanges();
-        int personId = existingPersonnage.Id;
-
-        var updatedPersonnage = new Personnage
-        {
-            Id = personId,
-            Nom = "Updated Test",
-            Rarete = Rarete.SR,
-            Niveau = 10,
-            Type = TypePersonnage.Commandant,
-            Rang = 5,
-            Puissance = 50,
-            PA = 15,
-            PV = 60,
-            Role = Role.Combattante,
-            Faction = Faction.Pacificateurs,
-            Selectionne = true
-        };
-
-        // Act
-        _service.Update(updatedPersonnage);
-
-        // Assert - Verify the update was persisted in the database
-        var persistedResult = _context.Personnages.Find(personId);
-        Assert.NotNull(persistedResult);
-        Assert.Equal("Updated Test", persistedResult.Nom);
-        Assert.Equal(Rarete.SR, persistedResult.Rarete);
-        Assert.Equal(10, persistedResult.Niveau);
+            _context?.Dispose();
+        }
     }
 
     [Fact]
@@ -492,5 +274,364 @@ public class PersonnageServiceTests : IDisposable
 
         // Assert - Should include mercenary (100) + Lucie (50 + 25) = 175
         Assert.Equal(175, result);
+    }
+
+    // ==================== ASYNC METHOD TESTS ====================
+
+    [Fact]
+    public async Task AddAsync_ShouldAddPersonnageAndRecordHistory()
+    {
+        // Arrange
+        var personnage = new Personnage
+        {
+            Nom = "Nouveau Personnage",
+            Rarete = Rarete.SR,
+            Niveau = 10,
+            Type = TypePersonnage.Mercenaire,
+            Rang = 2,
+            Puissance = 50,
+            PA = 8,
+            PV = 30,
+            Role = Role.Combattante,
+            Faction = Faction.Syndicat,
+            Selectionne = false,
+            TypeAttaque = TypeAttaque.Melee
+        };
+
+        // Act
+        await _service.AddAsync(personnage);
+
+        // Assert
+        var saved = await _context.Personnages.FirstOrDefaultAsync(p => p.Nom == "Nouveau Personnage");
+        Assert.NotNull(saved);
+        Assert.Equal("Nouveau Personnage", saved.Nom);
+        Assert.Equal(10, saved.Niveau);
+        Assert.Equal(50, saved.Puissance);
+
+        // Verify history was recorded
+        var history = await _context.HistoriquesModifications
+            .FirstOrDefaultAsync(h => h.TypeModification == TypeModification.Creation && h.NomEntite == "Nouveau Personnage");
+        Assert.NotNull(history);
+        Assert.Equal(TypeEntite.Personnage, history.TypeEntite);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ShouldUpdatePersonnageAndRecordHistory()
+    {
+        // Arrange
+        var personnage = new Personnage
+        {
+            Nom = "Test Update",
+            Rarete = Rarete.R,
+            Niveau = 1,
+            Type = TypePersonnage.Mercenaire,
+            Rang = 1,
+            Puissance = 100,
+            PA = 5,
+            PV = 20,
+            Role = Role.Sentinelle,
+            Faction = Faction.Syndicat,
+            Selectionne = false,
+            TypeAttaque = TypeAttaque.Melee
+        };
+
+        _context.Personnages.Add(personnage);
+        await _context.SaveChangesAsync();
+        int personId = personnage.Id;
+
+        // Modify properties
+        personnage.Niveau = 50;
+        personnage.Puissance = 500;
+        personnage.Rang = 5;
+
+        // Act
+        await _service.UpdateAsync(personnage);
+
+        // Assert
+        var updated = await _context.Personnages.FindAsync(personId);
+        Assert.NotNull(updated);
+        Assert.Equal(50, updated.Niveau);
+        Assert.Equal(500, updated.Puissance);
+        Assert.Equal(5, updated.Rang);
+
+        // Verify history was recorded for each change
+        var historyEntries = await _context.HistoriquesModifications
+            .Where(h => h.EntiteId == personId && h.TypeModification == TypeModification.Modification)
+            .ToListAsync();
+        Assert.NotEmpty(historyEntries);
+        Assert.Contains(historyEntries, h => h.ChampModifie == "Niveau");
+        Assert.Contains(historyEntries, h => h.ChampModifie == "Puissance");
+        Assert.Contains(historyEntries, h => h.ChampModifie == "Rang");
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WithNoChanges_ShouldNotRecordHistory()
+    {
+        // Arrange
+        var personnage = new Personnage
+        {
+            Nom = "Test No Change",
+            Rarete = Rarete.R,
+            Niveau = 1,
+            Type = TypePersonnage.Mercenaire,
+            Rang = 1,
+            Puissance = 100,
+            PA = 5,
+            PV = 20,
+            Role = Role.Sentinelle,
+            Faction = Faction.Syndicat,
+            Selectionne = false,
+            TypeAttaque = TypeAttaque.Melee
+        };
+
+        _context.Personnages.Add(personnage);
+        await _context.SaveChangesAsync();
+        int personId = personnage.Id;
+
+        // Act - Update with same values
+        await _service.UpdateAsync(personnage);
+
+        // Assert - No history entries should be created
+        var historyEntries = await _context.HistoriquesModifications
+            .Where(h => h.EntiteId == personId && h.TypeModification == TypeModification.Modification)
+            .ToListAsync();
+        Assert.Empty(historyEntries);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WithNonExistentPersonnage_ShouldNotThrow()
+    {
+        // Arrange
+        var personnage = new Personnage
+        {
+            Id = 999,
+            Nom = "Non Existent"
+        };
+
+        // Act & Assert - Should not throw
+        await _service.UpdateAsync(personnage);
+        
+        // Verify the personnage was not added to the database
+        var result = await _context.Personnages.FindAsync(999);
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_ShouldRemovePersonnageAndRecordHistory()
+    {
+        // Arrange
+        var personnage = new Personnage
+        {
+            Nom = "To Delete",
+            Rarete = Rarete.SR,
+            Niveau = 25,
+            Type = TypePersonnage.Mercenaire,
+            Rang = 3,
+            Puissance = 200,
+            PA = 10,
+            PV = 40,
+            Role = Role.Combattante,
+            Faction = Faction.Syndicat,
+            Selectionne = false,
+            TypeAttaque = TypeAttaque.Distance
+        };
+
+        _context.Personnages.Add(personnage);
+        await _context.SaveChangesAsync();
+        int personId = personnage.Id;
+
+        // Act
+        await _service.DeleteAsync(personId);
+
+        // Assert
+        var deleted = await _context.Personnages.FindAsync(personId);
+        Assert.Null(deleted);
+
+        // Verify history was recorded
+        var history = await _context.HistoriquesModifications
+            .FirstOrDefaultAsync(h => h.EntiteId == personId && h.TypeModification == TypeModification.Suppression);
+        Assert.NotNull(history);
+        Assert.Equal("To Delete", history.NomEntite);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_WithNonExistentId_ShouldNotThrow()
+    {
+        // Act & Assert - Should not throw
+        await _service.DeleteAsync(999);
+        
+        // Verify no personnage exists with this ID
+        var result = await _context.Personnages.FindAsync(999);
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ShouldReturnAllPersonnages()
+    {
+        // Arrange
+        var personnage1 = new Personnage
+        {
+            Nom = "Personnage 1",
+            Rarete = Rarete.R,
+            Niveau = 1,
+            Type = TypePersonnage.Mercenaire,
+            Rang = 1,
+            Puissance = 50,
+            PA = 5,
+            PV = 20,
+            Role = Role.Sentinelle,
+            Faction = Faction.Syndicat,
+            Selectionne = false
+        };
+
+        var personnage2 = new Personnage
+        {
+            Nom = "Personnage 2",
+            Rarete = Rarete.SR,
+            Niveau = 10,
+            Type = TypePersonnage.Commandant,
+            Rang = 2,
+            Puissance = 100,
+            PA = 10,
+            PV = 40,
+            Role = Role.Combattante,
+            Faction = Faction.Pacificateurs,
+            Selectionne = true
+        };
+
+        _context.Personnages.AddRange(personnage1, personnage2);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.GetAllAsync();
+
+        // Assert
+        Assert.Equal(2, result.Count());
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ShouldReturnPersonnage()
+    {
+        // Arrange
+        var personnage = new Personnage
+        {
+            Nom = "Test GetById",
+            Rarete = Rarete.SSR,
+            Niveau = 50,
+            Type = TypePersonnage.Mercenaire,
+            Rang = 5,
+            Puissance = 1000,
+            PA = 20,
+            PV = 100,
+            Role = Role.Combattante,
+            Faction = Faction.Syndicat,
+            Selectionne = true
+        };
+
+        _context.Personnages.Add(personnage);
+        await _context.SaveChangesAsync();
+        int personId = personnage.Id;
+
+        // Act
+        var result = await _service.GetByIdAsync(personId);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("Test GetById", result.Nom);
+        Assert.Equal(50, result.Niveau);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_WithNonExistentId_ShouldReturnNull()
+    {
+        // Act
+        var result = await _service.GetByIdAsync(999);
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ShouldUpdateImageUrls()
+    {
+        // Arrange
+        var personnage = new Personnage
+        {
+            Nom = "Test Image",
+            Rarete = Rarete.R,
+            Niveau = 1,
+            Type = TypePersonnage.Mercenaire,
+            Rang = 1,
+            Puissance = 100,
+            PA = 5,
+            PV = 20,
+            Role = Role.Sentinelle,
+            Faction = Faction.Syndicat,
+            Selectionne = false
+        };
+
+        _context.Personnages.Add(personnage);
+        await _context.SaveChangesAsync();
+
+        // Change name
+        personnage.Nom = "New Name";
+
+        // Act
+        await _service.UpdateAsync(personnage);
+
+        // Assert
+        var updated = await _context.Personnages.FindAsync(personnage.Id);
+        Assert.NotNull(updated);
+        Assert.False(string.IsNullOrEmpty(updated.ImageUrlDetailStored));
+        Assert.False(string.IsNullOrEmpty(updated.ImageUrlPreviewStored));
+        Assert.False(string.IsNullOrEmpty(updated.ImageUrlSelectedStored));
+    }
+
+    [Fact]
+    public async Task UpdateCapacitesAsync_ShouldUpdateCapacites()
+    {
+        // Arrange
+        var personnage = new Personnage
+        {
+            Nom = "Test Capacites",
+            Rarete = Rarete.R,
+            Niveau = 1,
+            Type = TypePersonnage.Mercenaire,
+            Rang = 1,
+            Puissance = 100,
+            PA = 5,
+            PV = 20,
+            Role = Role.Sentinelle,
+            Faction = Faction.Syndicat,
+            Selectionne = false
+        };
+
+        var capacite1 = new Capacite { Nom = "Capacite 1", Description = "Test", Icon = "icon1" };
+        var capacite2 = new Capacite { Nom = "Capacite 2", Description = "Test", Icon = "icon2" };
+
+        _context.Personnages.Add(personnage);
+        _context.Capacites.AddRange(capacite1, capacite2);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.UpdateCapacitesAsync(personnage.Id, new[] { capacite1.Id, capacite2.Id });
+
+        // Assert
+        Assert.True(result);
+        var updated = await _context.Personnages
+            .Include(p => p.Capacites)
+            .FirstOrDefaultAsync(p => p.Id == personnage.Id);
+        Assert.NotNull(updated);
+        Assert.Equal(2, updated.Capacites.Count);
+    }
+
+    [Fact]
+    public async Task UpdateCapacitesAsync_WithNonExistentPersonnage_ShouldReturnFalse()
+    {
+        // Act
+        var result = await _service.UpdateCapacitesAsync(999, new[] { 1, 2 });
+
+        // Assert
+        Assert.False(result);
     }
 }
