@@ -1,13 +1,15 @@
 # 🎮 Character Manager
 
 > **Gestionnaire de personnages pour Lust Goddess**  
-> Version actuelle : **0.16.0**
+> Version actuelle : **1.0.0** 🎉
 
 Application de gestion complète pour suivre et optimiser vos escouades, personnages, capacités et progression dans le jeu Lust Goddess.
 
 [![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![Blazor](https://img.shields.io/badge/Blazor-Server-purple)](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)](docs/RELEASE_1.0.0.md)
+[![Tests](https://img.shields.io/badge/Tests-78%2F78%20%E2%9C%85-blue.svg)](.github/workflows/tests.yml)
 
 ---
 
@@ -140,6 +142,7 @@ L'application sera accessible à l'adresse : **http://localhost:5000**
 
 Documentation complète disponible dans le dossier [`docs/`](docs/) :
 
+- 🎉 [**Nouvelle ! v1.0.0 Release Notes**](docs/RELEASE_1.0.0.md) - Production Ready 🚀
 - 📖 [**Guide d'installation**](docs/INSTALLATION_GUIDE.md) - Installation détaillée
 - 🚀 [**Démarrage rapide**](docs/QUICK_START.md) - Guide pas à pas
 - 📘 [**Documentation complète**](docs/DOCUMENTATION.md) - Toutes les fonctionnalités
@@ -164,6 +167,32 @@ Documentation complète disponible dans le dossier [`docs/`](docs/) :
 - **Graphiques** : [Chart.js 4.4.1](https://www.chartjs.org/)
 - **Conteneurisation** : [Docker](https://www.docker.com/)
 - **Tests** : [xUnit](https://xunit.net/) + [Moq](https://github.com/moq/moq4)
+
+---
+
+## 🎯 Statut de Production
+
+### v1.0.0 - Production Ready ✅
+
+| Critère | Status |
+|---------|--------|
+| Tests unitaires | ✅ 78/78 passent |
+| Sécurité | ✅ Aucune faille critique |
+| Documentation | ✅ Complète |
+| Build | ✅ Sans erreurs |
+| Performance | ✅ Optimisée |
+| Fonctionnalités | ✅ Toutes implémentées |
+
+**Application prête pour déploiement en production ! Voir [Release Notes v1.0.0](docs/RELEASE_1.0.0.md).**
+
+### Prochaines Versions (v1.1+)
+
+Développement en cours sur la branche [`develop-1.x`](https://github.com/Thorinval/CharacterManager/tree/develop-1.x)
+- 🔄 Improvements & optimisations
+- 🎨 Améliorations UX/UI
+- ⚡ Nouvelles fonctionnalités
+
+Consultez la [Roadmap](docs/ROADMAP.md) pour les détails.
 
 ---
 
