@@ -124,6 +124,7 @@
     "attackType": {
       "melee": "Melee",
       "distance": "Ranged",
+      "ranged": "Ranged",
       "android": "Android",
       "commander": "Commander",
       "unknown": "Unknown"

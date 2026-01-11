@@ -1,0 +1,264 @@
+@page "/historique-modifications"
+@using CharacterManager.Server.Models
+@using CharacterManager.Server.Services
+@inject HistoriqueModificationService HistoriqueService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Historique des modifications</PageTitle>
+
+<link rel="stylesheet" href="/css/HistoriqueModifications.css" />
+<script src="/js/historique.js"></script>
+
+<div class="container-fluid py-4">
+    <div class="page-header-banner mb-4">
+        <h3><i class="bi bi-clock-history"></i> Historique des modifications</h3>
+    </div>
+
+    <!-- Filtres -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Type d'entité</label>
+                    <select class="form-select" @bind="filtreTypeEntite">
+                        <option value="">Tous</option>
+                        <option value="Personnage">Personnages</option>
+                        <option value="Piece">Pièces Lucie</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Type de modification</label>
+                    <select class="form-select" @bind="filtreTypeModification">
+                        <option value="">Tous</option>
+                        <option value="Creation">Création</option>
+                        <option value="Modification">Modification</option>
+                        <option value="Suppression">Suppression</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Date début</label>
+                    <input type="date" class="form-control" @bind="dateDebut" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Date fin</label>
+                    <input type="date" class="form-control" @bind="dateFin" />
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" @onclick="ChargerHistorique">
+                        <i class="bi bi-search"></i> Rechercher
+                    </button>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <button class="btn btn-outline-secondary btn-sm" @onclick="ReinitialiserFiltres">
+                        <i class="bi bi-arrow-counterclockwise"></i> Réinitialiser
+                    </button>
+                    <button class="btn btn-outline-success btn-sm ms-2" @onclick="ExporterHistorique">
+                        <i class="bi bi-download"></i> Exporter (JSON)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    @if (historique != null)
+    {
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Total</h5>
+                        <h2 class="text-primary">@historique.Count</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Créations</h5>
+                        <h2 class="text-success">@historique.Count(h => h.TypeModification == TypeModification.Creation)</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Modifications</h5>
+                        <h2 class="text-warning">@historique.Count(h => h.TypeModification == TypeModification.Modification)</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Suppressions</h5>
+                        <h2 class="text-danger">@historique.Count(h => h.TypeModification == TypeModification.Suppression)</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Liste de l'historique -->
+    <div class="card">
+        <div class="card-body">
+            @if (chargement)
+            {
+                <div class="text-center p-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                </div>
+            }
+            else if (historique == null || !historique.Any())
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> Aucune modification enregistrée.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Entité</th>
+                                <th>Nom</th>
+                                <th>Champ</th>
+                                <th>Ancienne valeur</th>
+                                <th>Nouvelle valeur</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var modif in historique)
+                            {
+                                <tr>
+                                    <td>
+                                        <small>@modif.DateModification.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-@GetBadgeClass(modif.TypeModification)">
+                                            @GetTypeModificationLabel(modif.TypeModification)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">@modif.TypeEntite</span>
+                                    </td>
+                                    <td><strong>@modif.NomEntite</strong></td>
+                                    <td>@modif.ChampModifie</td>
+                                    <td><code>@FormatValue(modif.AncienneValeur)</code></td>
+                                    <td><code>@FormatValue(modif.NouvelleValeur)</code></td>
+                                    <td><small>@modif.Description</small></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<HistoriqueModification>? historique;
+    private bool chargement = false;
+    
+    private string filtreTypeEntite = "";
+    private string filtreTypeModification = "";
+    private DateTime? dateDebut = DateTime.Today;
+    private DateTime? dateFin = DateTime.Today.AddDays(1).AddSeconds(-1);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ChargerHistorique();
+    }
+
+    private async Task ChargerHistorique()
+    {
+        chargement = true;
+        try
+        {
+            TypeEntite? typeEntite = null;
+            if (!string.IsNullOrEmpty(filtreTypeEntite))
+            {
+                typeEntite = Enum.Parse<TypeEntite>(filtreTypeEntite);
+            }
+
+            historique = await HistoriqueService.GetHistoriqueAsync(
+                typeEntite: typeEntite,
+                dateDebut: dateDebut,
+                dateFin: dateFin);
+            
+            // Filtrer par type de modification si nécessaire
+            if (!string.IsNullOrEmpty(filtreTypeModification))
+            {
+                var typeModif = Enum.Parse<TypeModification>(filtreTypeModification);
+                historique = historique.Where(h => h.TypeModification == typeModif).ToList();
+            }
+        }
+        finally
+        {
+            chargement = false;
+        }
+    }
+
+    private async Task ReinitialiserFiltres()
+    {
+        filtreTypeEntite = "";
+        filtreTypeModification = "";
+        dateDebut = null;
+        dateFin = null;
+        await ChargerHistorique();
+    }
+
+    private async Task ExporterHistorique()
+    {
+        try
+        {
+            var json = await HistoriqueService.ExporterAsync(dateDebut, dateFin);
+            var fileName = $"historique_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+            
+            await JSRuntime.InvokeVoidAsync("downloadFile", fileName, json, "application/json");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de l'export: {ex.Message}");
+        }
+    }
+
+    private string GetBadgeClass(TypeModification type)
+    {
+        return type switch
+        {
+            TypeModification.Creation => "success",
+            TypeModification.Modification => "warning",
+            TypeModification.Suppression => "danger",
+            _ => "secondary"
+        };
+    }
+
+    private string GetTypeModificationLabel(TypeModification type)
+    {
+        return type switch
+        {
+            TypeModification.Creation => "Création",
+            TypeModification.Modification => "Modification",
+            TypeModification.Suppression => "Suppression",
+            _ => type.ToString()
+        };
+    }
+
+    private string FormatValue(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return "-";
+        
+        // Si la valeur est trop longue, la tronquer
+        return value.Length > 50 ? value.Substring(0, 47) + "..." : value;
+    }
+}

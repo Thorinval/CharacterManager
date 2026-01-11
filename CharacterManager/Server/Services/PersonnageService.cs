@@ -1,16 +1,21 @@
 using CharacterManager.Server.Data;
 using CharacterManager.Server.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace CharacterManager.Server.Services;
 
 public class PersonnageService
 {
     private readonly ApplicationDbContext _context;
+    private readonly HistoriqueModificationService _historiqueService;
+    private readonly ILogger<PersonnageService> _logger;
 
-    public PersonnageService(ApplicationDbContext context)
+    public PersonnageService(ApplicationDbContext context, HistoriqueModificationService historiqueService, ILogger<PersonnageService> logger)
     {
         _context = context;
+        _historiqueService = historiqueService;
+        _logger = logger;
     }
 
     public Task<IEnumerable<Personnage>> GetAllAsync()
@@ -314,6 +319,24 @@ public class PersonnageService
         _context.SaveChanges();
     }
 
+    public async Task AddAsync(Personnage personnage)
+    {
+        // Remplir les colonnes stockées pour compatibilité base de données (v0.12.1+: API de ressources)
+        personnage.ImageUrlDetailStored = PersonnageImageUrlHelper.GetImageDetailUrl(personnage.Nom);
+        personnage.ImageUrlPreviewStored = PersonnageImageUrlHelper.GetImageSmallPortraitUrl(personnage.Nom);
+        personnage.ImageUrlSelectedStored = PersonnageImageUrlHelper.GetImageSmallSelectUrl(personnage.Nom);
+        _context.Personnages.Add(personnage);
+        await _context.SaveChangesAsync();
+
+        // Enregistrer dans l'historique
+        await _historiqueService.EnregistrerCreationAsync(
+            TypeEntite.Personnage,
+            personnage.Id,
+            personnage.Nom,
+            new { personnage.Nom, personnage.Type, personnage.Niveau, personnage.Puissance },
+            "Création d'un personnage");
+    }
+
     public void Update(Personnage personnage)
     {
         var existing = _context.Personnages.Find(personnage.Id);
@@ -343,6 +366,92 @@ public class PersonnageService
         }
     }
 
+    public async Task UpdateAsync(Personnage personnage)
+    {
+        _logger.LogInformation("UpdateAsync appelée pour personnage {PersonnageId}", personnage.Id);
+        
+        // Récupérer les anciennes valeurs depuis la BDD (sans tracking pour éviter les conflits)
+        var oldValues = await _context.Personnages
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == personnage.Id);
+        
+        if (oldValues == null) 
+        {
+            _logger.LogWarning("Personnage {PersonnageId} not found", personnage.Id);
+            return;
+        }
+
+        // Maintenant récupérer l'entité trackée pour la mise à jour
+        var existing = await _context.Personnages.FindAsync(personnage.Id);
+        if (existing != null)
+        {
+            // Capturer les anciennes valeurs pour l'historique en comparant avec oldValues
+            var modifications = DetectPersonnageModifications(oldValues, personnage);
+
+            _logger.LogInformation("{Count} modifications détectées", modifications.Count);
+
+            existing.Nom = personnage.Nom;
+            existing.Rarete = personnage.Rarete;
+            existing.Niveau = personnage.Niveau;
+            existing.Type = personnage.Type;
+            existing.Rang = personnage.Rang;
+            existing.Puissance = personnage.Puissance;
+            existing.PA = personnage.PA;
+            existing.PV = personnage.PV;
+            existing.Role = personnage.Role;
+            existing.Faction = personnage.Faction;
+            existing.Selectionne = personnage.Selectionne;
+            existing.TypeAttaque = personnage.TypeAttaque;
+            existing.HasRelation = personnage.HasRelation;
+            existing.NivRelation = personnage.NivRelation;
+
+            // Mettre à jour les colonnes stockées si le nom change (v0.12.1+: API de ressources)
+            existing.ImageUrlDetailStored = PersonnageImageUrlHelper.GetImageDetailUrl(existing.Nom);
+            existing.ImageUrlPreviewStored = PersonnageImageUrlHelper.GetImageSmallPortraitUrl(existing.Nom);
+            existing.ImageUrlSelectedStored = PersonnageImageUrlHelper.GetImageSmallSelectUrl(existing.Nom);
+
+            await _context.SaveChangesAsync();
+
+            // Enregistrer chaque modification dans l'historique
+            foreach (var (champ, ancienne, nouvelle) in modifications)
+            {
+                _logger.LogInformation("Enregistrement historique: {Champ} {Ancienne} -> {Nouvelle}", champ, ancienne, nouvelle);
+                await _historiqueService.EnregistrerModificationAsync(
+                    TypeEntite.Personnage,
+                    personnage.Id,
+                    personnage.Nom,
+                    champ,
+                    ancienne,
+                    nouvelle,
+                    $"Modification de {champ}");
+            }
+        }
+    }
+
+    private static List<(string champ, object? ancienne, object? nouvelle)> DetectPersonnageModifications(Personnage oldValues, Personnage newValues)
+    {
+        var modifications = new List<(string champ, object? ancienne, object? nouvelle)>();
+
+        if (oldValues.Nom != newValues.Nom)
+            modifications.Add(("Nom", oldValues.Nom, newValues.Nom));
+        if (oldValues.Niveau != newValues.Niveau)
+            modifications.Add(("Niveau", oldValues.Niveau, newValues.Niveau));
+        if (oldValues.Rang != newValues.Rang)
+            modifications.Add(("Rang", oldValues.Rang, newValues.Rang));
+        if (oldValues.Puissance != newValues.Puissance)
+            modifications.Add(("Puissance", oldValues.Puissance, newValues.Puissance));
+        if (oldValues.PA != newValues.PA)
+            modifications.Add(("PA", oldValues.PA, newValues.PA));
+        if (oldValues.PV != newValues.PV)
+            modifications.Add(("PV", oldValues.PV, newValues.PV));
+        if (oldValues.Selectionne != newValues.Selectionne)
+            modifications.Add(("Selectionne", oldValues.Selectionne, newValues.Selectionne));
+        if (oldValues.NivRelation != newValues.NivRelation)
+            modifications.Add(("NivRelation", oldValues.NivRelation, newValues.NivRelation));
+
+        return modifications;
+    }
+
     public void Delete(int id)
     {
         var personnage = _context.Personnages.Find(id);
@@ -350,6 +459,24 @@ public class PersonnageService
         {
             _context.Personnages.Remove(personnage);
             _context.SaveChanges();
+        }
+    }
+
+    public async Task DeleteAsync(int id)
+    {
+        var personnage = await _context.Personnages.FindAsync(id);
+        if (personnage != null)
+        {
+            // Enregistrer la suppression dans l'historique avant de supprimer
+            await _historiqueService.EnregistrerSuppressionAsync(
+                TypeEntite.Personnage,
+                personnage.Id,
+                personnage.Nom,
+                new { personnage.Nom, personnage.Type, personnage.Niveau, personnage.Puissance },
+                "Suppression d'un personnage");
+
+            _context.Personnages.Remove(personnage);
+            await _context.SaveChangesAsync();
         }
     }
 

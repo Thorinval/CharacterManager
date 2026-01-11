@@ -19,6 +19,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     public DbSet<HistoriqueClassement> HistoriquesClassement { get; set; }
     public DbSet<HistoriqueLigue> HistoriquesLigue { get; set; }
+    public DbSet<HistoriqueModification> HistoriquesModifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -98,5 +99,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany()
             .HasForeignKey(h => h.CommandantId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // HistoriqueModification - Index sur DateModification pour recherches rapides
+        modelBuilder.Entity<HistoriqueModification>()
+            .HasIndex(h => h.DateModification);
     }
 }

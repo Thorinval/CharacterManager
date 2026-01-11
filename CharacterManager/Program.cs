@@ -31,6 +31,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Register ProfileService BEFORE PersonnageService (dependency order)
 builder.Services.AddScoped<ProfileService>();
+builder.Services.AddScoped<HistoriqueModificationService>();  // AVANT PersonnageService
 builder.Services.AddScoped<PersonnageService>();
 builder.Services.AddScoped<PmlImportService>();
 builder.Services.AddScoped<PmlExportService>();

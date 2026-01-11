@@ -1,6 +1,40 @@
 # Character Manager
 
-> **Version actuelle**: 0.15.0
+> **Version actuelle**: 0.16.0
+
+---
+
+## 0.16.0 (11 Janvier 2026)
+
+📜 - Nouvelle page: Historique des Modifications (`/historique`) avec suivi complet de toutes les modifications
+
+✨ - Historisation: Enregistrement automatique de toutes les modifications sur les personnages (création, modification, suppression)
+
+🔍 - Filtres: Filtres par type d'entité (Personnage/Pièce), type de modification (Création/Modification/Suppression), et plage de dates
+
+📊 - Statistiques: Cartes récapitulatives affichant le nombre total et par type de modification
+
+📥 - Export: Fonction d'export en JSON de l'historique filtré avec téléchargement direct
+
+💾 - BDD: Nouvelle table `HistoriquesModifications` avec migration EF Core pour le stockage des modifications
+
+⚡ - Service: `HistoriqueModificationService` avec méthodes async complètes (EnregistrerCreationAsync, EnregistrerModificationAsync, EnregistrerSuppressionAsync, GetHistoriqueAsync, ExporterAsync)
+
+🔄 - Integration: PersonnageService enrichi avec AddAsync, UpdateAsync, DeleteAsync incluant l'enregistrement automatique dans l'historique
+
+🎨 - UI/UX: Interface responsive avec timeline des modifications, badges colorés par type, et affichage des anciennes/nouvelles valeurs
+
+🌍 - I18n: Ajout de nouvelles clés de traduction (fr/en) pour la page historique et les types d'entités/modifications
+
+🐛 - Corrections: Résolution du problème de dependency injection avec constructeur optionnel, correction de l'ordre d'enregistrement des services
+
+🐛 - Corrections: Résolution du problème de détection des modifications avec AsNoTracking() pour comparer avec les valeurs en base de données
+
+🐛 - Corrections: Transformation des méthodes async void en async Task pour meilleure gestion des erreurs dans Inventaire.razor.cs
+
+📦 - Assets: Fichiers CSS et JavaScript dédiés (historique.js avec fonction de téléchargement Blob, HistoriqueModifications.css)
+
+🧭 - Navigation: Nouvel élément "Historique" dans le menu latéral avec icône clock-history
 
 ---
 

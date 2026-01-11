@@ -1,6 +1,6 @@
 # 🗺️ Character Manager - Roadmap 2026
 
-> **Version actuelle** : 0.15.0  
+> **Version actuelle** : 0.16.0  
 > **Dernière mise à jour** : 11 janvier 2026
 
 ---
@@ -20,34 +20,41 @@ Cette roadmap présente les fonctionnalités prévues et les améliorations futu
 - [x] Cartes récapitulatives (total, moyenne, extrêmes)
 - [x] Support multilingue complet
 
-**Version 0.16.0** - *Prévu fin janvier*
+**Version 0.16.0** ✓ *Terminé*
+- [x] Système d'historisation complet des modifications
+- [x] Page d'historique avec filtres et statistiques
+- [x] Export JSON de l'historique
+- [x] Enregistrement automatique dans PersonnageService
+- [x] Corrections de bugs async/await et dependency injection
+
+**Version 0.17.0** - *Prévu fin janvier*
 - [ ] Associer les capacités aux pièces Lucie
 - [ ] Export/Import des associations capacités-personnages
 - [ ] Amélioration de l'interface utilisateur (unification du style)
 - [ ] Thèmes sombres/clairs personnalisables
 
 ### 🎯 Février 2026 - Analyse Avancée
-**Version 0.17.0** - *Analytics & Comparaisons*
+**Version 0.18.0** - *Analytics & Comparaisons*
 - [ ] Graphiques d'évolution temporelle de la puissance
 - [ ] Comparaison entre templates (côte à côte)
 - [ ] Statistiques par rareté (R, SR, SSR)
 - [ ] Export des statistiques en PDF/PNG
 - [ ] Tableau de bord personnalisable avec widgets
 
-**Version 0.18.0** - *Optimisation & Recommandations*
+**Version 0.19.0** - *Optimisation & Recommandations*
 - [ ] Système de recommandations d'équipe
 - [ ] Analyse des synergies entre personnages
 - [ ] Calculateur de puissance optimale pour escouade
 - [ ] Suggestions de montée de rang/niveau
 
 ### 🔮 Mars 2026 - Planification & Stratégie
-**Version 0.19.0** - *Gestion de Ressources*
+**Version 0.20.0** - *Gestion de Ressources*
 - [ ] Planificateur de montée de niveau/rang
 - [ ] Gestionnaire de ressources (matériaux nécessaires)
 - [ ] Calendrier d'événements in-game
 - [ ] Objectifs et missions personnalisés
 
-**Version 0.20.0** - *Collaboration*
+**Version 0.21.0** - *Collaboration*
 - [ ] Partage de templates via liens/QR codes
 - [ ] Galerie communautaire de compositions
 - [ ] Système de notation des templates
@@ -58,40 +65,40 @@ Cette roadmap présente les fonctionnalités prévues et les améliorations futu
 ## 🌟 T2 2026 (Avril - Juin)
 
 ### 📊 Avril 2026 - Reporting Avancé
-**Version 0.21.0** - *Tableaux de Bord*
+**Version 0.22.0** - *Tableaux de Bord*
 - [ ] Rapports détaillés d'évolution (hebdo/mensuel)
 - [ ] Graphiques de progression par personnage
 - [ ] Comparaison historique entre périodes
 - [ ] Export multi-formats (Excel, JSON, CSV)
 
-**Version 0.22.0** - *Prédictions & Tendances*
+**Version 0.23.0** - *Prédictions & Tendances*
 - [ ] Prévisions de puissance basées sur l'historique
 - [ ] Détection des personnages en stagnation
 - [ ] Alertes de progression (objectifs atteints)
 - [ ] Statistiques comparatives avec la communauté
 
 ### 🎨 Mai 2026 - Personnalisation
-**Version 0.23.0** - *Thèmes & Apparence*
+**Version 0.24.0** - *Thèmes & Apparence*
 - [ ] Éditeur de thèmes personnalisés
 - [ ] Bibliothèque de thèmes préconçus
 - [ ] Mode contraste élevé (accessibilité)
 - [ ] Choix de polices et tailles
 - [ ] Widgets de raccourcis personnalisables
 
-**Version 0.24.0** - *Layouts Flexibles*
+**Version 0.25.0** - *Layouts Flexibles*
 - [ ] Disposition personnalisable des pages
 - [ ] Favoris et raccourcis personnels
 - [ ] Mode compact/étendu pour les listes
 - [ ] Groupement personnalisé dans l'inventaire
 
 ### ⚡ Juin 2026 - Performance & Mobile
-**Version 0.25.0** - *Optimisation*
+**Version 0.26.0** - *Optimisation*
 - [ ] Mode hors ligne (PWA - Progressive Web App)
 - [ ] Cache intelligent des données
 - [ ] Chargement paresseux des images
 - [ ] Optimisation pour connexions lentes
 
-**Version 0.26.0** - *Expérience Mobile*
+**Version 0.27.0** - *Expérience Mobile*
 - [ ] Interface adaptative tactile
 - [ ] Gestes de navigation (swipe, pinch)
 - [ ] Mode portrait optimisé
@@ -102,41 +109,41 @@ Cette roadmap présente les fonctionnalités prévues et les améliorations futu
 ## 💎 T3 2026 (Juillet - Septembre)
 
 ### 🤝 Juillet 2026 - Multi-utilisateurs
-**Version 0.27.0** - *Équipes & Guildes*
+**Version 0.28.0** - *Équipes & Guildes*
 - [ ] Profils d'équipe/guilde
 - [ ] Statistiques d'équipe agrégées
 - [ ] Classements inter-guildes
 - [ ] Chat et communication interne
 
-**Version 0.28.0** - *Collaboration Avancée*
+**Version 0.29.0** - *Collaboration Avancée*
 - [ ] Partage de stratégies annotées
 - [ ] Planification d'événements en équipe
 - [ ] Rôles et permissions granulaires
 - [ ] Notifications et alertes d'équipe
 
 ### 🔍 Août 2026 - Recherche & Filtres
-**Version 0.29.0** - *Recherche Avancée*
+**Version 0.30.0** - *Recherche Avancée*
 - [ ] Recherche par capacités
 - [ ] Filtres combinés multiples
 - [ ] Recherche textuelle plein-texte
 - [ ] Sauvegarde de filtres favoris
 - [ ] Suggestions de recherche intelligentes
 
-**Version 0.30.0** - *Tri & Organisation*
+**Version 0.31.0** - *Tri & Organisation*
 - [ ] Tri multi-critères personnalisé
 - [ ] Dossiers et collections personnels
 - [ ] Tags et étiquettes personnalisées
 - [ ] Smart collections (règles automatiques)
 
 ### 📱 Septembre 2026 - Intégrations
-**Version 0.31.0** - *APIs & Webhooks*
+**Version 0.32.0** - *APIs & Webhooks*
 - [ ] API REST publique
 - [ ] Webhooks pour événements
 - [ ] Intégration Discord
 - [ ] Intégration Slack/Teams
 - [ ] Zapier/IFTTT support
 
-**Version 0.32.0** - *Import/Export Avancé*
+**Version 0.33.0** - *Import/Export Avancé*
 - [ ] Import automatique depuis screenshots (OCR)
 - [ ] Synchronisation cloud (Google Drive, Dropbox)
 - [ ] Import depuis autres gestionnaires
@@ -147,7 +154,7 @@ Cette roadmap présente les fonctionnalités prévues et les améliorations futu
 ## 🎁 T4 2026 (Octobre - Décembre)
 
 ### 🎯 Octobre 2026 - Gamification
-**Version 0.33.0** - *Accomplissements*
+**Version 0.34.0** - *Accomplissements*
 - [ ] Système d'achievements
 - [ ] Badges et récompenses
 - [ ] Niveaux de profil utilisateur
@@ -155,7 +162,7 @@ Cette roadmap présente les fonctionnalités prévues et les améliorations futu
 - [ ] Défis hebdomadaires/mensuels
 
 ### 🔧 Novembre 2026 - Outils Avancés
-**Version 0.34.0** - *Calculateurs & Simulateurs*
+**Version 0.35.0** - *Calculateurs & Simulateurs*
 - [ ] Simulateur de combat
 - [ ] Calculateur de dégâts/résistance
 - [ ] Optimiseur d'équipement
@@ -163,7 +170,7 @@ Cette roadmap présente les fonctionnalités prévues et les améliorations futu
 - [ ] Générateur aléatoire d'équipes
 
 ### 🎄 Décembre 2026 - Polissage & Stabilité
-**Version 0.35.0** - *Qualité & Expérience*
+**Version 0.36.0** - *Qualité & Expérience*
 - [ ] Refonte UX complète basée sur retours
 - [ ] Mode tutoriel interactif
 - [ ] Vidéos d'aide intégrées

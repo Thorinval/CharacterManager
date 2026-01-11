@@ -156,7 +156,7 @@ public partial class Inventaire : IAsyncDisposable
         if (piece != null)
         {
             int newValue = Math.Max(0, piece.Niveau + delta);
-            await Task.Run(() => UpdatePieceField(pieceId, AppConstants.XmlElements.Niveau, newValue.ToString()));
+            await UpdatePieceField(pieceId, AppConstants.XmlElements.Niveau, newValue.ToString());
         }
     }
 
@@ -166,7 +166,7 @@ public partial class Inventaire : IAsyncDisposable
         if (personnage != null)
         {
             int newValue = Math.Max(0, personnage.Puissance + delta);
-            await Task.Run(() => UpdatePersonnageField(personnageId, AppConstants.XmlElements.Puissance, newValue.ToString()));
+            await UpdatePersonnageField(personnageId, AppConstants.XmlElements.Puissance, newValue.ToString());
         }
     }
 
@@ -210,7 +210,7 @@ public partial class Inventaire : IAsyncDisposable
         };
     }
 
-    private void UpdatePersonnageField(int personnageId, string field, string value)
+    private async Task UpdatePersonnageField(int personnageId, string field, string value)
     {
         var personnage = personnages.FirstOrDefault(p => p.Id == personnageId);
         if (personnage == null) return;
@@ -245,8 +245,8 @@ public partial class Inventaire : IAsyncDisposable
                     break;
             }
 
-            PersonnageService.Update(personnage);
-            _ = InvokeAsync(async () =>
+            await PersonnageService.UpdateAsync(personnage);
+            await InvokeAsync(async () =>
             {
                 await LoadPersonnagesAsync();
                 toastRef?.Show($"{field} mis à jour avec succès", "success");
@@ -258,16 +258,16 @@ public partial class Inventaire : IAsyncDisposable
         }
     }
 
-    internal void OnSelectionneChanged(int personnageId, bool value)
+    internal async Task OnSelectionneChanged(int personnageId, bool value)
     {
-        UpdatePersonnageField(personnageId, AppConstants.XmlElements.Selectionne, value.ToString());
+        await UpdatePersonnageField(personnageId, AppConstants.XmlElements.Selectionne, value.ToString());
     }
 
-    internal void UpdateRankFromStar(int personnageId, int clickedStar, int currentRank)
+    internal async Task UpdateRankFromStar(int personnageId, int clickedStar, int currentRank)
     {
         // Toggle down if clicking the currently selected star (allows rank 0)
         var newRank = clickedStar == currentRank ? Math.Max(0, clickedStar - 1) : clickedStar;
-        UpdatePersonnageField(personnageId, "Rang", newRank.ToString());
+        await UpdatePersonnageField(personnageId, "Rang", newRank.ToString());
     }
 
     private async Task LoadPersonnagesAsync()
@@ -578,7 +578,7 @@ public partial class Inventaire : IAsyncDisposable
             if (personnage != null)
             {
                 ApplyBulkEditValue(personnage, bulkEditProperty, bulkEditValue);
-                PersonnageService.Update(personnage);
+                await PersonnageService.UpdateAsync(personnage);
             }
         }
 
@@ -690,7 +690,7 @@ public partial class Inventaire : IAsyncDisposable
             {
                 foreach (var id in selectedPersonnages)
                 {
-                    PersonnageService.Delete(id);
+                    await PersonnageService.DeleteAsync(id);
                 }
                 await LoadPersonnagesAsync();
                 selectedPersonnages.Clear();

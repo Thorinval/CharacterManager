@@ -418,7 +418,7 @@ else
                 editedPerso.NivRelation = 1;
             }
 
-            PersonnageService.Update(editedPerso);
+            await PersonnageService.UpdateAsync(editedPerso);
             currentPerso = editedPerso;
             isEditing = false;
             Close();
