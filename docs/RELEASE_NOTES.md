@@ -17,14 +17,15 @@
 ### 📖 Documentation
 
 📚 - **README.md principal créé** : Documentation complète à la racine du projet incluant :
-  - Description et fonctionnalités de l'application
-  - 3 options d'installation (Windows Installer, Docker, Build sources)
-  - Guide de démarrage rapide avec premier login
-  - Navigation et utilisation
-  - Stack technique et dépendances
-  - Instructions de mise à jour
-  - Guide de contribution
-  - Badges GitHub et support
+
+- Description et fonctionnalités de l'application
+- 3 options d'installation (Windows Installer, Docker, Build sources)
+- Guide de démarrage rapide avec premier login
+- Navigation et utilisation
+- Stack technique et dépendances
+- Instructions de mise à jour
+- Guide de contribution
+- Badges GitHub et support
 
 ### ✅ Qualité
 

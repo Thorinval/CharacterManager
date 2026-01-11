@@ -105,7 +105,6 @@ public class DatabaseInitializationService
             ThumbnailHeightPx INTEGER NOT NULL DEFAULT 110
         );";
         await _db.Database.ExecuteSqlRawAsync(appSettingsSql);
-        _logger.LogInformation("[DB] Ensured AppSettings table exists.");
 
         const string templatesSql = @"CREATE TABLE IF NOT EXISTS Templates (
             Id INTEGER NOT NULL CONSTRAINT PK_Templates PRIMARY KEY AUTOINCREMENT,
@@ -117,7 +116,6 @@ public class DatabaseInitializationService
             PersonnagesJson TEXT NOT NULL
         );";
         await _db.Database.ExecuteSqlRawAsync(templatesSql);
-        _logger.LogInformation("[DB] Ensured Templates table exists.");
 
         const string historiquesEscouadeSql = @"CREATE TABLE IF NOT EXISTS HistoriquesEscouade (
             Id INTEGER NOT NULL CONSTRAINT PK_HistoriquesEscouade PRIMARY KEY AUTOINCREMENT,
@@ -127,13 +125,11 @@ public class DatabaseInitializationService
             DonneesEscouadeJson TEXT NOT NULL
         );";
         await _db.Database.ExecuteSqlRawAsync(historiquesEscouadeSql);
-        _logger.LogInformation("[DB] Ensured HistoriquesEscouade table exists.");
 
         const string lucieHousesSql = @"CREATE TABLE IF NOT EXISTS LucieHouses (
             Id INTEGER NOT NULL CONSTRAINT PK_LucieHouses PRIMARY KEY AUTOINCREMENT
         );";
         await _db.Database.ExecuteSqlRawAsync(lucieHousesSql);
-        _logger.LogInformation("[DB] Ensured LucieHouses table exists.");
 
         const string piecesSql = @"CREATE TABLE IF NOT EXISTS Pieces (
             Id INTEGER NOT NULL CONSTRAINT PK_Pieces PRIMARY KEY AUTOINCREMENT,
@@ -149,7 +145,8 @@ public class DatabaseInitializationService
             FOREIGN KEY (LucieHouseId) REFERENCES LucieHouses (Id) ON DELETE CASCADE
         );";
         await _db.Database.ExecuteSqlRawAsync(piecesSql);
-        _logger.LogInformation("[DB] Ensured Pieces table exists.");
+        
+        _logger.LogInformation("[DB] Ensured all core tables exist: AppSettings, Templates, HistoriquesEscouade, LucieHouses, Pieces.");
         await EnsureLuciePieceAspectColumnsAsync();
 
         const string profilesSql = @"CREATE TABLE IF NOT EXISTS Profiles (
@@ -278,11 +275,11 @@ public class DatabaseInitializationService
                 try
                 {
                     await _db.Database.ExecuteSqlRawAsync(sql);
-                    _logger.LogInformation($"[DB] Added {displayName} column to Profiles.");
+                    _logger.LogInformation("[DB] Added {DisplayName} column to Profiles.", displayName);
                 }
                 catch (SqliteException ex)
                 {
-                    _logger.LogError(ex, $"[DB] Could not add {displayName}");
+                    _logger.LogError(ex, "[DB] Could not add {DisplayName}", displayName);
                 }
             }
         }
