@@ -1006,23 +1006,32 @@ public partial class Inventaire : IAsyncDisposable
         var piece = lucieHouse.Pieces.FirstOrDefault(p => p.Id == pieceId);
         if (piece == null) return;
 
+        object? ancienneValeur = null;
+        object? nouvelleValeur = null;
+
         switch (field)
         {
             case "Niveau":
                 if (int.TryParse(value, out var niveau))
                 {
+                    ancienneValeur = piece.Niveau;
+                    nouvelleValeur = niveau;
                     piece.Niveau = niveau;
                 }
                 break;
             case "PuissanceStrategique":
                 if (int.TryParse(value, out var puissance))
                 {
+                    ancienneValeur = piece.AspectsStrategiques.Puissance;
+                    nouvelleValeur = puissance;
                     piece.AspectsStrategiques.Puissance = puissance;
                 }
                 break;
             case "PuissanceTactique":
                 if (int.TryParse(value, out var puissanceTactique))
                 {
+                    ancienneValeur = piece.AspectsTactiques.Puissance;
+                    nouvelleValeur = puissanceTactique;
                     piece.AspectsTactiques.Puissance = puissanceTactique;
                 }
                 break;
@@ -1031,6 +1040,18 @@ public partial class Inventaire : IAsyncDisposable
         await EnsureLuciePieceAspectColumnsAsync(force: false);
         DbContext.Pieces.Update(piece);
         await DbContext.SaveChangesAsync();
+        
+        // Historiser la modification si des valeurs ont été changées
+        if (ancienneValeur != null)
+        {
+            await PersonnageService.UpdatePieceAsync(
+                pieceId,
+                field,
+                ancienneValeur,
+                nouvelleValeur!,
+                piece.Nom);
+        }
+        
         await InvokeAsync(StateHasChanged);
         toastRef?.Show($"{piece.Nom} - {field} mis à jour: {value}", "success");
     }

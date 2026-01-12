@@ -43,7 +43,9 @@ public class HistoriqueModificationService
     }
 
     /// <summary>
-    /// Enregistre une modification d'entité
+    /// Enregistre une modification d'entité.
+    /// Si une modification du même type (même TypeEntite, EntiteId, TypeModification et ChampModifie) 
+    /// a eu lieu il y a moins de 5 secondes, la ligne existante est mise à jour au lieu d'en ajouter une nouvelle.
     /// </summary>
     public async Task EnregistrerModificationAsync(
         TypeEntite typeEntite,
@@ -54,20 +56,46 @@ public class HistoriqueModificationService
         object? nouvelleValeur,
         string? description = null)
     {
-        var historique = new HistoriqueModification
+        var dateDebut = DateTime.UtcNow.AddSeconds(-5);
+        
+        // Cherche une modification récente du même type
+        var derniereModification = await _context.HistoriquesModifications
+            .Where(h => h.TypeEntite == typeEntite 
+                && h.EntiteId == entiteId 
+                && h.TypeModification == TypeModification.Modification 
+                && h.ChampModifie == champModifie
+                && h.DateModification >= dateDebut)
+            .OrderByDescending(h => h.DateModification)
+            .FirstOrDefaultAsync();
+        
+        if (derniereModification != null)
         {
-            TypeEntite = typeEntite,
-            EntiteId = entiteId,
-            NomEntite = nomEntite,
-            TypeModification = TypeModification.Modification,
-            DateModification = DateTime.UtcNow,
-            ChampModifie = champModifie,
-            AncienneValeur = ancienneValeur != null ? JsonSerializer.Serialize(ancienneValeur) : null,
-            NouvelleValeur = nouvelleValeur != null ? JsonSerializer.Serialize(nouvelleValeur) : null,
-            Description = description ?? $"Modification de {champModifie} pour {nomEntite}"
-        };
+            // Mise à jour de la ligne existante
+            derniereModification.DateModification = DateTime.UtcNow;
+            derniereModification.NouvelleValeur = nouvelleValeur != null ? JsonSerializer.Serialize(nouvelleValeur) : null;
+            derniereModification.Description = description ?? $"Modification de {champModifie} pour {nomEntite}";
+            
+            _context.HistoriquesModifications.Update(derniereModification);
+        }
+        else
+        {
+            // Création d'une nouvelle ligne
+            var historique = new HistoriqueModification
+            {
+                TypeEntite = typeEntite,
+                EntiteId = entiteId,
+                NomEntite = nomEntite,
+                TypeModification = TypeModification.Modification,
+                DateModification = DateTime.UtcNow,
+                ChampModifie = champModifie,
+                AncienneValeur = ancienneValeur != null ? JsonSerializer.Serialize(ancienneValeur) : null,
+                NouvelleValeur = nouvelleValeur != null ? JsonSerializer.Serialize(nouvelleValeur) : null,
+                Description = description ?? $"Modification de {champModifie} pour {nomEntite}"
+            };
 
-        _context.HistoriquesModifications.Add(historique);
+            _context.HistoriquesModifications.Add(historique);
+        }
+        
         await _context.SaveChangesAsync();
     }
 

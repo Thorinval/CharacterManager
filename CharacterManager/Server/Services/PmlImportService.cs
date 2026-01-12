@@ -594,7 +594,7 @@ public class PmlImportService(ApplicationDbContext context) : PmlServiceBase(con
             }
 
             // Sauvegarder dans la base de données
-            var existingLucieHouse = await _context.LucieHouses.Include(l => l.Pieces).FirstOrDefaultAsync();
+            var existingLucieHouse = await _context.LucieHouses.Include(l => l.Pieces).OrderBy(l => l.Id).FirstOrDefaultAsync();
             if (existingLucieHouse != null)
             {
                 _context.LucieHouses.Remove(existingLucieHouse);

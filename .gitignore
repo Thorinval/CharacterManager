@@ -52,3 +52,6 @@ Thumbs.db
 
 # Publish output
 publish/
+
+#logs
+logs/

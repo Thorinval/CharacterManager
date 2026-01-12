@@ -399,4 +399,151 @@ public class HistoriqueModificationServiceTests : IDisposable
         Assert.Contains("HP", entry.AncienneValeur);
         Assert.Contains("MP", entry.NouvelleValeur);
     }
+
+    [Fact]
+    public async Task EnregistrerModificationAsync_WithinFiveSeconds_ShouldUpdateExistingEntry()
+    {
+        // Arrange
+        var entiteId = 1;
+        var nomEntite = "Test Personnage";
+        var champModifie = "Puissance";
+
+        // Act - Première modification
+        await _service.EnregistrerModificationAsync(
+            TypeEntite.Personnage,
+            entiteId,
+            nomEntite,
+            champModifie,
+            100,
+            150,
+            "Première modification");
+
+        var historiquesAhres1 = await _context.HistoriquesModifications.ToListAsync();
+        var idPremiereModif = historiquesAhres1[0].Id;
+
+        // Deuxième modification dans les 5 secondes
+        await _service.EnregistrerModificationAsync(
+            TypeEntite.Personnage,
+            entiteId,
+            nomEntite,
+            champModifie,
+            150,
+            200,
+            "Deuxième modification");
+
+        // Assert
+        var resultat = await _context.HistoriquesModifications.ToListAsync();
+        Assert.Single(resultat); // Une seule entrée, pas deux
+        Assert.Equal(idPremiereModif, resultat[0].Id); // C'est la même entrée
+        Assert.Equal("200", resultat[0].NouvelleValeur); // Nouvelle valeur mise à jour
+        Assert.Equal("Deuxième modification", resultat[0].Description); // Description mise à jour
+    }
+
+    [Fact]
+    public async Task EnregistrerModificationAsync_OutsideFiveSeconds_ShouldCreateNewEntry()
+    {
+        // Arrange
+        var entiteId = 1;
+        var nomEntite = "Test Personnage";
+        var champModifie = "Puissance";
+
+        // Act - Première modification
+        await _service.EnregistrerModificationAsync(
+            TypeEntite.Personnage,
+            entiteId,
+            nomEntite,
+            champModifie,
+            100,
+            150,
+            "Première modification");
+
+        // Attendre plus de 5 secondes
+        await Task.Delay(5100);
+
+        // Deuxième modification après 5 secondes
+        await _service.EnregistrerModificationAsync(
+            TypeEntite.Personnage,
+            entiteId,
+            nomEntite,
+            champModifie,
+            150,
+            200,
+            "Deuxième modification");
+
+        // Assert
+        var resultat = await _context.HistoriquesModifications.OrderByDescending(h => h.DateModification).ToListAsync();
+        Assert.Equal(2, resultat.Count); // Deux entrées distinctes
+        Assert.Equal("200", resultat[0].NouvelleValeur); // La deuxième modification (plus récente en premier)
+        Assert.Equal("150", resultat[0].AncienneValeur);
+        Assert.Equal("150", resultat[1].NouvelleValeur); // La première modification
+        Assert.Equal("100", resultat[1].AncienneValeur);
+    }
+
+    [Fact]
+    public async Task EnregistrerModificationAsync_DifferentChamps_ShouldCreateNewEntry()
+    {
+        // Arrange
+        var entiteId = 1;
+        var nomEntite = "Test Personnage";
+
+        // Act - Modification du champ "Puissance"
+        await _service.EnregistrerModificationAsync(
+            TypeEntite.Personnage,
+            entiteId,
+            nomEntite,
+            "Puissance",
+            100,
+            150,
+            "Modification Puissance");
+
+        // Modification du champ "Niveau" (différent) dans les 5 secondes
+        await _service.EnregistrerModificationAsync(
+            TypeEntite.Personnage,
+            entiteId,
+            nomEntite,
+            "Niveau",
+            1,
+            2,
+            "Modification Niveau");
+
+        // Assert
+        var resultat = await _context.HistoriquesModifications.OrderByDescending(h => h.DateModification).ToListAsync();
+        Assert.Equal(2, resultat.Count); // Deux entrées car champs différents
+        Assert.Equal("Niveau", resultat[0].ChampModifie); // La plus récente d'abord
+        Assert.Equal("Puissance", resultat[1].ChampModifie);
+    }
+
+    [Fact]
+    public async Task EnregistrerModificationAsync_DifferentEntities_ShouldCreateNewEntry()
+    {
+        // Arrange
+        var nomEntite = "Test Personnage";
+        var champModifie = "Puissance";
+
+        // Act - Modification de l'entité 1
+        await _service.EnregistrerModificationAsync(
+            TypeEntite.Personnage,
+            1,
+            nomEntite,
+            champModifie,
+            100,
+            150,
+            "Modification entité 1");
+
+        // Modification de l'entité 2 (différente) dans les 5 secondes
+        await _service.EnregistrerModificationAsync(
+            TypeEntite.Personnage,
+            2,
+            nomEntite,
+            champModifie,
+            100,
+            150,
+            "Modification entité 2");
+
+        // Assert
+        var resultat = await _context.HistoriquesModifications.OrderByDescending(h => h.DateModification).ToListAsync();
+        Assert.Equal(2, resultat.Count); // Deux entrées car entités différentes
+        Assert.Equal(2, resultat[0].EntiteId); // La plus récente d'abord
+        Assert.Equal(1, resultat[1].EntiteId);
+    }
 }

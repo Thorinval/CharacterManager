@@ -378,7 +378,7 @@ public class PmlExportService(ApplicationDbContext context) : PmlServiceBase(con
 
     private async Task WriteLucieHouseDatas(XmlWriter writer)
     {
-        var lucieHouse = await _context.LucieHouses.Include(l => l.Pieces).FirstOrDefaultAsync();
+        var lucieHouse = await _context.LucieHouses.Include(l => l.Pieces).OrderBy(l => l.Id).FirstOrDefaultAsync();
         if (lucieHouse != null)
         {
             writer.WriteStartElement(AppConstants.XmlElements.LucieHouse);

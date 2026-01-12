@@ -543,6 +543,7 @@ public class PersonnageService
     {
         return await _context.LucieHouses
             .Include(l => l.Pieces)
+            .OrderBy(l => l.Id)
             .FirstOrDefaultAsync();
     }
 
@@ -562,7 +563,8 @@ public class PersonnageService
     public async Task<int> UpdateLucieAffectionAsync(int affection)
     {
         var boundedAffection = affection < 0 ? 0 : affection;
-        var lucieHouse = await _context.LucieHouses.Include(static l => l.Pieces).FirstOrDefaultAsync();
+        var lucieHouse = await _context.LucieHouses.Include(static l => l.Pieces).OrderBy(l => l.Id).FirstOrDefaultAsync();
+        var ancienneAffection = lucieHouse?.Affection ?? 0;
 
         if (lucieHouse == null)
         {
@@ -577,6 +579,48 @@ public class PersonnageService
         }
 
         await _context.SaveChangesAsync();
+        
+        // Historiser la modification d'affection si elle a changé
+        if (ancienneAffection != boundedAffection)
+        {
+            await _historiqueService.EnregistrerModificationAsync(
+                TypeEntite.Piece,
+                lucieHouse.Id,
+                "Maison de Lucie",
+                "Affection",
+                ancienneAffection,
+                boundedAffection,
+                $"Modification de l'affection de la Maison de Lucie");
+        }
+        
         return lucieHouse.Affection;
+    }
+
+    /// <summary>
+    /// Met à jour un champ d'une pièce de la Lucie House avec historisation.
+    /// </summary>
+    public async Task UpdatePieceAsync(int pieceId, string champModifie, object? ancienneValeur, object? nouvelleValeur, string nomPiece)
+    {
+        var piece = await _context.Pieces
+            .Where(p => p.Id == pieceId && p.GetType() == typeof(Piece))
+            .OrderBy(p => p.Id)
+            .FirstOrDefaultAsync();
+        
+        if (piece != null)
+        {
+            // Historiser la modification
+            await _historiqueService.EnregistrerModificationAsync(
+                TypeEntite.Piece,
+                pieceId,
+                nomPiece,
+                champModifie,
+                ancienneValeur,
+                nouvelleValeur,
+                $"Modification de {champModifie} pour {nomPiece}");
+
+            // Sauvegarder les modifications
+            _context.Pieces.Update(piece);
+            await _context.SaveChangesAsync();
+        }
     }
 }
