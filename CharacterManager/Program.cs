@@ -33,7 +33,22 @@ builder.Services.AddHttpContextAccessor();
 
 // Configure SQLite database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite("Data Source=charactermanager.db"));
+{
+    options.UseSqlite("Data Source=charactermanager.db");
+    
+    // Enable detailed logging in development
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+        options.EnableDetailedErrors();
+    }
+    
+    // Log SQL queries with caller information
+    options.LogTo(
+        message => Log.Debug("[EF Core] {Message}", message),
+        new[] { Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.CommandExecuting }
+    );
+});
 
 // Register ProfileService BEFORE PersonnageService (dependency order)
 builder.Services.AddScoped<ProfileService>();

@@ -346,5 +346,41 @@
     "averagePower": "Average Power",
     "mostPowerful": "Most Powerful",
     "leastPowerful": "Least Powerful"
+  },
+  "errors": {
+    "system": "System error",
+    "updateError": "Update error",
+    "exportError": "Export error",
+    "importError": "Import error",
+    "loadingError": "Loading error",
+    "saveError": "Save error",
+    "deleteError": "Delete error",
+    "chartCreationError": "Error creating charts",
+    "configLoadError": "Error loading configuration",
+    "invalidFile": "Invalid file",
+    "emptyFile": "File is empty",
+    "xmlParsingError": "XML parsing error",
+    "noSectionsFound": "No recognized sections found in file",
+    "templateNameRequired": "Template must have a name",
+    "historiqueInvalide": "Invalid history: missing date or data",
+    "capacityNameRequired": "Capacity name is required",
+    "capacityNotFound": "Capacity not found",
+    "historiqueNotFound": "History not found",
+    "imageLoadError": "Error loading image",
+    "resourcesListError": "Error listing resources",
+    "personalized": "{operation}: {detail}",
+    "personnageImageLoadError": "Error retrieving character image",
+    "lucieMaxPieces": "Maximum {0} pieces can be selected"
+  },
+  "warnings": {
+    "system": "System warning",
+    "lucieImportWarning": "Warning: More than {0} pieces selected during import"
+  },
+  "messages": {
+    "processing": "Processing...",
+    "importSuccess": "Import successful",
+    "exportSuccess": "Export successful",
+    "operationSuccess": "Operation successful",
+    "autoImportAttempt": "Attempting to auto-import configuration file"
   }
 }

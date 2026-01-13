@@ -2,6 +2,7 @@ using CharacterManager.Server.Models;
 using CharacterManager.Server.Data;
 using CharacterManager.Server.Constants;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Xml;
 
@@ -12,8 +13,9 @@ namespace CharacterManager.Server.Services;
 /// Extension .pml pour les fichiers d'export
 /// Supporte les sections : HistoriqueClassements, inventaire, template, capacités
 /// </summary>
-public class PmlExportService(ApplicationDbContext context) : PmlServiceBase(context)
+public class PmlExportService(ApplicationDbContext context, ILogger<PmlExportService> logger) : PmlServiceBase(context)
 {
+    private readonly ILogger<PmlExportService> _logger = logger;
     /// <summary>
     /// Exporte les données sélectionnées au format PML
     /// </summary>
@@ -479,6 +481,7 @@ public class PmlExportService(ApplicationDbContext context) : PmlServiceBase(con
             WritePersonnagesDatas(personnages, writer);
 
             // Export Lucie House as part of the inventory payload (no extra checkbox/UI toggle)
+            _logger.LogDebug("[PmlExportService.ExportConfiguration] Récupération de la Lucie House avec pièces");
             var lucieHouse = _context.LucieHouses.Include(l => l.Pieces).FirstOrDefault();
             if (lucieHouse != null)
             {
@@ -583,6 +586,7 @@ public class PmlExportService(ApplicationDbContext context) : PmlServiceBase(con
                 var personnageIds = template.GetPersonnageIds();
                 foreach (var personnageId in personnageIds)
                 {
+                    _logger.LogDebug("[PmlExportService.ExportToFileAsync] Récupération du personnage template avec ID: {PersonnageId}", personnageId);
                     var personnage = _context.Personnages
                         .Include(p => p.Capacites)
                         .FirstOrDefault(p => p.Id == personnageId);

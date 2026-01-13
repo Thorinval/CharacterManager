@@ -2,6 +2,7 @@ using CharacterManager.Server.Data;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Xunit;
 using Moq;
 using Microsoft.AspNetCore.Http;
@@ -24,7 +25,8 @@ public class PersonnageServiceTests : IDisposable
 
         // Create a real HistoriqueModificationService for integration tests
         var historiqueService = new HistoriqueModificationService(_context);
-        _service = new PersonnageService(_context, historiqueService);
+        var loggerMock = new Mock<ILogger<PersonnageService>>();
+        _service = new PersonnageService(_context, historiqueService, loggerMock.Object);
     }
 
     public void Dispose()

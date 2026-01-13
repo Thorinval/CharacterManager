@@ -1,3 +1,5 @@
+/* Page header inherits from app.css - no local overrides */
+
 .templates-list { display: flex; flex-direction: column; gap: 12px; }
 .template-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 .template-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }

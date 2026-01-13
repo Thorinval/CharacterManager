@@ -345,5 +345,41 @@
     "averagePower": "Puissance Moyenne",
     "mostPowerful": "Plus Puissant",
     "leastPowerful": "Moins Puissant"
-  } 
+  },
+  "errors": {
+    "system": "Erreur système",
+    "updateError": "Erreur lors de la mise à jour",
+    "exportError": "Erreur lors de l'export",
+    "importError": "Erreur lors de l'import",
+    "loadingError": "Erreur lors du chargement",
+    "saveError": "Erreur lors de l'enregistrement",
+    "deleteError": "Erreur lors de la suppression",
+    "chartCreationError": "Erreur lors de la création des graphiques",
+    "configLoadError": "Erreur lors du chargement de la configuration",
+    "invalidFile": "Le fichier n'est pas valide",
+    "emptyFile": "Le fichier est vide",
+    "xmlParsingError": "Erreur lors de l'analyse du fichier XML",
+    "noSectionsFound": "Aucune section reconnue trouvée dans le fichier",
+    "templateNameRequired": "Un template doit avoir un nom",
+    "historiquInvalide": "Historique invalide: date ou données manquantes",
+    "capacityNameRequired": "Le nom de la capacité est requis",
+    "capacityNotFound": "Aucune capacité avec l'ID fourni n'a été trouvée",
+    "historiqueNotFound": "Aucun historique avec l'ID fourni n'a été trouvé",
+    "imageLoadError": "Erreur lors du chargement de l'image",
+    "resourcesListError": "Erreur lors du listage des ressources",
+    "personalized": "{operation}: {detail}",
+    "personnageImageLoadError": "Erreur lors de la récupération de l'image",
+    "lucieMaxPieces": "Maximum {0} pièces peuvent être sélectionnées"
+  },
+  "warnings": {
+    "system": "Avertissement système",
+    "lucieImportWarning": "Attention: Plus de {0} pièces sélectionnées dans l'import"
+  },
+  "messages": {
+    "processing": "Traitement en cours...",
+    "importSuccess": "Import réussi",
+    "exportSuccess": "Export réussi",
+    "operationSuccess": "Opération réussie",
+    "autoImportAttempt": "Tentative d'import automatique du fichier de configuration"
+  }
 }

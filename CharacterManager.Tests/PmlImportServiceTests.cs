@@ -7,6 +7,7 @@ using CharacterManager.Server.Data;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Xunit;
 using Moq;
 using Microsoft.AspNetCore.Http;
@@ -29,7 +30,8 @@ public class PmlImportServiceTests : IDisposable
     _context.Database.EnsureCreated();
 
     _pmlImportService = new PmlImportService(_context);
-    _pmlExportService = new PmlExportService(_context);
+    var exportLoggerMock = new Mock<ILogger<PmlExportService>>();
+    _pmlExportService = new PmlExportService(_context, exportLoggerMock.Object);
 
     SeedPersonnages();
   }

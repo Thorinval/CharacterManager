@@ -2,6 +2,7 @@ using CharacterManager.Server.Data;
 using CharacterManager.Server.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace CharacterManager.Server.Services;
 
@@ -9,11 +10,13 @@ public class ProfileService
 {
     private readonly ApplicationDbContext _db;
     private readonly IConfiguration _config;
+    private readonly ILogger<ProfileService> _logger;
 
-    public ProfileService(ApplicationDbContext db, IConfiguration config)
+    public ProfileService(ApplicationDbContext db, IConfiguration config, ILogger<ProfileService> logger)
     {
         _db = db;
         _config = config;
+        _logger = logger;
     }
 
     public async Task<Profile> GetOrCreateAsync(string username)
@@ -33,7 +36,10 @@ public class ProfileService
     }
 
     public async Task<Profile?> GetByUsernameAsync(string username)
-        => await _db.Profiles.FirstOrDefaultAsync(p => p.Username == username);
+    {
+        _logger.LogDebug("[ProfileService.GetByUsernameAsync] Récupération du profil pour: {Username}", username);
+        return await _db.Profiles.FirstOrDefaultAsync(p => p.Username == username);
+    }
 
     public Profile? GetByUsername(string username)
         => _db.Profiles.FirstOrDefault(p => p.Username == username);

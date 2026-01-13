@@ -1,8 +1,10 @@
 .historique-container {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(147, 112, 219, 0.1) 100%);
+    background: transparent;
     min-height: 100vh;
     padding: 20px 0;
 }
+
+/* Page Header Banner - inherits from app.css */
 
 .controls-section {
     background: rgba(255, 255, 255, 0.95);

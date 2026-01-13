@@ -14,23 +14,23 @@
 
 <link rel="stylesheet" href="/css/Capacites.css" />
 
-<div class="page-container">
-    <div class="page-header">
-        <h1><i class="bi bi-lightning-charge-fill"></i> Gestion des Capacités</h1>
-        <div class="header-actions">
-            <button class="btn btn-primary" @onclick="OpenCreateModal">
-                <i class="bi bi-plus-circle"></i> Nouvelle Capacité
-            </button>
-            <button class="btn btn-success" @onclick="ExportCapacites" disabled="@(capacites?.Count == 0)">
-                <i class="bi bi-download"></i> Exporter
-            </button>
-            <label class="btn btn-info mb-0" for="importCapacitesFile">
-                <i class="bi bi-upload"></i> Importer
-            </label>
-            <InputFile id="importCapacitesFile" class="d-none" accept=".pml,.xml" OnChange="HandleImportCapacites" />
-        </div>
+<div class="page-header">
+    <h1><i class="bi bi-lightning-charge-fill"></i> Gestion des Capacités</h1>
+    <div class="header-actions">
+        <button class="btn btn-primary" @onclick="OpenCreateModal">
+            <i class="bi bi-plus-circle"></i> Nouvelle Capacité
+        </button>
+        <button class="btn btn-success" @onclick="ExportCapacites" disabled="@(capacites?.Count == 0)">
+            <i class="bi bi-download"></i> Exporter
+        </button>
+        <label class="btn btn-info mb-0" for="importCapacitesFile">
+            <i class="bi bi-upload"></i> Importer
+        </label>
+        <InputFile id="importCapacitesFile" class="d-none" accept=".pml,.xml" OnChange="HandleImportCapacites" />
     </div>
+</div>
 
+<div class="page-container">
     @if (capacites == null)
     {
         <div class="loading-state">

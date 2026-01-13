@@ -7,6 +7,79 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [1.1.0] - En développement (2026-01-14)
+
+### ✨ Améliorations (Improved)
+
+#### Interface Utilisateur - Uniformisation Complète
+- **Headers de pages standardisés** : Tous les headers utilisent maintenant un fond transparent avec border-bottom subtile, inspiré du style MaisonLucie
+  - Suppression des fonds blancs opaques sur toutes les pages
+  - Padding uniformisé : `padding: 0 0 1.25rem 0`
+  - Border subtile : `border-bottom: 2px solid rgba(0, 0, 0, 0.1)`
+  - Couleur de texte cohérente : `#1e293b`
+  - Icônes bleues standardisées : `#667eea`
+  - Pages concernées : Capacites, Inventaire, Templates, Historique, HistoriqueModifications, Histoligues, ManageUsers, Statistiques
+
+- **Espacement optimisé** : Ajout de `padding-top: 2rem` au `.main-content` pour éviter que les pages ne soient collées à la top bar
+
+- **Suppression des overrides CSS locaux** : Nettoyage des fichiers CSS spécifiques
+  - `Templates.css` : Suppression des overrides de `.page-header-banner`
+  - `Histoligues.css` : Conversion du fond bleu (#e6f0ff) en transparent
+  - `Historique.css` : Suppression du gradient de fond
+  - `HistoriqueModifications.css` : Suppression des overrides de header
+  - Tous les styles héritent maintenant de `app.css`
+
+- **Pages Escouade protégées** : MeilleurEscouade et Escouade conservent leur style spécifique avec overrides explicites
+
+#### Édition de la Maison de Lucie
+- **Édition inline des pièces** : Possibilité de modifier les pièces directement dans l'interface
+  - Mode édition avec boutons Sauvegarder/Annuler
+  - Modification du niveau, puissance tactique et stratégique
+  - Case à cocher "Selectionnée" pour activer/désactiver les pièces
+  - Mise en évidence visuelle (bordure bleue) des pièces en édition
+  - Historisation automatique des modifications via `HistoriqueModificationService`
+  - Méthode `UpdateLuciePieceAsync` ajoutée à `PersonnageService`
+
+### 🔧 Technique
+
+#### Logging Amélioré
+- **Logs contextuels EF Core** : Ajout de logs debug avant les requêtes FirstOrDefault
+  - `PersonnageService` : Logs avec nom de personnage et détails de requête
+  - `ProfileService` : Logs avec nom d'utilisateur
+  - `PmlExportService` : Logs des opérations d'export
+  - Configuration Serilog étendue : `CharacterManager.Server.Services` au niveau Debug
+  - Injection ILogger<T> dans tous les services concernés
+
+#### Tests
+- **Mise à jour des tests** : Ajout des mocks ILogger dans les tests unitaires
+  - `PersonnageServiceTests.cs` : Mock ILogger<PersonnageService>
+  - `PmlImportServiceTests.cs` : Mock ILogger<PmlExportService>
+  - Tous les tests passent avec les nouvelles dépendances
+
+### 🐛 Corrections (Fixed)
+
+#### Localisation
+- **Fichiers JSON malformés** : Correction des erreurs de parsing
+  - `fr.json` : Ajout de l'accolade fermante manquante
+  - `en.json` : Ajout de l'accolade fermante manquante
+  - Les fichiers de localisation se parsent maintenant correctement
+
+#### Structure HTML
+- **Capacites.razor** : Correction des balises div mal fermées
+  - Suppression de div orphelin
+  - Balance correcte des balises de fermeture
+  - Build réussit sans erreurs RZ9980/RZ9981/RZ1026
+
+### 📁 Fichiers Modifiés
+- CSS : `app.css`, `Escouade.css`, `Templates.css`, `Histoligues.css`, `Historique.css`, `HistoriqueModifications.css`, `MaisonLucie.css`, `Capacites.css`, `Inventaire.css`
+- Razor : `Capacites.razor`, `MaisonLucie.razor`
+- Services : `PersonnageService.cs`, `ProfileService.cs`, `PmlExportService.cs`
+- Tests : `PersonnageServiceTests.cs`, `PmlImportServiceTests.cs`
+- Config : `appsettings.json`
+- I18n : `fr.json`, `en.json`
+
+---
+
 ## [0.12.2] - 2026-01-03
 
 ### 🐛 Corrections (Fixed)

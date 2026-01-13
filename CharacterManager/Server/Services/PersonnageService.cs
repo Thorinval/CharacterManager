@@ -1,6 +1,7 @@
 using CharacterManager.Server.Data;
 using CharacterManager.Server.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace CharacterManager.Server.Services;
 
@@ -8,11 +9,13 @@ public class PersonnageService
 {
     private readonly ApplicationDbContext _context;
     private readonly HistoriqueModificationService _historiqueService;
+    private readonly ILogger<PersonnageService> _logger;
 
-    public PersonnageService(ApplicationDbContext context, HistoriqueModificationService historiqueService)
+    public PersonnageService(ApplicationDbContext context, HistoriqueModificationService historiqueService, ILogger<PersonnageService> logger)
     {
         _context = context;
         _historiqueService = historiqueService;
+        _logger = logger;
     }
 
     public Task<IEnumerable<Personnage>> GetAllAsync()
@@ -56,11 +59,14 @@ public class PersonnageService
         return puissanceTactiqueLucie + puissanceStrategiqueLucie;
     }
 
-    private int GetPuissanceCommandantEscouade() =>
-        _context.Personnages
+    private int GetPuissanceCommandantEscouade()
+    {
+        _logger.LogDebug("[PersonnageService.GetPuissanceCommandantEscouade] Exécution de la requête FirstOrDefault pour commandant sélectionné");
+        return _context.Personnages
             .Where(p => p.Selectionne && p.Type == TypePersonnage.Commandant && p.GetType() == typeof(Personnage))
             .Select(p => p.Puissance + p.Rang * 20)
             .FirstOrDefault();
+    }
 
 
     private int GetPuissanceTopCommandant()
@@ -294,6 +300,7 @@ public class PersonnageService
 
     public Personnage? GetById(int id)
     {
+        _logger.LogDebug("[PersonnageService.GetById] Récupération du personnage avec ID: {PersonnageId}", id);
         return _context.Personnages
             .Include(p => p.Capacites)
             .FirstOrDefault(p => p.Id == id);
@@ -301,6 +308,7 @@ public class PersonnageService
 
     public async Task<Personnage?> GetByIdAsync(int id)
     {
+        _logger.LogDebug("[PersonnageService.GetByIdAsync] Récupération du personnage avec ID: {PersonnageId}", id);
         return await _context.Personnages
             .Include(p => p.Capacites)
             .FirstOrDefaultAsync(p => p.Id == id);
@@ -621,6 +629,74 @@ public class PersonnageService
             // Sauvegarder les modifications
             _context.Pieces.Update(piece);
             await _context.SaveChangesAsync();
+        }
+    }
+
+    /// <summary>
+    /// Met à jour une pièce de la Lucie House
+    /// </summary>
+    public async Task UpdateLuciePieceAsync(Piece updatedPiece)
+    {
+        _logger.LogDebug("[PersonnageService.UpdateLuciePieceAsync] Mise à jour de la pièce: {PieceName} (ID: {PieceId})", updatedPiece.Nom, updatedPiece.Id);
+        
+        var piece = await _context.Pieces
+            .Where(p => p.Id == updatedPiece.Id && p.GetType() == typeof(Piece))
+            .FirstOrDefaultAsync();
+
+        if (piece == null)
+        {
+            throw new InvalidOperationException($"Pièce avec ID {updatedPiece.Id} introuvable");
+        }
+
+        // Capturer les anciennes valeurs pour l'historique
+        var ancienNiveau = piece.Niveau;
+        var ancienneSelection = piece.Selectionnee;
+        var anciennePuissanceTactique = piece.AspectsTactiques?.Puissance;
+        var anciennePuissanceStrategique = piece.AspectsStrategiques?.Puissance;
+
+        // Appliquer les modifications
+        piece.Niveau = updatedPiece.Niveau;
+        piece.Selectionnee = updatedPiece.Selectionnee;
+
+        if (piece.AspectsTactiques != null && updatedPiece.AspectsTactiques != null)
+        {
+            piece.AspectsTactiques.Puissance = updatedPiece.AspectsTactiques.Puissance;
+        }
+
+        if (piece.AspectsStrategiques != null && updatedPiece.AspectsStrategiques != null)
+        {
+            piece.AspectsStrategiques.Puissance = updatedPiece.AspectsStrategiques.Puissance;
+        }
+
+        _context.Pieces.Update(piece);
+        await _context.SaveChangesAsync();
+
+        // Historiser les modifications
+        if (ancienNiveau != piece.Niveau)
+        {
+            await _historiqueService.EnregistrerModificationAsync(
+                TypeEntite.Piece, piece.Id, piece.Nom, "Niveau", ancienNiveau, piece.Niveau, 
+                $"Modification du niveau de {piece.Nom}");
+        }
+        if (ancienneSelection != piece.Selectionnee)
+        {
+            await _historiqueService.EnregistrerModificationAsync(
+                TypeEntite.Piece, piece.Id, piece.Nom, "Selectionnee", ancienneSelection, piece.Selectionnee,
+                $"Modification de la sélection de {piece.Nom}");
+        }
+        if (anciennePuissanceTactique != piece.AspectsTactiques?.Puissance)
+        {
+            await _historiqueService.EnregistrerModificationAsync(
+                TypeEntite.Piece, piece.Id, piece.Nom, "AspectsTactiques.Puissance", 
+                anciennePuissanceTactique, piece.AspectsTactiques?.Puissance,
+                $"Modification de la puissance tactique de {piece.Nom}");
+        }
+        if (anciennePuissanceStrategique != piece.AspectsStrategiques?.Puissance)
+        {
+            await _historiqueService.EnregistrerModificationAsync(
+                TypeEntite.Piece, piece.Id, piece.Nom, "AspectsStrategiques.Puissance", 
+                anciennePuissanceStrategique, piece.AspectsStrategiques?.Puissance,
+                $"Modification de la puissance stratégique de {piece.Nom}");
         }
     }
 }

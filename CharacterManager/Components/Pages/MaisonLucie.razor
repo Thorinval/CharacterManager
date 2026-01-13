@@ -85,21 +85,79 @@
         <div class="pieces-grid hub-grid">
             @foreach (var piece in pieces.OrderByDescending(p => p.Puissance).ToList())
             {
-                <div class="piece-card hub-card">
+                var isEditing = editingPieceId == piece.Id;
+                <div class="piece-card hub-card @(isEditing ? "editing" : "")">
                     <div class="piece-header hub-card-head">
                         <h3 class="piece-name" title="@piece.Nom">@piece.Nom</h3>
-                        <span class="piece-level">Lvl @piece.Niveau</span>
+                        @if (isEditing)
+                        {
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-success" @onclick="() => SavePieceEdit(piece)" disabled="@savingPiece">
+                                    <i class="bi bi-check"></i>
+                                </button>
+                                <button class="btn btn-sm btn-secondary" @onclick="CancelPieceEdit">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex gap-2 align-items-center">
+                                <span class="piece-level">Lvl @piece.Niveau</span>
+                                <button class="btn btn-sm btn-outline-primary" @onclick="() => StartPieceEdit(piece)">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                        }
                     </div>
 
                     <div class="piece-body">
-                        <!-- Puissance Totale -->
-                        <div class="stat-row">
-                            <span class="stat-label">Puissance</span>
-                            <span class="stat-value">@piece.Puissance</span>
-                        </div>
+                        @if (isEditing)
+                        {
+                            <!-- Mode édition -->
+                            <div class="edit-mode">
+                                <div class="mb-2">
+                                    <label class="form-label">Niveau</label>
+                                    <InputNumber @bind-Value="pieceEditDraft.Niveau" class="form-control form-control-sm" min="1" />
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-check-label">
+                                        <InputCheckbox @bind-Value="pieceEditDraft.Selectionnee" class="form-check-input" />
+                                        Sélectionnée
+                                    </label>
+                                </div>
+                                @if (pieceEditDraft.AspectsTactiques != null)
+                                {
+                                    <div class="mb-2">
+                                        <label class="form-label">Puissance Tactique</label>
+                                        <InputNumber @bind-Value="pieceEditDraft.AspectsTactiques.Puissance" class="form-control form-control-sm" min="0" />
+                                    </div>
+                                }
+                                @if (pieceEditDraft.AspectsStrategiques != null)
+                                {
+                                    <div class="mb-2">
+                                        <label class="form-label">Puissance Stratégique</label>
+                                        <InputNumber @bind-Value="pieceEditDraft.AspectsStrategiques.Puissance" class="form-control form-control-sm" min="0" />
+                                    </div>
+                                }
+                                <div class="stat-row mt-2">
+                                    <span class="stat-label">Puissance totale:</span>
+                                    <span class="stat-value">@pieceEditDraft.Puissance</span>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- Mode lecture -->
+                            <!-- Puissance Totale -->
+                            <div class="stat-row">
+                                <span class="stat-label">Puissance</span>
+                                <span class="stat-value">@piece.Puissance</span>
+                            </div>
+                        }
 
                         <!-- Aspect Tactique -->
-                        @if (piece.AspectsTactiques != null)
+                        @if (piece.AspectsTactiques != null && !isEditing)
                         {
                             <div class="aspect-section">
                                 <div class="aspect-header">
@@ -128,7 +186,7 @@
                         }
 
                         <!-- Aspect Stratégie -->
-                        @if (piece.AspectsStrategiques != null)
+                        @if (piece.AspectsStrategiques != null && !isEditing)
                         {
                             <div class="aspect-section">
                                 <div class="aspect-header">
@@ -157,28 +215,34 @@
                         }
 
                         <!-- Bonus Totaux -->
-                        <div class="bonus-totals">
-                            <div class="bonus-row">
-                                <span class="bonus-label">Total Tactique:</span>
-                                <span class="bonus-value">@(piece.BonusTactiques?.Count ?? 0)</span>
+                        @if (!isEditing)
+                        {
+                            <div class="bonus-totals">
+                                <div class="bonus-row">
+                                    <span class="bonus-label">Total Tactique:</span>
+                                    <span class="bonus-value">@(piece.BonusTactiques?.Count ?? 0)</span>
+                                </div>
+                                <div class="bonus-row">
+                                    <span class="bonus-label">Total Stratégique:</span>
+                                    <span class="bonus-value">@(piece.BonusStrategiques?.Count ?? 0)</span>
+                                </div>
                             </div>
-                            <div class="bonus-row">
-                                <span class="bonus-label">Total Stratégique:</span>
-                                <span class="bonus-value">@(piece.BonusStrategiques?.Count ?? 0)</span>
-                            </div>
-                        </div>
+                        }
 
                         <!-- Sélection -->
-                        <div class="selection-indicator">
-                            @if (piece.Selectionnee)
-                            {
-                                <span class="selected-badge"><i class="bi bi-check-circle-fill"></i> Sélectionnée</span>
-                            }
-                            else
-                            {
-                                <span class="not-selected-badge"><i class="bi bi-circle"></i> Non sélectionnée</span>
-                            }
-                        </div>
+                        @if (!isEditing)
+                        {
+                            <div class="selection-indicator">
+                                @if (piece.Selectionnee)
+                                {
+                                    <span class="selected-badge"><i class="bi bi-check-circle-fill"></i> Sélectionnée</span>
+                                }
+                                else
+                                {
+                                    <span class="not-selected-badge"><i class="bi bi-circle"></i> Non sélectionnée</span>
+                                }
+                            </div>
+                        }
                     </div>
                 </div>
             }
@@ -218,6 +282,10 @@
     private int affectionDraft;
     private bool savingAffection;
     private string? affectionError;
+    
+    private int? editingPieceId;
+    private Server.Models.Piece pieceEditDraft = new();
+    private bool savingPiece;
 
     [Inject]
     public PmlImportService PmlImportService { get; set; } = null!;
@@ -371,6 +439,71 @@
         {
             savingAffection = false;
             await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void StartPieceEdit(Server.Models.Piece piece)
+    {
+        editingPieceId = piece.Id;
+        // Créer une copie pour l'édition
+        pieceEditDraft = new Server.Models.Piece
+        {
+            Id = piece.Id,
+            Nom = piece.Nom,
+            Niveau = piece.Niveau,
+            Selectionnee = piece.Selectionnee,
+            AspectsTactiques = piece.AspectsTactiques != null ? new Aspect 
+            { 
+                Nom = piece.AspectsTactiques.Nom,
+                Puissance = piece.AspectsTactiques.Puissance,
+                Bonus = new List<string>(piece.AspectsTactiques.Bonus)
+            } : new Aspect { Nom = "Aspects tactiques", Puissance = 0 },
+            AspectsStrategiques = piece.AspectsStrategiques != null ? new Aspect 
+            { 
+                Nom = piece.AspectsStrategiques.Nom,
+                Puissance = piece.AspectsStrategiques.Puissance,
+                Bonus = new List<string>(piece.AspectsStrategiques.Bonus)
+            } : new Aspect { Nom = "Aspects stratégiques", Puissance = 0 }
+        };
+    }
+
+    private void CancelPieceEdit()
+    {
+        editingPieceId = null;
+    }
+
+    private async Task SavePieceEdit(Server.Models.Piece originalPiece)
+    {
+        if (savingPiece) return;
+
+        savingPiece = true;
+        try
+        {
+            // Mettre à jour la pièce via le service
+            await PersonnageService.UpdateLuciePieceAsync(pieceEditDraft);
+            
+            // Mettre à jour l'objet local
+            originalPiece.Niveau = pieceEditDraft.Niveau;
+            originalPiece.Selectionnee = pieceEditDraft.Selectionnee;
+            if (originalPiece.AspectsTactiques != null && pieceEditDraft.AspectsTactiques != null)
+            {
+                originalPiece.AspectsTactiques.Puissance = pieceEditDraft.AspectsTactiques.Puissance;
+            }
+            if (originalPiece.AspectsStrategiques != null && pieceEditDraft.AspectsStrategiques != null)
+            {
+                originalPiece.AspectsStrategiques.Puissance = pieceEditDraft.AspectsStrategiques.Puissance;
+            }
+
+            editingPieceId = null;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de la mise à jour: {ex.Message}");
+        }
+        finally
+        {
+            savingPiece = false;
         }
     }
 }

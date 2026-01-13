@@ -1,6 +1,53 @@
 # Character Manager
 
-> **Version actuelle**: 1.0.0 🎉
+> **Version actuelle**: 1.0.0 🎉  
+> **Version en développement**: 1.1.0
+
+---
+
+## 🚧 1.1.0 (En développement - 14 Janvier 2026)
+
+### 🎨 Interface Utilisateur
+
+✨ - **Uniformisation complète des headers** : Tous les headers de pages utilisent maintenant un style transparent cohérent avec border-bottom subtile, inspiré de la page MaisonLucie
+
+🎨 - **Suppression des fonds blancs** : Fonds opaques remplacés par des backgrounds transparents sur toutes les pages (Capacites, Inventaire, Templates, Historique, etc.)
+
+📐 - **Espacement optimisé** : Ajout de padding-top au main-content pour éviter les collisions avec la top bar
+
+🎯 - **Icônes cohérentes** : Standardisation de la couleur des icônes (#667eea) et du texte (#1e293b) sur tous les headers
+
+### 🏠 Maison de Lucie
+
+✏️ - **Édition des pièces** : Possibilité de modifier les pièces directement dans l'interface avec mode édition interactif
+
+💾 - **Historisation** : Toutes les modifications de pièces sont automatiquement enregistrées dans l'historique
+
+🎯 - **Champs éditables** : Niveau, Puissance Tactique, Puissance Stratégique, et état Selectionnée
+
+🖌️ - **Feedback visuel** : Bordure bleue sur les cartes en mode édition, boutons Sauvegarder/Annuler
+
+### 🔍 Logging
+
+📊 - **Logs contextuels EF Core** : Ajout de logs debug avec contexte avant les requêtes FirstOrDefault pour faciliter le diagnostic
+
+🔧 - **Services enrichis** : PersonnageService, ProfileService et PmlExportService incluent maintenant des logs détaillés
+
+⚙️ - **Configuration Serilog** : Niveau Debug activé pour CharacterManager.Server.Services
+
+### 🐛 Corrections
+
+✅ - **Fichiers JSON i18n** : Correction des accolades fermantes manquantes dans fr.json et en.json
+
+✅ - **Structure HTML Capacites** : Correction des balises div mal fermées causant des erreurs de build
+
+✅ - **CSS Cleanup** : Suppression des overrides CSS locaux redondants, unification dans app.css
+
+### 🧪 Tests
+
+✅ - **Tests unitaires mis à jour** : Ajout des mocks ILogger dans PersonnageServiceTests et PmlImportServiceTests
+
+✅ - **Tous les tests passent** : 78/78 tests réussis avec les nouvelles dépendances
 
 ---
 
