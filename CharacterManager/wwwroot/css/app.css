@@ -295,7 +295,7 @@ body {
    ============================================================ */
 
 .main-content {
-    margin-left: 72px;
+    margin-left: 32px;
     /* Décalage en mode compact */
     transition: margin-left 0.25s ease;
     width: 100%;
@@ -312,7 +312,7 @@ body {
 }
 
 .layout-container.rail-expanded .main-content {
-    margin-left: 200px;
+    margin-left: 160px;
     /* Décalage quand rail étendu */
 }
 
