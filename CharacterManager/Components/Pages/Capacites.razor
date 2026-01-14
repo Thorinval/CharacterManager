@@ -9,24 +9,27 @@
 @inject PmlExportService PmlExportService
 @inject PmlImportService PmlImportService
 @inject IJSRuntime JSRuntime
-
-<PageTitle>Gestion des Capacités</PageTitle>
+@inject ClientLocalizationService LocalizationService
 
 <link rel="stylesheet" href="/css/Capacites.css" />
 
-<div class="page-header">
-    <h1><i class="bi bi-lightning-charge-fill"></i> Gestion des Capacités</h1>
-    <div class="header-actions">
-        <button class="btn btn-primary" @onclick="OpenCreateModal">
-            <i class="bi bi-plus-circle"></i> Nouvelle Capacité
-        </button>
-        <button class="btn btn-success" @onclick="ExportCapacites" disabled="@(capacites?.Count == 0)">
-            <i class="bi bi-download"></i> Exporter
-        </button>
-        <label class="btn btn-info mb-0" for="importCapacitesFile">
-            <i class="bi bi-upload"></i> Importer
-        </label>
-        <InputFile id="importCapacitesFile" class="d-none" accept=".pml,.xml" OnChange="HandleImportCapacites" />
+<div class="container-fluid py-4">
+    <div class="page-header-banner">
+        <h1><i class="bi bi-lightning-charge-fill"></i> @LocalizationService.GetKeyValue("capacities.title")</h1>
+    </div>
+    <div class="templates-header">
+        <div class="header-actions">
+            <button class="btn btn-primary" @onclick="OpenCreateModal">
+                <i class="bi bi-plus-circle"></i> @LocalizationService.GetKeyValue("capacities.new")
+            </button>
+            <button class="btn btn-success" @onclick="ExportCapacites" disabled="@(capacites?.Count == 0)">
+                <i class="bi bi-download"></i> @LocalizationService.GetKeyValue("common.export")
+            </button>
+            <label class="btn btn-info mb-0" for="importCapacitesFile">
+                <i class="bi bi-upload"></i> @LocalizationService.GetKeyValue("common.import")
+            </label>
+            <InputFile id="importCapacitesFile" class="d-none" accept=".pml,.xml" OnChange="HandleImportCapacites" />
+        </div>
     </div>
 </div>
 
@@ -35,14 +38,14 @@
     {
         <div class="loading-state">
             <div class="spinner"></div>
-            <p>Chargement...</p>
+            <p>@LocalizationService.GetKeyValue("common.loading")</p>
         </div>
     }
     else if (capacites.Count == 0)
     {
         <div class="empty-state">
             <i class="bi bi-inbox"></i>
-            <p>Aucune capacité disponible.</p>
+            <p>@LocalizationService.GetKeyValue("capacities.empty")</p>
         </div>
     }
     else
@@ -70,16 +73,16 @@
                         }
                         else
                         {
-                            <p class="card-description text-muted">Aucune description</p>
+                            <p class="card-description text-muted">@LocalizationService.GetKeyValue("capacities.noDescription")</p>
                         }
                     </div>
 
                     <div class="card-actions d-flex gap-2 flex-wrap">
                         <button class="btn btn-sm btn-warning" @onclick="() => OpenEditModal(capacite)">
-                            <i class="bi bi-pencil"></i> Éditer
+                            <i class="bi bi-pencil"></i> @LocalizationService.GetKeyValue("common.edit")
                         </button>
                         <button class="btn btn-sm btn-danger" @onclick="() => DeleteCapacite(capacite.Id)">
-                            <i class="bi bi-trash"></i> Supprimer
+                            <i class="bi bi-trash"></i> @LocalizationService.GetKeyValue("common.delete")
                         </button>
                     </div>
                 </div>
@@ -94,33 +97,37 @@
         <div class="modal-dialog-custom" @onclick:stopPropagation="true">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@(isEditing ? "Éditer Capacité" : "Nouvelle Capacité")</h5>
+                    <h5 class="modal-title">@(isEditing ? LocalizationService.GetKeyValue("capacities.modal.editTitle") : LocalizationService.GetKeyValue("capacities.modal.createTitle"))</h5>
                     <button type="button" class="btn-close" @onclick="CloseModal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="nomInput" class="form-label">Nom *</label>
-                        <input type="text" class="form-control" id="nomInput" @bind="currentCapacite.Nom" placeholder="Nom de la capacité" />
+                        <label for="nomInput" class="form-label">@LocalizationService.GetKeyValue("capacities.fields.nameLabel")</label>
+                        <input type="text" class="form-control" id="nomInput" @bind="currentCapacite.Nom"
+                            placeholder="@LocalizationService.GetKeyValue("capacities.fields.namePlaceholder")" />
                     </div>
                     <div class="mb-3">
-                        <label for="descriptionInput" class="form-label">Description</label>
-                        <textarea class="form-control" id="descriptionInput" rows="3" @bind="currentCapacite.Description" placeholder="Description de la capacité"></textarea>
+                        <label for="descriptionInput" class="form-label">@LocalizationService.GetKeyValue("capacities.fields.descriptionLabel")</label>
+                        <textarea class="form-control" id="descriptionInput" rows="3" @bind="currentCapacite.Description"
+                            placeholder="@LocalizationService.GetKeyValue("capacities.fields.descriptionPlaceholder")"></textarea>
                     </div>
                     <div class="mb-3">
-                        <label for="iconInput" class="form-label">Icône (nom Bootstrap Icons sans le préfixe 'bi-')</label>
-                        <input type="text" class="form-control" id="iconInput" @bind="currentCapacite.Icon" placeholder="ex: lightning-charge-fill" />
+                        <label for="iconInput" class="form-label">@LocalizationService.GetKeyValue("capacities.fields.iconLabel")</label>
+                        <input type="text" class="form-control" id="iconInput" @bind="currentCapacite.Icon"
+                            placeholder="@LocalizationService.GetKeyValue("capacities.fields.iconPlaceholder")" />
                         @if (!string.IsNullOrEmpty(currentCapacite.Icon))
                         {
                             <small class="text-muted d-block mt-2">
-                                Aperçu: <i class="bi bi-@currentCapacite.Icon"></i>
+                                @LocalizationService.GetKeyValue("capacities.preview") <i class="bi bi-@currentCapacite.Icon"></i>
                             </small>
                         }
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Annuler</button>
-                    <button type="button" class="btn btn-primary" @onclick="SaveCapacite" disabled="@string.IsNullOrWhiteSpace(currentCapacite.Nom)">
-                        @(isEditing ? "Mettre à jour" : "Créer")
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">@LocalizationService.GetKeyValue("common.cancel")</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveCapacite"
+                        disabled="@string.IsNullOrWhiteSpace(currentCapacite.Nom)">
+                        @(isEditing ? LocalizationService.GetKeyValue("common.update") : LocalizationService.GetKeyValue("common.add"))
                     </button>
                 </div>
             </div>
@@ -147,7 +154,7 @@
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors du chargement des capacités: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"{LocalizationService.GetKeyValue("errors.loadingError")}: {ex.Message}");
         }
     }
 
@@ -160,7 +167,13 @@
 
     private void OpenEditModal(Capacite capacite)
     {
-        currentCapacite = new() { Id = capacite.Id, Nom = capacite.Nom, Description = capacite.Description, Icon = capacite.Icon };
+        currentCapacite = new()
+        {
+            Id = capacite.Id,
+            Nom = capacite.Nom,
+            Description = capacite.Description,
+            Icon = capacite.Icon
+        };
         isEditing = true;
         showModal = true;
     }
@@ -177,7 +190,7 @@
         {
             if (string.IsNullOrWhiteSpace(currentCapacite.Nom))
             {
-                await JSRuntime.InvokeVoidAsync("alert", "Le nom de la capacité est requis.");
+                await JSRuntime.InvokeVoidAsync("alert", LocalizationService.GetKeyValue("errors.capacityNameRequired"));
                 return;
             }
 
@@ -195,13 +208,13 @@
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de la sauvegarde: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"{LocalizationService.GetKeyValue("errors.saveError")}: {ex.Message}");
         }
     }
 
     private async Task DeleteCapacite(int id)
     {
-        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Êtes-vous sûr de vouloir supprimer cette capacité ?");
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetKeyValue("capacities.confirmDelete"));
         if (confirmed)
         {
             try
@@ -211,7 +224,7 @@
             }
             catch (Exception ex)
             {
-                await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de la suppression: {ex.Message}");
+                await JSRuntime.InvokeVoidAsync("alert", $"{LocalizationService.GetKeyValue("errors.deleteError")}: {ex.Message}");
             }
         }
     }
@@ -222,7 +235,7 @@
         {
             if (capacites?.Count == 0)
             {
-                await JSRuntime.InvokeVoidAsync("alert", "Aucune capacité à exporter");
+                await JSRuntime.InvokeVoidAsync("alert", LocalizationService.GetKeyValue("capacities.nothingToExport"));
                 return;
             }
 
@@ -232,7 +245,7 @@
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de l'export: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"{LocalizationService.GetKeyValue("errors.exportError")}: {ex.Message}");
         }
     }
 
@@ -246,17 +259,17 @@
 
             if (result.IsSuccess)
             {
-                await JSRuntime.InvokeVoidAsync("alert", $"Import réussi : {result.SuccessCount} capacité(s) importée(s)");
+                await JSRuntime.InvokeVoidAsync("alert", string.Format(LocalizationService.GetKeyValue("capacities.importSuccessCount"), result.SuccessCount));
                 await LoadCapacitesAsync();
             }
             else
             {
-                await JSRuntime.InvokeVoidAsync("alert", result.Error ?? "Import échoué");
+                await JSRuntime.InvokeVoidAsync("alert", result.Error ?? LocalizationService.GetKeyValue("errors.importError"));
             }
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de l'import: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"{LocalizationService.GetKeyValue("errors.importError")}: {ex.Message}");
         }
     }
 }

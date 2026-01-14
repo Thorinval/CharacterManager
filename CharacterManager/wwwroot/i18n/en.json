@@ -19,6 +19,7 @@
     "warning": "Warning",
     "info": "Information",
     "close": "Close",
+    "update": "Update",
     "back": "Back"
   },
   "navigation": {
@@ -210,6 +211,64 @@
     "empty": "No templates saved.",
     "confirmDelete": "Are you sure you want to delete this template?"
   },
+
+  "capacities": {
+    "title": "Capacity Management",
+    "new": "New Capacity",
+    "empty": "No capacities available.",
+    "noDescription": "No description",
+    "modal": {
+      "editTitle": "Edit Capacity",
+      "createTitle": "New Capacity"
+    },
+    "fields": {
+      "nameLabel": "Name *",
+      "namePlaceholder": "Capacity name",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Capacity description",
+      "iconLabel": "Icon (Bootstrap Icons name without 'bi-' prefix)",
+      "iconPlaceholder": "e.g., lightning-charge-fill"
+    },
+    "preview": "Preview:",
+    "confirmDelete": "Are you sure you want to delete this capacity?",
+    "nothingToExport": "No capacities to export",
+    "importSuccessCount": "Import successful: {0} capacity(ies) imported"
+  },
+
+  "leagueHistory": {
+    "title": "League History",
+    "newEntry": "New promotion date",
+    "emptyPrompt": "No dates recorded",
+    "addFirst": "Add the first date",
+    "table": {
+      "date": "Date",
+      "league": "League",
+      "notes": "Notes",
+      "actions": "Actions"
+    },
+    "badge": {
+      "eliteTop50": "Elite - Top 50",
+      "leagueN": "League {0}"
+    },
+    "labels": {
+      "dateMontee": "Promotion date",
+      "ligue": "League",
+      "select": "Select",
+      "notesOptional": "Notes (optional)",
+      "notesPlaceholder": "Add notes..."
+    },
+    "modal": {
+      "editTitle": "Edit promotion date",
+      "createTitle": "New promotion date"
+    },
+    "confirmDelete": "Are you sure you want to delete this promotion date?",
+    "import": {
+      "selectPml": "Please select a PML file.",
+      "successCount": "{0} record(s) imported successfully.",
+      "none": "No records imported.",
+      "detailsPreview": "Details (preview):"
+    }
+  },
   "manageUsers": {
     "title": "User Management",
     "heading": "User Management",
@@ -242,7 +301,7 @@
     "messageCopied": "Password copied to clipboard",
     "messageDeleted": "User deleted"
   },
-  "history": {
+  "ranking": {
     "title": "Rankings",
     "subtitle": "Ranking History",
     "filters": "Filters",

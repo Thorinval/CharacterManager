@@ -7,7 +7,7 @@ using CharacterManager.Server.Services;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Constants;
 using CharacterManager.Components.Modal;
-public partial class Historique
+public partial class Classements
 {
     [Inject]
     public HistoriqueClassementService HistoriqueService { get; set; } = null!;

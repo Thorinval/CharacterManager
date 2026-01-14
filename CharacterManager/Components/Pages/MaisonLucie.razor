@@ -11,17 +11,21 @@
 
 <link rel="stylesheet" href="/css/MaisonLucie.css" />
 
-<div class="lucie-house-container">
-    <div class="lucie-house-header">
-        <div class="lucie-house-title-section">
+<div class="container-fluid py-4">
+    <div class="page-header-banner">
+        <div class="page-title">
             <i class="bi bi-house-fill lucie-icon"></i>
-            <h1><LocalizedText Key="navigation.lucieHouse" /></h1>
+            <h1>
+                <LocalizedText Key="navigation.lucieHouse" />
+            </h1>
         </div>
-        
+    </div>
+    <div class="templates-header">
         @if (lucieHouse != null)
         {
             <div class="d-flex align-items-center gap-3">
-                <div class="affection-badge" role="button" tabindex="0" title="Modifier l'affection" @onclick="StartAffectionEdit">
+                <div class="affection-badge" role="button" tabindex="0" title="Modifier l'affection"
+                    @onclick="StartAffectionEdit">
                     <i class="bi bi-heart-fill"></i>
                     <span class="affection-value">@lucieHouse.Affection</span>
                     <span class="affection-label">Affection</span>
@@ -54,7 +58,8 @@
                                 }
                                 <span class="ms-1">Enregistrer</span>
                             </button>
-                            <button class="btn btn-outline-secondary" @onclick="CancelAffectionEdit" disabled="@savingAffection">Annuler</button>
+                            <button class="btn btn-outline-secondary" @onclick="CancelAffectionEdit"
+                                disabled="@savingAffection">Annuler</button>
                         </div>
                     </div>
                     @if (!string.IsNullOrWhiteSpace(affectionError))
@@ -70,14 +75,18 @@
     {
         <div class="loading-state">
             <div class="spinner"></div>
-            <p><LocalizedText Key="loading" /></p>
+            <p>
+                <LocalizedText Key="loading" />
+            </p>
         </div>
     }
     else if (pieces.Count == 0)
     {
         <div class="empty-state">
             <i class="bi bi-inbox"></i>
-            <p><LocalizedText Key="noData" /></p>
+            <p>
+                <LocalizedText Key="noData" />
+            </p>
         </div>
     }
     else
@@ -92,7 +101,8 @@
                         @if (isEditing)
                         {
                             <div class="d-flex gap-2">
-                                <button class="btn btn-sm btn-success" @onclick="() => SavePieceEdit(piece)" disabled="@savingPiece">
+                                <button class="btn btn-sm btn-success" @onclick="() => SavePieceEdit(piece)"
+                                    disabled="@savingPiece">
                                     <i class="bi bi-check"></i>
                                 </button>
                                 <button class="btn btn-sm btn-secondary" @onclick="CancelPieceEdit">
@@ -130,14 +140,16 @@
                                 {
                                     <div class="mb-2">
                                         <label class="form-label">Puissance Tactique</label>
-                                        <InputNumber @bind-Value="pieceEditDraft.AspectsTactiques.Puissance" class="form-control form-control-sm" min="0" />
+                                        <InputNumber @bind-Value="pieceEditDraft.AspectsTactiques.Puissance"
+                                            class="form-control form-control-sm" min="0" />
                                     </div>
                                 }
                                 @if (pieceEditDraft.AspectsStrategiques != null)
                                 {
                                     <div class="mb-2">
                                         <label class="form-label">Puissance Stratégique</label>
-                                        <InputNumber @bind-Value="pieceEditDraft.AspectsStrategiques.Puissance" class="form-control form-control-sm" min="0" />
+                                        <InputNumber @bind-Value="pieceEditDraft.AspectsStrategiques.Puissance"
+                                            class="form-control form-control-sm" min="0" />
                                     </div>
                                 }
                                 <div class="stat-row mt-2">
@@ -250,7 +262,9 @@
 
         <!-- Statistiques Globales -->
         <div class="statistics-section">
-            <h2><LocalizedText Key="statistics" /></h2>
+            <h2>
+                <LocalizedText Key="statistics" />
+            </h2>
             <div class="stats-grid">
                 <div class="stat-card">
                     <span class="stat-title">Total Pièces</span>
@@ -282,7 +296,7 @@
     private int affectionDraft;
     private bool savingAffection;
     private string? affectionError;
-    
+
     private int? editingPieceId;
     private Server.Models.Piece pieceEditDraft = new();
     private bool savingPiece;
@@ -360,13 +374,13 @@
             var file = e.File;
             using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
             var result = await PmlImportService.ImportPmlAsync(
-                stream,
-                file.Name,
-                importInventory: true,
-                importTemplates: false,
-                importBestSquad: false,
-                importHistories: false,
-                importLeagueHistory: false);
+            stream,
+            file.Name,
+            importInventory: true,
+            importTemplates: false,
+            importBestSquad: false,
+            importHistories: false,
+            importLeagueHistory: false);
 
             if (result.IsSuccess)
             {
@@ -452,14 +466,14 @@
             Nom = piece.Nom,
             Niveau = piece.Niveau,
             Selectionnee = piece.Selectionnee,
-            AspectsTactiques = piece.AspectsTactiques != null ? new Aspect 
-            { 
+            AspectsTactiques = piece.AspectsTactiques != null ? new Aspect
+            {
                 Nom = piece.AspectsTactiques.Nom,
                 Puissance = piece.AspectsTactiques.Puissance,
                 Bonus = new List<string>(piece.AspectsTactiques.Bonus)
             } : new Aspect { Nom = "Aspects tactiques", Puissance = 0 },
-            AspectsStrategiques = piece.AspectsStrategiques != null ? new Aspect 
-            { 
+            AspectsStrategiques = piece.AspectsStrategiques != null ? new Aspect
+            {
                 Nom = piece.AspectsStrategiques.Nom,
                 Puissance = piece.AspectsStrategiques.Puissance,
                 Bonus = new List<string>(piece.AspectsStrategiques.Bonus)
@@ -481,7 +495,7 @@
         {
             // Mettre à jour la pièce via le service
             await PersonnageService.UpdateLuciePieceAsync(pieceEditDraft);
-            
+
             // Mettre à jour l'objet local
             originalPiece.Niveau = pieceEditDraft.Niveau;
             originalPiece.Selectionnee = pieceEditDraft.Selectionnee;

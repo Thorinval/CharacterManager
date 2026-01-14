@@ -11,32 +11,41 @@
 <link rel="stylesheet" href="/css/Templates.css" />
 <link rel="stylesheet" href="/css/Inventaire.css" />
 
-<PageTitle><LocalizedText Key="templates.title" /></PageTitle>
+<PageTitle>
+    <LocalizedText Key="templates.title" />
+</PageTitle>
 
-<div class="page-header-banner">
-    <a href="@AppConstants.Routes.Home" class="back-button" aria-label="Retour" title="Back to home"></a>
-    <h1 class="page-title"><i class="bi bi-collection"></i> <LocalizedText Key="templates.title" /></h1>
-</div>
+<div class="container-fluid py-4">
+    <div class="page-header-banner">
+        <h1 class="page-title"><i class="bi bi-collection"></i>
+            <LocalizedText Key="templates.title" />
+        </h1>
+    </div>
 
-<Toast @ref="toastRef" />
+    <Toast @ref="toastRef" />
 
-<!-- Template Creator Button -->
-<div class="templates-header">
-    <button class="btn btn-primary" @onclick="() => OpenTemplateEditor()" title="Créer un nouveau template">
-        <i class="bi bi-plus-circle"></i>
-        <LocalizedText Key="templates.create" />
-    </button>
+    <!-- Template Creator Button -->
+    <div class="templates-header">
+        <button class="btn btn-primary" @onclick="() => OpenTemplateEditor()" title="Créer un nouveau template">
+            <i class="bi bi-plus-circle"></i>
+            <LocalizedText Key="templates.create" />
+        </button>
+    </div>
 </div>
 
 @if (!showTemplateEditor)
 {
     @if (templates is null)
     {
-        <p><LocalizedText Key="common.loading" /></p>
+        <p>
+            <LocalizedText Key="common.loading" />
+        </p>
     }
     else if (!templates.Any())
     {
-        <p><LocalizedText Key="templates.empty" /></p>
+        <p>
+            <LocalizedText Key="templates.empty" />
+        </p>
     }
     else
     {
@@ -47,33 +56,46 @@
                     <div class="template-header">
                         @if (editingTemplateId == t.Id)
                         {
-                            <input class="form-control form-control-sm" style="max-width: 240px; display:inline-block;" @bind="editingName" />
-                            <button class="btn btn-sm btn-success ms-2" @onclick="(() => SaveRename(t))"><i class="bi bi-check"></i></button>
+                            <input class="form-control form-control-sm" style="max-width: 240px; display:inline-block;"
+                                @bind="editingName" />
+                            <button class="btn btn-sm btn-success ms-2" @onclick="(() => SaveRename(t))"><i
+                                    class="bi bi-check"></i></button>
                             <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelRename"><i class="bi bi-x"></i></button>
                         }
                         else
                         {
                             <span class="template-name">@t.Nom</span>
-                            <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="(() => StartRename(t))"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="(() => StartRename(t))"><i
+                                    class="bi bi-pencil"></i></button>
                         }
-                        <span class="template-power"><LocalizedText Key="templates.power" /> <strong>@t.PuissanceTotal</strong></span>
+                        <span class="template-power">
+                            <LocalizedText Key="templates.power" /> <strong>@t.PuissanceTotal</strong>
+                        </span>
                     </div>
                     <div class="template-meta">
-                        <span><LocalizedText Key="templates.created" /> @t.DateCreation.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</span>
-                        <span><LocalizedText Key="templates.modified" /> @t.DateModification.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</span>
+                        <span>
+                            <LocalizedText Key="templates.created" /> @t.DateCreation.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+                        </span>
+                        <span>
+                            <LocalizedText Key="templates.modified" /> @t.DateModification.ToLocalTime().ToString("yyyy-MM-dd             HH:mm")
+                        </span>
                     </div>
                     <div class="template-actions">
                         <button class="btn btn-primary" @onclick="(() => OpenInInventaire(t.Id))">
-                            <i class="bi bi-folder2-open"></i> <LocalizedText Key="templates.open" />
+                            <i class="bi bi-folder2-open"></i>
+                            <LocalizedText Key="templates.open" />
                         </button>
                         <button class="btn btn-info" @onclick="(() => ExportTemplate(t.Id))">
-                            <i class="bi bi-download"></i> <LocalizedText Key="templates.export" /> PML
+                            <i class="bi bi-download"></i>
+                            <LocalizedText Key="templates.export" /> PML
                         </button>
                         <button class="btn btn-secondary" @onclick="(() => DuplicateTemplate(t.Id))">
-                            <i class="bi bi-files"></i> <LocalizedText Key="templates.duplicate" />
+                            <i class="bi bi-files"></i>
+                            <LocalizedText Key="templates.duplicate" />
                         </button>
                         <button class="btn btn-danger" @onclick="(() => DeleteTemplate(t.Id))">
-                            <i class="bi bi-trash"></i> <LocalizedText Key="templates.delete" />
+                            <i class="bi bi-trash"></i>
+                            <LocalizedText Key="templates.delete" />
                         </button>
                     </div>
                 </div>
@@ -175,7 +197,3 @@ else
         </div>
     </div>
 }
-
-
-
-

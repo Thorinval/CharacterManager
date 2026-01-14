@@ -19,6 +19,7 @@
     "warning": "Avertissement",
     "info": "Information",
     "close": "Fermer",
+    "update": "Mettre à jour",
     "back": "Retour"
   },
   "navigation": {
@@ -209,6 +210,64 @@
     "empty": "Aucun template enregistré.",
     "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce template ?"
   },
+
+  "capacities": {
+    "title": "Gestion des Capacités",
+    "new": "Nouvelle Capacité",
+    "empty": "Aucune capacité disponible.",
+    "noDescription": "Aucune description",
+    "modal": {
+      "editTitle": "Éditer Capacité",
+      "createTitle": "Nouvelle Capacité"
+    },
+    "fields": {
+      "nameLabel": "Nom *",
+      "namePlaceholder": "Nom de la capacité",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Description de la capacité",
+      "iconLabel": "Icône (nom Bootstrap Icons sans le préfixe 'bi-')",
+      "iconPlaceholder": "ex: lightning-charge-fill"
+    },
+    "preview": "Aperçu:",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette capacité ?",
+    "nothingToExport": "Aucune capacité à exporter",
+    "importSuccessCount": "Import réussi : {0} capacité(s) importée(s)"
+  },
+
+  "leagueHistory": {
+    "title": "Historique des Ligues",
+    "newEntry": "Nouvelle date de montée",
+    "emptyPrompt": "Aucune date enregistrée",
+    "addFirst": "Ajouter la première date",
+    "table": {
+      "date": "Date",
+      "league": "Ligue",
+      "notes": "Notes",
+      "actions": "Actions"
+    },
+    "badge": {
+      "eliteTop50": "Elite - Top 50",
+      "leagueN": "Ligue {0}"
+    },
+    "labels": {
+      "dateMontee": "Date de montée",
+      "ligue": "Ligue",
+      "select": "Sélectionner",
+      "notesOptional": "Notes (optionnel)",
+      "notesPlaceholder": "Ajouter des notes..."
+    },
+    "modal": {
+      "editTitle": "Éditer la date de montée",
+      "createTitle": "Nouvelle date de montée"
+    },
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette date de montée ?",
+    "import": {
+      "selectPml": "Veuillez sélectionner un fichier PML.",
+      "successCount": "{0} enregistrement(s) importé(s) avec succès.",
+      "none": "Aucun enregistrement importé.",
+      "detailsPreview": "Détails (aperçu):"
+    }
+  },
   "manageUsers": {
     "title": "Gestion utilisateurs",
     "heading": "Gestion des utilisateurs",
@@ -241,7 +300,7 @@
     "messageCopied": "Mot de passe copié dans le presse-papiers",
     "messageDeleted": "Utilisateur supprimé"
   },
-  "history": {
+  "ranking": {
     "title": "Classements",
     "subtitle": "Historique des escouades",
     "filters": "Filtres",

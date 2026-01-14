@@ -12,7 +12,7 @@ public static class AppConstants
         public const string Home = "/";
         public const string Inventaire = "/inventaire";
         public const string Templates = "/templates";
-        public const string Historique = "/historique";
+        public const string Historique = "/classements";
         public const string ImportPml = "/import-pml";
         public const string Escouade = "/escouade";
         public const string MeilleurEscouade = "/meilleur-escouade";
