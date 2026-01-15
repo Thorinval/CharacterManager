@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CharacterManager.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260115124513_RefactorToPersonnageClassement")]
+    [Migration("20260115125246_RefactorToPersonnageClassement")]
     partial class RefactorToPersonnageClassement
     {
         /// <inheritdoc />
