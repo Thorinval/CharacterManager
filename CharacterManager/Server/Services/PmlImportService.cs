@@ -536,7 +536,7 @@ public class PmlImportService(ApplicationDbContext context) : PmlServiceBase(con
         }
     }
 
-    private static PersonnageClassement ConvertToPersonnageHistorique(Personnage personnage)
+    private static new PersonnageClassement ConvertToPersonnageHistorique(Personnage personnage)
     {
         return PersonnageClassement.FromPersonnage(personnage);
     }
