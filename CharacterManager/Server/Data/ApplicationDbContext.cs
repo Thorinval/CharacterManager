@@ -20,6 +20,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<HistoriqueClassement> HistoriquesClassement { get; set; }
     public DbSet<HistoriqueLigue> HistoriquesLigue { get; set; }
     public DbSet<HistoriqueModification> HistoriquesModifications { get; set; }
+    public DbSet<PersonnageClassement> PersonnagesClassement { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -81,24 +82,33 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithOne()
             .OnDelete(DeleteBehavior.Cascade);
 
-        // HistoriqueClassement - Mercenaires
+        // Configuration de PersonnageClassement
+        modelBuilder.Entity<PersonnageClassement>()
+            .HasKey(p => p.Id);
+
+        // Relations HistoriqueClassement - PersonnageClassement
+        // Utilisez des shadow properties avec des noms explicites pour distinguer les relations
+        
+        // Mercenaires (one-to-many)
         modelBuilder.Entity<HistoriqueClassement>()
             .HasMany(h => h.Mercenaires)
-            .WithMany()
-            .UsingEntity(j => j.ToTable("HistoriqueClassementMercenaires"));
+            .WithOne()
+            .HasForeignKey("HistoriqueClassementMercenaireId")
+            .OnDelete(DeleteBehavior.Cascade);
 
-        // HistoriqueClassement - Androides
+        // Androïdes (one-to-many)
         modelBuilder.Entity<HistoriqueClassement>()
             .HasMany(h => h.Androides)
-            .WithMany()
-            .UsingEntity(j => j.ToTable("HistoriqueClassementAndroides"));
+            .WithOne()
+            .HasForeignKey("HistoriqueClassementAndroideId")
+            .OnDelete(DeleteBehavior.Cascade);
 
-        // HistoriqueClassement - Commandant (relation 1-1 optionnelle)
+        // Commandant (one-to-one)
         modelBuilder.Entity<HistoriqueClassement>()
             .HasOne(h => h.Commandant)
-            .WithMany()
-            .HasForeignKey(h => h.CommandantId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .WithOne()
+            .HasForeignKey<PersonnageClassement>("HistoriqueClassementCommandantId")
+            .OnDelete(DeleteBehavior.Cascade);
 
         // HistoriqueModification - Index sur DateModification pour recherches rapides
         modelBuilder.Entity<HistoriqueModification>()
