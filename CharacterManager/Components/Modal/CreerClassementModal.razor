@@ -250,9 +250,9 @@
 </div>
 
 @code {
-    private PersonnageHistorique Commandant { get; set; } = default!;
-    private List<PersonnageHistorique> Mercenaires { get; set; } = new();
-    private List<PersonnageHistorique> Androides { get; set; } = new();
+    private PersonnageClassement Commandant { get; set; } = default!;
+    private List<PersonnageClassement> Mercenaires { get; set; } = new();
+    private List<PersonnageClassement> Androides { get; set; } = new();
     private List<PieceHistorique> Pieces { get; set; } = new();
 
     private readonly List<int> LigueSteps = Enumerable.Range(1, 25).Reverse().ToList();
@@ -288,9 +288,9 @@
                 France = Existing.Classements.FirstOrDefault(c => c.Type == TypeClassement.France)?.Valeur
             };
 
-            Commandant = Existing.Commandant ?? new PersonnageHistorique { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
-            Mercenaires = Existing.Mercenaires?.ToList() ?? new List<PersonnageHistorique>();
-            Androides = Existing.Androides?.ToList() ?? new List<PersonnageHistorique>();
+            Commandant = Existing.Commandant ?? new PersonnageClassement { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
+            Mercenaires = Existing.Mercenaires?.ToList() ?? new List<PersonnageClassement>();
+            Androides = Existing.Androides?.ToList() ?? new List<PersonnageClassement>();
             Pieces = Existing.Pieces?.ToList() ?? new List<PieceHistorique>();
             
             // Charger les puissances historisées
@@ -304,41 +304,11 @@
             form.DateEnregistrement = DateOnly.FromDateTime(DateTime.Now);
 
             var cmd = PersonnageService.GetCommandants(true).FirstOrDefault();
-            Commandant = cmd != null ? new PersonnageHistorique
-            {
-                IdOrigine = cmd.Id,
-                Nom = cmd.Nom,
-                Niveau = cmd.Niveau,
-                Rang = cmd.Rang,
-                Rarete = cmd.Rarete,
-                Puissance = cmd.Puissance,
-                Type = cmd.Type,
-                Capacites = cmd.Capacites,
-            } : new PersonnageHistorique { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
+            Commandant = cmd != null ? PersonnageClassement.FromPersonnage(cmd) : new PersonnageClassement { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
 
-            Mercenaires = PersonnageService.GetMercenaires(true)?.Select(m => new PersonnageHistorique
-            {
-                IdOrigine = m.Id,
-                Nom = m.Nom,
-                Niveau = m.Niveau,
-                Rang = m.Rang,
-                Rarete = m.Rarete,
-                Puissance = m.Puissance,
-                Type = m.Type,
-                Capacites = m.Capacites,
-            }).ToList() ?? new List<PersonnageHistorique>();
+            Mercenaires = PersonnageService.GetMercenaires(true)?.Select(PersonnageClassement.FromPersonnage).ToList() ?? new List<PersonnageClassement>();
 
-            Androides = PersonnageService.GetAndroides(true)?.Select(a => new PersonnageHistorique
-            {
-                IdOrigine = a.Id,
-                Nom = a.Nom,
-                Niveau = a.Niveau,
-                Rang = a.Rang,
-                Rarete = a.Rarete,
-                Puissance = a.Puissance,
-                Type = a.Type,
-                Capacites = a.Capacites,
-            }).ToList() ?? new List<PersonnageHistorique>();
+            Androides = PersonnageService.GetAndroides(true)?.Select(PersonnageClassement.FromPersonnage).ToList() ?? new List<PersonnageClassement>();
 
             Pieces = PersonnageService.GetPieces(true)?.Select(p => new PieceHistorique
             {
@@ -357,13 +327,66 @@
         editContext = new EditContext(form);
         isValid = IsEdit ? editContext.Validate() : false;
 
-        editContext.OnFieldChanged += (_, __) =>
+        editContext.OnFieldChanged += (_, e) =>
         {
+            // Si la date change, recharger les personnages
+            if (e.FieldIdentifier.FieldName == nameof(form.DateEnregistrement))
+            {
+                ChargerPersonnagesSelonDate();
+            }
+            
             isValid = editContext.Validate();
             InvokeAsync(StateHasChanged);
         };
 
         StateHasChanged();
+    }
+
+    private void ChargerPersonnagesSelonDate()
+    {
+        // Si la date de classement est aujourd'hui, on utilise l'escouade sélectionnée
+        // Sinon, on charge tous les personnages de l'inventaire (pas seulement les sélectionnés)
+        bool estAujourdhui = form.DateEnregistrement == DateOnly.FromDateTime(DateTime.Now);
+
+        // Charger le commandant
+        var cmd = estAujourdhui 
+            ? PersonnageService.GetCommandants(true).FirstOrDefault()
+            : PersonnageService.GetCommandants(false).FirstOrDefault();
+        Commandant = cmd != null ? PersonnageClassement.FromPersonnage(cmd) : new PersonnageClassement { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
+
+        // Charger les mercenaires
+        Mercenaires = estAujourdhui
+            ? (PersonnageService.GetMercenaires(true)?.Select(PersonnageClassement.FromPersonnage).ToList() ?? new List<PersonnageClassement>())
+            : (PersonnageService.GetMercenaires(false)?.Select(PersonnageClassement.FromPersonnage).ToList() ?? new List<PersonnageClassement>());
+
+        // Charger les androïdes
+        Androides = estAujourdhui
+            ? (PersonnageService.GetAndroides(true)?.Select(PersonnageClassement.FromPersonnage).ToList() ?? new List<PersonnageClassement>())
+            : (PersonnageService.GetAndroides(false)?.Select(PersonnageClassement.FromPersonnage).ToList() ?? new List<PersonnageClassement>());
+
+        // Charger les pièces Lucie
+        Pieces = estAujourdhui
+            ? (PersonnageService.GetPieces(true)?.Select(p => new PieceHistorique
+            {
+                IdOrigine = p.Id,
+                Nom = p.Nom,
+                Niveau = p.Niveau,
+                Selectionnee = p.Selectionnee,
+                AspectsStrategiques = p.AspectsStrategiques,
+                AspectsTactiques = p.AspectsTactiques
+            }).ToList() ?? new List<PieceHistorique>())
+            : (PersonnageService.GetPieces(false)?.Select(p => new PieceHistorique
+            {
+                IdOrigine = p.Id,
+                Nom = p.Nom,
+                Niveau = p.Niveau,
+                Selectionnee = p.Selectionnee,
+                AspectsStrategiques = p.AspectsStrategiques,
+                AspectsTactiques = p.AspectsTactiques
+            }).ToList() ?? new List<PieceHistorique>());
+        
+        // Recalculer les puissances
+        CalculerPuissances();
     }
 
     private void CalculerPuissances()

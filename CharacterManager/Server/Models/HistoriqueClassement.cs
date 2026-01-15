@@ -45,10 +45,9 @@ public class HistoriqueClassement
     /// </summary>
     public List<Classement> Classements { get; set; } = [];
 
-    public List<PersonnageHistorique> Mercenaires { get; set; } = [];
-    public int? CommandantId { get; set; }
-    public PersonnageHistorique? Commandant { get; set; }
-    public List<PersonnageHistorique> Androides { get; set; } = [];
+    public List<PersonnageClassement> Mercenaires { get; set; } = [];
+    public PersonnageClassement? Commandant { get; set; }
+    public List<PersonnageClassement> Androides { get; set; } = [];
 
     public int PuissanceTotale { get; set; }
 

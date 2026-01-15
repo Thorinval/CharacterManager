@@ -32,7 +32,7 @@ public partial class Classements
     internal int nbAndroidsMax = 0;
     internal InputFile? inputFileRef;
 
-    internal Personnage Commandant => historique.Commandant ?? new Personnage { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
+    internal PersonnageClassement Commandant => historique.Commandant ?? new PersonnageClassement { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
 
     internal HistoriqueClassement historique = new();
 

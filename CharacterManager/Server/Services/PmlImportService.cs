@@ -536,6 +536,11 @@ public class PmlImportService(ApplicationDbContext context) : PmlServiceBase(con
         }
     }
 
+    private static new PersonnageClassement ConvertToPersonnageHistorique(Personnage personnage)
+    {
+        return PersonnageClassement.FromPersonnage(personnage);
+    }
+
     private static void ImportHistoriquePieces(XElement element, HistoriqueClassement historiqueClassement)
     {
         var piecesElement = element.Element(AppConstants.XmlElements.Pieces);

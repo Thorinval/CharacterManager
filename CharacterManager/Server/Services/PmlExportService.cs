@@ -191,7 +191,7 @@ public class PmlExportService(ApplicationDbContext context, ILogger<PmlExportSer
         writer.WriteEndElement();
     }
 
-    private static void ExportHistoriqueCommandantElement(XmlWriter writer, PersonnageHistorique? commandant)
+    private static void ExportHistoriqueCommandantElement(XmlWriter writer, PersonnageClassement? commandant)
     {
         if (commandant != null)
         {
@@ -200,7 +200,7 @@ public class PmlExportService(ApplicationDbContext context, ILogger<PmlExportSer
             {
                 writer.WriteAttributeString(AppConstants.XmlElements.Id, commandant.Id.ToString());
             }
-            WritePersonnageData(writer, commandant);
+            WritePersonnageClassementData(writer, commandant);
             writer.WriteEndElement();
         }
     }
@@ -218,7 +218,7 @@ public class PmlExportService(ApplicationDbContext context, ILogger<PmlExportSer
         }
     }
 
-    private static void ExportListAndroides(XmlWriter writer, List<PersonnageHistorique> listAndroides)
+    private static void ExportListAndroides(XmlWriter writer, List<PersonnageClassement> listAndroides)
     {
         if (listAndroides.Count != 0)
         {
@@ -230,14 +230,14 @@ public class PmlExportService(ApplicationDbContext context, ILogger<PmlExportSer
                 {
                     writer.WriteAttributeString(AppConstants.XmlElements.Id, androide.Id.ToString());
                 }
-                WritePersonnageData(writer, androide);
+                WritePersonnageClassementData(writer, androide);
                 writer.WriteEndElement();
             }
             writer.WriteEndElement();
         }
     }
 
-    private static void ExportListMercenaires(XmlWriter writer, List<PersonnageHistorique> listMercenaires)
+    private static void ExportListMercenaires(XmlWriter writer, List<PersonnageClassement> listMercenaires)
     {
         if (listMercenaires.Count != 0)
         {
@@ -249,7 +249,7 @@ public class PmlExportService(ApplicationDbContext context, ILogger<PmlExportSer
                 {
                     writer.WriteAttributeString(AppConstants.XmlElements.Id, mercenaire.Id.ToString());
                 }
-                WritePersonnageData(writer, mercenaire);
+                WritePersonnageClassementData(writer, mercenaire);
                 writer.WriteEndElement();
             }
             writer.WriteEndElement();
@@ -455,6 +455,19 @@ public class PmlExportService(ApplicationDbContext context, ILogger<PmlExportSer
             writer.WriteElementString(AppConstants.XmlElements.TypeAttaque, personnage.TypeAttaque.ToString());
             writer.WriteElementString(AppConstants.XmlElements.Selectionne, personnage.Selectionne.ToString());
         }
+    }
+
+    /// <summary>
+    /// Helper method to write PersonnageClassement data to XML
+    /// </summary>
+    private static void WritePersonnageClassementData(XmlWriter writer, PersonnageClassement personnage)
+    {
+        writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
+        writer.WriteElementString(AppConstants.XmlElements.Rarete, personnage.Rarete.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Type, personnage.Type.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Rang, personnage.Rang.ToString());
     }
 
     /// <summary>
