@@ -51,28 +51,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 // Register ProfileService BEFORE PersonnageService (dependency order)
-builder.Services.AddScoped<ProfileService>();
-builder.Services.AddScoped<HistoriqueModificationService>();  // AVANT PersonnageService
-builder.Services.AddScoped<PersonnageService>();
-builder.Services.AddScoped(provider => new PmlImportService(
-    provider.GetRequiredService<ApplicationDbContext>(),
-    provider.GetRequiredService<HistoriqueModificationService>()));
-builder.Services.AddScoped<PmlExportService>();
-builder.Services.AddScoped<HistoriqueClassementService>();
-builder.Services.AddScoped<HistoriqueLigueService>();
-builder.Services.AddScoped<CapaciteService>();
-builder.Services.AddScoped<ClientLocalizationService>();
-
-builder.Services.AddSingleton<AppVersionService>();
-builder.Services.AddSingleton<LocalizationService>();
-builder.Services.AddSingleton<LanguageContextService>();  // Service de contexte de langue
-builder.Services.AddSingleton<AdultModeNotificationService>();  // Service singleton pour notification mode adulte
-builder.Services.AddSingleton<IModalService, ModalService>();
-builder.Services.AddScoped<DatabaseInitializationService>();
-
-
-builder.Services.AddHttpClient<UpdateService>();
-builder.Services.AddHttpClient();  // Pour les appels HTTP du ClientLocalizationService
+builder.Services.AddApplicationServices(builder.Environment);
 
 // API controllers (ex: ResourcesController)
 builder.Services.AddControllers();
@@ -200,4 +179,43 @@ static string GenerateSecurePassword()
 
     // Shuffle the password to avoid predictable pattern
     return BitConverter.ToString(data);
+}
+
+namespace CharacterManager.Server.Extensions
+{
+    /// <summary>
+    /// Extension method to register all application services
+    /// </summary>
+    static class ServiceCollectionExtensions
+    {
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IHostEnvironment environment)
+        {
+            // Register scoped services (order matters: ProfileService before PersonnageService)
+            services.AddScoped<ProfileService>();
+            services.AddScoped<HistoriqueModificationService>();  // BEFORE PersonnageService
+            services.AddScoped<PersonnageService>();
+            services.AddScoped(provider => new PmlImportService(
+                provider.GetRequiredService<ApplicationDbContext>(),
+                provider.GetRequiredService<HistoriqueModificationService>()));
+            services.AddScoped<PmlExportService>();
+            services.AddScoped<HistoriqueClassementService>();
+            services.AddScoped<HistoriqueLigueService>();
+            services.AddScoped<CapaciteService>();
+            services.AddScoped<ClientLocalizationService>();
+            services.AddScoped<DatabaseInitializationService>();
+
+            // Register singleton services
+            services.AddSingleton<AppVersionService>();
+            services.AddSingleton<LocalizationService>();
+            services.AddSingleton<LanguageContextService>();
+            services.AddSingleton<AdultModeNotificationService>();
+            services.AddSingleton<IModalService, ModalService>();
+
+            // Register HTTP clients
+            services.AddHttpClient<UpdateService>();
+            services.AddHttpClient();
+
+            return services;
+        }
+    }
 }

@@ -59,7 +59,7 @@ public class HistoriqueModificationServiceTests : IDisposable
                 ChampModifie = "Puissance",
                 AncienneValeur = "3000",
                 NouvelleValeur = "3200",
-                DateModification = new DateTime(2026, 1, 25)
+                DateModification = new DateTime(2026, 1, 25, 0, 0, 0, DateTimeKind.Utc)
             };
             _context.HistoriquesModifications.Add(future);
             await _context.SaveChangesAsync();

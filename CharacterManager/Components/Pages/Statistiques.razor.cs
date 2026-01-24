@@ -95,75 +95,14 @@ public partial class Statistiques : IAsyncDisposable
             if (!dailyData.Any())
                 return;
 
-            // Créer les labels avec le numéro du jour et le mois
             var labels = dailyData.Select(d => FormatDateWithDay(d.Date)).ToList();
-            
-            // Récupérer tous les noms uniques de personnages (seulement ceux avec historique)
-            // En s'assurant qu'ils ont au moins une valeur non-zéro
-            var allPersonnages = dailyData
-                .SelectMany(w => w.LevelsByPersonnage.Keys)
-                .Distinct()
-                .OrderBy(n => n)
-                .ToList();
-
-            // Filtrer pour ne garder que les personnages qui ont réellement des données d'historique
-            var personnagesAvecHistorique = new List<string>();
-            foreach (var personnage in allPersonnages)
-            {
-                var donnees = dailyData.Select(w => 
-                    w.LevelsByPersonnage.ContainsKey(personnage) ? w.LevelsByPersonnage[personnage] : 0
-                ).ToList();
-                
-                // Vérifier que le personnage a au moins une donnée non-zéro
-                if (donnees.Any(d => d > 0))
-                {
-                    personnagesAvecHistorique.Add(personnage);
-                }
-            }
+            var personnagesAvecHistorique = GetPersonnagesWithHistory(dailyData);
 
             if (!personnagesAvecHistorique.Any())
                 return;
 
-            // Générer les couleurs pour les courbes
-            var colors = GenerateColors(personnagesAvecHistorique.Count);
-            
-            var datasets = new List<object>();
-            int minLevel = int.MaxValue;
-            
-            for (int i = 0; i < personnagesAvecHistorique.Count; i++)
-            {
-                var personnageName = personnagesAvecHistorique[i];
-                var data = dailyData.Select(w => 
-                    w.LevelsByPersonnage.ContainsKey(personnageName) ? w.LevelsByPersonnage[personnageName] : 0
-                ).ToList();
+            var datasets = CreateChartDatasets(dailyData, personnagesAvecHistorique, out int minLevel);
 
-                // Calculer le minimum parmi les valeurs non-zéro
-                var nonZeroValues = data.Where(d => d > 0).ToList();
-                if (nonZeroValues.Any())
-                {
-                    minLevel = Math.Min(minLevel, nonZeroValues.Min());
-                }
-
-                datasets.Add(new
-                {
-                    label = personnageName,
-                    data = data,
-                    borderColor = colors[i],
-                    backgroundColor = ColorWithAlpha(colors[i], 0.1),
-                    borderWidth = 2,
-                    fill = false,
-                    spanGaps = true,
-                    pointRadius = 3,
-                    pointHoverRadius = 5,
-                    tension = 0.3
-                });
-            }
-
-            // Si aucun minimum n'a été trouvé, utiliser 0
-            if (minLevel == int.MaxValue)
-                minLevel = 0;
-
-            // Passer les informations des graduations journalières et du minimum à JavaScript
             await chartModule!.InvokeVoidAsync("createLineChart", "chartLevelEvolution", labels, datasets, 
                 new { showDayNumbers = true, minLevel = minLevel });
         }
@@ -171,6 +110,70 @@ public partial class Statistiques : IAsyncDisposable
         {
             Console.WriteLine($"Erreur lors de la création du graphique d'évolution: {ex.Message}");
         }
+    }
+
+    private static List<string> GetPersonnagesWithHistory(List<LevelEvolutionData> dailyData)
+    {
+        var allPersonnages = dailyData
+            .SelectMany(w => w.LevelsByPersonnage.Keys)
+            .Distinct()
+            .OrderBy(n => n)
+            .ToList();
+
+        var personnagesAvecHistorique = new List<string>();
+        foreach (var personnage in allPersonnages)
+        {
+            var donnees = dailyData.Select(w => 
+                w.LevelsByPersonnage.ContainsKey(personnage) ? w.LevelsByPersonnage[personnage] : 0
+            ).ToList();
+            
+            if (donnees.Any(d => d > 0))
+            {
+                personnagesAvecHistorique.Add(personnage);
+            }
+        }
+
+        return personnagesAvecHistorique;
+    }
+
+    private static List<object> CreateChartDatasets(List<LevelEvolutionData> dailyData, List<string> personnages, out int minLevel)
+    {
+        var colors = GenerateColors(personnages.Count);
+        var datasets = new List<object>();
+        minLevel = int.MaxValue;
+        
+        for (int i = 0; i < personnages.Count; i++)
+        {
+            var personnageName = personnages[i];
+            var data = dailyData.Select(w => 
+                w.LevelsByPersonnage.ContainsKey(personnageName) ? w.LevelsByPersonnage[personnageName] : 0
+            ).ToList();
+
+            var nonZeroValues = data.Where(d => d > 0).ToList();
+            if (nonZeroValues.Any())
+            {
+                minLevel = Math.Min(minLevel, nonZeroValues.Min());
+            }
+
+            datasets.Add(new
+            {
+                label = personnageName,
+                data = data,
+                borderColor = colors[i],
+                backgroundColor = ColorWithAlpha(colors[i], 0.1),
+                borderWidth = 2,
+                fill = false,
+                spanGaps = true,
+                pointRadius = 3,
+                pointHoverRadius = 5,
+                tension = 0.3
+            });
+        }
+
+        if (minLevel == int.MaxValue)
+            minLevel = 0;
+
+        return datasets;
     }
 
     private List<LevelEvolutionData> GetLevelEvolutionData()
@@ -235,30 +238,14 @@ public partial class Statistiques : IAsyncDisposable
         return result;
     }
 
-    private string FormatDateWithDay(DateTime date)
+    private static string FormatDateWithDay(DateTime date)
     {
         var monthNames = new[] { "JAN", "FEV", "MAR", "AVR", "MAI", "JUN", "JUL", "AOU", "SEP", "OCT", "NOV", "DEC" };
         var month = monthNames[date.Month - 1];
         return $"{date.Day:D2} {month}";
     }
 
-    private DateTime GetWeekStart(DateTime date)
-    {
-        var diff = date.DayOfWeek - DayOfWeek.Monday;
-        if (diff < 0)
-            diff += 7;
-        return date.AddDays(-diff).Date;
-    }
-
-    private string FormatWeekLabel(DateTime weekStart)
-    {
-        var monthNames = new[] { "JAN", "FEV", "MAR", "AVR", "MAI", "JUN", "JUL", "AOU", "SEP", "OCT", "NOV", "DEC" };
-        var month = monthNames[weekStart.Month - 1];
-        var year = (weekStart.Year % 100).ToString("D2");
-        return $"{month} {year}";
-    }
-
-    private List<string> GenerateColors(int count)
+    private static List<string> GenerateColors(int count)
     {
         var baseColors = new[]
         {
@@ -275,7 +262,7 @@ public partial class Statistiques : IAsyncDisposable
         return colors;
     }
 
-    private string ColorWithAlpha(string hexColor, double alpha)
+    private static string ColorWithAlpha(string hexColor, double alpha)
     {
         // Convert hex color to rgba
         var hex = hexColor.TrimStart('#');

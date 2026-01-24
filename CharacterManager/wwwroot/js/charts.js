@@ -145,7 +145,7 @@ export async function createLineChart(canvasId, labels, datasets, options = {}) 
                 scales: {
                     y: {
                         beginAtZero: false,
-                        min: options.minLevel !== undefined ? options.minLevel : 0,
+                        min: options.minLevel === undefined ? 0 : options.minLevel,
                         title: {
                             display: true,
                             text: 'Niveau'
@@ -173,8 +173,9 @@ export async function createLineChart(canvasId, labels, datasets, options = {}) 
         });
 
         // Appliquer le style en colonnes à la légende
-        if (chart.legend && chart.legend.ctx && chart.legend.ctx.canvas) {
-            const canvasParent = chart.legend.ctx.canvas.parentElement;
+        const legendCanvas = chart.legend?.ctx?.canvas;
+        if (legendCanvas) {
+            const canvasParent = legendCanvas.parentElement;
             if (canvasParent) {
                 const legendContainer = canvasParent.querySelector('[role="region"][aria-label*="legend"]') 
                     || canvasParent.querySelector('ul');

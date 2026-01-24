@@ -7,6 +7,22 @@ using CharacterManager.Server.Constants;
 namespace CharacterManager.Server.Services;
 
 /// <summary>
+/// DTO pour enregistrer une modification d'entité
+/// </summary>
+public class ModificationHistoriqueRequest
+{
+    public TypeEntite TypeEntite { get; set; }
+    public int EntiteId { get; set; }
+    public string NomEntite { get; set; } = string.Empty;
+    public string ChampModifie { get; set; } = string.Empty;
+    public object? AncienneValeur { get; set; }
+    public object? NouvelleValeur { get; set; }
+    public string? Description { get; set; }
+    public DateTime? DateModification { get; set; }
+    public bool EstImportation { get; set; } = false;
+}
+
+/// <summary>
 /// Service de gestion de l'historique des modifications
 /// </summary>
 public class HistoriqueModificationService
@@ -55,6 +71,23 @@ public class HistoriqueModificationService
     /// Si une modification du même type (même TypeEntite, EntiteId, TypeModification et ChampModifie) 
     /// a eu lieu il y a moins de 5 secondes, la ligne existante est mise à jour au lieu d'en ajouter une nouvelle.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "Parameters validated by EF Core")]
+    public async Task EnregistrerModificationAsync(ModificationHistoriqueRequest request)
+    {
+        await EnregistrerModificationInternalAsync(request);
+    }
+
+    /// <summary>
+    /// Enregistre une modification d'entité (surcharge compatible avec signature existante).
+    /// Si une modification du même type (même TypeEntite, EntiteId, TypeModification et ChampModifie) 
+    /// a eu lieu il y a moins de 5 secondes, la ligne existante est mise à jour au lieu d'en ajouter une nouvelle.
+    /// </summary>
+    /// <remarks>
+    /// Cette surcharge maintient la compatibilité arrière. Préférez utiliser la surcharge acceptant ModificationHistoriqueRequest.
+    /// Exceptionnellement conservée avec 9 paramètres pour la rétrocompatibilité - préférer la surcharge avec ModificationHistoriqueRequest.
+    /// </remarks>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "Parameters validated by EF Core")]
+#pragma warning disable S107 // Functions should not have too many parameters
     public async Task EnregistrerModificationAsync(
         TypeEntite typeEntite,
         int entiteId,
@@ -66,15 +99,34 @@ public class HistoriqueModificationService
         DateTime? dateModification = null,
         bool estImportation = false)
     {
-        var maintenant = dateModification ?? DateTime.UtcNow;
+        var request = new ModificationHistoriqueRequest
+        {
+            TypeEntite = typeEntite,
+            EntiteId = entiteId,
+            NomEntite = nomEntite,
+            ChampModifie = champModifie,
+            AncienneValeur = ancienneValeur,
+            NouvelleValeur = nouvelleValeur,
+            Description = description,
+            DateModification = dateModification,
+            EstImportation = estImportation
+        };
+
+        await EnregistrerModificationInternalAsync(request);
+    }
+#pragma warning restore S107
+
+    private async Task EnregistrerModificationInternalAsync(ModificationHistoriqueRequest request)
+    {
+        var maintenant = request.DateModification ?? DateTime.UtcNow;
         var jourUtc = maintenant.Date;
 
         // Cherche une modification existante pour le même jour et le même champ
         var modificationJour = await _context.HistoriquesModifications
-            .Where(h => h.TypeEntite == typeEntite
-                && h.EntiteId == entiteId
+            .Where(h => h.TypeEntite == request.TypeEntite
+                && h.EntiteId == request.EntiteId
                 && h.TypeModification == TypeModification.Modification
-                && h.ChampModifie == champModifie
+                && h.ChampModifie == request.ChampModifie
                 && h.DateModification.Date == jourUtc)
             .OrderByDescending(h => h.DateModification)
             .FirstOrDefaultAsync();
@@ -85,9 +137,9 @@ public class HistoriqueModificationService
             modificationJour.DateModification = maintenant;
             modificationJour.DateMiseAJour = maintenant;
             // On conserve l'ancienne valeur, on ne met à jour que la nouvelle
-            modificationJour.NouvelleValeur = nouvelleValeur != null ? JsonSerializer.Serialize(nouvelleValeur) : null;
-            modificationJour.Description = description ?? $"Modification de {champModifie} pour {nomEntite}";
-            modificationJour.EstImportation = estImportation;
+            modificationJour.NouvelleValeur = request.NouvelleValeur != null ? JsonSerializer.Serialize(request.NouvelleValeur) : null;
+            modificationJour.Description = request.Description ?? $"Modification de {request.ChampModifie} pour {request.NomEntite}";
+            modificationJour.EstImportation = request.EstImportation;
 
             _context.HistoriquesModifications.Update(modificationJour);
         }
@@ -96,18 +148,18 @@ public class HistoriqueModificationService
             // Création d'une nouvelle ligne pour ce jour
             var historique = new HistoriqueModification
             {
-                TypeEntite = typeEntite,
-                EntiteId = entiteId,
-                NomEntite = nomEntite,
+                TypeEntite = request.TypeEntite,
+                EntiteId = request.EntiteId,
+                NomEntite = request.NomEntite,
                 TypeModification = TypeModification.Modification,
                 DateModification = maintenant,
                 DateInsertion = maintenant,
                 DateMiseAJour = maintenant,
-                ChampModifie = champModifie,
-                AncienneValeur = ancienneValeur != null ? JsonSerializer.Serialize(ancienneValeur) : null,
-                NouvelleValeur = nouvelleValeur != null ? JsonSerializer.Serialize(nouvelleValeur) : null,
-                Description = description ?? $"Modification de {champModifie} pour {nomEntite}",
-                EstImportation = estImportation
+                ChampModifie = request.ChampModifie,
+                AncienneValeur = request.AncienneValeur != null ? JsonSerializer.Serialize(request.AncienneValeur) : null,
+                NouvelleValeur = request.NouvelleValeur != null ? JsonSerializer.Serialize(request.NouvelleValeur) : null,
+                Description = request.Description ?? $"Modification de {request.ChampModifie} pour {request.NomEntite}",
+                EstImportation = request.EstImportation
             };
 
             _context.HistoriquesModifications.Add(historique);
@@ -315,80 +367,17 @@ public class HistoriqueModificationService
 
         try
         {
-            var modifications = await JsonSerializer.DeserializeAsync<List<HistoriqueModification>>(jsonStream, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            }) ?? new List<HistoriqueModification>();
-
-            // Traiter dans l'ordre chronologique
+            var modifications = await DeserializeModifications(jsonStream);
+            
             foreach (var modification in modifications.OrderBy(m => m.DateModification))
             {
-                var date = DateOnly.FromDateTime(modification.DateModification);
-                var dataType = modification.ChampModifie ?? modification.TypeModification.ToString();
-                var conflictKey = $"{modification.NomEntite}_{dataType}_{date}";
-
-                // Conflit : personnage manquant
-                if (modification.TypeEntite == TypeEntite.Personnage)
-                {
-                    var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.Nom == modification.NomEntite);
-
-                    if (personnage == null && modification.TypeModification != TypeModification.Suppression)
-                    {
-                        // Vérifier résolution
-                        if (!conflictResolutions.TryGetValue(conflictKey, out var resolved) || !resolved)
-                        {
-                            logs.Add(new ImportLogEntry
-                            {
-                                Level = ImportLogLevel.Warning,
-                                Category = ImportLogCategory.Historique,
-                                DataType = dataType,
-                                Message = $"Modification ignorée (non résolue): {modification.NomEntite} ({dataType}) le {date}"
-                            });
-                            continue;
-                        }
-
-                        // Même résolue, sans personnage on ignore l'insertion
-                        logs.Add(new ImportLogEntry
-                        {
-                            Level = ImportLogLevel.Warning,
-                            Category = ImportLogCategory.Historique,
-                            DataType = dataType,
-                            Message = $"Modification ignorée (personnage inexistant): {modification.NomEntite} ({dataType}) le {date}"
-                        });
-                        continue;
-                    }
-
-                    if (personnage != null)
-                    {
-                        // Appliquer l'entrée en base
-                        await ApplyHistoriqueImport(modification, personnage.Id, logs);
-                        result.SuccessCount++;
-                    }
-                }
+                await ProcessModificationImport(modification, conflictResolutions, result, logs);
             }
 
             result.Logs = logs;
             result.IsSuccess = string.IsNullOrEmpty(result.Error);
 
-            // Rapport des conflits appliqués (ici: ceux marqués comme résolus/ignorés)
-            if (originalConflicts != null)
-            {
-                foreach (var conflict in originalConflicts)
-                {
-                    if (conflictResolutions.TryGetValue(conflict.ConflictKey, out var overwrite))
-                    {
-                        result.ConflictsApplied.Add(new ConflictResolutionApplied
-                        {
-                            PersonnageName = conflict.PersonnageName,
-                            ChampModifie = conflict.ChampModifie,
-                            DateClassement = conflict.DateClassement,
-                            AncienneValeur = conflict.AncienneValeur,
-                            NouvelleValeur = conflict.NouvelleValeur,
-                            Overwritten = overwrite
-                        });
-                    }
-                }
-            }
+            ProcessConflictResolutions(originalConflicts, conflictResolutions, result);
         }
         catch (Exception ex)
         {
@@ -400,6 +389,80 @@ public class HistoriqueModificationService
         return result;
     }
 
+    private static async Task<List<HistoriqueModification>> DeserializeModifications(Stream jsonStream)
+    {
+        return await JsonSerializer.DeserializeAsync<List<HistoriqueModification>>(jsonStream, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        }) ?? new List<HistoriqueModification>();
+    }
+
+    private async Task ProcessModificationImport(HistoriqueModification modification, Dictionary<string, bool> conflictResolutions, ImportResult result, List<ImportLogEntry> logs)
+    {
+        var date = DateOnly.FromDateTime(modification.DateModification);
+        var dataType = modification.ChampModifie ?? modification.TypeModification.ToString();
+        var conflictKey = $"{modification.NomEntite}_{dataType}_{date}";
+
+        if (modification.TypeEntite == TypeEntite.Personnage)
+        {
+            var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.Nom == modification.NomEntite);
+
+            if (personnage == null && modification.TypeModification != TypeModification.Suppression)
+            {
+                HandleMissingPersonnage(modification, conflictKey, conflictResolutions, logs, date, dataType);
+            }
+            else if (personnage != null)
+            {
+                await ApplyHistoriqueImport(modification, personnage.Id, logs);
+                result.SuccessCount++;
+            }
+        }
+    }
+
+    private static void HandleMissingPersonnage(HistoriqueModification modification, string conflictKey, Dictionary<string, bool> conflictResolutions, List<ImportLogEntry> logs, DateOnly date, string dataType)
+    {
+        if (!conflictResolutions.TryGetValue(conflictKey, out var resolved) || !resolved)
+        {
+            logs.Add(new ImportLogEntry
+            {
+                Level = ImportLogLevel.Warning,
+                Category = ImportLogCategory.Historique,
+                DataType = dataType,
+                Message = $"Modification ignorée (non résolue): {modification.NomEntite} ({dataType}) le {date}"
+            });
+            return;
+        }
+
+        logs.Add(new ImportLogEntry
+        {
+            Level = ImportLogLevel.Warning,
+            Category = ImportLogCategory.Historique,
+            DataType = dataType,
+            Message = $"Modification ignorée (personnage inexistant): {modification.NomEntite} ({dataType}) le {date}"
+        });
+    }
+
+    private static void ProcessConflictResolutions(List<ImportConflict>? originalConflicts, Dictionary<string, bool> conflictResolutions, ImportResult result)
+    {
+        if (originalConflicts == null) return;
+
+        foreach (var conflict in originalConflicts)
+        {
+            if (conflictResolutions.TryGetValue(conflict.ConflictKey, out var overwrite))
+            {
+                result.ConflictsApplied.Add(new ConflictResolutionApplied
+                {
+                    PersonnageName = conflict.PersonnageName,
+                    ChampModifie = conflict.ChampModifie,
+                    DateClassement = conflict.DateClassement,
+                    AncienneValeur = conflict.AncienneValeur,
+                    NouvelleValeur = conflict.NouvelleValeur,
+                    Overwritten = overwrite
+                });
+            }
+        }
+    }
+
     private async Task ApplyHistoriqueImport(HistoriqueModification modification, int entiteId, List<ImportLogEntry> logs)
     {
         // Convertir les valeurs JSON en objets pour re-sérialisation
@@ -408,11 +471,25 @@ public class HistoriqueModificationService
 
         if (!string.IsNullOrWhiteSpace(modification.AncienneValeur))
         {
-            try { ancienne = JsonSerializer.Deserialize<object>(modification.AncienneValeur); } catch { }
+            try 
+            { 
+                ancienne = JsonSerializer.Deserialize<object>(modification.AncienneValeur); 
+            } 
+            catch (JsonException)
+            {
+                // Si la désérialisation échoue, on garde la valeur null (valeur invalide ignorée)
+            }
         }
         if (!string.IsNullOrWhiteSpace(modification.NouvelleValeur))
         {
-            try { nouvelle = JsonSerializer.Deserialize<object>(modification.NouvelleValeur); } catch { }
+            try 
+            { 
+                nouvelle = JsonSerializer.Deserialize<object>(modification.NouvelleValeur); 
+            } 
+            catch (JsonException)
+            {
+                // Si la désérialisation échoue, on garde la valeur null (valeur invalide ignorée)
+            }
         }
 
         switch (modification.TypeModification)

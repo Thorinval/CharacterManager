@@ -9,6 +9,34 @@ using System.Text.Json;
 namespace CharacterManager.Server.Services;
 
 /// <summary>
+/// DTO pour les options d'import PML
+/// </summary>
+public class PmlImportOptions
+{
+    public bool ImportInventory { get; set; } = true;
+    public bool ImportTemplates { get; set; } = true;
+    public bool ImportBestSquad { get; set; } = true;
+    public bool ImportHistories { get; set; } = true;
+    public bool ImportLeagueHistory { get; set; } = false;
+}
+
+/// <summary>
+/// DTO pour la création d'une entrée d'historique de modification lors de l'import
+/// </summary>
+public class HistoriqueModificationImportRequest
+{
+    public string NomPersonnage { get; set; } = string.Empty;
+    public string ChampModifie { get; set; } = string.Empty;
+    public int NouvelleValeur { get; set; }
+    public DateOnly DateClassement { get; set; }
+    public List<string> Errors { get; set; } = new();
+    public List<ImportLogEntry>? Logs { get; set; }
+    public ImportLogCategory Category { get; set; }
+    public Dictionary<string, bool>? ConflictResolutions { get; set; }
+    public bool ForceOverwriteSameDate { get; set; } = false;
+}
+
+/// <summary>
 /// Service pour importer les données au format PML (XML personnalisé)
 /// Extension .pml pour les fichiers d'import
 /// Supporte les sections : HistoriqueClassements, inventaire, template
@@ -16,6 +44,11 @@ namespace CharacterManager.Server.Services;
 public class PmlImportService(ApplicationDbContext context, HistoriqueModificationService? historiqueService = null) : PmlServiceBase(context)
 {
     private readonly HistoriqueModificationService? _historiqueService = historiqueService;
+
+    // Constantes pour les types de données dans les logs
+    private const string DataTypePuissance = "Puissance";
+    private const string DataTypeComposition = "Composition";
+    private const string DataTypeClassement = "Classement";
 
     private static void AddLog(List<ImportLogEntry>? logs, ImportLogLevel level, ImportLogCategory category, string dataType, string message, List<string>? legacyErrors = null)
     {
@@ -39,6 +72,23 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
         bool importInventory = true, bool importTemplates = true,
         bool importBestSquad = true, bool importHistories = true, bool importLeagueHistory = false)
     {
+        var options = new PmlImportOptions
+        {
+            ImportInventory = importInventory,
+            ImportTemplates = importTemplates,
+            ImportBestSquad = importBestSquad,
+            ImportHistories = importHistories,
+            ImportLeagueHistory = importLeagueHistory
+        };
+
+        return await ImportPmlAsync(pmlStream, fileName, options);
+    }
+
+    /// <summary>
+    /// Importe les données du format PML (inventaire, templates, etc.)
+    /// </summary>
+    public async Task<ImportResult> ImportPmlAsync(Stream pmlStream, string fileName, PmlImportOptions options)
+    {
         var result = new ImportResult();
         var errors = new List<string>();
         var logs = new List<ImportLogEntry>();
@@ -56,7 +106,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
                 return result;
             }
 
-            result.SuccessCount += await ProcessImportSections(doc.Root, importInventory, importTemplates, importBestSquad, importHistories, importLeagueHistory, errors, logs);
+            result.SuccessCount += await ProcessImportSections(doc.Root, options, errors, logs);
 
             result.Errors = errors;
             result.Logs = logs;
@@ -134,6 +184,91 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
     }
 
     /// <summary>
+    /// Traite un élément d'historique de classement dans le contexte d'une prévisualisation
+    /// </summary>
+    private async Task ProcessPreviewHistoriqueClassementAsync(XElement historiqueClassementElement, List<ImportLogEntry> logs, ImportPreviewResult preview)
+    {
+        var errors = new List<string>();
+        var historiqueClassement = ParseHistoriqueClassementHeader(historiqueClassementElement, errors, logs);
+        if (historiqueClassement == null)
+            return;
+
+        ImportHistoriqueClassements(historiqueClassementElement, historiqueClassement);
+        ImportHistoriqueMercenaires(historiqueClassementElement, historiqueClassement);
+        ImportHistoriqueCommandant(historiqueClassementElement, historiqueClassement);
+        ImportHistoriqueAndroides(historiqueClassementElement, historiqueClassement);
+        ImportHistoriquePieces(historiqueClassementElement, historiqueClassement);
+
+        // Valider la composition du classement
+        if (!ValidateHistoriqueClassementComposition(historiqueClassement, logs, errors))
+            return;
+
+        // Vérifier la présence d'un classement existant pour la même date
+        var sameDateEntries = await _context.HistoriquesClassement
+            .Include(h => h.Classements)
+            .Include(h => h.Commandant)
+            .Include(h => h.Mercenaires)
+            .Include(h => h.Androides)
+            .Include(h => h.Pieces)
+            .Where(h => h.DateEnregistrement == historiqueClassement.DateEnregistrement)
+            .ToListAsync();
+
+        if (sameDateEntries.Any())
+        {
+            if (sameDateEntries.Any(existing => AreClassementsStrictementIdentiques(existing, historiqueClassement)))
+            {
+                AddLog(logs, ImportLogLevel.Warning, ImportLogCategory.Classement, DataTypeClassement, $"Import du {historiqueClassement.DateEnregistrement} ignoré: données identiques déjà présentes.", errors);
+                return;
+            }
+
+            if (!IsBetterRankingForSameDate(historiqueClassement, sameDateEntries))
+            {
+                AddLog(logs, ImportLogLevel.Warning, ImportLogCategory.Classement, DataTypeClassement, $"Import du {historiqueClassement.DateEnregistrement} ignoré: classements identiques ou moins bons que ceux déjà importés ce jour.", errors);
+                return;
+            }
+        }
+
+        // Détecter les conflits sur les historiques de modification
+        var conflictsResult = await DetectHistoriqueConflicts(historiqueClassement);
+        preview.Conflicts.AddRange(conflictsResult.Conflicts);
+
+        AddLog(logs, ImportLogLevel.Ok, ImportLogCategory.Classement, DataTypeClassement, $"Import du {historiqueClassement.DateEnregistrement} prêt à être appliqué.");
+        preview.ValidCount++;
+    }
+
+    /// <summary>
+    /// Valide la composition d'un historique de classement (commandant, mercenaires, androides)
+    /// </summary>
+    private static bool ValidateHistoriqueClassementComposition(HistoriqueClassement historiqueClassement, List<ImportLogEntry> logs, List<string> errors)
+    {
+        if (historiqueClassement.Commandant == null)
+        {
+            AddLog(logs, ImportLogLevel.Error, ImportLogCategory.Commandant, "Structure", $"Import du {historiqueClassement.DateEnregistrement} ignoré: pas de commandant trouvé.", errors);
+            return false;
+        }
+
+        if (historiqueClassement.Commandant.Puissance == 0)
+        {
+            AddLog(logs, ImportLogLevel.Error, ImportLogCategory.Commandant, DataTypePuissance, $"Import du {historiqueClassement.DateEnregistrement} ignoré: la puissance du commandant est 0.", errors);
+            return false;
+        }
+
+        if (historiqueClassement.Mercenaires.Count != 8)
+        {
+            AddLog(logs, ImportLogLevel.Error, ImportLogCategory.Mercenaires, DataTypeComposition, $"Import du {historiqueClassement.DateEnregistrement} ignoré: doit avoir exactement 8 mercenaires, trouvé {historiqueClassement.Mercenaires.Count}.", errors);
+            return false;
+        }
+
+        if (historiqueClassement.Androides.Count != 3)
+        {
+            AddLog(logs, ImportLogLevel.Error, ImportLogCategory.Androides, DataTypeComposition, $"Import du {historiqueClassement.DateEnregistrement} ignoré: doit avoir exactement 3 androides, trouvé {historiqueClassement.Androides.Count}.", errors);
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Prépare un pré-rapport d'import (sans écriture en base) pour les historiques de classement
     /// </summary>
     public async Task<ImportPreviewResult> PreviewPmlClassementsAsync(Stream pmlStream)
@@ -158,73 +293,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
             foreach (var historiqueClassementElement in historiqueClassementElements)
             {
-                var errors = new List<string>();
-                var historiqueClassement = ParseHistoriqueClassementHeader(historiqueClassementElement, errors, logs);
-                if (historiqueClassement == null)
-                    continue;
-
-                ImportHistoriqueClassements(historiqueClassementElement, historiqueClassement);
-                ImportHistoriqueMercenaires(historiqueClassementElement, historiqueClassement);
-                ImportHistoriqueCommandant(historiqueClassementElement, historiqueClassement);
-                ImportHistoriqueAndroides(historiqueClassementElement, historiqueClassement);
-                ImportHistoriquePieces(historiqueClassementElement, historiqueClassement);
-
-                // Valider la composition du classement
-                if (historiqueClassement.Commandant == null)
-                {
-                    AddLog(logs, ImportLogLevel.Error, ImportLogCategory.Commandant, "Structure", $"Import du {historiqueClassement.DateEnregistrement} ignoré: pas de commandant trouvé.", errors);
-                    continue;
-                }
-
-                if (historiqueClassement.Commandant.Puissance == 0)
-                {
-                    AddLog(logs, ImportLogLevel.Error, ImportLogCategory.Commandant, "Puissance", $"Import du {historiqueClassement.DateEnregistrement} ignoré: la puissance du commandant est 0.", errors);
-                    continue;
-                }
-
-                if (historiqueClassement.Mercenaires.Count != 8)
-                {
-                    AddLog(logs, ImportLogLevel.Error, ImportLogCategory.Mercenaires, "Composition", $"Import du {historiqueClassement.DateEnregistrement} ignoré: doit avoir exactement 8 mercenaires, trouvé {historiqueClassement.Mercenaires.Count}.", errors);
-                    continue;
-                }
-
-                if (historiqueClassement.Androides.Count != 3)
-                {
-                    AddLog(logs, ImportLogLevel.Error, ImportLogCategory.Androides, "Composition", $"Import du {historiqueClassement.DateEnregistrement} ignoré: doit avoir exactement 3 androides, trouvé {historiqueClassement.Androides.Count}.", errors);
-                    continue;
-                }
-
-                // Vérifier la présence d'un classement existant pour la même date
-                var sameDateEntries = await _context.HistoriquesClassement
-                    .Include(h => h.Classements)
-                    .Include(h => h.Commandant)
-                    .Include(h => h.Mercenaires)
-                    .Include(h => h.Androides)
-                    .Include(h => h.Pieces)
-                    .Where(h => h.DateEnregistrement == historiqueClassement.DateEnregistrement)
-                    .ToListAsync();
-
-                if (sameDateEntries.Any())
-                {
-                    if (sameDateEntries.Any(existing => AreClassementsStrictementIdentiques(existing, historiqueClassement)))
-                    {
-                        AddLog(logs, ImportLogLevel.Warning, ImportLogCategory.Classement, "Classement", $"Import du {historiqueClassement.DateEnregistrement} ignoré: données identiques déjà présentes.", errors);
-                        continue;
-                    }
-
-                    if (!IsBetterRankingForSameDate(historiqueClassement, sameDateEntries))
-                    {
-                        AddLog(logs, ImportLogLevel.Warning, ImportLogCategory.Classement, "Classement", $"Import du {historiqueClassement.DateEnregistrement} ignoré: classements identiques ou moins bons que ceux déjà importés ce jour.", errors);
-                        continue;
-                    }
-                }
-
-                // Détecter les conflits sur les historiques de modification
-                var conflictsResult = await DetectHistoriqueConflicts(historiqueClassement);
-                preview.Conflicts.AddRange(conflictsResult.Conflicts);
-
-                AddLog(logs, ImportLogLevel.Ok, ImportLogCategory.Classement, "Synthese", $"Import du {historiqueClassement.DateEnregistrement} prêt à être appliqué.");
-                preview.ValidCount++;
+                await ProcessPreviewHistoriqueClassementAsync(historiqueClassementElement, logs, preview);
             }
 
             preview.Logs = logs;
@@ -309,32 +378,31 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
     /// <summary>
     /// Traite toutes les sections d'import
     /// </summary>
-    private async Task<int> ProcessImportSections(XElement root, bool importInventory, bool importTemplates,
-        bool importBestSquad, bool importHistories, bool importLeagueHistory, List<string> errors, List<ImportLogEntry> logs)
+    private async Task<int> ProcessImportSections(XElement root, PmlImportOptions options, List<string> errors, List<ImportLogEntry> logs)
     {
         int totalCount = 0;
 
-        if (importInventory)
+        if (options.ImportInventory)
         {
             totalCount += await ProcessInventorySection(root, errors);
         }
 
-        if (importTemplates)
+        if (options.ImportTemplates)
         {
             totalCount += await ProcessTemplatesSection(root, errors);
         }
 
-        if (importBestSquad)
+        if (options.ImportBestSquad)
         {
             totalCount += await ProcessBestSquadSection(root, errors);
         }
 
-        if (importHistories)
+        if (options.ImportHistories)
         {
             totalCount += await ProcessHistoriesSection(root, errors, logs);
         }
 
-        if (importLeagueHistory)
+        if (options.ImportLeagueHistory)
         {
             totalCount += await ProcessLeagueHistorySection(root, errors);
         }
@@ -397,41 +465,61 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
         foreach (var inventaire in inventaireElements)
         {
-            var personnageElements = inventaire.Name.LocalName.Equals(AppConstants.XmlElements.Personnage, StringComparison.OrdinalIgnoreCase)
-                ? [inventaire]
-                : inventaire.Elements(AppConstants.XmlElements.Personnage);
+            importedCount += await ProcessInventairePersonnagesAsync(inventaire, errors);
+            importedCount += await ProcessLuciHouseSectionAsync(inventaire, errors);
+        }
 
-            foreach (var personnageElement in personnageElements)
+        return importedCount;
+    }
+
+    /// <summary>
+    /// Traite les personnages dans un élément d'inventaire
+    /// </summary>
+    private async Task<int> ProcessInventairePersonnagesAsync(XElement inventaire, List<string> errors)
+    {
+        int importedCount = 0;
+        var personnageElements = inventaire.Name.LocalName.Equals(AppConstants.XmlElements.Personnage, StringComparison.OrdinalIgnoreCase)
+            ? [inventaire]
+            : inventaire.Elements(AppConstants.XmlElements.Personnage);
+
+        foreach (var personnageElement in personnageElements)
+        {
+            try
             {
-                try
+                var personnage = ParsePersonnageFromXml(personnageElement);
+                if (personnage != null)
                 {
-                    var personnage = ParsePersonnageFromXml(personnageElement);
-                    if (personnage != null)
-                    {
-                        var persisted = ImportOrUpdatePersonnage(personnage);
-                        importedCount++;
+                    var persisted = ImportOrUpdatePersonnage(personnage);
+                    importedCount++;
 
-                        if (_historiqueService != null)
-                        {
-                            await _historiqueService.EnregistrerCreationAsync(TypeEntite.Personnage, persisted.Id, persisted.Nom, persisted, "Import inventaire", DateTime.UtcNow, estImportation: true);
-                        }
+                    if (_historiqueService != null)
+                    {
+                        await _historiqueService.EnregistrerCreationAsync(TypeEntite.Personnage, persisted.Id, persisted.Nom, persisted, "Import inventaire", DateTime.UtcNow, estImportation: true);
                     }
                 }
-                catch (Exception ex)
-                {
-                    errors.Add($"{AppConstants.Messages.ErrorImportPersonnageInventaire} {ex.Message}");
-                }
             }
-
-            // Traiter la section Lucie House
-            var lucieHouseElement = inventaire.Name.LocalName.Equals(AppConstants.XmlElements.LucieHouse, StringComparison.OrdinalIgnoreCase)
-                ? new[] { inventaire }
-                : inventaire.Elements(AppConstants.XmlElements.LucieHouse);
-
-            foreach (var lucieElement in lucieHouseElement)
+            catch (Exception ex)
             {
-                importedCount += await ImportLucieHouseAsync(lucieElement, errors);
+                errors.Add($"{AppConstants.Messages.ErrorImportPersonnageInventaire} {ex.Message}");
             }
+        }
+
+        return importedCount;
+    }
+
+    /// <summary>
+    /// Traite la section Lucie House dans un élément d'inventaire
+    /// </summary>
+    private async Task<int> ProcessLuciHouseSectionAsync(XElement inventaire, List<string> errors)
+    {
+        int importedCount = 0;
+        var lucieHouseElement = inventaire.Name.LocalName.Equals(AppConstants.XmlElements.LucieHouse, StringComparison.OrdinalIgnoreCase)
+            ? new[] { inventaire }
+            : inventaire.Elements(AppConstants.XmlElements.LucieHouse);
+
+        foreach (var lucieElement in lucieHouseElement)
+        {
+            importedCount += await ImportLucieHouseAsync(lucieElement, errors);
         }
 
         return importedCount;
@@ -685,19 +773,19 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
                 if (historiqueClassement.Commandant.Puissance == 0)
                 {
-                    AddLog(logs, ImportLogLevel.Error, ImportLogCategory.Commandant, "Puissance", $"Import du {historiqueClassement.DateEnregistrement} ignoré: la puissance du commandant est 0.", errors);
+                    AddLog(logs, ImportLogLevel.Error, ImportLogCategory.Commandant, DataTypePuissance, $"Import du {historiqueClassement.DateEnregistrement} ignoré: la puissance du commandant est 0.", errors);
                     continue;
                 }
 
                 if (historiqueClassement.Mercenaires.Count != 8)
                 {
-                    AddLog(logs, ImportLogLevel.Error, ImportLogCategory.Mercenaires, "Composition", $"Import du {historiqueClassement.DateEnregistrement} ignoré: doit avoir exactement 8 mercenaires, trouvé {historiqueClassement.Mercenaires.Count}.", errors);
+                    AddLog(logs, ImportLogLevel.Error, ImportLogCategory.Mercenaires, DataTypeComposition, $"Import du {historiqueClassement.DateEnregistrement} ignoré: doit avoir exactement 8 mercenaires, trouvé {historiqueClassement.Mercenaires.Count}.", errors);
                     continue;
                 }
 
                 if (historiqueClassement.Androides.Count != 3)
                 {
-                    AddLog(logs, ImportLogLevel.Error, ImportLogCategory.Androides, "Composition", $"Import du {historiqueClassement.DateEnregistrement} ignoré: doit avoir exactement 3 androides, trouvé {historiqueClassement.Androides.Count}.", errors);
+                    AddLog(logs, ImportLogLevel.Error, ImportLogCategory.Androides, DataTypeComposition, $"Import du {historiqueClassement.DateEnregistrement} ignoré: doit avoir exactement 3 androides, trouvé {historiqueClassement.Androides.Count}.", errors);
                     continue;
                 }
 
@@ -718,14 +806,14 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
                     // Si les données sont strictement identiques, ne rien importer
                     if (sameDateEntries.Any(existing => AreClassementsStrictementIdentiques(existing, historiqueClassement)))
                     {
-                        AddLog(logs, ImportLogLevel.Warning, ImportLogCategory.Classement, "Classement", $"Import du {historiqueClassement.DateEnregistrement} ignoré: données identiques déjà présentes.", errors);
+                        AddLog(logs, ImportLogLevel.Warning, ImportLogCategory.Classement, DataTypeClassement, $"Import du {historiqueClassement.DateEnregistrement} ignoré: données identiques déjà présentes.", errors);
                         continue;
                     }
 
                     // Si la date est identique mais que les classements ne sont pas meilleurs, ignorer
                     if (!IsBetterRankingForSameDate(historiqueClassement, sameDateEntries))
                     {
-                        AddLog(logs, ImportLogLevel.Warning, ImportLogCategory.Classement, "Classement", $"Import du {historiqueClassement.DateEnregistrement} ignoré: classements identiques ou moins bons que ceux déjà importés ce jour.", errors);
+                        AddLog(logs, ImportLogLevel.Warning, ImportLogCategory.Classement, DataTypeClassement, $"Import du {historiqueClassement.DateEnregistrement} ignoré: classements identiques ou moins bons que ceux déjà importés ce jour.", errors);
                         continue;
                     }
 
@@ -763,70 +851,87 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
         foreach (var historiqueClassementElement in historiqueClassementElements)
         {
-            try
-            {
-                var historiqueClassement = ParseHistoriqueClassementHeader(historiqueClassementElement, errors, logs);
-                if (historiqueClassement == null)
-                    continue;
-
-                ImportHistoriqueClassements(historiqueClassementElement, historiqueClassement);
-                ImportHistoriqueMercenaires(historiqueClassementElement, historiqueClassement);
-                ImportHistoriqueCommandant(historiqueClassementElement, historiqueClassement);
-                ImportHistoriqueAndroides(historiqueClassementElement, historiqueClassement);
-                ImportHistoriquePieces(historiqueClassementElement, historiqueClassement);
-
-                // Valider la composition du classement
-                if (historiqueClassement.Commandant == null || historiqueClassement.Commandant.Puissance == 0 ||
-                    historiqueClassement.Mercenaires.Count != 8 || historiqueClassement.Androides.Count != 3)
-                    continue;
-
-                bool forceOverwriteSameDate = false;
-
-                var sameDateEntries = await _context.HistoriquesClassement
-                    .Include(h => h.Classements)
-                    .Include(h => h.Commandant)
-                    .Include(h => h.Mercenaires)
-                    .Include(h => h.Androides)
-                    .Include(h => h.Pieces)
-                    .Where(h => h.DateEnregistrement == historiqueClassement.DateEnregistrement)
-                    .ToListAsync();
-
-                if (sameDateEntries.Any())
-                {
-                    if (sameDateEntries.Any(existing => AreClassementsStrictementIdentiques(existing, historiqueClassement)))
-                    {
-                        AddLog(logs, ImportLogLevel.Warning, ImportLogCategory.Classement, "Classement", $"Import du {historiqueClassement.DateEnregistrement} ignoré: données identiques déjà présentes.", errors);
-                        continue;
-                    }
-
-                    if (!IsBetterRankingForSameDate(historiqueClassement, sameDateEntries))
-                    {
-                        AddLog(logs, ImportLogLevel.Warning, ImportLogCategory.Classement, "Classement", $"Import du {historiqueClassement.DateEnregistrement} ignoré: classements identiques ou moins bons que ceux déjà importés ce jour.", errors);
-                        continue;
-                    }
-
-                    forceOverwriteSameDate = true;
-                }
-
-                _context.HistoriquesClassement.Add(historiqueClassement);
-                await _context.SaveChangesAsync();
-                importedCount++;
-
-                AddLog(logs, ImportLogLevel.Ok, ImportLogCategory.Classement, "Synthese", $"Import du {historiqueClassement.DateEnregistrement} validé (résolution de conflits).");
-
-                // Créer les entrées d'historique de modification avec résolutions des conflits
-                if (_historiqueService != null)
-                {
-                    await CreateHistoriqueModificationsForClassement(historiqueClassement, errors, logs, conflictResolutions, forceOverwriteSameDate);
-                }
-            }
-            catch (Exception ex)
-            {
-                AddLog(logs, ImportLogLevel.Error, ImportLogCategory.Classement, "Exception", $"Erreur lors de l'import d'un historique de classement: {ex.Message}", errors);
-            }
+            importedCount += await ProcessHistoriqueWithConflictResolutionAsync(historiqueClassementElement, errors, logs, conflictResolutions);
         }
 
         return importedCount;
+    }
+
+    /// <summary>
+    /// Traite un historique de classement avec résolution de conflits
+    /// </summary>
+    private async Task<int> ProcessHistoriqueWithConflictResolutionAsync(XElement historiqueClassementElement, List<string> errors, List<ImportLogEntry> logs, Dictionary<string, bool> conflictResolutions)
+    {
+        try
+        {
+            var historiqueClassement = ParseHistoriqueClassementHeader(historiqueClassementElement, errors, logs);
+            if (historiqueClassement == null)
+                return 0;
+
+            ImportHistoriqueClassements(historiqueClassementElement, historiqueClassement);
+            ImportHistoriqueMercenaires(historiqueClassementElement, historiqueClassement);
+            ImportHistoriqueCommandant(historiqueClassementElement, historiqueClassement);
+            ImportHistoriqueAndroides(historiqueClassementElement, historiqueClassement);
+            ImportHistoriquePieces(historiqueClassementElement, historiqueClassement);
+
+            // Valider la composition du classement
+            if (!ValidateHistoriqueClassementComposition(historiqueClassement, logs, errors))
+                return 0;
+
+            var (shouldContinue, forceOverwriteSameDate) = await ValidateExistingClassementsForSameDate(historiqueClassement, logs, errors);
+            if (!shouldContinue)
+                return 0;
+
+            _context.HistoriquesClassement.Add(historiqueClassement);
+            await _context.SaveChangesAsync();
+
+            AddLog(logs, ImportLogLevel.Ok, ImportLogCategory.Classement, "Synthese", $"Import du {historiqueClassement.DateEnregistrement} validé (résolution de conflits).");
+
+            // Créer les entrées d'historique de modification avec résolutions des conflits
+            if (_historiqueService != null)
+            {
+                await CreateHistoriqueModificationsForClassement(historiqueClassement, errors, logs, conflictResolutions, forceOverwriteSameDate);
+            }
+
+            return 1;
+        }
+        catch (Exception ex)
+        {
+            AddLog(logs, ImportLogLevel.Error, ImportLogCategory.Classement, "Exception", $"Erreur lors de l'import d'un historique de classement: {ex.Message}", errors);
+            return 0;
+        }
+    }
+
+    /// <summary>
+    /// Valide les classements existants à la même date
+    /// </summary>
+    private async Task<(bool shouldContinue, bool forceOverwriteSameDate)> ValidateExistingClassementsForSameDate(HistoriqueClassement historiqueClassement, List<ImportLogEntry> logs, List<string> errors)
+    {
+        var sameDateEntries = await _context.HistoriquesClassement
+            .Include(h => h.Classements)
+            .Include(h => h.Commandant)
+            .Include(h => h.Mercenaires)
+            .Include(h => h.Androides)
+            .Include(h => h.Pieces)
+            .Where(h => h.DateEnregistrement == historiqueClassement.DateEnregistrement)
+            .ToListAsync();
+
+        if (!sameDateEntries.Any())
+            return (true, false);
+
+        if (sameDateEntries.Any(existing => AreClassementsStrictementIdentiques(existing, historiqueClassement)))
+        {
+            AddLog(logs, ImportLogLevel.Warning, ImportLogCategory.Classement, DataTypeClassement, $"Import du {historiqueClassement.DateEnregistrement} ignoré: données identiques déjà présentes.", errors);
+            return (false, false);
+        }
+
+        if (!IsBetterRankingForSameDate(historiqueClassement, sameDateEntries))
+        {
+            AddLog(logs, ImportLogLevel.Warning, ImportLogCategory.Classement, DataTypeClassement, $"Import du {historiqueClassement.DateEnregistrement} ignoré: classements identiques ou moins bons que ceux déjà importés ce jour.", errors);
+            return (false, false);
+        }
+
+        return (true, true);
     }
 
     /// <summary>
@@ -927,41 +1032,82 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
     /// </summary>
     private async Task TryCreateHistoriqueModifications(PersonnageClassement personnage, DateOnly dateClassement, List<string> errors, List<ImportLogEntry> logs, ImportLogCategory category, Dictionary<string, bool>? conflictResolutions = null, bool forceOverwriteSameDate = false)
     {
-        await TryCreateHistoriqueModification(personnage.Nom, "Puissance", personnage.Puissance, dateClassement, errors, logs, category, conflictResolutions, forceOverwriteSameDate);
-        await TryCreateHistoriqueModification(personnage.Nom, "Niveau", personnage.Niveau, dateClassement, errors, logs, category, conflictResolutions, forceOverwriteSameDate);
-        await TryCreateHistoriqueModification(personnage.Nom, "Rang", personnage.Rang, dateClassement, errors, logs, category, conflictResolutions, forceOverwriteSameDate);
+        var request = new HistoriqueModificationImportRequest
+        {
+            NomPersonnage = personnage.Nom,
+            ChampModifie = "Puissance",
+            NouvelleValeur = personnage.Puissance,
+            DateClassement = dateClassement,
+            Errors = errors,
+            Logs = logs,
+            Category = category,
+            ConflictResolutions = conflictResolutions,
+            ForceOverwriteSameDate = forceOverwriteSameDate
+        };
+        await TryCreateHistoriqueModification(request);
+
+        request.ChampModifie = "Niveau";
+        request.NouvelleValeur = personnage.Niveau;
+        await TryCreateHistoriqueModification(request);
+
+        request.ChampModifie = "Rang";
+        request.NouvelleValeur = personnage.Rang;
+        await TryCreateHistoriqueModification(request);
     }
 
-    /// <summary>
-    /// Crée les entrées d'historique de modification pour chaque personnage du classement
-    /// </summary>
     /// <summary>
     /// Tente de créer une entrée d'historique de modification si elle n'existe pas déjà
     /// Si le personnage n'existe pas, il est créé automatiquement en inventaire
     /// Si aucune modification n'existe pour ce champ avant la date de l'import, l'ancienne valeur = nouvelle valeur
     /// </summary>
-    private async Task TryCreateHistoriqueModification(string nomPersonnage, string champModifie, 
-        int nouvelleValeur, DateOnly dateClassement, List<string> errors, List<ImportLogEntry>? logs, ImportLogCategory category, Dictionary<string, bool>? conflictResolutions = null, bool forceOverwriteSameDate = false)
+    /// <summary>
+    /// Traite la création d'une modification d'historique pour un personnage spécifique
+    /// </summary>
+    private async Task ProcessHistoriqueModificationForPersonnageAsync(HistoriqueModificationImportRequest request)
     {
         if (_historiqueService == null)
             return;
 
-        var dateTimeClassement = dateClassement.ToDateTime(TimeOnly.MinValue);
+        var dateTimeClassement = request.DateClassement.ToDateTime(TimeOnly.MinValue);
         var typeEntite = TypeEntite.Personnage;
 
-        // Chercher le personnage pour obtenir son ID
-        var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.Nom == nomPersonnage);
+        var personnage = await GetOrCreatePersonnageForModification(request);
+        if (personnage == null)
+            return;
+
+        // Vérifier si une modification existe déjà ce jour-là
+        var existingModification = await _context.HistoriquesModifications
+            .Where(h => h.TypeEntite == typeEntite
+                && h.EntiteId == personnage.Id
+                && h.ChampModifie == request.ChampModifie
+                && h.DateModification.Date == dateTimeClassement.Date)
+            .FirstOrDefaultAsync();
+
+        if (existingModification != null)
+        {
+            await HandleExistingModification(existingModification, request, typeEntite, personnage.Id, dateTimeClassement);
+            return;
+        }
+
+        await CreateNewModification(request, typeEntite, personnage.Id, dateTimeClassement);
+    }
+
+    /// <summary>
+    /// Obtient ou crée un personnage pour la modification d'historique
+    /// </summary>
+    private async Task<Personnage?> GetOrCreatePersonnageForModification(HistoriqueModificationImportRequest request)
+    {
+        var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.Nom == request.NomPersonnage);
         
-        // Si le personnage n'existe pas, le créer automatiquement
         if (personnage == null)
         {
             personnage = new Personnage
             {
-                Nom = nomPersonnage,
+                Nom = request.NomPersonnage,
                 Niveau = 1,
                 Type = TypePersonnage.Mercenaire,
                 Rang = 1,
-                Puissance = nouvelleValeur,
+                Puissance = request.NouvelleValeur,
                 Rarete = Rarete.Inconnu,
                 Role = Role.Inconnu,
                 Faction = Faction.Inconnu,
@@ -969,97 +1115,112 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
             };
             _context.Personnages.Add(personnage);
             await _context.SaveChangesAsync();
-            AddLog(logs, ImportLogLevel.Warning, category, "Creation", $"Personnage créé automatiquement lors de l'import: {nomPersonnage}", errors);
+            AddLog(request.Logs, ImportLogLevel.Warning, request.Category, "Creation", $"Personnage créé automatiquement lors de l'import: {request.NomPersonnage}", request.Errors);
         }
 
-        // Vérifier si une modification existe déjà ce jour-là
-        var existingModification = await _context.HistoriquesModifications
-            .Where(h => h.TypeEntite == typeEntite
-                && h.EntiteId == personnage.Id
-                && h.ChampModifie == champModifie
-                && h.DateModification.Date == dateTimeClassement.Date)
-            .FirstOrDefaultAsync();
+        return personnage;
+    }
 
-        if (existingModification != null)
+    /// <summary>
+    /// Gère le cas où une modification existe déjà pour le même jour
+    /// </summary>
+    private async Task HandleExistingModification(HistoriqueModification existingModification, HistoriqueModificationImportRequest request, TypeEntite typeEntite, int personnageId, DateTime dateTimeClassement)
+    {
+        var conflictKey = $"{request.NomPersonnage}_{request.ChampModifie}_{request.DateClassement}";
+        var shouldOverwrite = request.ForceOverwriteSameDate;
+
+        if (!shouldOverwrite && request.ConflictResolutions != null && request.ConflictResolutions.TryGetValue(conflictKey, out var overwriteDecision))
         {
-            var conflictKey = $"{nomPersonnage}_{champModifie}_{dateClassement}";
-            var shouldOverwrite = forceOverwriteSameDate;
-
-            if (!shouldOverwrite && conflictResolutions != null && conflictResolutions.TryGetValue(conflictKey, out var overwriteDecision))
-            {
-                shouldOverwrite = overwriteDecision;
-            }
-
-            if (shouldOverwrite)
-            {
-                // Chercher la dernière valeur connue avant cette date pour mettre à jour l'ancienne valeur
-                var previousMod = await _context.HistoriquesModifications
-                    .Where(h => h.TypeEntite == typeEntite
-                        && h.EntiteId == personnage.Id
-                        && h.ChampModifie == champModifie
-                        && h.DateModification.Date < dateTimeClassement.Date)
-                    .OrderByDescending(h => h.DateModification)
-                    .FirstOrDefaultAsync();
-
-                // Si pas de valeur précédente, l'ancienne = la nouvelle
-                object? ancienneVal = previousMod?.NouvelleValeur != null 
-                    ? JsonSerializer.Deserialize<object>(previousMod.NouvelleValeur)
-                    : nouvelleValeur;
-
-                existingModification.AncienneValeur = ancienneVal != null ? JsonSerializer.Serialize(ancienneVal) : null;
-                existingModification.NouvelleValeur = JsonSerializer.Serialize(nouvelleValeur);
-                existingModification.DateMiseAJour = dateTimeClassement;
-                _context.HistoriquesModifications.Update(existingModification);
-                await _context.SaveChangesAsync();
-                AddLog(logs, ImportLogLevel.Warning, category, champModifie, $"Modification du {champModifie} pour {nomPersonnage} mise à jour pour le {dateClassement}.", errors);
-
-                await UpdateNextFutureModification(typeEntite, personnage.Id, champModifie, dateTimeClassement, nouvelleValeur, errors);
-            }
-            else
-            {
-                AddLog(logs, ImportLogLevel.Warning, category, champModifie, $"Modification du {champModifie} pour {nomPersonnage} existe déjà le {dateClassement}. Cette modification n'a pas été importée.", errors);
-            }
-            return;
+            shouldOverwrite = overwriteDecision;
         }
 
-        // Chercher la dernière valeur connue avant cette date
-        var previousModification = await _context.HistoriquesModifications
+        if (shouldOverwrite)
+        {
+            await UpdateExistingModification(existingModification, request, typeEntite, personnageId, dateTimeClassement);
+        }
+        else
+        {
+            AddLog(request.Logs, ImportLogLevel.Warning, request.Category, request.ChampModifie, $"Modification du {request.ChampModifie} pour {request.NomPersonnage} existe déjà le {request.DateClassement}. Cette modification n'a pas été importée.", request.Errors);
+        }
+    }
+
+    /// <summary>
+    /// Met à jour une modification d'historique existante
+    /// </summary>
+    private async Task UpdateExistingModification(HistoriqueModification existingModification, HistoriqueModificationImportRequest request, TypeEntite typeEntite, int personnageId, DateTime dateTimeClassement)
+    {
+        var previousMod = await _context.HistoriquesModifications
             .Where(h => h.TypeEntite == typeEntite
-                && h.EntiteId == personnage.Id
-                && h.ChampModifie == champModifie
+                && h.EntiteId == personnageId
+                && h.ChampModifie == request.ChampModifie
                 && h.DateModification.Date < dateTimeClassement.Date)
             .OrderByDescending(h => h.DateModification)
             .FirstOrDefaultAsync();
 
-        // Si pas de valeur précédente, l'ancienne = la nouvelle
+        object? ancienneVal = previousMod?.NouvelleValeur != null 
+            ? JsonSerializer.Deserialize<object>(previousMod.NouvelleValeur)
+            : request.NouvelleValeur;
+
+        existingModification.AncienneValeur = ancienneVal != null ? JsonSerializer.Serialize(ancienneVal) : null;
+        existingModification.NouvelleValeur = JsonSerializer.Serialize(request.NouvelleValeur);
+        existingModification.DateMiseAJour = dateTimeClassement;
+        _context.HistoriquesModifications.Update(existingModification);
+        await _context.SaveChangesAsync();
+        AddLog(request.Logs, ImportLogLevel.Warning, request.Category, request.ChampModifie, $"Modification du {request.ChampModifie} pour {request.NomPersonnage} mise à jour pour le {request.DateClassement}.", request.Errors);
+
+        await UpdateNextFutureModification(typeEntite, personnageId, request.ChampModifie, dateTimeClassement, request.NouvelleValeur);
+    }
+
+    /// <summary>
+    /// Crée une nouvelle modification d'historique
+    /// </summary>
+    private async Task CreateNewModification(HistoriqueModificationImportRequest request, TypeEntite typeEntite, int personnageId, DateTime dateTimeClassement)
+    {
+        var previousModification = await _context.HistoriquesModifications
+            .Where(h => h.TypeEntite == typeEntite
+                && h.EntiteId == personnageId
+                && h.ChampModifie == request.ChampModifie
+                && h.DateModification.Date < dateTimeClassement.Date)
+            .OrderByDescending(h => h.DateModification)
+            .FirstOrDefaultAsync();
+
         object? ancienneValeurNew = previousModification?.NouvelleValeur != null 
             ? JsonSerializer.Deserialize<object>(previousModification.NouvelleValeur)
-            : nouvelleValeur;
+            : request.NouvelleValeur;
 
-        // Créer l'entrée d'historique de modification
         try
         {
-            await _historiqueService.EnregistrerModificationAsync(
+            await _historiqueService!.EnregistrerModificationAsync(
                 typeEntite,
-                personnage.Id,
-                nomPersonnage,
-                champModifie,
+                personnageId,
+                request.NomPersonnage,
+                request.ChampModifie,
                 ancienneValeurNew,
-                nouvelleValeur,
-                $"Mise à jour du classement du {dateClassement}",
+                request.NouvelleValeur,
+                $"Mise à jour du classement du {request.DateClassement}",
                 dateTimeClassement,
-                estImportation: true); // Marquer comme importation
+                estImportation: true);
 
-            AddLog(logs, ImportLogLevel.Ok, category, champModifie, $"{champModifie} de {nomPersonnage} enregistré pour le {dateClassement} (valeur {nouvelleValeur}).");
+            AddLog(request.Logs, ImportLogLevel.Ok, request.Category, request.ChampModifie, $"{request.ChampModifie} de {request.NomPersonnage} enregistré pour le {request.DateClassement} (valeur {request.NouvelleValeur}).");
 
-            // Mettre à jour la prochaine modification future si elle existe
-            await UpdateNextFutureModification(typeEntite, personnage.Id, champModifie, dateTimeClassement, nouvelleValeur, errors);
+            await UpdateNextFutureModification(typeEntite, personnageId, request.ChampModifie, dateTimeClassement, request.NouvelleValeur);
         }
         catch (Exception ex)
         {
-            AddLog(logs, ImportLogLevel.Error, category, champModifie, $"Erreur création historique pour {nomPersonnage}: {ex.Message}", errors);
+            AddLog(request.Logs, ImportLogLevel.Error, request.Category, request.ChampModifie, $"Erreur création historique pour {request.NomPersonnage}: {ex.Message}", request.Errors);
         }
     }
+
+    private async Task TryCreateHistoriqueModification(HistoriqueModificationImportRequest request)
+    {
+        await ProcessHistoriqueModificationForPersonnageAsync(request);
+    }
+
+    /// <summary>
+    /// Tente de créer une entrée d'historique de modification si elle n'existe pas déjà (surcharge compatible).
+    /// Si le personnage n'existe pas, il est créé automatiquement en inventaire
+    /// Si aucune modification n'existe pour ce champ avant la date de l'import, l'ancienne valeur = nouvelle valeur
+    /// </summary>
 
     private static bool AreClassementsStrictementIdentiques(HistoriqueClassement existing, HistoriqueClassement incoming)
     {
@@ -1103,7 +1264,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
     /// Met à jour l'ancienne valeur de la prochaine modification future
     /// </summary>
     private async Task UpdateNextFutureModification(TypeEntite typeEntite, int entiteId, string champModifie, 
-        DateTime dateTimeClassement, int nouvelleValeur, List<string> errors)
+        DateTime dateTimeClassement, int nouvelleValeur)
     {
         // Chercher la prochaine modification la plus proche dans le futur
         var nextModification = await _context.HistoriquesModifications
@@ -1121,102 +1282,6 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
             nextModification.DateMiseAJour = DateTime.UtcNow;
             _context.HistoriquesModifications.Update(nextModification);
             await _context.SaveChangesAsync();
-        }
-    }
-    /// Crée les entrées d'historique de modification pour chaque personnage du classement (ancien)
-    /// </summary>
-    private async Task OldCreateHistoriqueModificationsForClassement(HistoriqueClassement historiqueClassement, List<string> errors, List<ImportLogEntry>? logs = null)
-    {
-        if (_historiqueService == null)
-            return;
-
-        var dateClassement = historiqueClassement.DateEnregistrement;
-        
-        // Vérifier et créer l'historique pour le commandant
-        if (historiqueClassement.Commandant != null)
-        {
-            await TryCreateHistoriqueModification(
-                historiqueClassement.Commandant.Nom,
-                "Puissance",
-                historiqueClassement.Commandant.Puissance,
-                dateClassement,
-                errors,
-                logs,
-                ImportLogCategory.Commandant);
-            await TryCreateHistoriqueModification(
-                historiqueClassement.Commandant.Nom,
-                "Niveau",
-                historiqueClassement.Commandant.Niveau,
-                dateClassement,
-                errors,
-                logs,
-                ImportLogCategory.Commandant);
-            await TryCreateHistoriqueModification(
-                historiqueClassement.Commandant.Nom,
-                "Rang",
-                historiqueClassement.Commandant.Rang,
-                dateClassement,
-                errors,
-                logs,
-                ImportLogCategory.Commandant);
-        }
-
-        // Vérifier et créer l'historique pour chaque mercenaire
-        foreach (var mercenaire in historiqueClassement.Mercenaires)
-        {
-            await TryCreateHistoriqueModification(
-                mercenaire.Nom,
-                "Puissance",
-                mercenaire.Puissance,
-                dateClassement,
-                errors,
-                logs,
-                ImportLogCategory.Mercenaires);
-            await TryCreateHistoriqueModification(
-                mercenaire.Nom,
-                "Niveau",
-                mercenaire.Niveau,
-                dateClassement,
-                errors,
-                logs,
-                ImportLogCategory.Mercenaires);
-            await TryCreateHistoriqueModification(
-                mercenaire.Nom,
-                "Rang",
-                mercenaire.Rang,
-                dateClassement,
-                errors,
-                logs,
-                ImportLogCategory.Mercenaires);
-        }
-
-        // Vérifier et créer l'historique pour chaque androïde
-        foreach (var androide in historiqueClassement.Androides)
-        {
-            await TryCreateHistoriqueModification(
-                androide.Nom,
-                "Puissance",
-                androide.Puissance,
-                dateClassement,
-                errors,
-                logs,
-                ImportLogCategory.Androides);
-            await TryCreateHistoriqueModification(
-                androide.Nom,
-                "Niveau",
-                androide.Niveau,
-                dateClassement,
-                errors,
-                logs,
-                ImportLogCategory.Androides);
-            await TryCreateHistoriqueModification(
-                androide.Nom,
-                "Rang",
-                androide.Rang,
-                dateClassement,
-                errors,
-                logs,
-                ImportLogCategory.Androides);
         }
     }
 

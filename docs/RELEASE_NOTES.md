@@ -67,16 +67,18 @@
 🔒 - **Validation stricte** : Impossible d'appliquer l'import tant que tous les conflits ne sont pas résolus
 
 📄 - **Rapport final détaillé** : Après import, affichage d'un rapport complet avec :
-  - Statistiques de résolution (X conflits résolus, Y nouvelles valeurs appliquées, Z anciennes conservées)
-  - Tableau des résolutions avec badges visuels (✅ Nouvelle appliquée / 🔄 Ancienne conservée)
-  - Mise en valeur des valeurs appliquées (vert gras) et ignorées (barré gris)
-  - Rapport d'import détaillé avec logs groupés par catégorie et type de données
+
+- Statistiques de résolution (X conflits résolus, Y nouvelles valeurs appliquées, Z anciennes conservées)
+- Tableau des résolutions avec badges visuels (✅ Nouvelle appliquée / 🔄 Ancienne conservée)
+- Mise en valeur des valeurs appliquées (vert gras) et ignorées (barré gris)
+- Rapport d'import détaillé avec logs groupés par catégorie et type de données
 
 💾 - **Nouveaux modèles de données** :
-  - `ImportPreviewResult` : Résultat de prévisualisation avec logs et conflits
-  - `ImportConflict` : Représentation d'un conflit avec anciennes/nouvelles valeurs
-  - `ConflictResolutionApplied` : Résolution appliquée avec indication si écrasée ou conservée
-  - `ImportLogEntry` : Log structuré avec niveau, catégorie, type de données et message
+
+- `ImportPreviewResult` : Résultat de prévisualisation avec logs et conflits
+- `ImportConflict` : Représentation d'un conflit avec anciennes/nouvelles valeurs
+- `ConflictResolutionApplied` : Résolution appliquée avec indication si écrasée ou conservée
+- `ImportLogEntry` : Log structuré avec niveau, catégorie, type de données et message
 
 ### 🔍 Logging
 
@@ -101,8 +103,9 @@
 ✅ - **Tous les tests passent** : 78/78 tests réussis avec les nouvelles dépendances
 
 ✅ - **Couverture de tests augmentée** : Ajout de 2 nouveaux tests pour:
-  - Détection des conflits d'import d'historique (personnage manquant)
-  - Recalculation des anciennes valeurs lorsqu'une modification antérieure arrive
+
+- Détection des conflits d'import d'historique (personnage manquant)
+- Recalculation des anciennes valeurs lorsqu'une modification antérieure arrive
 
 ✅ - **Total tests unitaires** : 23/23 tests HistoriqueModificationServiceTests passent
 
