@@ -438,8 +438,8 @@ public partial class Inventaire : IAsyncDisposable
     private List<Personnage> SortByPuissance(List<Personnage> source, Dictionary<TypePersonnage, int> typeOrder)
     {
         return sortAscending
-            ? [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Type == TypePersonnage.Commandant ? p.Puissance + p.Rang * 20 : p.Puissance)]
-            : [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Type == TypePersonnage.Commandant ? p.Puissance + p.Rang * 20 : p.Puissance)];
+            ? [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Type == TypePersonnage.Commandant ? p.PuissanceReelleCommandant() : p.Puissance)]
+            : [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Type == TypePersonnage.Commandant ? p.PuissanceReelleCommandant() : p.Puissance)];
     }
 
     private List<Personnage> SortByName(List<Personnage> source, Dictionary<TypePersonnage, int> typeOrder)

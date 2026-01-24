@@ -165,6 +165,7 @@
                                     <div>Niv: @Commandant.Niveau</div>
                                     <div class="card-stars">@TemplateEscouade.GetRankStars(Commandant.Rang)</div>
                                     <div>Puiss: @Commandant.Puissance</div>
+                                    <div>Puiss réelle: @(Commandant?.PuissanceReelleCommandant() ?? 0)</div>
                                 </div>
                             </div>
                         </div>

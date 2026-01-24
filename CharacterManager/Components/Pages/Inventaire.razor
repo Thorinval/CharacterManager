@@ -174,22 +174,25 @@
                                 @onclick="() => ViewPersonnage(personnage.Id)" style="cursor: pointer;"
                                 onerror="this.onerror=null; this.src='/api/v1/resources/interface/default_portrait.png';" />
                             <div class="personnage-card-info">
-                                <div class="editable-field">
-                                    <label for=@( $"niveauInput_p{personnage.Id}")>
-                                        <LocalizedText Key="inventory.level" />:
-                                    </label>
-                                    <input id=@($"niveauInput_p{personnage.Id}") type="number" min="1" max="200"
-                                        class="form-control form-control-sm" value="@personnage.Niveau"
-                                        @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Niveau", e.Value?.ToString() ?? "1"))"
-                                        @onclick:stopPropagation="true" />
-                                </div>
-                                <div class="editable-field">
-                                    <label for=@($"selectionneInput_p{personnage.Id}")>
-                                        <LocalizedText Key="inventory.selected" />
-                                    </label>
-                                    <InputCheckbox id=@($"selectionneInput_p{personnage.Id}") Value="@personnage.Selectionne"
-                                        ValueChanged="@( (bool value) => OnSelectionneChanged(personnage.Id, value) )"
-                                        ValueExpression="@(() => personnage.Selectionne)" @onclick:stopPropagation="true" />
+                                <div class="editable-field" style="display:flex;align-items:center;gap:16px;flex-wrap:nowrap;min-width:0;">
+                                    <div style="display:flex;align-items:center;gap:4px;min-width:0;">
+                                        <label for=@($"selectionneInput_p{personnage.Id}") style="margin:0;white-space:nowrap;flex-shrink:0;">
+                                            @LocalizationService.GetKeyValue("inventory.inTeam")
+                                        </label>
+                                        <InputCheckbox id=@($"selectionneInput_p{personnage.Id}") Value="@personnage.Selectionne"
+                                            ValueChanged="@( (bool value) => OnSelectionneChanged(personnage.Id, value) )"
+                                            ValueExpression="@(() => personnage.Selectionne)" @onclick:stopPropagation="true" style="width:auto;flex-shrink:0;" />
+                                    </div>
+                                    <div style="display:flex;align-items:center;gap:2px;min-width:0;">
+                                        <label for=@($"niveauInput_p{personnage.Id}") style="margin:0;white-space:nowrap;flex-shrink:0;">
+                                            <LocalizedText Key="inventory.level" />:
+                                        </label>
+                                        <input id=@($"niveauInput_p{personnage.Id}") type="number" min="1" max="200"
+                                            class="form-control form-control-sm" style="width:70px;flex-shrink:0;"
+                                            value="@personnage.Niveau"
+                                            @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Niveau", e.Value?.ToString() ?? "1"))"
+                                            @onclick:stopPropagation="true" />
+                                    </div>
                                 </div>
 
                                 @if (personnage.Type != TypePersonnage.Androide)
@@ -215,17 +218,21 @@
                                     <label for=@($"puissanceInput_p{personnage.Id}")>
                                         <LocalizedText Key="inventory.power" />:
                                     </label>
-                                    <div class="input-group input-group-sm">
+                                    <div class="input-group input-group-sm" style="align-items:center;">
                                         <button class="btn btn-outline-secondary" type="button"
                                             @onclick="() => ChangePuissance(personnage.Id, -5)"
                                             @onclick:stopPropagation="true">-</button>
                                         <input id=@($"puissanceInput_p{personnage.Id}") type="number" min="0"
-                                            class="form-control form-control-sm text-center" value="@personnage.Puissance"
+                                            class="form-control form-control-sm text-center" style="max-width:120px;" value="@personnage.Puissance"
                                             @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Puissance", e.Value?.ToString() ?? "0"))"
                                             @onclick:stopPropagation="true" />
                                         <button class="btn btn-outline-secondary" type="button"
                                             @onclick="() => ChangePuissance(personnage.Id, 5)"
                                             @onclick:stopPropagation="true">+</button>
+                                        @if (personnage.Type == TypePersonnage.Commandant)
+                                        {
+                                            <span class="ms-2" style="white-space:nowrap;">(<strong>@personnage.PuissanceReelleCommandant()</strong>)</span>
+                                        }
                                     </div>
                                 </div>
 
@@ -262,6 +269,11 @@
                                 <span>Rareté: @personnage.Rarete</span>
                                 <span class="list-separator">|</span>
                                 <span>Puissance: @personnage.Puissance</span>
+                                @if (personnage.Type == TypePersonnage.Commandant)
+                                {
+                                    <span class="list-separator">|</span>
+                                    <span>Puissance réelle: @personnage.PuissanceReelleCommandant()</span>
+                                }
                                 <span class="list-separator">|</span>
                                 <span>Niveau: @personnage.Niveau</span>
                                 <span class="list-separator">|</span>

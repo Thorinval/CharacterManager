@@ -45,6 +45,11 @@ public class PersonnageClassement
     /// Puissance du personnage au moment du classement
     /// </summary>
     public int Puissance { get; set; }
+
+    public int PuissanceReelleCommandant()
+    {
+        return Puissance + (Rang * 20);
+    }
     
     // Helper methods for UI compatibility
     /// <summary>

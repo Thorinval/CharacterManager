@@ -89,6 +89,7 @@
                                                     <div>Niv: @historique.Commandant?.Niveau</div>
                                                     <div class="card-stars">@CharacterManager.Components.Pages.TemplateEscouade.GetRankStars(historique.Commandant?.Rang ?? 0)</div>
                                                     <div>Puiss: @historique.Commandant?.Puissance</div>
+                                                    <div>Puiss réelle: @(historique.Commandant != null ? historique.Commandant.PuissanceReelleCommandant() : 0)</div>
                                                 </div>
                                             </div>
                                         </td>
