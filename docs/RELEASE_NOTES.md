@@ -5,7 +5,17 @@
 
 ---
 
-## 🚧 1.1.0 (En développement - 14 Janvier 2026)
+## 🚧 1.1.0 (En développement - 24 Janvier 2026)
+
+### ⚔️ Fonctionnalités Commandants
+
+⚡ - **Puissance réelle des commandants** : Ajout du calcul automatique de la puissance réelle des commandants (Puissance + Rang × 20)
+
+📊 - **Affichage puissance réelle** : La puissance réelle s'affiche en gras entre parenthèses à côté de la puissance de base sur toutes les pages
+
+🔄 - **Tri par puissance réelle** : Le tri par puissance dans l'inventaire utilise maintenant la puissance réelle pour les commandants
+
+📍 - **Affichage multi-pages** : Puissance réelle visible sur Inventaire (grille/liste), Escouade, Meilleure Escouade, Classements, et modal de création de classement
 
 ### 🎨 Interface Utilisateur
 
@@ -17,6 +27,14 @@
 
 🎯 - **Icônes cohérentes** : Standardisation de la couleur des icônes (#667eea) et du texte (#1e293b) sur tous les headers
 
+✏️ - **Label "Dans l'équipe"** : Remplacement du label "sélectionné" par "Dans l'équipe" avec checkbox inline
+
+📏 - **Optimisation de l'espace** : Alignement de "Dans l'équipe" et "Niveau" sur la même ligne avec espacement optimisé
+
+🔢 - **Ajustements des inputs** : Réduction de la largeur du champ Niveau (70px) et agrandissement du champ Puissance (120px)
+
+🖼️ - **Images des cartes** : Ajustement de la hauteur des images (350px) avec object-fit cover pour éviter les troncatures et bandes blanches
+
 ### 🏠 Maison de Lucie
 
 ✏️ - **Édition des pièces** : Possibilité de modifier les pièces directement dans l'interface avec mode édition interactif
@@ -26,6 +44,10 @@
 🎯 - **Champs éditables** : Niveau, Puissance Tactique, Puissance Stratégique, et état Selectionnée
 
 🖌️ - **Feedback visuel** : Bordure bleue sur les cartes en mode édition, boutons Sauvegarder/Annuler
+
+### 🌍 Localisation
+
+🔤 - **Nouvelle clé "Dans l'équipe"** : Ajout de la clé `inventory.inTeam` en français ("Dans l'équipe") et anglais ("In team")
 
 ### 🔍 Logging
 

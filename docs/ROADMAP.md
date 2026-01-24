@@ -46,6 +46,10 @@ Cette roadmap présente les fonctionnalités prévues et les améliorations futu
 - [x] Amélioration de la précision des logs EF Core avec contexte
 - [x] Correction des erreurs JSON dans les fichiers de localisation
 - [x] Uniformisation des titres de pages avec icônes cohérentes
+- [x] Calcul et affichage de la puissance réelle des commandants (Puissance + Rang × 20)
+- [x] Optimisation de l'interface inventaire (alignements, espacements, tailles inputs)
+- [x] Amélioration de l'affichage des images de cartes (hauteur optimisée, suppression des bandes blanches)
+- [x] Ajout de la localisation "Dans l'équipe" (FR/EN)
 - [ ] Associer les capacités aux pièces Lucie
 - [ ] Export/Import des associations capacités-personnages
 - [ ] Thèmes sombres/clairs personnalisables
