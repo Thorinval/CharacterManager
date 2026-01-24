@@ -115,6 +115,19 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Graphique Evolution des Niveaux -->
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <i class="bi bi-graph-up"></i>
+                        <h2>
+                            <LocalizedText Key="statistics.chartTitleLevelEvolution" />
+                        </h2>
+                    </div>
+                    <div class="stat-card-body">
+                        <canvas id="chartLevelEvolution"></canvas>
+                    </div>
+                </div>
             </div>
 
             <!-- Statistiques additionnelles -->
@@ -122,39 +135,46 @@
                 <div class="stat-box">
                     <i class="bi bi-people-fill"></i>
                     <div class="stat-box-content">
-                        <h3>
-                            <LocalizedText Key="statistics.totalMercenaries" />
+                        <h3 style="font-size: 1.4em; margin-bottom: 0.8rem; color: #667eea;">
+                            <strong><LocalizedText Key="statistics.mercenaires" /></strong>
                         </h3>
-                        <p class="stat-box-value">@mercenaires.Count()</p>
+                        <p class="stat-box-value" style="font-size: 0.95em; margin-bottom: 0.4rem;"><strong>Total:</strong> @GetTotalMercenaires()</p>
+                        <p class="stat-box-value" style="font-size: 0.95em; margin-bottom: 0.4rem;"><strong>
+                            <LocalizedText Key="statistics.mostPowerful" /> : @GetMaxPower() (@GetMostPowerfulName())
+                        </strong></p>
+                        <p class="stat-box-value" style="font-size: 0.95em; margin-bottom: 0;"><strong>
+                            <LocalizedText Key="statistics.leastPowerful" /> : @GetMinPower() (@GetLeastPowerfulName())
+                        </strong></p>
                     </div>
                 </div>
                 <div class="stat-box">
-                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-lightning-charge-fill"></i>
                     <div class="stat-box-content">
-                        <h3>
-                            <LocalizedText Key="statistics.averagePower" />
+                        <h3 style="font-size: 1.4em; margin-bottom: 0.8rem; color: #667eea;">
+                            <strong><LocalizedText Key="statistics.power" /></strong>
                         </h3>
-                        <p class="stat-box-value">@((int)mercenaires.Average(m => m.Puissance))</p>
+                        <p class="stat-box-value" style="font-size: 0.95em; margin-bottom: 0.4rem;"><strong>Moyenne:</strong> @GetAveragePower()</p>
+                        <p class="stat-box-value" style="font-size: 0.95em; margin-bottom: 0.4rem;"><strong>
+                            <LocalizedText Key="statistics.mostPowerful" /> : @GetMaxPower() (@GetMostPowerfulName())
+                        </strong></p>
+                        <p class="stat-box-value" style="font-size: 0.95em; margin-bottom: 0;"><strong>
+                            <LocalizedText Key="statistics.leastPowerful" /> : @GetMinPower() (@GetLeastPowerfulName())
+                        </strong></p>
                     </div>
                 </div>
                 <div class="stat-box">
-                    <i class="bi bi-trophy-fill"></i>
+                    <i class="bi bi-bar-chart-line-fill"></i>
                     <div class="stat-box-content">
-                        <h3>
-                            <LocalizedText Key="statistics.mostPowerful" />
+                        <h3 style="font-size: 1.4em; margin-bottom: 0.8rem; color: #667eea;">
+                            <strong><LocalizedText Key="statistics.level" /></strong>
                         </h3>
-                        <p class="stat-box-value">@mercenaires.OrderByDescending(m => m.Puissance).First().Nom</p>
-                        <p class="stat-box-subvalue">(@mercenaires.Max(m => m.Puissance))</p>
-                    </div>
-                </div>
-                <div class="stat-box">
-                    <i class="bi bi-arrow-down-circle-fill"></i>
-                    <div class="stat-box-content">
-                        <h3>
-                            <LocalizedText Key="statistics.leastPowerful" />
-                        </h3>
-                        <p class="stat-box-value">@mercenaires.OrderBy(m => m.Puissance).First().Nom</p>
-                        <p class="stat-box-subvalue">(@mercenaires.Min(m => m.Puissance))</p>
+                        <p class="stat-box-value" style="font-size: 0.95em; margin-bottom: 0.4rem;"><strong>Moyenne:</strong> @GetAverageLevel()</p>
+                        <p class="stat-box-value" style="font-size: 0.95em; margin-bottom: 0.4rem;"><strong>
+                            <LocalizedText Key="statistics.highestLevel" /> : @GetMaxLevel() (@GetHighestLevelName())
+                        </strong></p>
+                        <p class="stat-box-value" style="font-size: 0.95em; margin-bottom: 0;"><strong>
+                            <LocalizedText Key="statistics.lowestLevel" /> : @GetMinLevel() (@GetLowestLevelName())
+                        </strong></p>
                     </div>
                 </div>
             </div>
@@ -173,4 +193,21 @@
     private Dictionary<TypeAttaque, int> statsTypeAttaque = new();
     private Dictionary<Faction, int> statsFaction = new();
     private Dictionary<int, int> statsRang = new();
+
+    // Méthodes helper pour les statistiques mercenaires
+    private int GetTotalMercenaires() => mercenaires?.Count() ?? 0;
+    
+    // Méthodes helper pour les statistiques de puissance
+    private int GetAveragePower() => mercenaires?.Any() == true ? (int)mercenaires.Average(m => m.Puissance) : 0;
+    private int GetMaxPower() => mercenaires?.Any() == true ? mercenaires.Max(m => m.Puissance) : 0;
+    private int GetMinPower() => mercenaires?.Any() == true ? mercenaires.Min(m => m.Puissance) : 0;
+    private string GetMostPowerfulName() => mercenaires?.Any() == true ? mercenaires.OrderByDescending(m => m.Puissance).First().Nom : "N/A";
+    private string GetLeastPowerfulName() => mercenaires?.Any() == true ? mercenaires.OrderBy(m => m.Puissance).First().Nom : "N/A";
+
+    // Méthodes helper pour les statistiques de niveau
+    private int GetAverageLevel() => mercenaires?.Any() == true ? (int)mercenaires.Average(m => m.Niveau) : 0;
+    private int GetMaxLevel() => mercenaires?.Any() == true ? mercenaires.Max(m => m.Niveau) : 0;
+    private int GetMinLevel() => mercenaires?.Any() == true ? mercenaires.Min(m => m.Niveau) : 0;
+    private string GetHighestLevelName() => mercenaires?.Any() == true ? mercenaires.OrderByDescending(m => m.Niveau).First().Nom : "N/A";
+    private string GetLowestLevelName() => mercenaires?.Any() == true ? mercenaires.OrderBy(m => m.Niveau).First().Nom : "N/A";
 }

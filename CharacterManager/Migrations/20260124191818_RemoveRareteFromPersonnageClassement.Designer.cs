@@ -3,6 +3,7 @@ using System;
 using CharacterManager.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CharacterManager.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260124191818_RemoveRareteFromPersonnageClassement")]
+    partial class RemoveRareteFromPersonnageClassement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -176,9 +179,6 @@ namespace CharacterManager.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("EntiteId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("EstImportation")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("NomEntite")

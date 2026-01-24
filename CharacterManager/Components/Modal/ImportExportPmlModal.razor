@@ -5,6 +5,8 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.JSInterop
 @using System.IO
+@using System.Linq
+@using System.Collections.Generic
 @using CharacterManager.Components
 @inject PmlImportService PmlImportService
 @inject PmlExportService PmlExportService
@@ -38,17 +40,6 @@
                                         <LocalizedText Key="importExportPml.success" />
                                     </h4>
                                     <p>@importResult?.SuccessCount <LocalizedText Key="importExportPml.imported" /></p>
-                                    @if (importResult?.Errors.Count > 0)
-                                    {
-                                        <hr>
-                                        <p><strong><LocalizedText Key="importExportPml.warnings" /></strong></p>
-                                        <ul>
-                                            @foreach (var error in importResult.Errors)
-                                            {
-                                                <li>@error</li>
-                                            }
-                                        </ul>
-                                    }
                                 }
                                 else
                                 {
@@ -58,6 +49,197 @@
                                     <p>@importResult?.Error</p>
                                 }
                             </div>
+
+                            @if (importResult?.ConflictsApplied.Any() == true)
+                            {
+                                <div class="border rounded p-3 mb-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                    <div class="d-flex align-items-center gap-2 mb-3">
+                                        <span class="msr text-warning" style="font-size: 1.5rem;">task_alt</span>
+                                        <h5 class="mb-0">Résolutions de conflits appliquées</h5>
+                                    </div>
+                                    <div class="alert alert-info mb-3">
+                                        <strong>@importResult.ConflictsApplied.Count</strong> conflit(s) résolu(s) :
+                                        <strong>@importResult.ConflictsApplied.Count(r => r.Overwritten)</strong> nouvelle(s) valeur(s) appliquée(s),
+                                        <strong>@importResult.ConflictsApplied.Count(r => !r.Overwritten)</strong> ancienne(s) valeur(s) conservée(s)
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered table-hover bg-white">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Personnage</th>
+                                                    <th>Champ modifié</th>
+                                                    <th>Date</th>
+                                                    <th>Ancienne valeur</th>
+                                                    <th>Nouvelle valeur</th>
+                                                    <th class="text-center">Résolution</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var resolution in importResult.ConflictsApplied)
+                                                {
+                                                    <tr>
+                                                        <td class="fw-semibold">@resolution.PersonnageName</td>
+                                                        <td>@resolution.ChampModifie</td>
+                                                        <td>@resolution.DateClassement.ToString("dd/MM/yyyy")</td>
+                                                        <td class="@(resolution.Overwritten ? "text-muted text-decoration-line-through" : "text-success fw-semibold")">
+                                                            @resolution.AncienneValeur
+                                                        </td>
+                                                        <td class="@(resolution.Overwritten ? "text-success fw-semibold" : "text-muted text-decoration-line-through")">
+                                                            @resolution.NouvelleValeur
+                                                        </td>
+                                                        <td class="text-center">
+                                                            @if (resolution.Overwritten)
+                                                            {
+                                                                <span class="badge bg-success">
+                                                                    <span class="msr">check_circle</span> Nouvelle appliquée
+                                                                </span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge bg-secondary">
+                                                                    <span class="msr">history</span> Ancienne conservée
+                                                                </span>
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            }
+
+                            @if (importResult?.Logs.Any() == true)
+                            {
+                                <div class="border rounded p-3 bg-light">
+                                    <h5 class="mb-3">Rapport d'import détaillé</h5>
+                                    @foreach (var categoryGroup in importResult.Logs.GroupBy(l => l.Category).OrderBy(g => g.Key.ToString()))
+                                    {
+                                        <div class="mb-2">
+                                            <div class="fw-bold text-uppercase small">@GetCategoryLabel(categoryGroup.Key)</div>
+                                            @foreach (var dataGroup in categoryGroup.GroupBy(l => l.DataType).OrderBy(g => g.Key))
+                                            {
+                                                <div class="ms-3 mb-1">
+                                                    <div class="fw-semibold">@dataGroup.Key</div>
+                                                    <ul class="list-unstyled ms-2 mb-2">
+                                                        @foreach (var log in dataGroup)
+                                                        {
+                                                            <li class="d-flex align-items-center gap-2">
+                                                                <span class="badge rounded-pill @GetBadgeClass(log)">@GetBadgeLabel(log)</span>
+                                                                <span>@log.Message</span>
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else if (importResult?.Errors.Count > 0)
+                            {
+                                <div class="alert alert-warning">
+                                    <p class="mb-2"><strong><LocalizedText Key="importExportPml.warnings" /></strong></p>
+                                    <ul class="mb-0">
+                                        @foreach (var error in importResult.Errors)
+                                        {
+                                            <li>@error</li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        }
+                        else if (previewComplete)
+                        {
+                            <div class="alert alert-info" role="alert">
+                                <h4 class="alert-heading">Pré-rapport d'import</h4>
+                                <p>@(previewResult?.ValidCount ?? 0) entrées prêtes à être importées.</p>
+                                @if (!string.IsNullOrEmpty(previewResult?.Error))
+                                {
+                                    <p class="text-danger mb-0">@previewResult.Error</p>
+                                }
+                            </div>
+
+                            @if (previewResult?.Logs.Any() == true)
+                            {
+                                <div class="border rounded p-3 bg-light mb-3">
+                                    <h5 class="mb-3">Rapport détaillé</h5>
+                                    @foreach (var categoryGroup in previewResult.Logs.GroupBy(l => l.Category).OrderBy(g => g.Key.ToString()))
+                                    {
+                                        <div class="mb-2">
+                                            <div class="fw-bold text-uppercase small">@GetCategoryLabel(categoryGroup.Key)</div>
+                                            @foreach (var dataGroup in categoryGroup.GroupBy(l => l.DataType).OrderBy(g => g.Key))
+                                            {
+                                                <div class="ms-3 mb-1">
+                                                    <div class="fw-semibold">@dataGroup.Key</div>
+                                                    <ul class="list-unstyled ms-2 mb-2">
+                                                        @foreach (var log in dataGroup)
+                                                        {
+                                                            <li class="d-flex align-items-center gap-2">
+                                                                <span class="badge rounded-pill @GetBadgeClass(log)">@GetBadgeLabel(log)</span>
+                                                                <span>@log.Message</span>
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            @if (HasConflicts)
+                            {
+                                <div class="d-flex align-items-center gap-2 mb-3">
+                                    <button class="btn btn-warning" @onclick="() => showConflictResolver = true">
+                                        Résoudre les conflits (@ConflictsTotal)
+                                    </button>
+                                    <span class="text-muted">Conflits non résolus: @ConflictsUnresolved / @ConflictsTotal</span>
+                                </div>
+                            }
+
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-success" @onclick="ApplyImport" disabled="@(!CanApplyImport)">
+                                    Accepter l'intégration
+                                </button>
+                                <button class="btn btn-secondary" @onclick="ResetPreview">Annuler</button>
+                            </div>
+
+                            @if (showConflictResolver && HasConflicts)
+                            {
+                                <div class="card mt-3">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div>Résolution des conflits (@ConflictsUnresolved non résolus / @ConflictsResolved résolus)</div>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-sm btn-outline-success" @onclick="() => ResolveAllConflicts(true)">Tout valider</button>
+                                            <button class="btn btn-sm btn-outline-danger" @onclick="() => ResolveAllConflicts(false)">Tout refuser</button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body" style="max-height: 320px; overflow:auto;">
+                                        @foreach (var conflict in previewResult!.Conflicts)
+                                        {
+                                            <div class="border-bottom pb-2 mb-2">
+                                                <div class="fw-semibold">@conflict.PersonnageName (@conflict.ChampModifie) - @conflict.DateClassement</div>
+                                                <div class="text-muted small">Ancienne: @conflict.AncienneValeur | Nouvelle: @conflict.NouvelleValeur</div>
+                                                <div class="mt-1 d-flex gap-3">
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="@($"c_{conflict.ConflictKey}")" value="overwrite" checked="@(IsConflictResolved(conflict.ConflictKey, true))" @onchange="_ => SetConflictDecision(conflict.ConflictKey, true)">
+                                                        <label class="form-check-label">Accepter la nouvelle valeur</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="@($"c_{conflict.ConflictKey}")" value="keep" checked="@(IsConflictResolved(conflict.ConflictKey, false))" @onchange="_ => SetConflictDecision(conflict.ConflictKey, false)">
+                                                        <label class="form-check-label">Conserver l'existant</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="card-footer d-flex justify-content-end gap-2">
+                                        <button class="btn btn-secondary" @onclick="() => showConflictResolver = false">Annuler</button>
+                                        <button class="btn btn-primary" disabled="@(ConflictsUnresolved > 0)" @onclick="() => showConflictResolver = false">OK</button>
+                                    </div>
+                                </div>
+                            }
                         }
                         else
                         {
@@ -78,7 +260,7 @@
 
                             @if (activeTab == "import")
                             {
-                                <form @onsubmit="HandleImport">
+                                <form @onsubmit="HandlePreview">
                                     @if (!string.IsNullOrEmpty(lastImportedFileName))
                                     {
                                         <div class="alert alert-secondary">
@@ -117,7 +299,7 @@
 
                                     <div class="mb-3">
                                         <label for="pmlFile" class="form-label"><LocalizedText Key="importExportPml.selectFile" /></label>
-                                        <InputFile class="form-control" id="pmlFile" accept=".pml,.xml" OnChange="@OnFileSelected" disabled="@isImporting" />
+                                        <InputFile class="form-control" id="pmlFile" accept=".pml,.xml" OnChange="OnFileSelected" disabled="@isImporting" />
                                         <small class="text-muted"><LocalizedText Key="importExportPml.expectedFormat" /></small>
                                     </div>
 
@@ -137,12 +319,12 @@
                                         </div>
                                     }
 
-                                    <button type="submit" class="btn btn-success" disabled="@(selectedFile == null || isImporting || !HasSelectedImportTypes())">
+                                    <button type="submit" class="btn btn-success" disabled="@(uploadedBytes == null || isImporting || !HasSelectedImportTypes())">
                                         @if (isImporting)
                                         {
                                             <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                         }
-                                        <LocalizedText Key="importExportPml.importButton" />
+                                        Prévisualiser l'import
                                     </button>
                                 </form>
                             }
@@ -200,12 +382,17 @@
 @code {
     private IBrowserFile? selectedFile;
     private string? selectedFileName;
+    private byte[]? uploadedBytes;
     private bool isImporting = false;
     private bool importComplete = false;
+    private bool previewComplete = false;
+    private bool showConflictResolver = false;
     private ImportResult? importResult;
+    private ImportPreviewResult? previewResult;
     private string? lastImportedFileName;
     private string activeTab = "import";
     private PmlExportOptions exportOptions = new();
+    private Dictionary<string, bool?> conflictDecisions = new();
 
     // Import checkboxes
     private bool importInventory
@@ -277,42 +464,112 @@
         lastImportedFileName = await PmlImportService.GetLastImportedFileName();
     }
 
-    private void OnFileSelected(InputFileChangeEventArgs e)
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
     {
         selectedFile = e.File;
         selectedFileName = e.File.Name;
+
+        using var ms = new MemoryStream();
+        await e.File.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(ms);
+        uploadedBytes = ms.ToArray();
+        previewComplete = false;
+        importComplete = false;
+        previewResult = null;
+        conflictDecisions.Clear();
     }
 
     private bool HasSelectedImportTypes() => exportOptions.HasSelectedExports();
     private bool HasSelectedExportTypes() => exportOptions.HasSelectedExports();
 
-    private async Task HandleImport()
+    private async Task HandlePreview()
     {
-        if (selectedFile == null || !HasSelectedImportTypes())
+        if (uploadedBytes == null || !HasSelectedImportTypes())
         {
             return;
         }
 
         isImporting = true;
+        importComplete = false;
+        previewComplete = false;
+        previewResult = null;
+        conflictDecisions.Clear();
 
         try
         {
-            using var stream = selectedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
-            importResult = await PmlImportService.ImportPmlAsync(
-                stream,
-                selectedFileName ?? "",
-                exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_INVENTORY),
-                exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_TEMPLATES),
-                exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD),
-                exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_HISTORIES),
-                exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY)
-            );
+            using var stream = new MemoryStream(uploadedBytes);
+            previewResult = await PmlImportService.PreviewPmlClassementsAsync(stream);
+            previewComplete = true;
+
+            if (previewResult.HasConflicts)
+            {
+                conflictDecisions = previewResult.Conflicts.ToDictionary(c => c.ConflictKey, c => (bool?)null);
+            }
+        }
+        catch (Exception ex)
+        {
+            previewResult = new ImportPreviewResult
+            {
+                IsSuccess = false,
+                Error = $"Erreur: {ex.Message}"
+            };
+            previewComplete = true;
+        }
+        finally
+        {
+            isImporting = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task ApplyImport()
+    {
+        if (uploadedBytes == null || !HasSelectedImportTypes())
+        {
+            return;
+        }
+
+        if (HasConflicts && ConflictsUnresolved > 0)
+        {
+            showConflictResolver = true;
+            return;
+        }
+
+        isImporting = true;
+        importComplete = false;
+
+        try
+        {
+            using var stream = new MemoryStream(uploadedBytes);
+
+            if (HasConflicts)
+            {
+                var resolved = conflictDecisions
+                    .Where(kv => kv.Value.HasValue)
+                    .ToDictionary(kv => kv.Key, kv => kv.Value!.Value);
+
+                importResult = await PmlImportService.ImportPmlWithConflictResolution(
+                    stream,
+                    selectedFileName ?? "",
+                    resolved,
+                    previewResult?.Conflicts
+                );
+            }
+            else
+            {
+                importResult = await PmlImportService.ImportPmlAsync(
+                    stream,
+                    selectedFileName ?? "",
+                    exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_INVENTORY),
+                    exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_TEMPLATES),
+                    exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_BEST_SQUAD),
+                    exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_HISTORIES),
+                    exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_LEAGUE_HISTORY)
+                );
+            }
 
             if (exportOptions.IsExporting(PmlExportOptions.EXPORT_TYPE_CAPACITES) && importResult?.IsSuccess == true)
             {
-                using var capacitesStream = new MemoryStream();
-                await stream.CopyToAsync(capacitesStream);
-                capacitesStream.Position = 0;
+                using var capacitesStream = new MemoryStream(uploadedBytes);
                 var capacitesResult = await PmlImportService.ImportCapacitesAsync(capacitesStream, selectedFileName ?? "");
                 if (capacitesResult.IsSuccess)
                 {
@@ -326,6 +583,7 @@
             }
 
             importComplete = true;
+            previewComplete = false;
             lastImportedFileName = await PmlImportService.GetLastImportedFileName();
         }
         catch (Exception ex)
@@ -342,6 +600,35 @@
             isImporting = false;
             await InvokeAsync(StateHasChanged);
         }
+    }
+
+    private bool HasConflicts => previewResult?.HasConflicts == true;
+    private int ConflictsTotal => previewResult?.Conflicts.Count ?? 0;
+    private int ConflictsResolved => conflictDecisions.Values.Count(v => v.HasValue);
+    private int ConflictsUnresolved => ConflictsTotal - ConflictsResolved;
+    private bool CanApplyImport => previewComplete && (previewResult?.IsSuccess ?? false) && (!HasConflicts || ConflictsUnresolved == 0);
+
+    private bool IsConflictResolved(string key, bool value) => conflictDecisions.TryGetValue(key, out var val) && val.HasValue && val.Value == value;
+    private void SetConflictDecision(string key, bool value)
+    {
+        conflictDecisions[key] = value;
+    }
+
+    private void ResolveAllConflicts(bool value)
+    {
+        var keys = conflictDecisions.Keys.ToList();
+        foreach (var key in keys)
+        {
+            conflictDecisions[key] = value;
+        }
+    }
+
+    private void ResetPreview()
+    {
+        previewComplete = false;
+        previewResult = null;
+        conflictDecisions.Clear();
+        showConflictResolver = false;
     }
 
     private async Task HandleExport()
@@ -385,12 +672,42 @@
         }
     }
 
+    private static string GetBadgeClass(ImportLogEntry entry) => entry.Level switch
+    {
+        ImportLogLevel.Error => "bg-danger text-white",
+        ImportLogLevel.Warning => "bg-warning text-dark",
+        _ => "bg-success text-white"
+    };
+
+    private static string GetBadgeLabel(ImportLogEntry entry) => entry.Level switch
+    {
+        ImportLogLevel.Error => "ERREUR",
+        ImportLogLevel.Warning => "Warning",
+        _ => "Ok"
+    };
+
+    private static string GetCategoryLabel(ImportLogCategory category) => category switch
+    {
+        ImportLogCategory.Classement => "Classement",
+        ImportLogCategory.Commandant => "Commandant",
+        ImportLogCategory.Mercenaires => "Mercenaires",
+        ImportLogCategory.Androides => "Androides",
+        ImportLogCategory.Lucie => "Lucie",
+        ImportLogCategory.Capacites => "Capacités",
+        _ => "Général"
+    };
+
     private void Reset()
     {
         selectedFile = null;
         selectedFileName = null;
+        uploadedBytes = null;
         importComplete = false;
+        previewComplete = false;
+        previewResult = null;
         importResult = null;
+        conflictDecisions.Clear();
+        showConflictResolver = false;
         activeTab = "import";
     }
 

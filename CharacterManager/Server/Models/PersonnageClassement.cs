@@ -22,11 +22,6 @@ public class PersonnageClassement
     public string Nom { get; set; } = string.Empty;
     
     /// <summary>
-    /// Rareté du personnage
-    /// </summary>
-    public Rarete Rarete { get; set; }
-    
-    /// <summary>
     /// Niveau du personnage au moment du classement
     /// </summary>
     public int Niveau { get; set; }
@@ -71,7 +66,6 @@ public class PersonnageClassement
             Nom = p.Nom,
             Niveau = p.Niveau,
             Rang = p.Rang,
-            Rarete = p.Rarete,
             Puissance = p.Puissance,
             Type = p.Type
         };

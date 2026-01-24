@@ -50,6 +50,16 @@ public class HistoriqueModification
     /// Date et heure de la modification
     /// </summary>
     public DateTime DateModification { get; set; }
+
+    /// <summary>
+    /// Date/heure d'insertion de l'enregistrement (UTC)
+    /// </summary>
+    public DateTime DateInsertion { get; set; }
+
+    /// <summary>
+    /// Date/heure de dernière mise à jour (UTC)
+    /// </summary>
+    public DateTime DateMiseAJour { get; set; }
     
     /// <summary>
     /// Nom du champ modifié (null pour création/suppression)
@@ -70,4 +80,9 @@ public class HistoriqueModification
     /// Description de la modification
     /// </summary>
     public string? Description { get; set; }
+
+    /// <summary>
+    /// Indique si cette modification vient d'une importation (pour l'affichage sans heures/minutes)
+    /// </summary>
+    public bool EstImportation { get; set; } = false;
 }

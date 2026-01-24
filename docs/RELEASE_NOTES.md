@@ -1,11 +1,12 @@
 # Character Manager
 
 > **Version actuelle**: 1.0.0 🎉  
-> **Version en développement**: 1.1.0
+> **Version prête pour test**: 1.1.0  
+> **Déploiement**: À venir après validation de test
 
 ---
 
-## 🚧 1.1.0 (En développement - 24 Janvier 2026)
+## ✅ 1.1.0 (Prêt pour test - 24 Janvier 2026)
 
 ### ⚔️ Fonctionnalités Commandants
 
@@ -49,6 +50,34 @@
 
 🔤 - **Nouvelle clé "Dans l'équipe"** : Ajout de la clé `inventory.inTeam` en français ("Dans l'équipe") et anglais ("In team")
 
+### 📥 Import/Export PML
+
+🔍 - **Prévisualisation d'import** : Nouveau workflow en 3 étapes avec pré-rapport avant intégration
+
+📊 - **Logs structurés** : Logs d'import organisés par catégorie (Général, Classement, Commandant, Mercenaires, Androides, Lucie, Capacités) avec niveaux (Ok ✅ / Warning ⚠️ / Error ❌)
+
+⚔️ - **Détection de conflits** : Identification automatique des conflits sur les historiques de modification (personnage, champ, date)
+
+🛠️ - **Résolution de conflits** : Interface dédiée permettant de choisir pour chaque conflit entre nouvelle valeur ou ancienne valeur
+
+📋 - **Compteurs en temps réel** : Affichage du nombre de conflits total, résolus et non résolus
+
+✅ - **Actions groupées** : Boutons "Tout valider" et "Tout refuser" pour résoudre tous les conflits en un clic
+
+🔒 - **Validation stricte** : Impossible d'appliquer l'import tant que tous les conflits ne sont pas résolus
+
+📄 - **Rapport final détaillé** : Après import, affichage d'un rapport complet avec :
+  - Statistiques de résolution (X conflits résolus, Y nouvelles valeurs appliquées, Z anciennes conservées)
+  - Tableau des résolutions avec badges visuels (✅ Nouvelle appliquée / 🔄 Ancienne conservée)
+  - Mise en valeur des valeurs appliquées (vert gras) et ignorées (barré gris)
+  - Rapport d'import détaillé avec logs groupés par catégorie et type de données
+
+💾 - **Nouveaux modèles de données** :
+  - `ImportPreviewResult` : Résultat de prévisualisation avec logs et conflits
+  - `ImportConflict` : Représentation d'un conflit avec anciennes/nouvelles valeurs
+  - `ConflictResolutionApplied` : Résolution appliquée avec indication si écrasée ou conservée
+  - `ImportLogEntry` : Log structuré avec niveau, catégorie, type de données et message
+
 ### 🔍 Logging
 
 📊 - **Logs contextuels EF Core** : Ajout de logs debug avec contexte avant les requêtes FirstOrDefault pour faciliter le diagnostic
@@ -70,6 +99,22 @@
 ✅ - **Tests unitaires mis à jour** : Ajout des mocks ILogger dans PersonnageServiceTests et PmlImportServiceTests
 
 ✅ - **Tous les tests passent** : 78/78 tests réussis avec les nouvelles dépendances
+
+✅ - **Couverture de tests augmentée** : Ajout de 2 nouveaux tests pour:
+  - Détection des conflits d'import d'historique (personnage manquant)
+  - Recalculation des anciennes valeurs lorsqu'une modification antérieure arrive
+
+✅ - **Total tests unitaires** : 23/23 tests HistoriqueModificationServiceTests passent
+
+### 📋 État de la version
+
+**Status**: ✅ Prête pour test en environnement de validation
+
+- Toutes les fonctionnalités implémentées
+- Tous les tests unitaires passent
+- Build sans erreurs
+- Aucune nouvelle fonctionnalité dans cette version (focus sur stabilité et import de l'historique)
+- Version sera mise à jour lors du déploiement en production
 
 ---
 

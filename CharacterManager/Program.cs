@@ -54,7 +54,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<ProfileService>();
 builder.Services.AddScoped<HistoriqueModificationService>();  // AVANT PersonnageService
 builder.Services.AddScoped<PersonnageService>();
-builder.Services.AddScoped<PmlImportService>();
+builder.Services.AddScoped(provider => new PmlImportService(
+    provider.GetRequiredService<ApplicationDbContext>(),
+    provider.GetRequiredService<HistoriqueModificationService>()));
 builder.Services.AddScoped<PmlExportService>();
 builder.Services.AddScoped<HistoriqueClassementService>();
 builder.Services.AddScoped<HistoriqueLigueService>();

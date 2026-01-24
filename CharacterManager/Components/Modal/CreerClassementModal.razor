@@ -30,16 +30,6 @@
         <div class="bloc-infos-premium">
 
             <div class="info-item">
-                <label for="dateEnregistrementInput">
-                    <i class="bi bi-calendar3"></i>
-                    Date
-                </label>
-                <InputDate Type="InputDateType.Date" id="dateEnregistrementInput" @bind-Value="form.DateEnregistrement"
-                    class="@($"form-control form-control-sm {GetValidationClass(nameof(form.DateEnregistrement))}")" />
-                <ValidationMessage For="@(() => form.DateEnregistrement)" />
-            </div>
-
-            <div class="info-item">
                 <label for="ligueInput">
                     <i class="bi bi-shield-check"></i>
                     Ligue
@@ -152,9 +142,6 @@
                         <div class="mercenaires-grid">
                             <div class="personnage-card personnage-card-small">
                                 <div class="card-header-row">
-                                    <div class="card-rarity rarity-@Commandant.Rarete.ToString().ToLower()">
-                                        @Commandant.Rarete
-                                    </div>
                                     <div class="card-name">@Commandant.Nom</div>
                                 </div>
 
@@ -179,7 +166,6 @@
                             {
                                 <div class="personnage-card personnage-card-small">
                                     <div class="card-header-row">
-                                        <div class="card-rarity rarity-@m.Rarete.ToString().ToLower()">@m.Rarete</div>
                                         <div class="card-name">@m.Nom</div>
                                     </div>
 
@@ -207,7 +193,6 @@
                             {
                                 <div class="personnage-card personnage-card-small">
                                     <div class="card-header-row">
-                                        <div class="card-rarity rarity-@a.Rarete.ToString().ToLower()">@a.Rarete</div>
                                         <div class="card-name">@a.Nom</div>
                                     </div>
 
@@ -330,64 +315,11 @@
 
         editContext.OnFieldChanged += (_, e) =>
         {
-            // Si la date change, recharger les personnages
-            if (e.FieldIdentifier.FieldName == nameof(form.DateEnregistrement))
-            {
-                ChargerPersonnagesSelonDate();
-            }
-            
             isValid = editContext.Validate();
             InvokeAsync(StateHasChanged);
         };
 
         StateHasChanged();
-    }
-
-    private void ChargerPersonnagesSelonDate()
-    {
-        // Si la date de classement est aujourd'hui, on utilise l'escouade sélectionnée
-        // Sinon, on charge tous les personnages de l'inventaire (pas seulement les sélectionnés)
-        bool estAujourdhui = form.DateEnregistrement == DateOnly.FromDateTime(DateTime.Now);
-
-        // Charger le commandant
-        var cmd = estAujourdhui 
-            ? PersonnageService.GetCommandants(true).FirstOrDefault()
-            : PersonnageService.GetCommandants(false).FirstOrDefault();
-        Commandant = cmd != null ? PersonnageClassement.FromPersonnage(cmd) : new PersonnageClassement { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
-
-        // Charger les mercenaires
-        Mercenaires = estAujourdhui
-            ? (PersonnageService.GetMercenaires(true)?.Select(PersonnageClassement.FromPersonnage).ToList() ?? new List<PersonnageClassement>())
-            : (PersonnageService.GetMercenaires(false)?.Select(PersonnageClassement.FromPersonnage).ToList() ?? new List<PersonnageClassement>());
-
-        // Charger les androïdes
-        Androides = estAujourdhui
-            ? (PersonnageService.GetAndroides(true)?.Select(PersonnageClassement.FromPersonnage).ToList() ?? new List<PersonnageClassement>())
-            : (PersonnageService.GetAndroides(false)?.Select(PersonnageClassement.FromPersonnage).ToList() ?? new List<PersonnageClassement>());
-
-        // Charger les pièces Lucie
-        Pieces = estAujourdhui
-            ? (PersonnageService.GetPieces(true)?.Select(p => new PieceHistorique
-            {
-                IdOrigine = p.Id,
-                Nom = p.Nom,
-                Niveau = p.Niveau,
-                Selectionnee = p.Selectionnee,
-                AspectsStrategiques = p.AspectsStrategiques,
-                AspectsTactiques = p.AspectsTactiques
-            }).ToList() ?? new List<PieceHistorique>())
-            : (PersonnageService.GetPieces(false)?.Select(p => new PieceHistorique
-            {
-                IdOrigine = p.Id,
-                Nom = p.Nom,
-                Niveau = p.Niveau,
-                Selectionnee = p.Selectionnee,
-                AspectsStrategiques = p.AspectsStrategiques,
-                AspectsTactiques = p.AspectsTactiques
-            }).ToList() ?? new List<PieceHistorique>());
-        
-        // Recalculer les puissances
-        CalculerPuissances();
     }
 
     private void CalculerPuissances()
@@ -438,7 +370,7 @@
 
         HistoriqueClassement historique = new HistoriqueClassement
         {
-            DateEnregistrement = form.DateEnregistrement,
+            DateEnregistrement = DateOnly.FromDateTime(DateTime.Now),
             Ligue = form.Ligue ?? 0,
             Score = form.Score ?? 0,
             Classements = new List<Classement>(),

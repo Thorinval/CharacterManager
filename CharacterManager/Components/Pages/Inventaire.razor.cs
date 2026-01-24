@@ -31,6 +31,9 @@ public partial class Inventaire : IAsyncDisposable
     public PmlExportService PmlExportService { get; set; } = null!;
 
     [Inject]
+    public HistoriqueModificationService HistoriqueModificationService { get; set; } = null!;
+
+    [Inject]
     public IModalService ModalService { get; set; } = null!;
 
     [Inject]
@@ -700,16 +703,100 @@ public partial class Inventaire : IAsyncDisposable
 
     internal async Task ResetAll()
     {
-        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Êtes-vous sûr de vouloir supprimer toutes les données ? Cette action est irréversible.");
-        if (confirmed)
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Un export complet (inventaire + classements + ligue + historique des modifications + capacités) sera téléchargé avant la suppression. Continuer ?");
+        if (!confirmed)
         {
-            PersonnageService.DeleteAll();
-            selectedPersonnages.Clear();
-            LuciePieces.Clear();
-            lucieHouse = null;
+            return;
+        }
 
-            await LoadPersonnagesAsync();
-            await LoadLucieHouseAsync();
+        // Option : enregistrer des suppressions dans l'historique avant de purger
+        var logSuppressions = await JSRuntime.InvokeAsync<bool>("confirm", "Ajouter des entrées de suppression dans l'historique des modifications avant le reset ?");
+
+        await ExportFullBackupForReset();
+
+        if (logSuppressions)
+        {
+            await AddSuppressionHistoryBeforeReset();
+        }
+
+        PersonnageService.DeleteAll();
+        selectedPersonnages.Clear();
+        LuciePieces.Clear();
+        lucieHouse = null;
+
+        await LoadPersonnagesAsync();
+        await LoadLucieHouseAsync();
+    }
+
+    private async Task AddSuppressionHistoryBeforeReset()
+    {
+        try
+        {
+            var now = DateTime.UtcNow;
+
+            // Personnages
+            var persos = await DbContext.Personnages.AsNoTracking().ToListAsync();
+            foreach (var p in persos)
+            {
+                await HistoriqueModificationService.EnregistrerSuppressionAsync(
+                    TypeEntite.Personnage,
+                    p.Id,
+                    p.Nom,
+                    p,
+                    "Reset inventaire",
+                    now,
+                    estImportation: true);
+            }
+
+            // Pièces Lucie (si présente)
+            var house = await DbContext.LucieHouses.Include(l => l.Pieces).AsNoTracking().FirstOrDefaultAsync();
+            if (house?.Pieces != null)
+            {
+                foreach (var piece in house.Pieces)
+                {
+                    await HistoriqueModificationService.EnregistrerSuppressionAsync(
+                        TypeEntite.Piece,
+                        piece.Id,
+                        piece.Nom,
+                        piece,
+                        "Reset inventaire",
+                        now,
+                        estImportation: true);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync(JsAlert, $"Erreur lors de l'ajout des suppressions dans l'historique: {ex.Message}");
+        }
+    }
+
+    private async Task ExportFullBackupForReset()
+    {
+        try
+        {
+            // Export PML complet (inventaire + classements + ligues + capacités)
+            var options = PmlExportOptions.FromBooleans(
+                exportInventory: true,
+                exportTemplates: true,
+                exportBestSquad: true,
+                exportHistories: true,
+                exportLeagueHistory: true,
+                exportCapacites: true);
+
+            var pmlBytes = await PmlExportService.ExportPmlAsync(options);
+            var timestamp = DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime);
+            var pmlFileName = $"backup_complet_{timestamp}{AppConstants.FileExtensions.Pml}";
+            await JSRuntime.InvokeVoidAsync("downloadFile", pmlFileName, Convert.ToBase64String(pmlBytes));
+
+            // Export historique des modifications en JSON
+            var historiqueJson = await HistoriqueModificationService.ExporterAsync();
+            var histoFileName = $"historique_modifications_{timestamp}.json";
+            await JSRuntime.InvokeVoidAsync("downloadFile", histoFileName, historiqueJson, "application/json");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync(JsAlert, $"Erreur lors de l'export avant réinitialisation: {ex.Message}");
         }
     }
 

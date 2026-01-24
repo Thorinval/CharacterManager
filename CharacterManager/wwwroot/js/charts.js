@@ -83,3 +83,117 @@ export async function createPieChart(canvasId, labels, data, colors) {
         console.error('Erreur lors de la création du graphique:', error);
     }
 }
+
+// Créer un graphique en ligne pour l'évolution des niveaux
+export async function createLineChart(canvasId, labels, datasets, options = {}) {
+    try {
+        // Charger Chart.js si nécessaire
+        await loadChartJs();
+
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) {
+            console.error(`Canvas avec l'id ${canvasId} non trouvé`);
+            return;
+        }
+
+        // Détruire le graphique existant s'il y en a un
+        const existingChart = Chart.getChart(ctx);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+
+        // Injecter le style CSS pour la légende en colonnes si nécessaire
+        if (!document.getElementById('chart-legend-style')) {
+            const style = document.createElement('style');
+            style.id = 'chart-legend-style';
+            style.textContent = `
+                .chart-legend-columns {
+                    display: flex;
+                    flex-wrap: wrap;
+                    max-width: 300px;
+                }
+                .chart-legend-columns > * {
+                    flex: 0 0 25%;
+                    margin-bottom: 8px;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Créer le nouveau graphique
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12
+                            },
+                            usePointStyle: true
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: options.minLevel !== undefined ? options.minLevel : 0,
+                        title: {
+                            display: true,
+                            text: 'Niveau'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        },
+                        ticks: {
+                            callback: function(value, index) {
+                                // Afficher le label pour chaque point si graduations quotidiennes
+                                if (options.showDayNumbers) {
+                                    return labels[index];
+                                }
+                                return labels[index];
+                            },
+                            maxRotation: 45,
+                            minRotation: 0
+                        }
+                    }
+                }
+            }
+        });
+
+        // Appliquer le style en colonnes à la légende
+        if (chart.legend && chart.legend.ctx && chart.legend.ctx.canvas) {
+            const canvasParent = chart.legend.ctx.canvas.parentElement;
+            if (canvasParent) {
+                const legendContainer = canvasParent.querySelector('[role="region"][aria-label*="legend"]') 
+                    || canvasParent.querySelector('ul');
+                if (legendContainer) {
+                    legendContainer.classList.add('chart-legend-columns');
+                    // Forcer 4 colonnes avec flexbox
+                    legendContainer.style.display = 'flex';
+                    legendContainer.style.flexWrap = 'wrap';
+                    legendContainer.style.maxWidth = '300px';
+                    
+                    const items = legendContainer.querySelectorAll('li');
+                    items.forEach(item => {
+                        item.style.flex = '0 0 25%';
+                        item.style.marginBottom = '8px';
+                    });
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Erreur lors de la création du graphique de ligne:', error);
+    }
+}

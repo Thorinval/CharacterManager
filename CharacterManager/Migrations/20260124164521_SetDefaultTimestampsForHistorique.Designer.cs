@@ -3,6 +3,7 @@ using System;
 using CharacterManager.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CharacterManager.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260124164521_SetDefaultTimestampsForHistorique")]
+    partial class SetDefaultTimestampsForHistorique
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -178,9 +181,6 @@ namespace CharacterManager.Migrations
                     b.Property<int>("EntiteId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("EstImportation")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("NomEntite")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -326,6 +326,9 @@ namespace CharacterManager.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Rang")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Rarete")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Type")

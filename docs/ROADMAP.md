@@ -1,8 +1,8 @@
 # 🗺️ Character Manager - Roadmap 2026
 
 > **Version actuelle** : 1.0.0 🎉  
-> **Version en développement** : 1.1.0  
-> **Dernière mise à jour** : 14 janvier 2026
+> **Version prête pour test** : 1.1.0  
+> **Dernière mise à jour** : 24 janvier 2026
 
 ---
 
@@ -39,7 +39,7 @@ Cette roadmap présente les fonctionnalités prévues et les améliorations futu
 - [x] ✅ Validation : 78 tests unitaires passent
 - [x] 🚀 Application prête pour la production
 
-**Version 1.1.0** - *En cours*
+**Version 1.1.0** ✓ *Prêt pour test - Validation en cours*
 
 - [x] Uniformisation complète des headers de pages (style MaisonLucie)
 - [x] Édition des pièces Lucie directement dans l'interface
@@ -50,9 +50,13 @@ Cette roadmap présente les fonctionnalités prévues et les améliorations futu
 - [x] Optimisation de l'interface inventaire (alignements, espacements, tailles inputs)
 - [x] Amélioration de l'affichage des images de cartes (hauteur optimisée, suppression des bandes blanches)
 - [x] Ajout de la localisation "Dans l'équipe" (FR/EN)
-- [ ] Associer les capacités aux pièces Lucie
-- [ ] Export/Import des associations capacités-personnages
-- [ ] Thèmes sombres/clairs personnalisables
+- [x] Workflow d'import PML complet avec prévisualisation, résolution de conflits et rapport final
+- [x] Logs structurés par catégorie (Classement, Commandant, Mercenaires, Androides, Lucie, Capacités)
+- [x] Détection automatique des conflits sur les historiques de modification
+- [x] Interface de résolution de conflits avec actions groupées (Tout valider/Tout refuser)
+- [x] Rapport final détaillé des modifications et résolutions appliquées
+- [x] Sauvegardes automatiques avec backup complet avant reset
+- [x] Tests unitaires d'import avec conflit et recalculation des anciennes valeurs
 
 ### 🎯 Février 2026 - Analyse Avancée
 

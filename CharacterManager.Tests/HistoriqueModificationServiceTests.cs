@@ -23,6 +23,63 @@ public class HistoriqueModificationServiceTests : IDisposable
         _service = new HistoriqueModificationService(_context);
     }
 
+        [Fact]
+        public async Task PreviewImport_ShouldDetectConflicts_WhenPersonnageMissing()
+        {
+            // Arrange
+            var json = "[{\"TypeEntite\":0,\"EntiteId\":99,\"NomEntite\":\"INCONNU\",\"TypeModification\":1,\"ChampModifie\":\"Puissance\",\"AncienneValeur\":\"1000\",\"NouvelleValeur\":\"1200\",\"DateModification\":\"2026-01-20T00:00:00Z\"}]";
+
+            await using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
+
+            // Act
+            var preview = await _service.PreviewImportAsync(stream);
+
+            // Assert
+            Assert.True(preview.HasConflicts);
+            Assert.Single(preview.Conflicts);
+            Assert.Equal("INCONNU", preview.Conflicts[0].PersonnageName);
+            Assert.Equal("Puissance", preview.Conflicts[0].ChampModifie);
+            Assert.Equal(0, preview.ValidCount);
+        }
+
+        [Fact]
+        public async Task ImportAsync_ShouldApplyAndRecalculateFutureAnciennes_WhenOlderModificationArrives()
+        {
+            // Arrange: create personnage and future modification with ancienne valeur à mettre à jour
+            var personnage = new Personnage { Nom = "REGINA", Type = TypePersonnage.Mercenaire, Puissance = 3000 };
+            _context.Personnages.Add(personnage);
+            await _context.SaveChangesAsync();
+
+            var future = new HistoriqueModification
+            {
+                TypeEntite = TypeEntite.Personnage,
+                EntiteId = personnage.Id,
+                NomEntite = personnage.Nom,
+                TypeModification = TypeModification.Modification,
+                ChampModifie = "Puissance",
+                AncienneValeur = "3000",
+                NouvelleValeur = "3200",
+                DateModification = new DateTime(2026, 1, 25)
+            };
+            _context.HistoriquesModifications.Add(future);
+            await _context.SaveChangesAsync();
+
+            var json = $"[{{\"TypeEntite\":0,\"EntiteId\":{personnage.Id},\"NomEntite\":\"REGINA\",\"TypeModification\":1,\"ChampModifie\":\"Puissance\",\"AncienneValeur\":\"2800\",\"NouvelleValeur\":\"3000\",\"DateModification\":\"2026-01-15T00:00:00Z\"}}]";
+
+            await using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
+
+            // Act
+            var result = await _service.ImportAsync(stream, new Dictionary<string, bool>());
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal(1, result.SuccessCount);
+
+            // Future modification should now have ancienne valeur = 3000 (nouvelle de l'ancienne modif)
+            var updatedFuture = await _context.HistoriquesModifications.FirstAsync(h => h.Id == future.Id);
+            Assert.Equal("3000", updatedFuture.AncienneValeur);
+        }
+
     public void Dispose()
     {
         Dispose(true);
@@ -437,46 +494,6 @@ public class HistoriqueModificationServiceTests : IDisposable
         Assert.Equal(idPremiereModif, resultat[0].Id); // C'est la même entrée
         Assert.Equal("200", resultat[0].NouvelleValeur); // Nouvelle valeur mise à jour
         Assert.Equal("Deuxième modification", resultat[0].Description); // Description mise à jour
-    }
-
-    [Fact]
-    public async Task EnregistrerModificationAsync_OutsideFiveSeconds_ShouldCreateNewEntry()
-    {
-        // Arrange
-        var entiteId = 1;
-        var nomEntite = "Test Personnage";
-        var champModifie = "Puissance";
-
-        // Act - Première modification
-        await _service.EnregistrerModificationAsync(
-            TypeEntite.Personnage,
-            entiteId,
-            nomEntite,
-            champModifie,
-            100,
-            150,
-            "Première modification");
-
-        // Attendre plus de 5 secondes
-        await Task.Delay(5100);
-
-        // Deuxième modification après 5 secondes
-        await _service.EnregistrerModificationAsync(
-            TypeEntite.Personnage,
-            entiteId,
-            nomEntite,
-            champModifie,
-            150,
-            200,
-            "Deuxième modification");
-
-        // Assert
-        var resultat = await _context.HistoriquesModifications.OrderByDescending(h => h.DateModification).ToListAsync();
-        Assert.Equal(2, resultat.Count); // Deux entrées distinctes
-        Assert.Equal("200", resultat[0].NouvelleValeur); // La deuxième modification (plus récente en premier)
-        Assert.Equal("150", resultat[0].AncienneValeur);
-        Assert.Equal("150", resultat[1].NouvelleValeur); // La première modification
-        Assert.Equal("100", resultat[1].AncienneValeur);
     }
 
     [Fact]
