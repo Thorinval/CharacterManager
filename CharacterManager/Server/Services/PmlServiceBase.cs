@@ -23,9 +23,9 @@ public abstract class PmlServiceBase(ApplicationDbContext context)
     {
         return value switch
         {
-            AppConstants.XmlElements.SSR => Rarete.SSR,
-            AppConstants.XmlElements.SR => Rarete.SR,
-            AppConstants.XmlElements.R => Rarete.R,
+            PersonnageConstants.Rarities.SSR => Rarete.SSR,
+            PersonnageConstants.Rarities.SR => Rarete.SR,
+            PersonnageConstants.Rarities.R => Rarete.R,
             _ => Rarete.R
         };
     }
@@ -49,9 +49,9 @@ public abstract class PmlServiceBase(ApplicationDbContext context)
     {
         return value switch
         {
-            AppConstants.XmlElements.Mercenaire => TypePersonnage.Mercenaire,
-            AppConstants.XmlElements.Androïde or AppConstants.XmlElements.Androide => TypePersonnage.Androide,
-            AppConstants.XmlElements.Commandant => TypePersonnage.Commandant,
+            PersonnageConstants.Types.Mercenaire => TypePersonnage.Mercenaire,
+            ImportExportConstants.XmlElements.Androïde or PersonnageConstants.Types.Androide => TypePersonnage.Androide,
+            PersonnageConstants.Types.Commandant => TypePersonnage.Commandant,
             _ => TypePersonnage.Mercenaire
         };
     }
@@ -60,10 +60,10 @@ public abstract class PmlServiceBase(ApplicationDbContext context)
     {
         return value switch
         {
-            AppConstants.XmlElements.Sentinelle => Role.Sentinelle,
-            AppConstants.XmlElements.Combattante => Role.Combattante,
-            AppConstants.XmlElements.Androide => Role.Androide,
-            AppConstants.XmlElements.Commandant => Role.Commandant,
+            PersonnageConstants.Roles.Sentinelle => Role.Sentinelle,
+            PersonnageConstants.Roles.Combattante => Role.Combattante,
+            PersonnageConstants.Types.Androide => Role.Androide,
+            PersonnageConstants.Types.Commandant => Role.Commandant,
             _ => Role.Combattante
         };
     }
@@ -72,9 +72,9 @@ public abstract class PmlServiceBase(ApplicationDbContext context)
     {
         return value switch
         {
-            AppConstants.XmlElements.Syndicat => Faction.Syndicat,
-            AppConstants.XmlElements.Pacificateurs => Faction.Pacificateurs,
-            AppConstants.XmlElements.HommesLibres => Faction.HommesLibres,
+            PersonnageConstants.Factions.Syndicat => Faction.Syndicat,
+            PersonnageConstants.XmlElements.Faction => Faction.Pacificateurs,
+            PersonnageConstants.Factions.HommesLibres => Faction.HommesLibres,
             _ => Faction.Syndicat
         };
     }
@@ -83,16 +83,16 @@ public abstract class PmlServiceBase(ApplicationDbContext context)
     {
         return value switch
         {
-            AppConstants.XmlElements.MeleeAccent or AppConstants.XmlElements.Melee => TypeAttaque.Melee,
+            PersonnageConstants.AttackTypes.MeleeAccent or PersonnageConstants.AttackTypes.Melee => TypeAttaque.Melee,
             "Distance" => TypeAttaque.Distance,
-            AppConstants.XmlElements.Androïde or AppConstants.XmlElements.Androide => TypeAttaque.Androide,
+            ImportExportConstants.XmlElements.Androïde or PersonnageConstants.Types.Androide => TypeAttaque.Androide,
             _ => TypeAttaque.Inconnu
         };
     }
 
     protected static List<Capacite> ParseCapacites(XElement element)
     {
-        var capacitesElement = element.Element(AppConstants.XmlElements.Capacites);
+        var capacitesElement = element.Element(PersonnageConstants.XmlElements.Capacites);
         if (capacitesElement == null)
         {
             return [];
@@ -100,16 +100,16 @@ public abstract class PmlServiceBase(ApplicationDbContext context)
 
         var capacites = new List<Capacite>();
 
-        foreach (var capaciteElement in capacitesElement.Elements(AppConstants.XmlElements.Capacite))
+        foreach (var capaciteElement in capacitesElement.Elements(PersonnageConstants.XmlElements.Capacite))
         {
-            var nom = capaciteElement.Element(AppConstants.XmlElements.Nom)?.Value ?? capaciteElement.Value;
+            var nom = capaciteElement.Element(ImportExportConstants.XmlElements.Nom)?.Value ?? capaciteElement.Value;
             if (string.IsNullOrWhiteSpace(nom))
             {
                 continue;
             }
 
-            var description = capaciteElement.Element(AppConstants.XmlElements.Description)?.Value ?? string.Empty;
-            var icon = capaciteElement.Element(AppConstants.XmlElements.Icon)?.Value ?? string.Empty;
+            var description = capaciteElement.Element(ImportExportConstants.XmlElements.Description)?.Value ?? string.Empty;
+            var icon = capaciteElement.Element(PersonnageConstants.XmlElements.Icon)?.Value ?? string.Empty;
 
             capacites.Add(new Capacite
             {
@@ -124,29 +124,29 @@ public abstract class PmlServiceBase(ApplicationDbContext context)
 
     protected Personnage? ParsePersonnageFromXml(XElement element)
     {
-        var nom = element.Element(AppConstants.XmlElements.Nom)?.Value;
+        var nom = element.Element(ImportExportConstants.XmlElements.Nom)?.Value;
         if (string.IsNullOrWhiteSpace(nom))
             return null;
 
-        var id = int.TryParse(element.Attribute(AppConstants.XmlElements.Id)?.Value, out var parsedId) ? parsedId : 0;
+        var id = int.TryParse(element.Attribute(ImportExportConstants.XmlElements.Id)?.Value, out var parsedId) ? parsedId : 0;
 
         var personnage = new Personnage
         {
             Id = id,
             Nom = nom.Trim().ToUpperInvariant(), // Normaliser en majuscules
-            Rarete = ParseRarete(element.Element(AppConstants.XmlElements.Rarete)?.Value),
-            Type = ParseType(element.Element(AppConstants.XmlElements.Type)?.Value),
-            Puissance = int.TryParse(element.Element(AppConstants.XmlElements.Puissance)?.Value, out var p) ? p : 0,
-            PA = int.TryParse(element.Element(AppConstants.XmlElements.PA)?.Value, out var pa) ? pa : 0,
-            PV = int.TryParse(element.Element(AppConstants.XmlElements.PV)?.Value, out var pv) ? pv : 0,
-            Niveau = int.TryParse(element.Element(AppConstants.XmlElements.Niveau)?.Value, out var n) ? n : 1,
-            Rang = int.TryParse(element.Element(AppConstants.XmlElements.Rang)?.Value, out var r) ? r : 1,
-            Role = ParseRole(element.Element(AppConstants.XmlElements.Role)?.Value),
-            Faction = ParseFaction(element.Element(AppConstants.XmlElements.Faction)?.Value),
-            TypeAttaque = ParseTypeAttaque(element.Element(AppConstants.XmlElements.TypeAttaque)?.Value),
-            Selectionne = ParseBool(element.Element(AppConstants.XmlElements.Selectionne)?.Value),
-            HasRelation = ParseBool(element.Element(AppConstants.XmlElements.HasRelation)?.Value),
-            NivRelation = int.TryParse(element.Element(AppConstants.XmlElements.NivRelation)?.Value, out var nivRel) ? nivRel : 0,
+            Rarete = ParseRarete(element.Element(PersonnageConstants.XmlElements.Rarete)?.Value),
+            Type = ParseType(element.Element(PersonnageConstants.XmlElements.Type)?.Value),
+            Puissance = int.TryParse(element.Element(PersonnageConstants.XmlElements.Puissance)?.Value, out var p) ? p : 0,
+            PA = int.TryParse(element.Element(PersonnageConstants.XmlElements.PA)?.Value, out var pa) ? pa : 0,
+            PV = int.TryParse(element.Element(PersonnageConstants.XmlElements.PV)?.Value, out var pv) ? pv : 0,
+            Niveau = int.TryParse(element.Element(PersonnageConstants.XmlElements.Niveau)?.Value, out var n) ? n : 1,
+            Rang = int.TryParse(element.Element(PersonnageConstants.XmlElements.Rang)?.Value, out var r) ? r : 1,
+            Role = ParseRole(element.Element(PersonnageConstants.XmlElements.Role)?.Value),
+            Faction = ParseFaction(element.Element(PersonnageConstants.XmlElements.Faction)?.Value),
+            TypeAttaque = ParseTypeAttaque(element.Element(PersonnageConstants.XmlElements.TypeAttaque)?.Value),
+            Selectionne = ParseBool(element.Element(PersonnageConstants.XmlElements.Selectionne)?.Value),
+            HasRelation = ParseBool(element.Element(PersonnageConstants.XmlElements.HasRelation)?.Value),
+            NivRelation = int.TryParse(element.Element(PersonnageConstants.XmlElements.NivRelation)?.Value, out var nivRel) ? nivRel : 0,
             Capacites = ParseCapacites(element)
         };
 
@@ -188,17 +188,17 @@ public abstract class PmlServiceBase(ApplicationDbContext context)
         var pieceHistorique = new PieceHistorique
         {
             Nom = nom,
-            Niveau = int.TryParse(pieceElement.Element(AppConstants.XmlElements.Niveau)?.Value, out var niveau) ? niveau : 1,
-            Selectionnee = ParseBool(pieceElement.Element(AppConstants.XmlElements.Selectionne)?.Value),
-            IdOrigine = int.TryParse(pieceElement.Attribute(AppConstants.XmlElements.Id)?.Value, out var parsedId) ? parsedId : 0
+            Niveau = int.TryParse(pieceElement.Element(PersonnageConstants.XmlElements.Niveau)?.Value, out var niveau) ? niveau : 1,
+            Selectionnee = ParseBool(pieceElement.Element(PersonnageConstants.XmlElements.Selectionne)?.Value),
+            IdOrigine = int.TryParse(pieceElement.Attribute(ImportExportConstants.XmlElements.Id)?.Value, out var parsedId) ? parsedId : 0
         };
 
-        if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceTactique)?.Value, out var pTact))
+        if (int.TryParse(pieceElement.Element(LucieHouseConstants.XmlElements.PuissanceTactique)?.Value, out var pTact))
         {
             pieceHistorique.AspectsTactiques.Puissance = pTact;
         }
 
-        if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceStrategique)?.Value, out var pStrat))
+        if (int.TryParse(pieceElement.Element(PersonnageConstants.XmlElements.Puissance)?.Value, out var pStrat))
         {
             pieceHistorique.AspectsStrategiques.Puissance = pStrat;
         }
@@ -208,15 +208,15 @@ public abstract class PmlServiceBase(ApplicationDbContext context)
 
     protected Piece? ParseLuciePiece(XElement pieceElement)
     {
-        var nom = pieceElement.Element(AppConstants.XmlElements.Nom)?.Value;
+        var nom = pieceElement.Element(ImportExportConstants.XmlElements.Nom)?.Value;
         if (string.IsNullOrWhiteSpace(nom))
             return null;
 
         var piece = new Piece
         {
             Nom = nom,
-            Niveau = int.TryParse(pieceElement.Element(AppConstants.XmlElements.Niveau)?.Value, out var niveau) ? niveau : 1,
-            Selectionnee = ParseBool(pieceElement.Element(AppConstants.XmlElements.Selectionne)?.Value)
+            Niveau = int.TryParse(pieceElement.Element(PersonnageConstants.XmlElements.Niveau)?.Value, out var niveau) ? niveau : 1,
+            Selectionnee = ParseBool(pieceElement.Element(PersonnageConstants.XmlElements.Selectionne)?.Value)
         };
 
         ParseLuciePieceBonus(pieceElement, piece);
@@ -228,20 +228,20 @@ public abstract class PmlServiceBase(ApplicationDbContext context)
     protected static void ParseLuciePieceBonus(XElement pieceElement, Piece piece)
     {
         // Parser les bonus tactiques
-        var bonusTactiquesElement = pieceElement.Element(AppConstants.XmlElements.BonusTactiques);
+        var bonusTactiquesElement = pieceElement.Element(LucieHouseConstants.XmlElements.BonusTactiques);
         if (bonusTactiquesElement != null)
         {
-            piece.AspectsTactiques.Bonus = [.. bonusTactiquesElement.Elements(AppConstants.XmlElements.Bonus)
+            piece.AspectsTactiques.Bonus = [.. bonusTactiquesElement.Elements(LucieHouseConstants.XmlElements.Bonus)
                 .Select(b => b.Value)
                 .Where(b => !string.IsNullOrWhiteSpace(b))];
             piece.AspectsTactiques.Puissance = piece.AspectsTactiques.Bonus.Count;
         }
 
         // Parser les bonus stratégiques
-        var bonusStrategiquesElement = pieceElement.Element(AppConstants.XmlElements.BonusStrategiques);
+        var bonusStrategiquesElement = pieceElement.Element(LucieHouseConstants.XmlElements.BonusStrategiques);
         if (bonusStrategiquesElement != null)
         {
-            piece.AspectsStrategiques.Bonus = bonusStrategiquesElement.Elements(AppConstants.XmlElements.Bonus)
+            piece.AspectsStrategiques.Bonus = bonusStrategiquesElement.Elements(LucieHouseConstants.XmlElements.Bonus)
                 .Select(b => b.Value)
                 .Where(b => !string.IsNullOrWhiteSpace(b))
                 .ToList();
@@ -252,16 +252,16 @@ public abstract class PmlServiceBase(ApplicationDbContext context)
     protected static void ParseLuciePiecePuissance(XElement pieceElement, Piece piece)
     {
         // Puissance tactiques et stratégiques (nouveau format). Fallback: ancienne balise "Puissance" alimente les tactiques.
-        if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceTactique)?.Value, out var pTact))
+        if (int.TryParse(pieceElement.Element(LucieHouseConstants.XmlElements.PuissanceTactique)?.Value, out var pTact))
         {
             piece.AspectsTactiques.Puissance = pTact;
         }
-        else if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceLegacy)?.Value, out var pLegacy))
+        else if (int.TryParse(pieceElement.Element(PersonnageConstants.XmlElements.Puissance)?.Value, out var pLegacy))
         {
             piece.AspectsTactiques.Puissance = pLegacy;
         }
 
-        if (int.TryParse(pieceElement.Element(AppConstants.XmlElements.PuissanceStrategique)?.Value, out var pStrat))
+        if (int.TryParse(pieceElement.Element(PersonnageConstants.XmlElements.Puissance)?.Value, out var pStrat))
         {
             piece.AspectsStrategiques.Puissance = pStrat;
         }
@@ -386,3 +386,8 @@ public abstract class PmlServiceBase(ApplicationDbContext context)
 
     #endregion
 }
+
+
+
+
+

@@ -109,3 +109,6 @@ public class AppVersionService
         return $"{appVersion} ({buildVersion}, {commitHash})";
     }
 }
+
+
+

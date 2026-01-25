@@ -107,3 +107,5 @@ public static class TemplateEscouade
         }
     }   
 }
+
+

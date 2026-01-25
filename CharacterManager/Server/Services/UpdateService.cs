@@ -204,3 +204,7 @@ public class ReleaseVersion
     public string? DownloadUrl { get; set; }
     public string? ChecksumUrl { get; set; }
 }
+
+
+
+

@@ -222,7 +222,7 @@ else
 
             var bytes = await PmlExportService.ExportPmlAsync(options);
             var fileName =
-            $"{AppConstants.ExportPrefixes.HistoriqueLigues}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
+            $"{ImportExportConstants.ExportPrefixes.HistoriqueLigues}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
             var base64 = Convert.ToBase64String(bytes);
             await JS.InvokeVoidAsync("downloadFile", fileName, base64);
         }

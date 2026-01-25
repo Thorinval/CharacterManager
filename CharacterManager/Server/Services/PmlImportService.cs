@@ -102,7 +102,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
             if (doc.Root == null)
             {
-                result.Error = AppConstants.Messages.ErrorFileEmpty + " ou invalide";
+                result.Error = ImportExportConstants.ErrorMessages.ErrorFileEmpty + " ou invalide";
                 return result;
             }
 
@@ -113,7 +113,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
             if (result.SuccessCount == 0 && string.IsNullOrEmpty(result.Error))
             {
-                result.Error = AppConstants.Messages.ErrorNoSectionsFound;
+                result.Error = ImportExportConstants.ErrorMessages.ErrorNoSectionsFound;
             }
 
             result.IsSuccess = result.SuccessCount > 0 && string.IsNullOrEmpty(result.Error);
@@ -126,7 +126,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
         }
         catch (Exception ex)
         {
-            result.Error = $"{AppConstants.Messages.ErrorXmlParsing}: {ex.Message}";
+            result.Error = $"{ImportExportConstants.ErrorMessages.ErrorXmlParsing}: {ex.Message}";
             result.IsSuccess = false;
             result.Logs = logs;
         }
@@ -151,7 +151,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
             if (doc.Root == null)
                 return result;
 
-            var historiqueClassementElements = doc.Root.Elements(AppConstants.XmlElements.HistoriqueClassement);
+            var historiqueClassementElements = doc.Root.Elements(ClassementConstants.XmlElements.HistoriqueClassement);
 
             foreach (var historiqueClassementElement in historiqueClassementElements)
             {
@@ -285,11 +285,11 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
             if (doc.Root == null)
             {
-                preview.Error = AppConstants.Messages.ErrorFileEmpty + " ou invalide";
+                preview.Error = ImportExportConstants.ErrorMessages.ErrorFileEmpty + " ou invalide";
                 return preview;
             }
 
-            var historiqueClassementElements = doc.Root.Elements(AppConstants.XmlElements.HistoriqueClassement);
+            var historiqueClassementElements = doc.Root.Elements(ClassementConstants.XmlElements.HistoriqueClassement);
 
             foreach (var historiqueClassementElement in historiqueClassementElements)
             {
@@ -301,7 +301,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
         }
         catch (Exception ex)
         {
-            preview.Error = $"{AppConstants.Messages.ErrorXmlParsing}: {ex.Message}";
+            preview.Error = $"{ImportExportConstants.ErrorMessages.ErrorXmlParsing}: {ex.Message}";
             preview.IsSuccess = false;
             preview.Logs = logs;
         }
@@ -328,12 +328,12 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
             if (doc.Root == null)
             {
-                result.Error = AppConstants.Messages.ErrorFileEmpty + " ou invalide";
+                result.Error = ImportExportConstants.ErrorMessages.ErrorFileEmpty + " ou invalide";
                 return result;
             }
 
             // Traiter seulement la section historiques avec les résolutions de conflits
-            var historiqueClassementElements = doc.Root.Elements(AppConstants.XmlElements.HistoriqueClassement);
+            var historiqueClassementElements = doc.Root.Elements(ClassementConstants.XmlElements.HistoriqueClassement);
             result.SuccessCount = await ImportHistoriquesClassementWithResolution(historiqueClassementElements, errors, logs, conflictResolutions);
 
             result.Errors = errors;
@@ -367,7 +367,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
         }
         catch (Exception ex)
         {
-            result.Error = $"{AppConstants.Messages.ErrorXmlParsing}: {ex.Message}";
+            result.Error = $"{ImportExportConstants.ErrorMessages.ErrorXmlParsing}: {ex.Message}";
             result.IsSuccess = false;
             result.Logs = logs;
         }
@@ -420,8 +420,8 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
             return 0;
         }
 
-        var inventaireElements = root.Elements(AppConstants.XmlElements.Inventaire);
-        if (!inventaireElements.Any() && root.Name.LocalName.Equals(AppConstants.XmlElements.Inventaire, StringComparison.OrdinalIgnoreCase))
+        var inventaireElements = root.Elements(ImportExportConstants.XmlElements.Inventaire);
+        if (!inventaireElements.Any() && root.Name.LocalName.Equals(ImportExportConstants.XmlElements.Inventaire, StringComparison.OrdinalIgnoreCase))
         {
             inventaireElements = [root];
         }
@@ -431,8 +431,8 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
     private async Task<int> ProcessTemplatesSection(XElement root, List<string> errors)
     {
-        var directTemplates = root.Elements(AppConstants.XmlElements.Template);
-        var nestedTemplates = root.Element(AppConstants.XmlElements.Templates)?.Elements(AppConstants.XmlElements.Template) ?? Enumerable.Empty<XElement>();
+        var directTemplates = root.Elements(TemplateConstants.XmlElements.Template);
+        var nestedTemplates = root.Element(TemplateConstants.XmlElements.Templates)?.Elements(TemplateConstants.XmlElements.Template) ?? Enumerable.Empty<XElement>();
         var templateElements = directTemplates.Concat(nestedTemplates);
 
         return templateElements.Any() ? await ImportTemplatesAsync(templateElements, errors) : 0;
@@ -440,19 +440,19 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
     private async Task<int> ProcessBestSquadSection(XElement root, List<string> errors)
     {
-        var bestSquadElements = root.Elements(AppConstants.XmlElements.MeilleurEscouade);
+        var bestSquadElements = root.Elements(SquadConstants.XmlElements.MeilleurEscouade);
         return bestSquadElements.Any() ? await ImportBestSquadAsync(bestSquadElements, errors) : 0;
     }
 
     private async Task<int> ProcessHistoriesSection(XElement root, List<string> errors, List<ImportLogEntry> logs)
     {
-        var historiqueClassementElements = root.Elements(AppConstants.XmlElements.HistoriqueClassement);
+        var historiqueClassementElements = root.Elements(ClassementConstants.XmlElements.HistoriqueClassement);
         return historiqueClassementElements.Any() ? await ImportHistoriquesClassementAsync(historiqueClassementElements, errors, logs) : 0;
     }
 
     private async Task<int> ProcessLeagueHistorySection(XElement root, List<string> errors)
     {
-        var historiqueLigueElements = root.Elements(AppConstants.XmlElements.HistoriqueLigue);
+        var historiqueLigueElements = root.Elements(HistoryConstants.XmlElements.HistoriqueLigue);
         return historiqueLigueElements.Any() ? await ImportHistoriquesLigueAsync(historiqueLigueElements, errors) : 0;
     }
 
@@ -478,9 +478,9 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
     private async Task<int> ProcessInventairePersonnagesAsync(XElement inventaire, List<string> errors)
     {
         int importedCount = 0;
-        var personnageElements = inventaire.Name.LocalName.Equals(AppConstants.XmlElements.Personnage, StringComparison.OrdinalIgnoreCase)
+        var personnageElements = inventaire.Name.LocalName.Equals(ImportExportConstants.XmlElements.Personnage, StringComparison.OrdinalIgnoreCase)
             ? [inventaire]
-            : inventaire.Elements(AppConstants.XmlElements.Personnage);
+            : inventaire.Elements(ImportExportConstants.XmlElements.Personnage);
 
         foreach (var personnageElement in personnageElements)
         {
@@ -500,7 +500,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
             }
             catch (Exception ex)
             {
-                errors.Add($"{AppConstants.Messages.ErrorImportPersonnageInventaire} {ex.Message}");
+                errors.Add($"{ImportExportConstants.ErrorMessages.ErrorImportPersonnageInventaire} {ex.Message}");
             }
         }
 
@@ -513,9 +513,9 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
     private async Task<int> ProcessLuciHouseSectionAsync(XElement inventaire, List<string> errors)
     {
         int importedCount = 0;
-        var lucieHouseElement = inventaire.Name.LocalName.Equals(AppConstants.XmlElements.LucieHouse, StringComparison.OrdinalIgnoreCase)
+        var lucieHouseElement = inventaire.Name.LocalName.Equals(LucieHouseConstants.XmlElements.LucieHouse, StringComparison.OrdinalIgnoreCase)
             ? new[] { inventaire }
-            : inventaire.Elements(AppConstants.XmlElements.LucieHouse);
+            : inventaire.Elements(LucieHouseConstants.XmlElements.LucieHouse);
 
         foreach (var lucieElement in lucieHouseElement)
         {
@@ -536,12 +536,12 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
         {
             try
             {
-                var templateName = template.Element(AppConstants.XmlElements.Nom)?.Value;
-                var description = template.Element(AppConstants.XmlElements.Description)?.Value;
+                var templateName = template.Element(ImportExportConstants.XmlElements.Nom)?.Value;
+                var description = template.Element(ImportExportConstants.XmlElements.Description)?.Value;
 
                 if (string.IsNullOrWhiteSpace(templateName))
                 {
-                    errors.Add(AppConstants.Messages.ErrorTemplateNoName);
+                    errors.Add(TemplateConstants.Validation.ErrorTemplateNoName);
                     continue;
                 }
 
@@ -558,7 +558,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
             }
             catch (Exception ex)
             {
-                errors.Add($"{AppConstants.Messages.ErrorImportTemplate} {ex.Message}");
+                errors.Add($"{TemplateConstants.Validation.ErrorImportTemplate} {ex.Message}");
             }
         }
 
@@ -590,13 +590,13 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
     private async Task<List<int>> ImportTemplatePersonnages(XElement template, string templateName, List<string> errors)
     {
         var personnageIds = new List<int>();
-        var personnagesElements = template.Elements(AppConstants.XmlElements.Personnage);
+        var personnagesElements = template.Elements(ImportExportConstants.XmlElements.Personnage);
 
         foreach (var personElement in personnagesElements)
         {
             try
             {
-                var nom = personElement.Element(AppConstants.XmlElements.Nom)?.Value;
+                var nom = personElement.Element(ImportExportConstants.XmlElements.Nom)?.Value;
                 if (string.IsNullOrWhiteSpace(nom))
                     continue;
 
@@ -610,7 +610,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
             }
             catch (Exception ex)
             {
-                errors.Add($"{AppConstants.Messages.ErrorImportPersonnageTemplate} '{templateName}': {ex.Message}");
+                errors.Add($"{TemplateConstants.Validation.ErrorImportPersonnageTemplate} '{templateName}': {ex.Message}");
             }
         }
 
@@ -634,7 +634,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
             }
             catch (Exception ex)
             {
-                errors.Add($"{AppConstants.Messages.ErrorImportBestSquad} {ex.Message}");
+                errors.Add($"{SquadConstants.ErrorMessages.ErrorImportBestSquad} {ex.Message}");
             }
         }
 
@@ -644,7 +644,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
     private int ImportBestSquadMercenaires(XElement bestSquad)
     {
         int count = 0;
-        var mercenairesElements = bestSquad.Elements(AppConstants.XmlElements.Mercenaire);
+        var mercenairesElements = bestSquad.Elements(PersonnageConstants.Types.Mercenaire);
         foreach (var mercElement in mercenairesElements)
         {
             var personnage = ParsePersonnageFromXml(mercElement);
@@ -659,7 +659,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
     private int ImportBestSquadCommandant(XElement bestSquad)
     {
-        var commandantElement = bestSquad.Element(AppConstants.XmlElements.Commandant);
+        var commandantElement = bestSquad.Element(PersonnageConstants.Types.Commandant);
         if (commandantElement == null)
             return 0;
 
@@ -675,7 +675,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
     private int ImportBestSquadAndroides(XElement bestSquad)
     {
         int count = 0;
-        var androidesElements = bestSquad.Elements(AppConstants.XmlElements.Androide);
+        var androidesElements = bestSquad.Elements(PersonnageConstants.Types.Androide);
         foreach (var androidElement in androidesElements)
         {
             var personnage = ParsePersonnageFromXml(androidElement);
@@ -699,9 +699,9 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
         {
             try
             {
-                var dateStr = historiqueLigueElement.Element(AppConstants.XmlElements.DateMontee)?.Value;
-                var ligueStr = historiqueLigueElement.Element(AppConstants.XmlElements.Ligue)?.Value;
-                var notes = historiqueLigueElement.Element(AppConstants.XmlElements.Notes)?.Value;
+                var dateStr = historiqueLigueElement.Element(HistoryConstants.XmlElements.DateMontee)?.Value;
+                var ligueStr = historiqueLigueElement.Element(ClassementConstants.XmlElements.Ligue)?.Value;
+                var notes = historiqueLigueElement.Element(HistoryConstants.XmlElements.Notes)?.Value;
 
                 if (string.IsNullOrWhiteSpace(dateStr) || string.IsNullOrWhiteSpace(ligueStr))
                 {
@@ -1291,7 +1291,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
     private HistoriqueClassement? ParseHistoriqueClassementHeader(XElement element, List<string> errors, List<ImportLogEntry>? logs = null)
     {
-        var dateStr = element.Element(AppConstants.XmlElements.DateEnregistrement)?.Value;
+        var dateStr = element.Element(ClassementConstants.XmlElements.DateEnregistrement)?.Value;
 
         if (string.IsNullOrWhiteSpace(dateStr))
         {
@@ -1305,12 +1305,12 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
             return null;
         }
 
-        var ligueStr = element.Element(AppConstants.XmlElements.Ligue)?.Value;
-        var scoreStr = element.Element(AppConstants.XmlElements.Score)?.Value;
-        var puissanceTotalStr = element.Element(AppConstants.XmlElements.PuissanceTotal)?.Value;
-        var puissanceCommandantStr = element.Element(AppConstants.XmlElements.PuissanceCommandant)?.Value;
-        var puissanceMercenairesStr = element.Element(AppConstants.XmlElements.PuissanceMercenaires)?.Value;
-        var puissanceLucieStr = element.Element(AppConstants.XmlElements.PuissanceLucie)?.Value;
+        var ligueStr = element.Element(ClassementConstants.XmlElements.Ligue)?.Value;
+        var scoreStr = element.Element(ClassementConstants.XmlElements.Score)?.Value;
+        var puissanceTotalStr = element.Element(ClassementConstants.XmlElements.PuissanceTotal)?.Value;
+        var puissanceCommandantStr = element.Element(ClassementConstants.XmlElements.PuissanceCommandant)?.Value;
+        var puissanceMercenairesStr = element.Element(ClassementConstants.XmlElements.PuissanceMercenaires)?.Value;
+        var puissanceLucieStr = element.Element(ClassementConstants.XmlElements.PuissanceLucie)?.Value;
 
         var historique = new HistoriqueClassement
         {
@@ -1336,15 +1336,15 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
     private void ImportHistoriqueClassements(XElement element, HistoriqueClassement historiqueClassement)
     {
-        var classementsElement = element.Element(AppConstants.XmlElements.Classements);
+        var classementsElement = element.Element(ClassementConstants.XmlElements.Classements);
         if (classementsElement == null)
             return;
 
-        foreach (var classementElement in classementsElement.Elements(AppConstants.XmlElements.ClassementItem))
+        foreach (var classementElement in classementsElement.Elements(ClassementConstants.XmlElements.ClassementItem))
         {
-            var nom = classementElement.Element(AppConstants.XmlElements.Nom)?.Value ?? "";
-            var typeStr = classementElement.Element(AppConstants.XmlElements.TypeClassement)?.Value;
-            var valeurStr = classementElement.Element(AppConstants.XmlElements.Valeur)?.Value;
+            var nom = classementElement.Element(ImportExportConstants.XmlElements.Nom)?.Value ?? "";
+            var typeStr = classementElement.Element(ClassementConstants.XmlElements.TypeClassement)?.Value;
+            var valeurStr = classementElement.Element(ClassementConstants.XmlElements.Valeur)?.Value;
 
             if (Enum.TryParse<TypeClassement>(typeStr, out var type) && int.TryParse(valeurStr, out var valeur))
             {
@@ -1360,11 +1360,11 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
     private void ImportHistoriqueMercenaires(XElement element, HistoriqueClassement historiqueClassement)
     {
-        var mercenairesElement = element.Element(AppConstants.XmlElements.Mercenaires);
+        var mercenairesElement = element.Element(ClassementConstants.XmlElements.Mercenaires);
         if (mercenairesElement == null)
             return;
 
-        foreach (var personnageElement in mercenairesElement.Elements(AppConstants.XmlElements.Personnage))
+        foreach (var personnageElement in mercenairesElement.Elements(ImportExportConstants.XmlElements.Personnage))
         {
             var personnage = ParsePersonnageFromXml(personnageElement);
             if (personnage != null)
@@ -1376,11 +1376,11 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
     private void ImportHistoriqueCommandant(XElement element, HistoriqueClassement historiqueClassement)
     {
-        var commandantElement = element.Element(AppConstants.XmlElements.Commandant);
+        var commandantElement = element.Element(PersonnageConstants.Types.Commandant);
         if (commandantElement == null)
             return;
 
-        var personnageElement = commandantElement.Element(AppConstants.XmlElements.Personnage) ?? commandantElement;
+        var personnageElement = commandantElement.Element(ImportExportConstants.XmlElements.Personnage) ?? commandantElement;
         var personnage = ParsePersonnageFromXml(personnageElement);
         if (personnage != null)
         {
@@ -1390,11 +1390,11 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
     private void ImportHistoriqueAndroides(XElement element, HistoriqueClassement historiqueClassement)
     {
-        var androidesElement = element.Element(AppConstants.XmlElements.Androides);
+        var androidesElement = element.Element(SquadConstants.XmlElements.Androides);
         if (androidesElement == null)
             return;
 
-        foreach (var personnageElement in androidesElement.Elements(AppConstants.XmlElements.Personnage))
+        foreach (var personnageElement in androidesElement.Elements(ImportExportConstants.XmlElements.Personnage))
         {
             var personnage = ParsePersonnageFromXml(personnageElement);
             if (personnage != null)
@@ -1411,13 +1411,13 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
     private static void ImportHistoriquePieces(XElement element, HistoriqueClassement historiqueClassement)
     {
-        var piecesElement = element.Element(AppConstants.XmlElements.Pieces);
+        var piecesElement = element.Element(LucieHouseConstants.XmlElements.Pieces);
         if (piecesElement == null)
             return;
 
-        foreach (var pieceElement in piecesElement.Elements(AppConstants.XmlElements.Piece))
+        foreach (var pieceElement in piecesElement.Elements(LucieHouseConstants.XmlElements.Piece))
         {
-            var nom = pieceElement.Element(AppConstants.XmlElements.Nom)?.Value;
+            var nom = pieceElement.Element(ImportExportConstants.XmlElements.Nom)?.Value;
             if (!string.IsNullOrWhiteSpace(nom))
             {
                 var pieceHistorique = ParsePieceHistorique(pieceElement, nom);
@@ -1440,7 +1440,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
             // Importer l'affection
             ImportAffection(lucieHouseElement, lucieHouse);
 
-            var piecesElements = lucieHouseElement.Elements(AppConstants.XmlElements.Piece);
+            var piecesElements = lucieHouseElement.Elements(LucieHouseConstants.XmlElements.Piece);
 
             foreach (var pieceElement in piecesElements)
             {
@@ -1456,14 +1456,14 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
                 }
                 catch (Exception ex)
                 {
-                    errors.Add($"{AppConstants.Messages.ErrorImportPieceLucieHouse} {ex.Message}");
+                    errors.Add($"{LucieHouseConstants.ErrorMessages.ErrorImportPieceLucieHouse} {ex.Message}");
                 }
             }
 
             // Valider que max 2 pièces sont sélectionnées
             if (lucieHouse.NombrePiecesSelectionnees > LucieHouse.MaxPiecesSelectionnees)
             {
-                errors.Add(string.Format(AppConstants.Messages.WarningTooManyLucieHousePieces, LucieHouse.MaxPiecesSelectionnees));
+                errors.Add(string.Format(LucieHouseConstants.ErrorMessages.WarningTooManyLucieHousePieces, LucieHouse.MaxPiecesSelectionnees));
             }
 
             // Sauvegarder dans la base de données
@@ -1478,7 +1478,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
         }
         catch (Exception ex)
         {
-            errors.Add($"{AppConstants.Messages.ErrorImportLucieHouse} {ex.Message}");
+            errors.Add($"{LucieHouseConstants.ErrorMessages.ErrorImportLucieHouse} {ex.Message}");
         }
 
         return importedCount;
@@ -1486,7 +1486,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
     private static void ImportAffection(XElement lucieHouseElement, LucieHouse lucieHouse)
     {
-        var affectionStr = lucieHouseElement.Element(AppConstants.XmlElements.Affection)?.Value;
+        var affectionStr = lucieHouseElement.Element(LucieHouseConstants.XmlElements.Affection)?.Value;
         if (!string.IsNullOrWhiteSpace(affectionStr) && int.TryParse(affectionStr, out var affection))
         {
             lucieHouse.Affection = affection;
@@ -1595,7 +1595,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
                         continue;
                     }
 
-                    var id = int.TryParse(capaciteElement.Attribute(AppConstants.XmlElements.Id)?.Value, out var parsedId) ? parsedId : 0;
+                    var id = int.TryParse(capaciteElement.Attribute(ImportExportConstants.XmlElements.Id)?.Value, out var parsedId) ? parsedId : 0;
                     var description = capaciteElement.Element("Description")?.Value ?? "";
                     var icon = capaciteElement.Element("Icon")?.Value ?? "";
 
@@ -1644,3 +1644,9 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
         return result;
     }
 }
+
+
+
+
+
+

@@ -210,7 +210,7 @@ public partial class Templates
             template.SetPersonnageIds(templateSelectedIds);
 
             var pmlBytes = await PmlExportService.ExporterTemplatesPmlAsync(new[] { template });
-            var fileName = $"{AppConstants.ExportPrefixes.Template}_{templateNom}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
+            var fileName = $"{ImportExportConstants.ExportPrefixes.Template}_{templateNom}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
             await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pmlBytes));
         }
         catch (Exception ex)
@@ -233,7 +233,7 @@ public partial class Templates
             return;
         }
         var pmlBytes = await PmlExportService.ExporterTemplatesPmlAsync(new[] { template });
-        var fileName = $"{AppConstants.ExportPrefixes.Template}_{template.Nom}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
+        var fileName = $"{ImportExportConstants.ExportPrefixes.Template}_{template.Nom}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
         await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pmlBytes));
         toastRef?.Show($"Export de '{template.Nom}' effectué", success);
     }
@@ -304,3 +304,5 @@ public partial class Templates
         }
     }
 }
+
+

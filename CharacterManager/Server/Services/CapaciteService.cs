@@ -89,3 +89,7 @@ public class CapaciteService
         return _context.Capacites.Count();
     }
 }
+
+
+
+

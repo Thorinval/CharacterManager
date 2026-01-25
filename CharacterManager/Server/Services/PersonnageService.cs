@@ -700,3 +700,6 @@ public class PersonnageService
         }
     }
 }
+
+
+

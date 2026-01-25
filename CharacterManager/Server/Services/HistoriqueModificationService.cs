@@ -404,7 +404,7 @@ public class HistoriqueModificationService
         }
         catch (Exception ex)
         {
-            preview.Error = $"{AppConstants.Messages.ErrorXmlParsing}: {ex.Message}";
+            preview.Error = $"{ImportExportConstants.ErrorMessages.ErrorXmlParsing}: {ex.Message}";
             preview.IsSuccess = false;
             preview.Logs = logs;
         }
@@ -496,7 +496,7 @@ public class HistoriqueModificationService
         }
         catch (Exception ex)
         {
-            result.Error = $"{AppConstants.Messages.ErrorXmlParsing}: {ex.Message}";
+            result.Error = $"{ImportExportConstants.ErrorMessages.ErrorXmlParsing}: {ex.Message}";
             result.IsSuccess = false;
             result.Logs = logs;
         }
@@ -672,3 +672,8 @@ public class HistoriqueModificationService
         }
     }
 }
+
+
+
+
+

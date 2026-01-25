@@ -53,7 +53,7 @@ public partial class Inventaire : IAsyncDisposable
     private Personnage currentPersonnage = new();
 
     // Tri
-    private string sortColumn = AppConstants.XmlElements.Puissance;
+    private string sortColumn = ImportExportConstants.XmlElements.Puissance;
     private bool sortAscending = false;
 
     // Sélection multiple
@@ -164,7 +164,7 @@ public partial class Inventaire : IAsyncDisposable
         if (piece != null)
         {
             int newValue = Math.Max(0, piece.Niveau + delta);
-            await UpdatePieceField(pieceId, AppConstants.XmlElements.Niveau, newValue.ToString());
+            await UpdatePieceField(pieceId, ImportExportConstants.XmlElements.Niveau, newValue.ToString());
         }
     }
 
@@ -174,7 +174,7 @@ public partial class Inventaire : IAsyncDisposable
         if (personnage != null)
         {
             int newValue = Math.Max(0, personnage.Puissance + delta);
-            await UpdatePersonnageField(personnageId, AppConstants.XmlElements.Puissance, newValue.ToString());
+            await UpdatePersonnageField(personnageId, ImportExportConstants.XmlElements.Puissance, newValue.ToString());
         }
     }
 
@@ -185,7 +185,7 @@ public partial class Inventaire : IAsyncDisposable
         if (piece != null)
         {
             int newValue = 0;
-            string typepuissance = typeBonus == TypeBonus.Tactique ? AppConstants.XmlElements.PuissanceTactique : AppConstants.XmlElements.PuissanceStrategique;
+            string typepuissance = typeBonus == TypeBonus.Tactique ? ImportExportConstants.XmlElements.PuissanceTactique : ImportExportConstants.XmlElements.PuissanceStrategique;
 
             switch (typeBonus)
             {
@@ -227,25 +227,25 @@ public partial class Inventaire : IAsyncDisposable
         {
             switch (field)
             {
-                case AppConstants.XmlElements.Niveau:
+                case ImportExportConstants.XmlElements.Niveau:
                     if (int.TryParse(value, out int niveau) && niveau >= 1 && niveau <= 200)
                     {
                         personnage.Niveau = niveau;
                     }
                     break;
-                case AppConstants.XmlElements.Rang:
+                case ImportExportConstants.XmlElements.Rang:
                     if (int.TryParse(value, out int rang) && rang >= 0 && rang <= 7)
                     {
                         personnage.Rang = rang;
                     }
                     break;
-                case AppConstants.XmlElements.Puissance:
+                case ImportExportConstants.XmlElements.Puissance:
                     if (int.TryParse(value, out int puissance) && puissance >= 0)
                     {
                         personnage.Puissance = puissance;
                     }
                     break;
-                case AppConstants.XmlElements.Selectionne:
+                case ImportExportConstants.XmlElements.Selectionne:
                     if (bool.TryParse(value, out var selectionne))
                     {
                         personnage.Selectionne = selectionne;
@@ -268,7 +268,7 @@ public partial class Inventaire : IAsyncDisposable
 
     internal async Task OnSelectionneChanged(int personnageId, bool value)
     {
-        await UpdatePersonnageField(personnageId, AppConstants.XmlElements.Selectionne, value.ToString());
+        await UpdatePersonnageField(personnageId, ImportExportConstants.XmlElements.Selectionne, value.ToString());
     }
 
     internal async Task UpdateRankFromStar(int personnageId, int clickedStar, int currentRank)
@@ -433,12 +433,12 @@ public partial class Inventaire : IAsyncDisposable
 
         return sortColumn switch
         {
-            AppConstants.XmlElements.Puissance => SortByPuissance(source, typeOrder),
-            AppConstants.XmlElements.Nom => SortByName(source, typeOrder),
-            AppConstants.XmlElements.Rarete => SortByRarity(source, typeOrder),
-            AppConstants.XmlElements.Niveau => SortByLevel(source, typeOrder),
-            AppConstants.XmlElements.Type => SortByType(source, typeOrder),
-            AppConstants.XmlElements.Rang => SortByRank(source, typeOrder),
+            ImportExportConstants.XmlElements.Puissance => SortByPuissance(source, typeOrder),
+            ImportExportConstants.XmlElements.Nom => SortByName(source, typeOrder),
+            ImportExportConstants.XmlElements.Rarete => SortByRarity(source, typeOrder),
+            ImportExportConstants.XmlElements.Niveau => SortByLevel(source, typeOrder),
+            ImportExportConstants.XmlElements.Type => SortByType(source, typeOrder),
+            ImportExportConstants.XmlElements.Rang => SortByRank(source, typeOrder),
             _ => SortByName(source, typeOrder)
         };
     }
@@ -499,11 +499,11 @@ public partial class Inventaire : IAsyncDisposable
         ApplyFiltersAndSorting();
     }
 
-    internal void SortByPuissance() => SortBy(AppConstants.XmlElements.Puissance);
-    internal void SortByNom() => SortBy(AppConstants.XmlElements.Nom);
-    internal void SortByRarete() => SortBy(AppConstants.XmlElements.Rarete);
-    internal void SortByNiveau() => SortBy(AppConstants.XmlElements.Niveau);
-    internal void SortByRang() => SortBy(AppConstants.XmlElements.Rang);
+    internal void SortByPuissance() => SortBy(ImportExportConstants.XmlElements.Puissance);
+    internal void SortByNom() => SortBy(ImportExportConstants.XmlElements.Nom);
+    internal void SortByRarete() => SortBy(ImportExportConstants.XmlElements.Rarete);
+    internal void SortByNiveau() => SortBy(ImportExportConstants.XmlElements.Niveau);
+    internal void SortByRang() => SortBy(ImportExportConstants.XmlElements.Rang);
 
     internal void HandleSearchInput(ChangeEventArgs e)
     {
@@ -823,7 +823,7 @@ public partial class Inventaire : IAsyncDisposable
                 : personnagesFiltres;
 
             var pmlBytes = await PmlExportService.ExporterInventairePmlAsync(personnagesAExporter);
-            var fileName = $"{AppConstants.ExportPrefixes.Inventaire}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
+            var fileName = $"{ImportExportConstants.ExportPrefixes.Inventaire}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
 
             // Utiliser JavaScript pour télécharger le fichier
             await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pmlBytes));
@@ -1218,3 +1218,5 @@ public partial class Inventaire : IAsyncDisposable
     /// Si l'URL est vide, affiche un fond lightblue
     /// </summary>
 }
+
+

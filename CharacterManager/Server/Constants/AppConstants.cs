@@ -53,16 +53,6 @@ public static class AppConstants
     }
 
     /// <summary>
-    /// Suffixes pour les noms de fichiers images
-    /// </summary>
-    public static class ImageSuffixes
-    {
-        public const string SmallPortrait = "_small_portrait";
-        public const string SmallSelect = "_small_select";
-        public const string Header = "_header";
-    }
-
-    /// <summary>
     /// Noms de fichiers de configuration
     /// </summary>
     public static class ConfigFiles
@@ -70,17 +60,6 @@ public static class AppConstants
         // NOTE: PersonnagesConfig.json removed - now using filesystem-based detection
         // Images in /adult/ subdirectory are automatically treated as adult content
         public const string Database = "charactermanager.db";
-    }
-
-    /// <summary>
-    /// Préfixes pour les noms de fichiers d'export
-    /// </summary>
-    public static class ExportPrefixes
-    {
-        public const string Inventaire = "inventaire";
-        public const string Template = "template";
-        public const string HistoriqueClassements = "historique_classements";
-        public const string HistoriqueLigues = "historique_ligues";
     }
 
     /// <summary>
@@ -93,124 +72,10 @@ public static class AppConstants
     }
 
     /// <summary>
-    /// Éléments XML/PML
-    /// </summary>
-    public static class XmlElements
-    {
-        public const string Androïde = "Androïde";
-        // Éléments racine
-        public const string CharacterManagerPML = "CharacterManagerPML";
-        public const string TypeAttaque = "TypeAttaque";
-        public const string InventairePML = "InventairePML";
-        public const string TemplatesPML = "TemplatesPML";
-        public const string HistoriqueClassements = "HistoriqueClassements";
-        public const string LucieHouse = "LucieHouse";
-        public const string MeilleurEscouade = "meilleurEscouade";
-        public const string Id = "Id";
-        public const string Capacites = "Capacites";
-        public const string Capacite = "Capacite";
-
-        // Valeurs pour parsing (switch)
-        public const string SSR = "SSR";
-        public const string SR = "SR";
-        public const string R = "R";
-        public const string Sentinelle = "Sentinelle";
-        public const string Combattante = "Combattante";
-        public const string Syndicat = "Syndicat";
-        public const string Pacificateurs = "Pacificateurs";
-        public const string HommesLibres = "HommesLibres";
-        public const string Melee = "Melee";
-        public const string MeleeAccent = "Mêlée";
-
-        // Sections
-        public const string Inventaire = "inventaire";
-        public const string Templates = "templates";
-        public const string Template = "template";
-
-        // Éléments de personnage
-        public const string Personnage = "Personnage";
-        public const string Nom = "Nom";
-        public const string Rarete = "Rarete";
-        public const string Type = "Type";
-        public const string Puissance = "Puissance";
-        public const string PA = "PA";
-        public const string PV = "PV";
-        public const string Niveau = "Niveau";
-        public const string Rang = "Rang";
-        public const string Role = "Role";
-        public const string Faction = "Faction";
-        public const string Selectionne = "Selectionne";
-        public const string Description = "Description";
-        public const string HasRelation = "HasRelation";
-        public const string NivRelation = "NivRelation";
-        public const string Icon = "Icon";
-        public const string Mercenaire = "Mercenaire";
-        public const string Commandant = "Commandant";
-        public const string Androide = "Androide";
-        public const string DateEnregistrement = "DateEnregistrement";
-        public const string PuissanceTotal = "PuissanceTotal";
-        public const string Classement = "Classement";
-        public const string DonneesEscouadeJson = "DonneesEscouadeJson";
-        public const string Piece = "Piece";
-        public const string Bonus = "Bonus";
-        public const string BonusTactiques = "BonusTactiques";
-        public const string BonusStrategiques = "BonusStrategiques";
-        public const string PuissanceTactique = "PuissanceTactique";
-        public const string PuissanceStrategique = "PuissanceStrategique";
-        public const string PuissanceLegacy = "Puissance";
-        public const string Affection = "Affection";
-        public const string Lucie = "Lucie";
-
-        // Éléments d'historique de ligue
-        public const string HistoriqueLigue = "HistoriqueLigue";
-        public const string DateMontee = "DateMontee";
-        public const string Ligue = "Ligue";
-        public const string Notes = "Notes";
-
-        // Éléments d'historique de classement
-        public const string HistoriqueClassement = "HistoriqueClassement";
-        public const string Score = "Score";
-        public const string PuissanceCommandant = "PuissanceCommandant";
-        public const string PuissanceMercenaires = "PuissanceMercenaires";
-        public const string PuissanceLucie = "PuissanceLucie";
-        public const string Classements = "Classements";
-        public const string ClassementItem = "ClassementItem";
-        public const string TypeClassement = "TypeClassement";
-        public const string Valeur = "Valeur";
-        public const string Mercenaires = "Mercenaires";
-        public const string Androides = "Androides";
-        public const string Pieces = "Pieces";
-        public const string Nutaku = "Nutaku";
-        public const string Top150 = "Top150";
-        public const string Pays = "Pays";
-        public const string Date = "Date";
-
-        // Attributs
-        public const string Version = "version";
-        public const string ExportDate = "exportDate";
-    }
-
-    /// <summary>
     /// Messages et libellés de l'application
     /// </summary>
     public static class Messages
     {
-        // Messages d'erreur
-        public const string ErrorTemplateNoName = "Un template doit avoir un nom";
-        public const string ErrorHistoriqueInvalide = "Historique invalide: date ou données manquantes";
-        public const string WarningTooManyLucieHousePieces = "Attention: Plus de {0} pièces sélectionnées dans l'import";
-        public const string ErrorImportPersonnageInventaire = "Erreur lors de l'import de personnage (inventaire):";
-        public const string ErrorImportPersonnageTemplate = "Erreur lors de l'import du personnage au template";
-        public const string ErrorImportTemplate = "Erreur lors de l'import du template:";
-        public const string ErrorImportBestSquad = "Erreur lors de l'import de la meilleure escouade:";
-        public const string ErrorImportHistorique = "Erreur lors de l'import d'un historique:";
-        public const string ErrorImportPieceLucieHouse = "Erreur lors de l'import d'une pièce Lucie House:";
-        public const string ErrorImportLucieHouse = "Erreur lors de l'import de Lucie House:";
-        public const string ErrorFileEmpty = "Le fichier est vide";
-        public const string ErrorFileInvalid = "Le fichier n'est pas valide";
-        public const string ErrorXmlParsing = "Erreur lors de l'analyse du fichier XML";
-        public const string ErrorNoSectionsFound = "Aucune section reconnue trouvée dans le fichier";
-
         // Messages de succès
         public const string SuccessImport = "Import réussi";
         public const string SuccessExport = "Export réussi";
