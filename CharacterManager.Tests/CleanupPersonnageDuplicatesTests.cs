@@ -245,8 +245,6 @@ public class CleanupPersonnageDuplicatesTests : IDisposable
 
     public void Dispose()
     {
-        // Restore console output before disposing context
-        Console.SetOut(_originalOut);
         Dispose(true);
         GC.SuppressFinalize(this);
     }
@@ -255,7 +253,14 @@ public class CleanupPersonnageDuplicatesTests : IDisposable
     {
         if (disposing)
         {
+            // Restore console output and dispose managed resources
+            Console.SetOut(_originalOut);
             _context?.Dispose();
         }
+    }
+
+    ~CleanupPersonnageDuplicatesTests()
+    {
+        Dispose(false);
     }
 }

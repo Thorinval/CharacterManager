@@ -118,7 +118,7 @@ public class ProfileServiceTests : IDisposable
         await _context.SaveChangesAsync();
 
         // Act
-        var profile = _service.GetByUsername("bob");
+        var profile = await _service.GetByUsernameAsync("bob");
 
         // Assert
         Assert.NotNull(profile);
