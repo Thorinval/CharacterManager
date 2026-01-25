@@ -43,9 +43,9 @@ public class HistoliguesTests : TestContext
         localizationService.InitializeAsync("fr").GetAwaiter().GetResult();
 
         Services.AddSingleton(_dbContext);
-        Services.AddSingleton(new HistoriqueLigueService(_dbContext));
-        Services.AddSingleton(new PmlExportService(_dbContext, NullLogger<PmlExportService>.Instance));
-        Services.AddSingleton(new PmlImportService(_dbContext));
+        Services.AddSingleton<IHistoriqueLigueService>(new HistoriqueLigueService(_dbContext));
+        Services.AddSingleton<IPmlExportService>(new PmlExportService(_dbContext, NullLogger<PmlExportService>.Instance));
+        Services.AddSingleton<IPmlImportService>(new PmlImportService(_dbContext));
         Services.AddSingleton<IClientLocalizationService>(localizationService);
         Services.AddSingleton(languageContext);
         Services.AddSingleton<IHttpContextAccessor>(httpAccessor);

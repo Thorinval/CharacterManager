@@ -1,0 +1,7 @@
+﻿Série de tests pour D:\Devs\CharacterManager\CharacterManager.Tests\bin\Debug\net9.0\CharacterManager.Tests.dll (.NETCoreApp,Version=v9.0)
+Version de VSTest 17.14.1 (x64)
+
+Démarrage de l'exécution de tests, patientez...
+Au total, 1 fichiers de test ont correspondu au modèle spécifié.
+
+Réussi!  - échec :     0, réussite :   716, ignorée(s) :     0, total :   716, durée : 2 s - CharacterManager.Tests.dll (net9.0)

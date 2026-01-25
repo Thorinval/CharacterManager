@@ -3,6 +3,7 @@ using CharacterManager.Server.Data;
 using CharacterManager.Server.Models;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using System.IO;
 
 namespace CharacterManager.Tests;
 
@@ -11,12 +12,14 @@ public class CleanupPersonnageDuplicatesTests : IDisposable
     private readonly ApplicationDbContext _context;
     private readonly CleanupPersonnageDuplicates _service;
     private readonly TextWriter _originalOut;
+    private readonly StringWriter _stringWriter;
 
     public CleanupPersonnageDuplicatesTests()
     {
-        // Suppress console output for tests
+        // Suppress console output for tests by redirecting to StringWriter
         _originalOut = Console.Out;
-        Console.SetOut(TextWriter.Null);
+        _stringWriter = new StringWriter();
+        Console.SetOut(_stringWriter);
 
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -232,8 +235,9 @@ public class CleanupPersonnageDuplicatesTests : IDisposable
 
     public void Dispose()
     {
-        // Restore console output
+        // Restore console output and dispose StringWriter
         Console.SetOut(_originalOut);
+        _stringWriter?.Dispose();
         Dispose(true);
         GC.SuppressFinalize(this);
     }

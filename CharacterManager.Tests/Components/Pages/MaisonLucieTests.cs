@@ -48,8 +48,8 @@ public class MaisonLucieTests : TestContext
 
         Services.AddSingleton(_db);
         Services.AddSingleton<IPersonnageService>(personnageService);
-        Services.AddSingleton(importService);
-        Services.AddSingleton(exportService);
+        Services.AddSingleton<IPmlImportService>(importService);
+        Services.AddSingleton<IPmlExportService>(exportService);
         Services.AddSingleton(_historique.Object);
         Services.AddSingleton(env.Object);
         Services.AddSingleton<IConfiguration>(config);
