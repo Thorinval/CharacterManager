@@ -25,7 +25,7 @@ public class ModificationHistoriqueRequest
 /// <summary>
 /// Service de gestion de l'historique des modifications
 /// </summary>
-public class HistoriqueModificationService
+public class HistoriqueModificationService : IHistoriqueModificationService
 {
     private readonly ApplicationDbContext _context;
 
@@ -241,6 +241,26 @@ public class HistoriqueModificationService
             .Where(h => h.TypeEntite == typeEntite && h.EntiteId == entiteId)
             .OrderByDescending(h => h.DateModification)
             .ToListAsync();
+    }
+
+    /// <summary>
+    /// Récupère l'historique des modifications récentes
+    /// </summary>
+    public async Task<List<HistoriqueModification>> GetHistoriqueRecentAsync(int nombre = 50)
+    {
+        return await _context.HistoriquesModifications
+            .OrderByDescending(h => h.DateModification)
+            .Take(nombre)
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// Vide l'historique des modifications
+    /// </summary>
+    public async Task ViderHistoriqueAsync()
+    {
+        _context.HistoriquesModifications.RemoveRange(_context.HistoriquesModifications);
+        await _context.SaveChangesAsync();
     }
 
     /// <summary>

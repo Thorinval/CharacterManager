@@ -12,9 +12,9 @@ namespace CharacterManager.Server.Services;
 /// </summary>
 public class AuthenticationHelper : IAuthenticationHelper
 {
-    private readonly ProfileService _profileService;
+    private readonly IProfileService _profileService;
 
-    public AuthenticationHelper(ProfileService profileService)
+    public AuthenticationHelper(IProfileService profileService)
     {
         _profileService = profileService;
     }

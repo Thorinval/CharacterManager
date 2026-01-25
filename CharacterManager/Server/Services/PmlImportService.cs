@@ -41,9 +41,9 @@ public class HistoriqueModificationImportRequest
 /// Extension .pml pour les fichiers d'import
 /// Supporte les sections : HistoriqueClassements, inventaire, template
 /// </summary>
-public class PmlImportService(ApplicationDbContext context, HistoriqueModificationService? historiqueService = null) : PmlServiceBase(context)
+public class PmlImportService(ApplicationDbContext context, IHistoriqueModificationService? historiqueService = null) : PmlServiceBase(context), IPmlImportService
 {
-    private readonly HistoriqueModificationService? _historiqueService = historiqueService;
+    private readonly IHistoriqueModificationService? _historiqueService = historiqueService;
 
     // Constantes pour les types de données dans les logs
     private const string DataTypePuissance = "Puissance";
@@ -753,6 +753,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
     /// Validation: doit avoir exactement 1 commandant + 8 mercenaires + 3 androides
     /// Validation: la puissance du commandant (Lucie) ne doit pas être 0
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "S3776", Justification = "Complex validation logic required by business rules")]
     private async Task<int> ImportHistoriquesClassementAsync(IEnumerable<XElement> historiqueClassementElements, List<string> errors, List<ImportLogEntry> logs)
     {
         int importedCount = 0;

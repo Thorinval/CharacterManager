@@ -12,13 +12,13 @@ using CharacterManager.Components;
 public partial class Templates
 {
     [Inject]
-    public PersonnageService PersonnageService { get; set; } = null!;
+    public IPersonnageService PersonnageService { get; set; } = null!;
 
     [Inject]
-    public PmlImportService PmlImportService { get; set; } = null!;
+    public IPmlImportService PmlImportService { get; set; } = null!;
 
     [Inject]
-    public PmlExportService PmlExportService { get; set; } = null!;
+    public IPmlExportService PmlExportService { get; set; } = null!;
 
     [Inject]
     public IJSRuntime JSRuntime { get; set; } = null!;

@@ -14,7 +14,7 @@ using Xunit;
 
 namespace CharacterManager.Tests.Components.Modal;
 
-public class CreerClassementModalTests : BlazorComponentTestBase, IDisposable
+public class CreerClassementModalTests : BlazorComponentTestBase
 {
     private readonly Mock<IModalService> _modalServiceMock;
     private readonly ApplicationDbContext _context;
@@ -22,7 +22,6 @@ public class CreerClassementModalTests : BlazorComponentTestBase, IDisposable
     private readonly HistoriqueClassementService _historiqueClassementService;
     private readonly string _testDir;
     private readonly string _i18nDir;
-    private bool _disposed;
 
     public CreerClassementModalTests()
     {
@@ -72,8 +71,8 @@ public class CreerClassementModalTests : BlazorComponentTestBase, IDisposable
         localizationService.InitializeAsync("fr").GetAwaiter().GetResult();
         
         Services.AddSingleton(_modalServiceMock.Object);
-        Services.AddSingleton(languageContext);
-        Services.AddSingleton(localizationService);
+        Services.AddSingleton<ILanguageContextService>(languageContext);
+        Services.AddSingleton<IClientLocalizationService>(localizationService);
         Services.AddSingleton(_personnageService);
         Services.AddSingleton(_historiqueClassementService);
         Services.AddSingleton(_context);
@@ -322,34 +321,6 @@ public class CreerClassementModalTests : BlazorComponentTestBase, IDisposable
 
         // Assert
         Assert.Contains("chip-label", cut.Markup);
-    }
-
-    #endregion
-
-    #region Cleanup
-
-    public new void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    protected new virtual void Dispose(bool disposing)
-    {
-        if (!_disposed)
-        {
-            if (disposing)
-            {
-                _context.Dispose();
-                
-                if (Directory.Exists(_testDir))
-                {
-                    try { Directory.Delete(_testDir, recursive: true); }
-                    catch { }
-                }
-            }
-            _disposed = true;
-        }
     }
 
     #endregion

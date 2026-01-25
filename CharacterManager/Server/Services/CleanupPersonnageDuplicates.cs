@@ -11,9 +11,9 @@ namespace CharacterManager.Scripts;
 /// </summary>
 public class CleanupPersonnageDuplicates
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IApplicationDbContext _context;
 
-    public CleanupPersonnageDuplicates(ApplicationDbContext context)
+    public CleanupPersonnageDuplicates(IApplicationDbContext context)
     {
         _context = context;
     }

@@ -5,7 +5,7 @@ namespace CharacterManager.Server.Services;
 /// Cela permet au ClientLocalizationService (scoped) de connaître la langue correcte
 /// même avant que LocalizationProvider n'ait terminé son initialisation
 /// </summary>
-public class LanguageContextService
+public class LanguageContextService : ILanguageContextService
 {
     private readonly Dictionary<string, string> _languageCache = new();
     private readonly object _lock = new();

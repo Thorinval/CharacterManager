@@ -24,10 +24,10 @@ public class EscouadePreviewEditorTests : IDisposable
             .Options;
         dbContext = new ApplicationDbContext(options);
         ctx.Services.AddSingleton(dbContext);
-        ctx.Services.AddSingleton<AdultModeNotificationService>();
+        ctx.Services.AddSingleton<IAdultModeNotificationService, AdultModeNotificationService>();
     }
 
-    public void Dispose()
+    void IDisposable.Dispose()
     {
         ctx?.Dispose();
         dbContext?.Dispose();

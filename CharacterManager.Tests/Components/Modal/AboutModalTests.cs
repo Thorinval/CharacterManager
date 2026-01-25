@@ -12,13 +12,12 @@ using Xunit;
 
 namespace CharacterManager.Tests.Components.Modal;
 
-public class AboutModalTests : BlazorComponentTestBase, IDisposable
+public class AboutModalTests : BlazorComponentTestBase
 {
     private readonly Mock<IModalService> _modalServiceMock;
     private readonly AppVersionService _versionService;
     private readonly string _testDir;
     private readonly string _i18nDir;
-    private bool _disposed;
 
     public AboutModalTests()
     {
@@ -67,9 +66,9 @@ public class AboutModalTests : BlazorComponentTestBase, IDisposable
         localizationService.InitializeAsync("fr").GetAwaiter().GetResult();
         
         Services.AddSingleton(_modalServiceMock.Object);
-        Services.AddSingleton(_versionService);
-        Services.AddSingleton(languageContext);
-        Services.AddSingleton(localizationService);
+        Services.AddSingleton<IAppVersionService>(_versionService);
+        Services.AddSingleton<ILanguageContextService>(languageContext);
+        Services.AddSingleton<IClientLocalizationService>(localizationService);
     }
 
     #region Rendering Tests
@@ -223,30 +222,4 @@ public class AboutModalTests : BlazorComponentTestBase, IDisposable
     }
 
     #endregion
-
-    public new void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    protected new virtual void Dispose(bool disposing)
-    {
-        if (!_disposed)
-        {
-            if (disposing)
-            {
-                
-                if (Directory.Exists(_testDir))
-                {
-                    try
-                    {
-                        Directory.Delete(_testDir, recursive: true);
-                    }
-                    catch { }
-                }
-            }
-            _disposed = true;
-        }
-    }
 }

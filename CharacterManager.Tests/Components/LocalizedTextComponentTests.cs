@@ -11,11 +11,10 @@ using Xunit;
 
 namespace CharacterManager.Tests.Components;
 
-public class LocalizedTextComponentTests : TestContext, IDisposable
+public class LocalizedTextComponentTests : TestContext
 {
     private readonly string _testDir;
     private readonly string _i18nDir;
-    private bool _disposed;
 
     public LocalizedTextComponentTests()
     {
@@ -56,8 +55,8 @@ public class LocalizedTextComponentTests : TestContext, IDisposable
         localizationService.InitializeAsync("fr").GetAwaiter().GetResult();
         
         // Register all services BEFORE any component is rendered
-        Services.AddSingleton(languageContext);
-        Services.AddSingleton(localizationService);
+        Services.AddSingleton<ILanguageContextService>(languageContext);
+        Services.AddSingleton<IClientLocalizationService>(localizationService);
         
         // Setup JSInterop
         JSInterop.Mode = JSRuntimeMode.Loose;
@@ -125,34 +124,4 @@ public class LocalizedTextComponentTests : TestContext, IDisposable
     }
 
     #endregion
-
-    public new void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    protected new virtual void Dispose(bool disposing)
-    {
-        if (!_disposed)
-        {
-            if (disposing)
-            {
-                base.Dispose();
-                
-                if (Directory.Exists(_testDir))
-                {
-                    try
-                    {
-                        Directory.Delete(_testDir, recursive: true);
-                    }
-                    catch
-                    {
-                        // Ignore cleanup errors
-                    }
-                }
-            }
-            _disposed = true;
-        }
-    }
 }

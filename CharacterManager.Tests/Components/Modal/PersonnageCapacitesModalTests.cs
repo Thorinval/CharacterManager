@@ -31,12 +31,12 @@ public class PersonnageCapacitesModalTests : IDisposable
         
         ctx.Services.AddSingleton(dbContext);
         ctx.Services.AddSingleton(modalServiceMock.Object);
-        ctx.Services.AddScoped<HistoriqueModificationService>();
-        ctx.Services.AddScoped<PersonnageService>();
-        ctx.Services.AddScoped<CapaciteService>();
+        ctx.Services.AddScoped<IHistoriqueModificationService, HistoriqueModificationService>();
+        ctx.Services.AddScoped<IPersonnageService, PersonnageService>();
+        ctx.Services.AddScoped<ICapaciteService, CapaciteService>();
     }
 
-    public void Dispose()
+    void IDisposable.Dispose()
     {
         ctx?.Dispose();
         dbContext?.Dispose();

@@ -10,13 +10,13 @@ using CharacterManager.Components.Modal;
 public partial class Classements
 {
     [Inject]
-    public HistoriqueClassementService HistoriqueService { get; set; } = null!;
+    public IHistoriqueClassementService HistoriqueService { get; set; } = null!;
 
     [Inject]
-    public PmlImportService PmlImportService { get; set; } = null!;
+    public IPmlImportService PmlImportService { get; set; } = null!;
 
     [Inject]
-    public PmlExportService PmlExportService { get; set; } = null!;
+    public IPmlExportService PmlExportService { get; set; } = null!;
 
     [Inject]
     public IJSRuntime JSRuntime { get; set; } = null!;
@@ -25,7 +25,7 @@ public partial class Classements
     public IModalService ModalService { get; set; } = null!;
 
     [Inject]
-    public ClientLocalizationService LocalizationService { get; set; } = null!;
+    public IClientLocalizationService LocalizationService { get; set; } = null!;
 
     private const string Identifier = "alert";
     internal List<HistoriqueClassement>? historiques;

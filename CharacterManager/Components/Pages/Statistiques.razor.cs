@@ -14,7 +14,13 @@ public partial class Statistiques : IAsyncDisposable
     public IJSRuntime JSRuntime { get; set; } = null!;
     
     [Inject]
-    public StatistiquesService StatistiquesService { get; set; } = null!;
+    public IStatistiquesService StatistiquesService { get; set; } = null!;
+
+    [Inject]
+    public IPersonnageService PersonnageService { get; set; } = null!;
+
+    [Inject]
+    public IClientLocalizationService LocalizationService { get; set; } = null!;
 
     private IJSObjectReference? chartModule;
     

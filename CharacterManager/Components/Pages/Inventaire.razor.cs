@@ -17,7 +17,7 @@ using System.Diagnostics.CodeAnalysis;
 public partial class Inventaire : IAsyncDisposable
 {
     [Inject]
-    public PersonnageService PersonnageService { get; set; } = null!;
+    public IPersonnageService PersonnageService { get; set; } = null!;
 
     [Inject]
     public NavigationManager Navigation { get; set; } = null!;
@@ -26,13 +26,13 @@ public partial class Inventaire : IAsyncDisposable
     public IJSRuntime JSRuntime { get; set; } = null!;
 
     [Inject]
-    public PmlImportService PmlImportService { get; set; } = null!;
+    public IPmlImportService PmlImportService { get; set; } = null!;
 
     [Inject]
-    public PmlExportService PmlExportService { get; set; } = null!;
+    public IPmlExportService PmlExportService { get; set; } = null!;
 
     [Inject]
-    public HistoriqueModificationService HistoriqueModificationService { get; set; } = null!;
+    public IHistoriqueModificationService HistoriqueModificationService { get; set; } = null!;
 
     [Inject]
     public IModalService ModalService { get; set; } = null!;

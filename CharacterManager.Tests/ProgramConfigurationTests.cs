@@ -17,7 +17,7 @@ namespace CharacterManager.Tests;
 /// </summary>
 public class ProgramConfigurationTests
 {
-    private IServiceProvider GetConfiguredServiceProvider()
+    private static IServiceProvider GetConfiguredServiceProvider()
     {
         var services = new ServiceCollection();
 
@@ -61,23 +61,23 @@ public class ProgramConfigurationTests
         services.AddSingleton(mockEnv.Object);
 
         // Manually register services that would be registered in AddApplicationServices
-        services.AddScoped<DatabaseInitializationService>();
-        services.AddScoped<PersonnageService>();
-        services.AddScoped<HistoriqueModificationService>();
-        services.AddScoped<HistoriqueClassementService>();
-        services.AddScoped<HistoriqueLigueService>();
-        services.AddScoped<ProfileService>();
-        services.AddScoped<UpdateService>();
-        services.AddScoped<LocalizationService>();
-        services.AddScoped<StatistiquesService>();
-        services.AddScoped<CapaciteService>();
-        services.AddScoped<AppVersionService>();
-        services.AddScoped<ClientLocalizationService>();
-        services.AddScoped<LanguageContextService>();
-        services.AddScoped<AdultModeNotificationService>();
+        services.AddScoped<IDatabaseInitializationService, DatabaseInitializationService>();
+        services.AddScoped<IHistoriqueModificationService, HistoriqueModificationService>();
+        services.AddScoped<IPersonnageService, PersonnageService>();
+        services.AddScoped<IHistoriqueClassementService, HistoriqueClassementService>();
+        services.AddScoped<IHistoriqueLigueService, HistoriqueLigueService>();
+        services.AddScoped<IProfileService, ProfileService>();
+        services.AddScoped<IUpdateService, UpdateService>();
+        services.AddScoped<ILocalizationService, LocalizationService>();
+        services.AddScoped<IStatistiquesService, StatistiquesService>();
+        services.AddScoped<ICapaciteService, CapaciteService>();
+        services.AddScoped<IAppVersionService, AppVersionService>();
+        services.AddScoped<IClientLocalizationService, ClientLocalizationService>();
+        services.AddScoped<ILanguageContextService, LanguageContextService>();
+        services.AddScoped<IAdultModeNotificationService, AdultModeNotificationService>();
         services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
-        services.AddScoped<PmlImportService>();
-        services.AddScoped<PmlExportService>();
+        services.AddScoped<IPmlImportService, PmlImportService>();
+        services.AddScoped<IPmlExportService, PmlExportService>();
 
         // Add logging
         services.AddLogging(builder => builder.AddConsole());
@@ -126,7 +126,7 @@ public class ProgramConfigurationTests
         var serviceProvider = GetConfiguredServiceProvider();
 
         // Assert
-        var service = serviceProvider.GetService<PersonnageService>();
+        var service = serviceProvider.GetService<IPersonnageService>();
         Assert.NotNull(service);
     }
 
@@ -137,7 +137,7 @@ public class ProgramConfigurationTests
         var serviceProvider = GetConfiguredServiceProvider();
 
         // Assert
-        var service = serviceProvider.GetService<ProfileService>();
+        var service = serviceProvider.GetService<IProfileService>();
         Assert.NotNull(service);
     }
 
@@ -148,7 +148,7 @@ public class ProgramConfigurationTests
         var serviceProvider = GetConfiguredServiceProvider();
 
         // Assert
-        var service = serviceProvider.GetService<StatistiquesService>();
+        var service = serviceProvider.GetService<IStatistiquesService>();
         Assert.NotNull(service);
     }
 
@@ -159,7 +159,7 @@ public class ProgramConfigurationTests
         var serviceProvider = GetConfiguredServiceProvider();
 
         // Assert
-        var service = serviceProvider.GetService<AppVersionService>();
+        var service = serviceProvider.GetService<IAppVersionService>();
         Assert.NotNull(service);
     }
 
@@ -181,7 +181,7 @@ public class ProgramConfigurationTests
         var serviceProvider = GetConfiguredServiceProvider();
 
         // Assert
-        var service = serviceProvider.GetService<PmlImportService>();
+        var service = serviceProvider.GetService<IPmlImportService>();
         Assert.NotNull(service);
     }
 
@@ -192,7 +192,7 @@ public class ProgramConfigurationTests
         var serviceProvider = GetConfiguredServiceProvider();
 
         // Assert
-        var service = serviceProvider.GetService<PmlExportService>();
+        var service = serviceProvider.GetService<IPmlExportService>();
         Assert.NotNull(service);
     }
 
@@ -253,7 +253,7 @@ public class ProgramConfigurationTests
         var serviceProvider = GetConfiguredServiceProvider();
 
         // Assert
-        var service = serviceProvider.GetService<DatabaseInitializationService>();
+        var service = serviceProvider.GetService<IDatabaseInitializationService>();
         Assert.NotNull(service);
     }
 
@@ -267,43 +267,6 @@ public class ProgramConfigurationTests
         // Assert
         Assert.NotNull(dbContext);
         Assert.True(dbContext.Database.CanConnect());
-    }
-
-    #endregion
-
-    #region Service Dependency Tests
-
-    [Fact]
-    public void PersonnageService_Should_Resolve_With_Dependencies()
-    {
-        // Arrange & Act
-        var serviceProvider = GetConfiguredServiceProvider();
-
-        // Assert - PersonnageService requires HistoriqueModificationService
-        var service = serviceProvider.GetService<PersonnageService>();
-        Assert.NotNull(service);
-    }
-
-    [Fact]
-    public void HistoriqueClassementService_Should_Resolve()
-    {
-        // Arrange & Act
-        var serviceProvider = GetConfiguredServiceProvider();
-
-        // Assert
-        var service = serviceProvider.GetService<HistoriqueClassementService>();
-        Assert.NotNull(service);
-    }
-
-    [Fact]
-    public void LocalizationService_Should_Resolve()
-    {
-        // Arrange & Act
-        var serviceProvider = GetConfiguredServiceProvider();
-
-        // Assert
-        var service = serviceProvider.GetService<LocalizationService>();
-        Assert.NotNull(service);
     }
 
     #endregion

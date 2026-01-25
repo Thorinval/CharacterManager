@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace CharacterManager.Server.Services;
 
-public class HistoriqueLigueService
+public class HistoriqueLigueService : IHistoriqueLigueService
 {
     private readonly ApplicationDbContext _context;
 

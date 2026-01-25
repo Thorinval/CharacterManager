@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CharacterManager.Server.Services;
 
-public class ProfileService
+public class ProfileService : IProfileService
 {
     private readonly ApplicationDbContext _db;
     private readonly IConfiguration _config;

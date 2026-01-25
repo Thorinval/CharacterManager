@@ -17,52 +17,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog((ctx, services, lc) =>
     lc.ReadFrom.Configuration(ctx.Configuration));
 
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+// Add all application services with configuration
+builder.Services.AddApplicationConfiguration(builder.Environment, builder.Configuration);
 
-// Authentication & Authorization
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/login";
-        options.LogoutPath = "/logout";
-        options.AccessDeniedPath = "/login";
-    });
-builder.Services.AddAuthorization();
-builder.Services.AddHttpContextAccessor();
-
-// Configure SQLite database
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    options.UseSqlite("Data Source=charactermanager.db");
-    
-    // Enable detailed logging in development
-    if (builder.Environment.IsDevelopment())
-    {
-        options.EnableSensitiveDataLogging();
-        options.EnableDetailedErrors();
-    }
-    
-    // Log SQL queries with caller information
-    options.LogTo(
-        message => Log.Debug("[EF Core] {Message}", message),
-        new[] { Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.CommandExecuting }
-    );
-});
-
-// Register ProfileService BEFORE PersonnageService (dependency order)
-builder.Services.AddApplicationServices(builder.Environment);
-
-// API controllers (ex: ResourcesController)
-builder.Services.AddControllers();
 
 var app = builder.Build();
 
 // Apply migrations automatically
 using (var scope = app.Services.CreateScope())
 {
-    var dbInitService = scope.ServiceProvider.GetRequiredService<DatabaseInitializationService>();
+    var dbInitService = scope.ServiceProvider.GetRequiredService<IDatabaseInitializationService>();
 
     await dbInitService.InitializeDatabaseAsync();
     await dbInitService.InitializeAppSettingsAndCheckStateAsync();

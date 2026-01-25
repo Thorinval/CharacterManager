@@ -9,7 +9,7 @@ namespace CharacterManager.Server.Services;
 /// <summary>
 /// Service for handling database initialization, migrations, and schema updates
 /// </summary>
-public class DatabaseInitializationService
+public class DatabaseInitializationService : IDatabaseInitializationService
 {
     private readonly ApplicationDbContext _db;
     private readonly ILogger<DatabaseInitializationService> _logger;

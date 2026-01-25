@@ -5,8 +5,8 @@
 @using CharacterManager.Server.Services
 
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
-@inject AppVersionService VersionService
-@inject ClientLocalizationService LocalizationService
+@inject IAppVersionService VersionService
+@inject IClientLocalizationService LocalizationService
 
 <PageTitle>
     <LocalizedText Key="navigation.home" />

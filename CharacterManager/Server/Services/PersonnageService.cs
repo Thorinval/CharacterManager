@@ -5,13 +5,13 @@ using Microsoft.Extensions.Logging;
 
 namespace CharacterManager.Server.Services;
 
-public class PersonnageService
+public class PersonnageService : IPersonnageService
 {
     private readonly ApplicationDbContext _context;
-    private readonly HistoriqueModificationService _historiqueService;
+    private readonly IHistoriqueModificationService _historiqueService;
     private readonly ILogger<PersonnageService> _logger;
 
-    public PersonnageService(ApplicationDbContext context, HistoriqueModificationService historiqueService, ILogger<PersonnageService> logger)
+    public PersonnageService(ApplicationDbContext context, IHistoriqueModificationService historiqueService, ILogger<PersonnageService> logger)
     {
         _context = context;
         _historiqueService = historiqueService;

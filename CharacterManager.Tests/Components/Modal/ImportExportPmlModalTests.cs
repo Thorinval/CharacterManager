@@ -18,7 +18,7 @@ using Xunit;
 
 namespace CharacterManager.Tests.Components.Modal;
 
-public class ImportExportPmlModalTests : BlazorComponentTestBase, IDisposable
+public class ImportExportPmlModalTests : BlazorComponentTestBase
 {
     private readonly Mock<IModalService> _modalServiceMock;
     private readonly ApplicationDbContext _context;
@@ -26,7 +26,6 @@ public class ImportExportPmlModalTests : BlazorComponentTestBase, IDisposable
     private readonly PmlExportService _pmlExportService;
     private readonly string _testDir;
     private readonly string _i18nDir;
-    private bool _disposed;
 
     public ImportExportPmlModalTests()
     {
@@ -85,10 +84,11 @@ public class ImportExportPmlModalTests : BlazorComponentTestBase, IDisposable
         localizationService.InitializeAsync("fr").GetAwaiter().GetResult();
         
         Services.AddSingleton(_modalServiceMock.Object);
-        Services.AddSingleton(languageContext);
-        Services.AddSingleton(localizationService);
-        Services.AddSingleton(_pmlImportService);
-        Services.AddSingleton(_pmlExportService);
+        Services.AddSingleton<ILanguageContextService>(languageContext);
+        Services.AddSingleton<IClientLocalizationService>(localizationService);
+        Services.AddSingleton<IPmlImportService>(_pmlImportService);
+        Services.AddSingleton<IPmlExportService>(_pmlExportService);
+        Services.AddSingleton<IHistoriqueModificationService, HistoriqueModificationService>(_ => historiqueModificationService);
 
         // Setup authorization
         var authContext = this.AddTestAuthorization();
@@ -194,34 +194,6 @@ public class ImportExportPmlModalTests : BlazorComponentTestBase, IDisposable
         };
 
         Assert.Equal(5, expectedKeys.Length);
-    }
-
-    #endregion
-
-    #region Cleanup
-
-    public new void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    protected new virtual void Dispose(bool disposing)
-    {
-        if (!_disposed)
-        {
-            if (disposing)
-            {
-                _context.Dispose();
-                
-                if (Directory.Exists(_testDir))
-                {
-                    try { Directory.Delete(_testDir, recursive: true); }
-                    catch { }
-                }
-            }
-            _disposed = true;
-        }
     }
 
     #endregion

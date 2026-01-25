@@ -16,14 +16,13 @@ using Xunit;
 
 namespace CharacterManager.Tests.Components.Modal;
 
-public class ManageUsersModalTests : BlazorComponentTestBase, IDisposable
+public class ManageUsersModalTests : BlazorComponentTestBase
 {
     private readonly Mock<IModalService> _modalServiceMock;
     private readonly ApplicationDbContext _context;
     private readonly ProfileService _profileService;
     private readonly string _testDir;
     private readonly string _i18nDir;
-    private bool _disposed;
 
     public ManageUsersModalTests()
     {
@@ -101,9 +100,9 @@ public class ManageUsersModalTests : BlazorComponentTestBase, IDisposable
         localizationService.InitializeAsync("fr").GetAwaiter().GetResult();
         
         Services.AddSingleton(_modalServiceMock.Object);
-        Services.AddSingleton(languageContext);
-        Services.AddSingleton(localizationService);
-        Services.AddSingleton(_profileService);
+        Services.AddSingleton<ILanguageContextService>(languageContext);
+        Services.AddSingleton<IClientLocalizationService>(localizationService);
+        Services.AddSingleton<IProfileService>(_profileService);
 
         // Setup authorization
         var authContext = this.AddTestAuthorization();
@@ -144,7 +143,6 @@ public class ManageUsersModalTests : BlazorComponentTestBase, IDisposable
         var cut = RenderComponent<ManageUsersModal>();
 
         // Assert - Check if authorization section is rendered
-        var markupDebug = cut.Markup;
         // Since LocalizedText component is used, check for the container structure instead
         Assert.Contains("admin_panel_settings", cut.Markup);
         Assert.Contains("modal-body", cut.Markup);
@@ -245,8 +243,10 @@ public class ManageUsersModalTests : BlazorComponentTestBase, IDisposable
         // Act
         var cut = RenderComponent<ManageUsersModal>();
 
-        // Assert - Check for table structure
+        // Assert - Check for table structure (name, role, lockout, and actions columns)
         Assert.Contains("<th", cut.Markup);
+        Assert.Contains("<td", cut.Markup);
+        Assert.Contains("<tbody", cut.Markup);
     }
 
     [Fact]
@@ -289,17 +289,7 @@ public class ManageUsersModalTests : BlazorComponentTestBase, IDisposable
         // Act
         var cut = RenderComponent<ManageUsersModal>();
 
-        // Assert - Check for option elements
-        Assert.Contains("<option", cut.Markup);
-    }
-
-    [Fact]
-    public void ManageUsersModal_HasAdminRoleOption()
-    {
-        // Act
-        var cut = RenderComponent<ManageUsersModal>();
-
-        // Assert - Check for option elements
+        // Assert - Check for option elements (user and admin roles)
         Assert.Contains("<option", cut.Markup);
     }
 
@@ -322,34 +312,6 @@ public class ManageUsersModalTests : BlazorComponentTestBase, IDisposable
         };
 
         Assert.Equal(6, expectedKeys.Length);
-    }
-
-    #endregion
-
-    #region Cleanup
-
-    public new void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    protected new virtual void Dispose(bool disposing)
-    {
-        if (!_disposed)
-        {
-            if (disposing)
-            {
-                _context.Dispose();
-                
-                if (Directory.Exists(_testDir))
-                {
-                    try { Directory.Delete(_testDir, recursive: true); }
-                    catch { }
-                }
-            }
-            _disposed = true;
-        }
     }
 
     #endregion

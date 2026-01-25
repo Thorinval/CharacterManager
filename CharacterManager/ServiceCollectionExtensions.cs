@@ -15,30 +15,30 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IHostEnvironment environment)
     {
         // Register scoped services (order matters: ProfileService before PersonnageService)
-        services.AddScoped<ProfileService>();
+        services.AddScoped<IProfileService, ProfileService>();
         services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
-        services.AddScoped<HistoriqueModificationService>();  // BEFORE PersonnageService
-        services.AddScoped<PersonnageService>();
-        services.AddScoped(provider => new PmlImportService(
+        services.AddScoped<IHistoriqueModificationService, HistoriqueModificationService>();  // BEFORE PersonnageService
+        services.AddScoped<IPersonnageService, PersonnageService>();
+        services.AddScoped<IPmlImportService>(provider => new PmlImportService(
             provider.GetRequiredService<ApplicationDbContext>(),
-            provider.GetRequiredService<HistoriqueModificationService>()));
-        services.AddScoped<PmlExportService>();
-        services.AddScoped<HistoriqueClassementService>();
-        services.AddScoped<HistoriqueLigueService>();
-        services.AddScoped<CapaciteService>();
-        services.AddScoped<ClientLocalizationService>();
-        services.AddScoped<DatabaseInitializationService>();
-        services.AddScoped<StatistiquesService>();
+            provider.GetRequiredService<IHistoriqueModificationService>()));
+        services.AddScoped<IPmlExportService, PmlExportService>();
+        services.AddScoped<IHistoriqueClassementService, HistoriqueClassementService>();
+        services.AddScoped<IHistoriqueLigueService, HistoriqueLigueService>();
+        services.AddScoped<ICapaciteService, CapaciteService>();
+        services.AddScoped<IClientLocalizationService, ClientLocalizationService>();
+        services.AddScoped<IDatabaseInitializationService, DatabaseInitializationService>();
+        services.AddScoped<IStatistiquesService, StatistiquesService>();
 
         // Register singleton services
-        services.AddSingleton<AppVersionService>();
-        services.AddSingleton<LocalizationService>();
-        services.AddSingleton<LanguageContextService>();
-        services.AddSingleton<AdultModeNotificationService>();
+        services.AddSingleton<IAppVersionService, AppVersionService>();
+        services.AddSingleton<ILocalizationService, LocalizationService>();
+        services.AddSingleton<ILanguageContextService, LanguageContextService>();
+        services.AddSingleton<IAdultModeNotificationService, AdultModeNotificationService>();
         services.AddSingleton<IModalService, ModalService>();
 
         // Register HTTP clients
-        services.AddHttpClient<UpdateService>();
+        services.AddHttpClient<IUpdateService, UpdateService>();
         services.AddHttpClient();
 
         return services;

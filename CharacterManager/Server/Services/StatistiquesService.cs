@@ -5,12 +5,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CharacterManager.Server.Services;
 
-public class StatistiquesService
+public class StatistiquesService : IStatistiquesService
 {
     private readonly ApplicationDbContext _dbContext;
-    private readonly PersonnageService _personnageService;
+    private readonly IPersonnageService _personnageService;
 
-    public StatistiquesService(ApplicationDbContext dbContext, PersonnageService personnageService)
+    public StatistiquesService(ApplicationDbContext dbContext, IPersonnageService personnageService)
     {
         _dbContext = dbContext;
         _personnageService = personnageService;
@@ -516,6 +516,16 @@ public class StatistiquesService
         }
         return hexColor;
     }
+
+    #endregion
+
+    #region Instance wrappers for static methods (for interface compliance)
+
+    string IStatistiquesService.FormatDateWithDay(DateTime date) => FormatDateWithDay(date);
+    string IStatistiquesService.FormatDateForClassement(DateOnly date) => FormatDateForClassement(date);
+    string IStatistiquesService.ColorWithAlpha(string hexColor, double alpha) => ColorWithAlpha(hexColor, alpha);
+    List<string> IStatistiquesService.GetPersonnagesWithHistory(List<LevelEvolutionData> dailyData) => GetPersonnagesWithHistory(dailyData);
+    List<object> IStatistiquesService.CreateChartDatasets(List<LevelEvolutionData> dailyData, List<string> personnages, out int minLevel) => CreateChartDatasets(dailyData, personnages, out minLevel);
 
     #endregion
 }

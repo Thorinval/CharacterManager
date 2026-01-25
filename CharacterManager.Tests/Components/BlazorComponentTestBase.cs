@@ -13,7 +13,7 @@ public abstract class BlazorComponentTestBase : TestContext
     protected BlazorComponentTestBase()
     {
         // Register common mock services
-        Services.AddSingleton<LanguageContextService>();
+        Services.AddSingleton<ILanguageContextService, LanguageContextService>();
         
         // Add JSInterop mock (required for many Blazor components)
         JSInterop.SetupVoid("Blazor._internal.navigationManager.enableNavigationInterception", _ => true);

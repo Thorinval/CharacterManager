@@ -8,7 +8,7 @@ using Microsoft.JSInterop;
 /// <summary>
 /// Service client pour fournir les traductions aux composants Blazor
 /// </summary>
-public class ClientLocalizationService
+public class ClientLocalizationService : IClientLocalizationService
 {
     private readonly ILogger<ClientLocalizationService> _logger;
     private readonly IWebHostEnvironment _env;
@@ -135,9 +135,22 @@ public class ClientLocalizationService
     public string GetCurrentLanguage() => _currentLanguage;
 
     /// <summary>
+    /// Obtient la langue actuelle
+    /// </summary>
+    public string CurrentLanguage => _currentLanguage;
+
+    /// <summary>
     /// Change de langue
     /// </summary>
     public async Task SetLanguageAsync(string languageCode)
+    {
+        await InitializeAsync(languageCode);
+    }
+
+    /// <summary>
+    /// Change la langue et recharge les ressources
+    /// </summary>
+    public async Task ChangeLanguageAsync(string languageCode)
     {
         await InitializeAsync(languageCode);
     }

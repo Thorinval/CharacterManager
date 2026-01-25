@@ -86,7 +86,7 @@ public static class ImportExportConstants
         public const string Lucie = "Lucie";
 
         // Attributs XML
-        public const string Version = "version";
+        public const string Version = "Version";
         public const string ExportDate = "exportDate";
         public const string TypeAttaque = "TypeAttaque";
         public const string TypeEntite = "TypeEntite";

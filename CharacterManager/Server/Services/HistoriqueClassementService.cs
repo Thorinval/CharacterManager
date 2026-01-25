@@ -10,7 +10,7 @@ using System.Xml.Linq;
 
 namespace CharacterManager.Server.Services;
 
-public class HistoriqueClassementService(ApplicationDbContext dbContext)
+public class HistoriqueClassementService(ApplicationDbContext dbContext) : IHistoriqueClassementService
 {
     public async Task<List<HistoriqueClassement>> GetHistoriqueAsync()
     {

@@ -209,12 +209,6 @@
 </div>
 
 @code {
-    [Inject]
-    public PersonnageService PersonnageService { get; set; } = null!;
-
-    [Inject]
-    public ClientLocalizationService LocalizationService { get; set; } = null!;
-
     private IEnumerable<Personnage>? mercenaires;
     private Dictionary<TypeAttaque, int> statsTypeAttaque = new();
     private Dictionary<Faction, int> statsFaction = new();

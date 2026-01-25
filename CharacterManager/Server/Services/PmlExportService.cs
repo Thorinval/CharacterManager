@@ -13,7 +13,7 @@ namespace CharacterManager.Server.Services;
 /// Extension .pml pour les fichiers d'export
 /// Supporte les sections : HistoriqueClassements, inventaire, template, capacités
 /// </summary>
-public class PmlExportService(ApplicationDbContext context, ILogger<PmlExportService> logger) : PmlServiceBase(context)
+public class PmlExportService(ApplicationDbContext context, ILogger<PmlExportService> logger) : PmlServiceBase(context), IPmlExportService
 {
     private readonly ILogger<PmlExportService> _logger = logger;
     /// <summary>
@@ -60,7 +60,7 @@ public class PmlExportService(ApplicationDbContext context, ILogger<PmlExportSer
             // Export capacités
             await ExporterCapacitesPmlAsync(options, writer);
 
-            writer.WriteEndDocument();
+            writer.WriteEndElement();
         }
 
         var bytes = memoryStream.ToArray();
@@ -104,7 +104,6 @@ public class PmlExportService(ApplicationDbContext context, ILogger<PmlExportSer
             }
         }
 
-        writer.WriteEndElement();
     }
 
     private static void WriteCapacites(XmlWriter writer, IEnumerable<Capacite> capacites)
@@ -375,6 +374,8 @@ public class PmlExportService(ApplicationDbContext context, ILogger<PmlExportSer
 
             // Export Lucie House
             await WriteLucieHouseDatas(writer);
+            
+            writer.WriteEndElement();
         }
     }
 

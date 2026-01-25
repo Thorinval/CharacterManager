@@ -3,8 +3,8 @@
 @using CharacterManager.Server.Services
 @using Microsoft.JSInterop
 @using Microsoft.AspNetCore.Components.Forms
-@inject ProfileService ProfileService
-@inject ClientLocalizationService LocalizationService
+@inject IProfileService ProfileService
+@inject IClientLocalizationService LocalizationService
 @inject IModalService ModalService
 @inject IJSRuntime JS
 
@@ -131,7 +131,7 @@
             message = LocalizationService.GetKeyValue("manageUsers.messageRequired");
             return;
         }
-        var strength = ProfileService.ValidatePasswordStrength(newPassword);
+        var strength = CharacterManager.Server.Services.ProfileService.ValidatePasswordStrength(newPassword);
         if (!strength.ok)
         {
             message = string.Format(LocalizationService.GetKeyValue("manageUsers.messageWeak"), strength.error);
