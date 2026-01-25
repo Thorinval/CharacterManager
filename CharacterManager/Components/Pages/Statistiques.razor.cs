@@ -135,12 +135,12 @@ public partial class Statistiques : IAsyncDisposable
 
             var dataset = new
             {
-                label = LocalizationService.GetKeyValue("statistics.mercenairePower"),
+                label = LocalizationService.GetKeyValue("statistics.teamPower"),
                 data = data,
                 borderColor = ColorPrimaryPurple,
                 backgroundColor = ColorWithAlpha(ColorPrimaryPurple, 0.1),
                 borderWidth = 2,
-                fill = true,
+                fill = false,
                 spanGaps = true,
                 pointRadius = 3,
                 pointHoverRadius = 5,
@@ -180,7 +180,7 @@ public partial class Statistiques : IAsyncDisposable
                 {
                     label = GetClassementTypeLabel(type),
                     data = data,
-                    backgroundColor = ColorWithAlpha(colors[i], 0.7),
+                    backgroundColor = colors[i],
                     borderColor = colors[i],
                     borderWidth = 1
                 });
