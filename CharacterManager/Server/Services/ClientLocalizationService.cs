@@ -12,7 +12,7 @@ public class ClientLocalizationService : IClientLocalizationService
 {
     private readonly ILogger<ClientLocalizationService> _logger;
     private readonly IWebHostEnvironment _env;
-    private readonly LanguageContextService _languageContext;
+    private readonly ILanguageContextService _languageContext;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private Dictionary<string, object>? _currentResources;
     private Dictionary<string, string>? _flatResources;
@@ -23,7 +23,7 @@ public class ClientLocalizationService : IClientLocalizationService
     public ClientLocalizationService(
         IWebHostEnvironment env, 
         ILogger<ClientLocalizationService> logger,
-        LanguageContextService languageContext,
+        ILanguageContextService languageContext,
         IHttpContextAccessor httpContextAccessor)
     {
         _logger = logger;
