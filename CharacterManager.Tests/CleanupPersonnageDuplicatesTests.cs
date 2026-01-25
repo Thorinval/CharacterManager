@@ -10,9 +10,14 @@ public class CleanupPersonnageDuplicatesTests : IDisposable
 {
     private readonly ApplicationDbContext _context;
     private readonly CleanupPersonnageDuplicates _service;
+    private readonly TextWriter _originalOut;
 
     public CleanupPersonnageDuplicatesTests()
     {
+        // Suppress console output for tests
+        _originalOut = Console.Out;
+        Console.SetOut(TextWriter.Null);
+
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
@@ -227,6 +232,8 @@ public class CleanupPersonnageDuplicatesTests : IDisposable
 
     public void Dispose()
     {
+        // Restore console output
+        Console.SetOut(_originalOut);
         Dispose(true);
         GC.SuppressFinalize(this);
     }

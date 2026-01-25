@@ -181,7 +181,7 @@ public class ProfileServiceTests : IDisposable
     public void ValidatePasswordStrength_ShouldValidateCorrectly(string password, bool expectedOk, string? expectedError)
     {
         // Act
-        var (ok, error) = ProfileService.ValidatePasswordStrength(password);
+        var (ok, error) = _service.ValidatePasswordStrength(password);
 
         // Assert
         Assert.Equal(expectedOk, ok);
@@ -192,7 +192,7 @@ public class ProfileServiceTests : IDisposable
     public void ValidatePasswordStrength_ShouldRejectEmpty()
     {
         // Act
-        var (ok, error) = ProfileService.ValidatePasswordStrength("");
+        var (ok, error) = _service.ValidatePasswordStrength("");
 
         // Assert
         Assert.False(ok);
@@ -211,7 +211,7 @@ public class ProfileServiceTests : IDisposable
         var profile = await _context.Profiles.FirstAsync(p => p.Username == "testuser");
 
         // Act
-        var result = ProfileService.VerifyPassword(profile, "MyPassword1!");
+        var result = _service.VerifyPassword(profile, "MyPassword1!");
 
         // Assert
         Assert.True(result);
@@ -225,7 +225,7 @@ public class ProfileServiceTests : IDisposable
         var profile = await _context.Profiles.FirstAsync(p => p.Username == "testuser");
 
         // Act
-        var result = ProfileService.VerifyPassword(profile, "WrongPassword1!");
+        var result = _service.VerifyPassword(profile, "WrongPassword1!");
 
         // Assert
         Assert.False(result);

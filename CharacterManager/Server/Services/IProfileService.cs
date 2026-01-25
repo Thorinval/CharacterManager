@@ -17,4 +17,7 @@ public interface IProfileService
     Task<bool> UpdateRoleAsync(string username, string role);
     Task<bool> ResetPasswordAsync(string username, string newPassword);
     Task<(bool ok, string? error)> RegisterLoginAttemptAsync(string username, bool success);
+    bool VerifyPassword(Profile profile, string password);
+    (bool ok, string? error) ValidatePasswordStrength(string password);
+    Task<bool> ChangePasswordAsync(string username, string newPassword);
 }

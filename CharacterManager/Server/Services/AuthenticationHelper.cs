@@ -80,7 +80,7 @@ public class AuthenticationHelper : IAuthenticationHelper
         }
 
         // Verify password
-        if (!ProfileService.VerifyPassword(profile, password))
+        if (!_profileService.VerifyPassword(profile, password))
         {
             await _profileService.RegisterLoginAttemptAsync(username, false);
             return (null, "invalid", null);

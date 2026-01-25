@@ -46,7 +46,7 @@ public class HistoliguesTests : TestContext
         Services.AddSingleton(new HistoriqueLigueService(_dbContext));
         Services.AddSingleton(new PmlExportService(_dbContext, NullLogger<PmlExportService>.Instance));
         Services.AddSingleton(new PmlImportService(_dbContext));
-        Services.AddSingleton(localizationService);
+        Services.AddSingleton<IClientLocalizationService>(localizationService);
         Services.AddSingleton(languageContext);
         Services.AddSingleton<IHttpContextAccessor>(httpAccessor);
     }

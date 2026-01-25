@@ -41,7 +41,7 @@ public class RoutesTests : TestContext
         db.SaveChanges();
         Services.AddSingleton(db);
         Services.AddSingleton<IConfiguration>(config);
-        Services.AddSingleton(new ProfileService(db, config, NullLogger<ProfileService>.Instance));
+        Services.AddSingleton<IProfileService>(new ProfileService(db, config, NullLogger<ProfileService>.Instance));
     }
 
     [Fact]

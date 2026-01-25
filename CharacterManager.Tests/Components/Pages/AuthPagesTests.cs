@@ -29,13 +29,13 @@ public class AuthPagesTests : TestContext
         Services.AddSingleton(env.Object);
 
         var languageContext = new LanguageContextService();
-        Services.AddSingleton(languageContext);
+        Services.AddSingleton<ILanguageContextService>(languageContext);
 
         var httpAccessor = new HttpContextAccessor { HttpContext = new DefaultHttpContext() };
         Services.AddSingleton<IHttpContextAccessor>(httpAccessor);
 
-        Services.AddSingleton<ClientLocalizationService>();
-        Services.AddSingleton<IClientLocalizationService>(sp => sp.GetRequiredService<ClientLocalizationService>());
+        var localizationService = new ClientLocalizationService(env.Object, NullLogger<ClientLocalizationService>.Instance, languageContext, httpAccessor);
+        Services.AddSingleton<IClientLocalizationService>(localizationService);
 
         var config = new ConfigurationBuilder().AddInMemoryCollection().Build();
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()

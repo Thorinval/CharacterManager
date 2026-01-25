@@ -51,7 +51,7 @@ public class MainLayoutTests : TestContext
         db.SaveChanges();
 
         var profileService = new ProfileService(db, config, NullLogger<ProfileService>.Instance);
-        Services.AddSingleton(profileService);
+        Services.AddSingleton<IProfileService>(profileService);
 
         _updateServiceMock.Setup(s => s.CheckForUpdatesAsync()).ReturnsAsync(new UpdateInfo { IsUpdateAvailable = false });
 

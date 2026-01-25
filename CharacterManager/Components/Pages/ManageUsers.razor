@@ -128,7 +128,7 @@
             message = LocalizationService.GetKeyValue("manageUsers.messageRequired");
             return;
         }
-        var strength = CharacterManager.Server.Services.ProfileService.ValidatePasswordStrength(newPassword);
+        var strength = ProfileService.ValidatePasswordStrength(newPassword);
         if (!strength.ok) { message = string.Format(LocalizationService.GetKeyValue("manageUsers.messageWeak"), strength.error); return; }
         var ok = await ProfileService.CreateUserAsync(newUsername, newPassword, newRole);
         message = ok ? LocalizationService.GetKeyValue("manageUsers.messageCreated") : LocalizationService.GetKeyValue("manageUsers.messageExists");
