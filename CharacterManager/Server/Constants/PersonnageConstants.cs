@@ -105,4 +105,25 @@ public static class PersonnageConstants
         public const int CommandantRankMultiplier = 20;
         public const int ThumbnailHeightPx = 110;
     }
+
+    /// <summary>
+    /// Messages de validation et d'erreur pour les personnages
+    /// </summary>
+    public static class ErrorMessages
+    {
+        public const string ErrorUpdatePersonnage = "Erreur lors de la mise à jour";
+        public const string ErrorPersonnageNotFound = "Personnage introuvable";
+        public const string ErrorPersonnageImageNotFound = "Image de personnage non trouvée";
+    }
+
+    /// <summary>
+    /// Messages de succès pour l'interface
+    /// </summary>
+    public static class UIMessages
+    {
+        public const string PersonnageUpdated = "{0} mis à jour avec succès";
+        public const string PersonnagesDeletedSuccess = "{0} personnage(s) supprimé(s)";
+        public const string ConfirmDeletePersonnages = "Êtes-vous sûr de vouloir supprimer {0} personnage(s) sélectionné(s) ? Cette action est irréversible.";
+        public const string ErrorDeletingPersonnages = "Erreur lors de la suppression: {0}";
+    }
 }

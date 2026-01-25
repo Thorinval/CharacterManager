@@ -1,4 +1,4 @@
-namespace CharacterManager.Components.Pages;
+﻿namespace CharacterManager.Components.Pages;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -56,7 +56,7 @@ public partial class Inventaire : IAsyncDisposable
     private string sortColumn = ImportExportConstants.XmlElements.Puissance;
     private bool sortAscending = false;
 
-    // Sélection multiple
+    // SÃ©lection multiple
     private HashSet<int> selectedPersonnages = [];
     internal bool showBulkEditModal = false;
     private string bulkEditProperty = "";
@@ -139,7 +139,7 @@ public partial class Inventaire : IAsyncDisposable
         await LoadLucieHouseAsync();
 
         ApplyFiltersAndSorting();
-        // Charger un template si présent dans l'URL
+        // Charger un template si prÃ©sent dans l'URL
         var uri = new Uri(Navigation.Uri);
         var query = uri.Query.TrimStart('?');
         if (!string.IsNullOrEmpty(query))
@@ -257,12 +257,12 @@ public partial class Inventaire : IAsyncDisposable
             await InvokeAsync(async () =>
             {
                 await LoadPersonnagesAsync();
-                toastRef?.Show($"{field} mis à jour avec succès", "success");
+                toastRef?.Show(string.Format(LocalizationService.GetKeyValue("ui.personnages.updated"), field), UIMessagesConstants.ToastTypes.Success);
             });
         }
         catch (Exception ex)
         {
-            toastRef?.Show($"Erreur lors de la mise à jour: {ex.Message}", "error");
+            toastRef?.Show($"{LocalizationService.GetKeyValue("errors.updateError")}: {ex.Message}", UIMessagesConstants.ToastTypes.Error);
         }
     }
 
@@ -315,7 +315,7 @@ public partial class Inventaire : IAsyncDisposable
         ApplyFiltersAndSorting();
     }
 
-    // 🔢 Compteur dynamique pour les badges
+    // ðŸ”¢ Compteur dynamique pour les badges
     internal int GetCount(InventoryFilter filter)
     {
         return filter switch
@@ -342,9 +342,9 @@ public partial class Inventaire : IAsyncDisposable
         };
 
         if (!list.Any())
-            return "bg-secondary"; // vide → gris
+            return "bg-secondary"; // vide â†’ gris
 
-        // Trouver la rareté dominante
+        // Trouver la raretÃ© dominante
         var dominant = list
             .GroupBy(p => p.Rarete)
             .OrderByDescending(g => g.Count())
@@ -513,7 +513,7 @@ public partial class Inventaire : IAsyncDisposable
     private void OnSearchChanged(string value)
     {
         searchTerm = value;
-        // Ne filtrer que si au moins 2 caractères sont saisis
+        // Ne filtrer que si au moins 2 caractÃ¨res sont saisis
         if (searchTerm.Length >= 2 || string.IsNullOrWhiteSpace(searchTerm))
         {
             ApplyFiltersAndSorting();
@@ -533,11 +533,11 @@ public partial class Inventaire : IAsyncDisposable
         {
             if (i <= rank)
             {
-                starsBuilder.Append("<span style='color: #FFD700;'>★</span>");
+                starsBuilder.Append("<span style='color: #FFD700;'>â˜…</span>");
             }
             else
             {
-                starsBuilder.Append("<span style='color: #CCCCCC;'>☆</span>");
+                starsBuilder.Append("<span style='color: #CCCCCC;'>â˜†</span>");
             }
         }
         return new MarkupString(starsBuilder.ToString());
@@ -646,7 +646,7 @@ public partial class Inventaire : IAsyncDisposable
 
     internal void EditPersonnage(Personnage personnage)
     {
-        // Ouvrir la modale de détail directement en mode édition
+        // Ouvrir la modale de dÃ©tail directement en mode Ã©dition
         ModalService.Open<CharacterManager.Components.Modal.DetailPersonnageModal>(
             new Dictionary<string, object>
             {
@@ -693,7 +693,8 @@ public partial class Inventaire : IAsyncDisposable
     {
         if (selectedPersonnages.Count != 0)
         {
-            var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Êtes-vous sûr de vouloir supprimer {selectedPersonnages.Count} personnage(s) sélectionné(s) ? Cette action est irréversible.");
+            var confirmation = string.Format(LocalizationService.GetKeyValue("ui.confirmations.confirmDeletePersonnages"), selectedPersonnages.Count);
+            var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", confirmation);
             if (confirmed)
             {
                 foreach (var id in selectedPersonnages)
@@ -708,14 +709,16 @@ public partial class Inventaire : IAsyncDisposable
 
     internal async Task ResetAll()
     {
-        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Un export complet (inventaire + classements + ligue + historique des modifications + capacités) sera téléchargé avant la suppression. Continuer ?");
+        var confirmReset = LocalizationService.GetKeyValue("ui.confirmations.confirmResetInventory");
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", confirmReset);
         if (!confirmed)
         {
             return;
         }
 
         // Option : enregistrer des suppressions dans l'historique avant de purger
-        var logSuppressions = await JSRuntime.InvokeAsync<bool>("confirm", "Ajouter des entrées de suppression dans l'historique des modifications avant le reset ?");
+        var confirmLogSuppressions = LocalizationService.GetKeyValue("ui.confirmations.confirmLogSuppressions");
+        var logSuppressions = await JSRuntime.InvokeAsync<bool>("confirm", confirmLogSuppressions);
 
         await ExportFullBackupForReset();
 
@@ -753,7 +756,7 @@ public partial class Inventaire : IAsyncDisposable
                     estImportation: true);
             }
 
-            // Pièces Lucie (si présente)
+            // PiÃ¨ces Lucie (si prÃ©sente)
             var house = await DbContext.LucieHouses.Include(l => l.Pieces).AsNoTracking().FirstOrDefaultAsync();
             if (house?.Pieces != null)
             {
@@ -772,7 +775,7 @@ public partial class Inventaire : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync(JsAlert, $"Erreur lors de l'ajout des suppressions dans l'historique: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync(JsAlert, $"{LocalizationService.GetKeyValue("errors.historyRecordingDeletionError")}: {ex.Message}");
         }
     }
 
@@ -780,7 +783,7 @@ public partial class Inventaire : IAsyncDisposable
     {
         try
         {
-            // Export PML complet (inventaire + classements + ligues + capacités)
+            // Export PML complet (inventaire + classements + ligues + capacitÃ©s)
             var options = PmlExportOptions.FromBooleans(
                 exportInventory: true,
                 exportTemplates: true,
@@ -801,7 +804,7 @@ public partial class Inventaire : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync(JsAlert, $"Erreur lors de l'export avant réinitialisation: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync(JsAlert, $"{LocalizationService.GetKeyValue("errors.exportError")}: {ex.Message}");
         }
     }
 
@@ -817,7 +820,7 @@ public partial class Inventaire : IAsyncDisposable
     {
         try
         {
-            // Exporter uniquement les personnages sélectionnés s'il y en a, sinon exporter la liste filtrée
+            // Exporter uniquement les personnages sÃ©lectionnÃ©s s'il y en a, sinon exporter la liste filtrÃ©e
             var personnagesAExporter = selectedPersonnages.Count > 0
                 ? personnagesFiltres.Where(p => selectedPersonnages.Contains(p.Id))
                 : personnagesFiltres;
@@ -825,12 +828,12 @@ public partial class Inventaire : IAsyncDisposable
             var pmlBytes = await PmlExportService.ExporterInventairePmlAsync(personnagesAExporter);
             var fileName = $"{ImportExportConstants.ExportPrefixes.Inventaire}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
 
-            // Utiliser JavaScript pour télécharger le fichier
+            // Utiliser JavaScript pour tÃ©lÃ©charger le fichier
             await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pmlBytes));
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync(JsAlert, $"Erreur lors de l'export: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync(JsAlert, $"{LocalizationService.GetKeyValue("errors.exportError")}: {ex.Message}");
         }
     }
 
@@ -847,7 +850,7 @@ public partial class Inventaire : IAsyncDisposable
 
         if (!isSupported)
         {
-            await JSRuntime.InvokeVoidAsync(JsAlert, "Veuillez sélectionner un fichier PML ou XML.");
+            await JSRuntime.InvokeVoidAsync(JsAlert, LocalizationService.GetKeyValue("errors.fileNotSelected"));
             return;
         }
 
@@ -865,8 +868,8 @@ public partial class Inventaire : IAsyncDisposable
                 importLeagueHistory: false);
 
             var importMessage = result.SuccessCount > 0
-                ? $"{result.SuccessCount} personnage(s) importé(s) avec succès."
-                : "Aucun personnage importé.";
+                ? $"{result.SuccessCount} personnage(s) importÃ©(s) avec succÃ¨s."
+                : "Aucun personnage importÃ©.";
 
             if (!string.IsNullOrEmpty(result.Error))
             {
@@ -876,7 +879,7 @@ public partial class Inventaire : IAsyncDisposable
             if (result.Errors.Count > 0)
             {
                 var preview = string.Join("\n", result.Errors.Take(3));
-                importMessage += $"\nDétails (aperçu):\n{preview}";
+                importMessage += $"\nDÃ©tails (aperÃ§u):\n{preview}";
             }
 
             await JSRuntime.InvokeVoidAsync(JsAlert, importMessage);
@@ -884,7 +887,7 @@ public partial class Inventaire : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync(JsAlert, $"Erreur lors de l'import: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync(JsAlert, $"{LocalizationService.GetKeyValue("errors.importError")}: {ex.Message}");
         }
         finally
         {
@@ -970,7 +973,7 @@ public partial class Inventaire : IAsyncDisposable
             // Initialize aspects to safe defaults
             piece.AspectsTactiques.Nom = "Aspects tactiques";
             piece.AspectsTactiques.Puissance = 0;
-            piece.AspectsStrategiques.Nom = "Aspects stratégiques";
+            piece.AspectsStrategiques.Nom = "Aspects stratÃ©giques";
             piece.AspectsStrategiques.Puissance = 0;
             result.Pieces.Add(piece);
         }
@@ -989,7 +992,7 @@ public partial class Inventaire : IAsyncDisposable
             }
 
             const string hydratedTactiques = "{\"Nom\":\"Aspects tactiques\",\"Puissance\":0,\"Bonus\":[]}";
-            const string hydratedStrategiques = "{\"Nom\":\"Aspects stratégiques\",\"Puissance\":0,\"Bonus\":[]}";
+            const string hydratedStrategiques = "{\"Nom\":\"Aspects stratÃ©giques\",\"Puissance\":0,\"Bonus\":[]}";
 
             // Always check if column exists before adding it
             if (!await ColumnExistsAsync("Pieces", "AspectsTactiques"))
@@ -1139,7 +1142,7 @@ public partial class Inventaire : IAsyncDisposable
         DbContext.Pieces.Update(piece);
         await DbContext.SaveChangesAsync();
         
-        // Historiser la modification si des valeurs ont été changées
+        // Historiser la modification si des valeurs ont Ã©tÃ© changÃ©es
         if (ancienneValeur != null)
         {
             await PersonnageService.UpdatePieceAsync(
@@ -1151,7 +1154,7 @@ public partial class Inventaire : IAsyncDisposable
         }
         
         await InvokeAsync(StateHasChanged);
-        toastRef?.Show($"{piece.Nom} - {field} mis à jour: {value}", "success");
+        toastRef?.Show($"{piece.Nom} - {field} mis Ã  jour: {value}", "success");
     }
 
     internal async Task UpdatePiecePuissance(int pieceId, string value)
@@ -1187,7 +1190,7 @@ public partial class Inventaire : IAsyncDisposable
             }
             else
             {
-                toastRef?.Show($"Maximum {LucieHouse.MaxPiecesSelectionnees} pièces peuvent être sélectionnées", "warning");
+                toastRef?.Show($"Maximum {LucieHouse.MaxPiecesSelectionnees} piÃ¨ces peuvent Ãªtre sÃ©lectionnÃ©es", "warning");
                 return;
             }
         }
@@ -1214,9 +1217,10 @@ public partial class Inventaire : IAsyncDisposable
     }
 
     /// <summary>
-    /// Retourne le style à appliquer à une image personnage
+    /// Retourne le style Ã  appliquer Ã  une image personnage
     /// Si l'URL est vide, affiche un fond lightblue
     /// </summary>
 }
+
 
 

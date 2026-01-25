@@ -1,4 +1,4 @@
-namespace CharacterManager.Components.Pages;
+﻿namespace CharacterManager.Components.Pages;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -160,13 +160,13 @@ public partial class Templates
                 templateDescription,
                 templateSelectedIds
             );
-            toastRef?.Show($"Template '{templateNom}' créé avec succès", error);
+            toastRef?.Show(string.Format(TemplateConstants.UIMessages.TemplateCreatedSuccess, templateNom), error);
             CancelTemplateCreation();
             templates = PersonnageService.GetAllTemplates().ToList();
         }
         catch (Exception ex)
         {
-            toastRef?.Show($"Erreur lors de la création du template: {ex.Message}", error);
+            toastRef?.Show($"{TemplateConstants.UIMessages.ErrorCreatingTemplate}: {ex.Message}", error);
         }
     }
 
@@ -188,7 +188,7 @@ public partial class Templates
         }
         catch (Exception ex)
         {
-            toastRef?.Show($"Erreur lors du chargement du template: {ex.Message}", error);
+            toastRef?.Show($"{TemplateConstants.UIMessages.ErrorLoadingTemplate}: {ex.Message}", error);
         }
     }
 
@@ -215,7 +215,7 @@ public partial class Templates
         }
         catch (Exception ex)
         {
-            toastRef?.Show($"Erreur lors de l'export: {ex.Message}", error);
+            toastRef?.Show($"{TemplateConstants.UIMessages.ErrorExportingTemplate}: {ex.Message}", error);
         }
     }
 
@@ -229,18 +229,18 @@ public partial class Templates
         var template = await PersonnageService.GetTemplateAsync(id);
         if (template is null)
         {
-            toastRef?.Show("Template introuvable", error);
+            toastRef?.Show(TemplateConstants.UIMessages.TemplateNotFound, error);
             return;
         }
         var pmlBytes = await PmlExportService.ExporterTemplatesPmlAsync(new[] { template });
         var fileName = $"{ImportExportConstants.ExportPrefixes.Template}_{template.Nom}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
         await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pmlBytes));
-        toastRef?.Show($"Export de '{template.Nom}' effectué", success);
+        toastRef?.Show(string.Format(TemplateConstants.UIMessages.TemplateExportSuccess, template.Nom), success);
     }
 
     internal async Task DeleteTemplate(int id)
     {
-        var reponseOk = await JSRuntime.InvokeAsync<bool>("confirm", "Supprimer ce template ?");
+        var reponseOk = await JSRuntime.InvokeAsync<bool>("confirm", TemplateConstants.UIMessages.ConfirmDelete);
         if (!reponseOk) return;
         var deleteOk = await PersonnageService.DeleteTemplateAsync(id);
 
@@ -251,7 +251,7 @@ public partial class Templates
         }
         else
         {
-            toastRef?.Show("Suppression échouée", error);
+            toastRef?.Show("Suppression Ã©chouÃ©e", error);
         }
     }
 
@@ -260,7 +260,7 @@ public partial class Templates
         var template = await PersonnageService.GetTemplateAsync(id);
         if (template is null)
         {
-            await JSRuntime.InvokeVoidAsync(alert, "Template introuvable");
+            await JSRuntime.InvokeVoidAsync(alert, TemplateConstants.UIMessages.TemplateNotFound);
             return;
         }
 
@@ -268,7 +268,7 @@ public partial class Templates
         var copyName = template.Nom + " (copie)";
         var newTemplate = await PersonnageService.CreateTemplateAsync(copyName, template.Description, ids);
         templates = PersonnageService.GetAllTemplates().ToList();
-        toastRef?.Show($"Template '{newTemplate.Nom}' créé.", success);
+        toastRef?.Show($"Template '{newTemplate.Nom}' crÃ©Ã©.", success);
     }
 
     internal void StartRename(Template t)
@@ -287,22 +287,23 @@ public partial class Templates
     {
         if (string.IsNullOrWhiteSpace(editingName))
         {
-            toastRef?.Show("Le nom ne peut pas être vide", warning);
+            toastRef?.Show("Le nom ne peut pas Ãªtre vide", warning);
             return;
         }
         var ids = t.GetPersonnageIds();
         var ok = await PersonnageService.UpdateTemplateAsync(t.Id, editingName, t.Description, ids);
         if (ok)
         {
-            toastRef?.Show("Template renommé", success);
+            toastRef?.Show("Template renommÃ©", success);
             templates = PersonnageService.GetAllTemplates().ToList();
             CancelRename();
         }
         else
         {
-            toastRef?.Show("Échec du renommage", error);
+            toastRef?.Show("Ã‰chec du renommage", error);
         }
     }
 }
+
 
 

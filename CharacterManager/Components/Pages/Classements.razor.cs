@@ -24,6 +24,9 @@ public partial class Classements
     [Inject]
     public IModalService ModalService { get; set; } = null!;
 
+    [Inject]
+    public ClientLocalizationService LocalizationService { get; set; } = null!;
+
     private const string Identifier = "alert";
     internal List<HistoriqueClassement>? historiques;
     private DateTime dateDebut = DateTime.Today.AddMonths(-1);
@@ -80,7 +83,8 @@ public partial class Classements
 
     internal async Task ViderHistorique()
     {
-        if (await JSRuntime.InvokeAsync<bool>("confirm", "Êtes-vous CERTAIN de vouloir vider tout l'historique? Cette action est irréversible."))
+        var confirmationMessage = LocalizationService.GetKeyValue("ui.confirmations.confirmClearRankings");
+        if (await JSRuntime.InvokeAsync<bool>("confirm", confirmationMessage))
         {
             await HistoriqueService.ViderHistoriqueAsync();
             await ChargerHistorique();
@@ -119,7 +123,8 @@ public partial class Classements
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync(Identifier, $"Erreur lors de l'export: {ex.Message}");
+            var errorMessage = $"{LocalizationService.GetKeyValue("errors.exportError")}: {ex.Message}";
+            await JSRuntime.InvokeVoidAsync(Identifier, errorMessage);
         }
     }
 
@@ -141,7 +146,7 @@ public partial class Classements
 
         if (!isSupported)
         {
-            await JSRuntime.InvokeVoidAsync(Identifier, "Veuillez sélectionner un fichier PML.");
+            await JSRuntime.InvokeVoidAsync(Identifier, LocalizationService.GetKeyValue("errors.importFormatNotSupported"));
             return;
         }
 
@@ -178,7 +183,8 @@ public partial class Classements
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync(Identifier, $"Erreur lors de l'import: {ex.Message}");
+            var errorMessage = $"{LocalizationService.GetKeyValue("errors.importError")}: {ex.Message}";
+            await JSRuntime.InvokeVoidAsync(Identifier, errorMessage);
         }
         finally
         {

@@ -75,4 +75,15 @@ public static class StatisticsConstants
         public const int PointHoverRadius = 5;
         public const double Tension = 0.3;
     }
+
+    /// <summary>
+    /// Messages d'erreur pour le module statistiques
+    /// </summary>
+    public static class ErrorMessages
+    {
+        public const string ErrorCreatingCharts = "Erreur lors de la création des graphiques";
+        public const string ErrorCreatingLevelEvolutionChart = "Erreur lors de la création du graphique d'évolution";
+        public const string ErrorCreatingPowerEvolutionChart = "Erreur lors de la création du graphique de puissance";
+        public const string ErrorCreatingClassementEvolutionChart = "Erreur lors de la création du graphique de classement";
+    }
 }

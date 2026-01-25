@@ -21,6 +21,7 @@ public static class LucieHouseConstants
         public const string Affection = "Affection";
         public const string Bonus = "Bonus";
         public const string Niveau = "Niveau";
+        public const string Selectionnee = "Selectionnee";
     }
 
     /// <summary>
@@ -43,12 +44,22 @@ public static class LucieHouseConstants
     }
 
     /// <summary>
+    /// Messages d'interface utilisateur pour Lucie House
+    /// </summary>
+    public static class UIMessages
+    {
+        public const string MaxPiecesExceeded = "Maximum {0} pièces peuvent être sélectionnées";
+        public const string PieceUpdated = "{0} - {1} mis à jour: {2}";
+    }
+
+    /// <summary>
     /// Limites et constantes de gestion
     /// </summary>
     public static class Limits
     {
         public const int MaxPiecesPerImport = 100;
         public const int WarningThresholdPiecesSelected = 50;
+        public const int MaxPiecesSelectable = 70; // Max selectable pieces in inventory UI
     }
 
     /// <summary>
@@ -60,5 +71,7 @@ public static class LucieHouseConstants
         public const string PiecesKey = "lucie.pieces";
         public const string TacticalBonusKey = "lucie.tactical.bonus";
         public const string StrategicBonusKey = "lucie.strategic.bonus";
+        public const string MaxPiecesKey = "lucie.lucieMaxPieces";
+        public const string WarningKey = "warnings.lucieImportWarning";
     }
 }

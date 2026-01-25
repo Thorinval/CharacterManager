@@ -35,6 +35,14 @@ public static class SquadConstants
     }
 
     /// <summary>
+    /// Messages d'interface utilisateur pour escouades
+    /// </summary>
+    public static class UIMessages
+    {
+        public const string NoSquadSelected = "Aucune pièce sélectionnée";
+    }
+
+    /// <summary>
     /// Modes d'affichage des escouades
     /// </summary>
     public static class ViewModes

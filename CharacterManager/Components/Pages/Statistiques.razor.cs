@@ -1,6 +1,7 @@
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
 using CharacterManager.Server.Data;
+using CharacterManager.Server.Constants;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Microsoft.EntityFrameworkCore;
@@ -17,9 +18,9 @@ public partial class Statistiques : IAsyncDisposable
 
     private IJSObjectReference? chartModule;
     
-    private const string ColorPrimaryPurple = "#667eea";
-    private const string ColorSecondaryPurple = "#764ba2";
-    private const string ColorAccentPink = "#f093fb";
+    private const string ColorPrimaryPurple = StatisticsConstants.Colors.PrimaryPurple;
+    private const string ColorSecondaryPurple = StatisticsConstants.Colors.SecondaryPurple;
+    private const string ColorAccentPink = StatisticsConstants.Colors.AccentPink;
 
     protected override void OnInitialized()
     {
@@ -48,7 +49,13 @@ public partial class Statistiques : IAsyncDisposable
                 // Créer le graphique des types d'attaque
                 var labelsTypeAttaque = statsTypeAttaque.Keys.Select(k => GetTypeAttaqueLabel(k)).ToArray();
                 var dataTypeAttaque = statsTypeAttaque.Values.ToArray();
-                var colorsTypeAttaque = new[] { "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0" };
+                var colorsTypeAttaque = new[]
+                {
+                    StatisticsConstants.Colors.Melee,
+                    StatisticsConstants.Colors.Distance,
+                    StatisticsConstants.Colors.Androide,
+                    StatisticsConstants.Colors.Commandant
+                };
 
                 await chartModule.InvokeVoidAsync("createPieChart", 
                     "chartTypeAttaque", 
@@ -59,7 +66,12 @@ public partial class Statistiques : IAsyncDisposable
                 // Créer le graphique des factions
                 var labelsFaction = statsFaction.Keys.Select(k => GetFactionLabel(k)).ToArray();
                 var dataFaction = statsFaction.Values.ToArray();
-                var colorsFaction = new[] { "#9966FF", "#FF9F40", "#4BC0C0" };
+                var colorsFaction = new[]
+                {
+                    StatisticsConstants.Colors.Syndicat,
+                    StatisticsConstants.Colors.Pacificateurs,
+                    StatisticsConstants.Colors.HommesLibres
+                };
 
                 await chartModule.InvokeVoidAsync("createPieChart", 
                     "chartFaction", 
@@ -68,9 +80,20 @@ public partial class Statistiques : IAsyncDisposable
                     colorsFaction);
 
                 // Créer le graphique des rangs
-                var labelsRang = statsRang.Keys.OrderByDescending(k => k).Select(k => $"Rang {k}").ToArray();
+                var rankLabel = LocalizationService.GetKeyValue("statistics.rankLabel");
+                var labelsRang = statsRang.Keys
+                    .OrderByDescending(k => k)
+                    .Select(k => $"{rankLabel} {k}")
+                    .ToArray();
                 var dataRang = statsRang.OrderByDescending(kvp => kvp.Key).Select(kvp => kvp.Value).ToArray();
-                var colorsRang = new[] { "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF" };
+                var colorsRang = new[]
+                {
+                    StatisticsConstants.Colors.Melee,
+                    StatisticsConstants.Colors.Distance,
+                    StatisticsConstants.Colors.Androide,
+                    StatisticsConstants.Colors.Commandant,
+                    StatisticsConstants.Colors.Syndicat
+                };
 
                 await chartModule.InvokeVoidAsync("createPieChart", 
                     "chartRang", 
@@ -89,7 +112,7 @@ public partial class Statistiques : IAsyncDisposable
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur lors de la création des graphiques: {ex.Message}");
+                Console.WriteLine($"{LocalizationService.GetKeyValue("errors.chartCreationError")}: {ex.Message}");
             }
         }
     }
@@ -118,7 +141,7 @@ public partial class Statistiques : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur lors de la création du graphique d'évolution: {ex.Message}");
+            Console.WriteLine($"{LocalizationService.GetKeyValue("errors.statsLevelChartError")}: {ex.Message}");
         }
     }
 
@@ -194,7 +217,7 @@ public partial class Statistiques : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur lors de la création du graphique de puissance: {ex.Message}");
+            Console.WriteLine($"{LocalizationService.GetKeyValue("errors.statsPowerChartError")}: {ex.Message}");
         }
     }
 
@@ -232,7 +255,7 @@ public partial class Statistiques : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur lors de la création du graphique de classement: {ex.Message}");
+            Console.WriteLine($"{LocalizationService.GetKeyValue("errors.statsClassementChartError")}: {ex.Message}");
         }
     }
 
@@ -243,7 +266,7 @@ public partial class Statistiques : IAsyncDisposable
         TypeClassement.Nutaku => this.LocalizationService.GetKeyValue("statistics.classementNutaku"),
         TypeClassement.Top150 => this.LocalizationService.GetKeyValue("statistics.classementTop150"),
         TypeClassement.France => this.LocalizationService.GetKeyValue("statistics.classementFrance"),
-        _ => "Unknown"
+        _ => this.LocalizationService.GetKeyValue("home.attackType.unknown")
     };
 
     private static Dictionary<TypeAttaque, int> CalculerStatistiquesParTypeAttaque(IEnumerable<Personnage> mercenaires)

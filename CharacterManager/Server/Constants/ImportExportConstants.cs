@@ -123,14 +123,38 @@ public static class ImportExportConstants
     /// </summary>
     public static class ErrorMessages
     {
+        // Erreurs de fichier
         public const string ErrorFileEmpty = "Le fichier est vide";
+        public const string ErrorFileInvalid = "Le fichier n'est pas valide";
         public const string ErrorNoSectionsFound = "Aucune section valide trouvée dans le fichier";
         public const string ErrorXmlParsing = "Erreur lors de l'analyse du fichier XML";
+
+        // Erreurs d'import spécifiques
         public const string ErrorImportPersonnageInventaire = "Erreur lors de l'import de personnage (inventaire):";
         public const string ErrorImportPersonnageTemplate = "Erreur lors de l'import du personnage au template";
         public const string ErrorImportTemplate = "Erreur lors de l'import du template:";
         public const string ErrorTemplateNoName = "Un template doit avoir un nom";
+        
+        // Erreurs Lucie House
         public const string WarningTooManyLucieHousePieces = "Attention: Plus de {0} pièces sélectionnées dans l'import";
+        
+        // Erreurs historique
         public const string ErrorHistoriqueInvalide = "Historique invalide: date ou données manquantes";
+
+        // Messages génériques d'erreur
+        public const string ErrorFileNotSelected = "Veuillez sélectionner un fichier PML ou XML.";
+        public const string ErrorImportFormat = "Format d'import non supporté";
+    }
+
+    /// <summary>
+    /// Messages de succès et notifications
+    /// </summary>
+    public static class SuccessMessages
+    {
+        public const string ImportSuccess = "Import réussi";
+        public const string ExportSuccess = "Export réussi";
+        public const string ImportFormatDetected = "{0} enregistrement(s) importé(s) avec succès.";
+        public const string NoRecordsImported = "Aucun enregistrement importé.";
+        public const string ImportDetails = "Détails (aperçu):";
     }
 }

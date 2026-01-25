@@ -384,7 +384,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
         if (options.ImportInventory)
         {
-            totalCount += await ProcessInventorySection(root, errors);
+            totalCount += await ProcessInventorySection(root, errors, options);
         }
 
         if (options.ImportTemplates)
@@ -410,11 +410,16 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
         return totalCount;
     }
 
-    private async Task<int> ProcessInventorySection(XElement root, List<string> errors)
+    private async Task<int> ProcessInventorySection(XElement root, List<string> errors, PmlImportOptions options)
     {
         // Vérifier si des personnages existent déjà
         var existingPersonnagesCount = await _context.Personnages.CountAsync();
-        if (existingPersonnagesCount > 0)
+        var allowInventoryOnNonEmpty = options.ImportTemplates
+            || options.ImportBestSquad
+            || options.ImportHistories
+            || options.ImportLeagueHistory;
+
+        if (existingPersonnagesCount > 0 && !allowInventoryOnNonEmpty)
         {
             errors.Add($"Import d'inventaire impossible : {existingPersonnagesCount} personnage(s) existe(nt) déjà dans la base de données. L'import d'inventaire n'est autorisé que sur une base vide.");
             return 0;
@@ -675,7 +680,9 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
     private int ImportBestSquadAndroides(XElement bestSquad)
     {
         int count = 0;
-        var androidesElements = bestSquad.Elements(PersonnageConstants.Types.Androide);
+        var androidesElements = bestSquad.Elements(PersonnageConstants.Types.Androide)
+            .Concat(bestSquad.Elements("Androide"));
+
         foreach (var androidElement in androidesElements)
         {
             var personnage = ParsePersonnageFromXml(androidElement);

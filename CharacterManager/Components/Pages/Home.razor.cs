@@ -146,19 +146,19 @@ public partial class Home : IAsyncDisposable
                     var result = await PmlImportService.ImportPmlAsync(stream, Path.GetFileName(configFile));
                     if (!result.IsSuccess)
                     {
-                        importError = $"Erreur lors de l'import automatique du fichier de configuration : {result.Error}";
+                        importError = $"{LocalizationService.GetKeyValue("errors.importError")}: {result.Error}";
                         showPmlImportAlert = true;
                     }
                 }
                 catch (Exception ex)
                 {
-                    importError = $"Erreur lors de l'import automatique du fichier de configuration : {ex.Message}";
+                    importError = $"{LocalizationService.GetKeyValue("errors.importError")}: {ex.Message}";
                     showPmlImportAlert = true;
                 }
             }
             else
             {
-                importError = "Aucun fichier de configuration PML/XML trouvé pour initialiser la base de données.";
+                importError = LocalizationService.GetKeyValue("errors.configNotFound");
                 showPmlImportAlert = true;
             }
         }

@@ -46,6 +46,25 @@ public static class ClassementConstants
     }
 
     /// <summary>
+    /// Messages d'erreur et messages UI pour classements
+    /// </summary>
+    public static class ErrorMessages
+    {
+        public const string ErrorLoadingRankings = "Erreur lors du chargement des classements";
+        public const string ErrorExportingRankings = "Erreur lors de l'export des classements";
+        public const string ErrorImportingRankings = "Erreur lors de l'import des classements";
+        public const string ConfirmClearHistory = "Êtes-vous CERTAIN de vouloir vider tout l'historique? Cette action est irréversible.";
+    }
+
+    /// <summary>
+    /// Messages de succès pour les classements
+    /// </summary>
+    public static class SuccessMessages
+    {
+        public const string RankingsExportSuccess = "Export des classements effectué";
+    }
+
+    /// <summary>
     /// Localisation et labels pour les classements
     /// </summary>
     public static class Localization
