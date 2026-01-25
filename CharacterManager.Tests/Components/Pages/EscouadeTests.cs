@@ -118,6 +118,6 @@ public class EscouadeTests : TestContext
     {
         Services.AddSingleton(db);
         var service = new PersonnageService(db, _historiqueMock.Object, NullLogger<PersonnageService>.Instance);
-        Services.AddSingleton(service);
+        Services.AddSingleton<IPersonnageService>(service);
     }
 }
