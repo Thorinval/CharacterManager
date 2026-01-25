@@ -112,7 +112,14 @@ public class LocalizationServiceTests : IDisposable
         {
             foreach (var file in Directory.GetFiles(_i18nPath, "*-lang.json"))
             {
-                File.Delete(file);
+                try
+                {
+                    File.Delete(file);
+                }
+                catch (IOException)
+                {
+                    // File may be locked by another test process - ignore
+                }
             }
         }
     }
