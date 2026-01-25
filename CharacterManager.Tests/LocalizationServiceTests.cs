@@ -102,7 +102,13 @@ public class LocalizationServiceTests : IDisposable
 
     public void Dispose()
     {
-        if (Directory.Exists(_i18nPath))
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing && Directory.Exists(_i18nPath))
         {
             foreach (var file in Directory.GetFiles(_i18nPath, "*-lang.json"))
             {
