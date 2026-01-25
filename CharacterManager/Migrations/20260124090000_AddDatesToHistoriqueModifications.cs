@@ -8,19 +8,21 @@ namespace CharacterManager.Migrations
     /// <inheritdoc />
     public partial class AddDatesToHistoriqueModifications : Migration
     {
+        private const string TableName = "HistoriquesModifications";
+
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<DateTime>(
                 name: "DateInsertion",
-                table: "HistoriquesModifications",
+                table: TableName,
                 type: "TEXT",
                 nullable: false,
                 defaultValue: new DateTime(2026, 1, 24, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "DateMiseAJour",
-                table: "HistoriquesModifications",
+                table: TableName,
                 type: "TEXT",
                 nullable: false,
                 defaultValue: new DateTime(2026, 1, 24, 0, 0, 0, 0, DateTimeKind.Utc));
@@ -31,11 +33,11 @@ namespace CharacterManager.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "DateInsertion",
-                table: "HistoriquesModifications");
+                table: TableName);
 
             migrationBuilder.DropColumn(
                 name: "DateMiseAJour",
-                table: "HistoriquesModifications");
+                table: TableName);
         }
     }
 }
