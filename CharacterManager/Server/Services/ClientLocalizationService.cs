@@ -79,37 +79,60 @@ public class ClientLocalizationService : IClientLocalizationService
     {
         EnsureResourcesLoaded();
 
+        // Try flat resources first (fastest lookup)
         if (_flatResources != null && _flatResources.TryGetValue(key, out var flatValue))
         {
             return flatValue;
         }
 
-        if (_currentRoot.HasValue)
+        // Try JSON root element navigation
+        var rootValue = TryGetFromJsonRoot(key);
+        if (rootValue != null)
         {
-            var element = _currentRoot.Value;
-            var keysPath = key.Split('.');
-            foreach (var k in keysPath)
-            {
-                if (element.ValueKind == JsonValueKind.Object && element.TryGetProperty(k, out var child))
-                {
-                    element = child;
-                    continue;
-                }
-
-                element = default;
-                break;
-            }
-
-            if (element.ValueKind != JsonValueKind.Undefined && element.ValueKind != JsonValueKind.Null)
-            {
-                return ConvertToString(element, key);
-            }
+            return rootValue;
         }
+
+        // Try direct dictionary lookup
         if (_currentResources != null && _currentResources.TryGetValue(key, out var directValue))
         {
             return ConvertToString(directValue, key);
         }
 
+        // Try nested navigation in dictionary
+        return TryGetFromNestedDictionary(key);
+    }
+
+    private string? TryGetFromJsonRoot(string key)
+    {
+        if (!_currentRoot.HasValue)
+        {
+            return null;
+        }
+
+        var element = _currentRoot.Value;
+        var keysPath = key.Split('.');
+        
+        foreach (var k in keysPath)
+        {
+            if (element.ValueKind == JsonValueKind.Object && element.TryGetProperty(k, out var child))
+            {
+                element = child;
+                continue;
+            }
+
+            return null;
+        }
+
+        if (element.ValueKind != JsonValueKind.Undefined && element.ValueKind != JsonValueKind.Null)
+        {
+            return ConvertToString(element, key);
+        }
+
+        return null;
+    }
+
+    private string TryGetFromNestedDictionary(string key)
+    {
         var keys = key.Split('.');
         object? current = _currentResources;
 

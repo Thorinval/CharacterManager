@@ -1067,6 +1067,22 @@ public partial class Inventaire : IAsyncDisposable
         try
         {
             var conn = DbContext.Database.GetDbConnection();
+            
+            // Check if using in-memory database (won't have sqlite_master)
+            if (conn.GetType().Name.Contains("InMemory"))
+            {
+                // For in-memory, check if the entity type exists in the model
+                var entityType = DbContext.Model.FindEntityType(table);
+                if (entityType != null)
+                {
+                    return true;
+                }
+                
+                // Also check by table name in the model
+                return DbContext.Model.GetEntityTypes().Any(e => 
+                    e.GetTableName()?.Equals(table, StringComparison.OrdinalIgnoreCase) == true);
+            }
+
             var shouldClose = conn.State != System.Data.ConnectionState.Open;
 
             if (shouldClose)

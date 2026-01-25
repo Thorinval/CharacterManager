@@ -329,14 +329,31 @@ public class DatabaseInitializationService : IDatabaseInitializationService
     {
         try
         {
-            using var conn = (SqliteConnection)_db.Database.GetDbConnection();
-            if (conn.State != System.Data.ConnectionState.Open)
-                await conn.OpenAsync();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name=@name;";
-            cmd.Parameters.AddWithValue("@name", table);
-            var result = await cmd.ExecuteScalarAsync();
-            return result != null;
+            // Check if using a relational database provider
+            if (_db.Database.IsRelational())
+            {
+                using var conn = (SqliteConnection)_db.Database.GetDbConnection();
+                if (conn.State != System.Data.ConnectionState.Open)
+                    await conn.OpenAsync();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name=@name;";
+                cmd.Parameters.AddWithValue("@name", table);
+                var result = await cmd.ExecuteScalarAsync();
+                return result != null;
+            }
+            else
+            {
+                // For in-memory database, check if the entity type exists in the model
+                var entityType = _db.Model.FindEntityType(table);
+                if (entityType != null)
+                {
+                    return true;
+                }
+                
+                // Also check by table name in the model
+                return _db.Model.GetEntityTypes().Any(e => 
+                    e.GetTableName()?.Equals(table, StringComparison.OrdinalIgnoreCase) == true);
+            }
         }
         catch (Exception ex)
         {

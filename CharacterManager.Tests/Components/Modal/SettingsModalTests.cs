@@ -40,6 +40,8 @@ public class SettingsModalTests : BlazorComponentTestBase
 
         _appVersionServiceMock.Setup(s => s.GetAppVersion()).Returns("1.0.0");
 
+        Services.AddSingleton(_dbContextMock.Object);
+
         var frContent = new Dictionary<string, string>
         {
             ["settings.title"] = "Paramètres",
@@ -238,6 +240,54 @@ public class SettingsModalTests : BlazorComponentTestBase
         var componentType = typeof(SettingsModal);
         Assert.NotNull(componentType);
         Assert.Equal("SettingsModal", componentType.Name);
+    }
+
+    #endregion
+
+    #region Rendering Tests
+
+    [Fact]
+    public void SettingsModal_Renders_Unauthorized_Prompt()
+    {
+        // No auth setup, should show sign-in prompt
+        this.AddTestAuthorization().SetNotAuthorized();
+        var cut = RenderComponent<CascadingAuthenticationState>(p => p.AddChildContent<SettingsModal>());
+
+        Assert.Contains("Connectez-vous pour accéder aux paramètres", cut.Markup);
+    }
+
+    [Fact]
+    public void SettingsModal_Renders_Settings_When_Authorized()
+    {
+        this.AddTestAuthorization().SetAuthorized("testuser", AuthorizationState.Authorized);
+        _profileServiceMock.Setup(p => p.GetOrCreateAsync("testuser"))
+            .ReturnsAsync(new Profile { Username = "testuser", Language = "fr", AdultMode = false });
+
+        var cut = RenderComponent<CascadingAuthenticationState>(p => p.AddChildContent<SettingsModal>());
+
+        cut.WaitForAssertion(() => Assert.Contains("Paramètres", cut.Markup));
+        Assert.Contains("Langue", cut.Markup);
+        Assert.Contains("Mode adulte", cut.Markup);
+    }
+
+    [Fact]
+    public async Task SettingsModal_AdultMode_Toggle_Updates_Profile()
+    {
+        this.AddTestAuthorization().SetAuthorized("admin", AuthorizationState.Authorized)
+            .SetRoles("admin");
+        var profile = new Profile { Username = "admin", Language = "fr", AdultMode = false };
+        _profileServiceMock.Setup(p => p.GetOrCreateAsync("admin")).ReturnsAsync(profile);
+        _profileServiceMock.Setup(p => p.UpdateAsync(It.IsAny<Profile>())).Returns(Task.CompletedTask);
+
+        var cut = RenderComponent<CascadingAuthenticationState>(p => p.AddChildContent<SettingsModal>());
+
+        cut.WaitForAssertion(() => Assert.Contains("form-check-input", cut.Markup));
+
+        var toggle = cut.Find("input.form-check-input");
+        await cut.InvokeAsync(() => toggle.Change(true));
+
+        _profileServiceMock.Verify(p => p.UpdateAsync(It.Is<Profile>(pr => pr.AdultMode)), Times.Once);
+        _adultModeNotificationMock.Verify(a => a.SetAdultMode(true), Times.Once);
     }
 
     #endregion

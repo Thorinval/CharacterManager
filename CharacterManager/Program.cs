@@ -1,13 +1,7 @@
-using CharacterManager.Server.Data;
 using CharacterManager.Server.Services;
 using CharacterManager.Server;
-using CharacterManager.Server.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Data.Sqlite;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using CharacterManager.Components;
 using Serilog;
 
