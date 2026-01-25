@@ -4,22 +4,32 @@ using CharacterManager.Server.Models;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 using System.IO;
+using System.Text;
 
 namespace CharacterManager.Tests;
+
+/// <summary>
+/// Null text writer that discards all output without buffering
+/// </summary>
+public class NullTextWriter : TextWriter
+{
+    public override Encoding Encoding => Encoding.UTF8;
+    public override void Write(char value) { }
+    public override void Write(string? value) { }
+    public override void WriteLine(string? value) { }
+}
 
 public class CleanupPersonnageDuplicatesTests : IDisposable
 {
     private readonly ApplicationDbContext _context;
     private readonly CleanupPersonnageDuplicates _service;
     private readonly TextWriter _originalOut;
-    private readonly StringWriter _stringWriter;
 
     public CleanupPersonnageDuplicatesTests()
     {
-        // Suppress console output for tests by redirecting to StringWriter
+        // Suppress console output for tests by redirecting to NullTextWriter (no buffering, no disposal issues)
         _originalOut = Console.Out;
-        _stringWriter = new StringWriter();
-        Console.SetOut(_stringWriter);
+        Console.SetOut(new NullTextWriter());
 
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -235,9 +245,8 @@ public class CleanupPersonnageDuplicatesTests : IDisposable
 
     public void Dispose()
     {
-        // Restore console output and dispose StringWriter
+        // Restore console output before disposing context
         Console.SetOut(_originalOut);
-        _stringWriter?.Dispose();
         Dispose(true);
         GC.SuppressFinalize(this);
     }
