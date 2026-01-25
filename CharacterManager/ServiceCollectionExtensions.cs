@@ -27,6 +27,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<CapaciteService>();
         services.AddScoped<ClientLocalizationService>();
         services.AddScoped<DatabaseInitializationService>();
+        services.AddScoped<StatistiquesService>();
 
         // Register singleton services
         services.AddSingleton<AppVersionService>();
