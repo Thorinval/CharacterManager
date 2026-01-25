@@ -1,14 +1,14 @@
 # 🎮 Character Manager
 
 > **Gestionnaire de personnages pour Lust Goddess**  
-> Version actuelle : **1.0.0** 🎉
+> Version actuelle : **1.1.0** (25/01/2026) 🎉
 
 Application de gestion complète pour suivre et optimiser vos escouades, personnages, capacités et progression dans le jeu Lust Goddess.
 
 [![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![Blazor](https://img.shields.io/badge/Blazor-Server-purple)](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)](docs/RELEASE_1.0.0.md)
+[![Status](https://img.shields.io/badge/Status-Production%20v1.1.0-brightgreen.svg)](docs/RELEASE_NOTES.md)
 [![Tests](https://img.shields.io/badge/Tests-78%2F78%20%E2%9C%85-blue.svg)](.github/workflows/tests.yml)
 
 ---
@@ -18,6 +18,7 @@ Application de gestion complète pour suivre et optimiser vos escouades, personn
 ### 📊 **Gestion d'Inventaire**
 - ✅ Gestion complète des **Commandants**, **Mercenaires** et **Androïdes**
 - ✅ Profils détaillés avec statistiques (Puissance, PA, PV, Niveau, Rang)
+- ✅ **Puissance réelle** automatique pour les commandants (Puissance + Rang × 20) utilisée pour l'affichage et les tris
 - ✅ Support de 28 capacités de jeu avec icônes
 - ✅ Mode adulte optionnel avec contenu filtrable
 
@@ -26,6 +27,7 @@ Application de gestion complète pour suivre et optimiser vos escouades, personn
 - ✅ **Historique des ligues** pour suivre votre progression
 - ✅ **Historique des modifications** (création, modification, suppression)
 - ✅ Export JSON de l'historique avec filtres avancés
+- ✅ Module admin de **nettoyage des doublons** pour corriger les références incohérentes
 
 ### 📈 **Statistiques & Analyse**
 - ✅ Graphiques interactifs (Type d'attaque, Faction, Rang)
@@ -34,11 +36,15 @@ Application de gestion complète pour suivre et optimiser vos escouades, personn
 
 ### 🏠 **Maison de Lucie**
 - ✅ Gestion des pièces et niveaux
+- ✅ Édition directe des pièces avec sauvegarde dans l'historique
 - ✅ Calcul de la puissance tactique et stratégique
 - ✅ Affichage de l'affection
 
 ### 💾 **Import / Export**
 - ✅ Format **PML** (XML personnalisé) pour tous vos exports
+- ✅ Workflow guidé en 3 étapes : prévisualisation, résolution des conflits, application
+- ✅ Logs d'import structurés par catégories avec niveaux ✅/⚠️/❌
+- ✅ Détection et résolution des conflits (valeurs anciennes/nouvelles) avant l'application
 - ✅ Import d'inventaire, templates, historiques
 - ✅ Export de compositions d'escouades optimales
 - ✅ Sauvegarde automatique dans SQLite
@@ -124,8 +130,8 @@ L'application sera accessible à l'adresse : **http://localhost:5000**
 
 1. **Exportez** vos données depuis le jeu (format PML/XML)
 2. Dans Character Manager, cliquez sur **Import/Export PML** (icône ☁️)
-3. **Sélectionnez** votre fichier d'export
-4. Vos personnages apparaîtront dans l'**Inventaire**
+3. **Sélectionnez** votre fichier d'export, vérifiez la prévisualisation et **résolvez les conflits** si besoin
+4. Appliquez l'import : vos personnages et historiques apparaîtront dans l'**Inventaire**
 
 ### Navigation
 
@@ -142,7 +148,7 @@ L'application sera accessible à l'adresse : **http://localhost:5000**
 
 Documentation complète disponible dans le dossier [`docs/`](docs/) :
 
-- 🎉 [**Nouvelle ! v1.0.0 Release Notes**](docs/RELEASE_1.0.0.md) - Production Ready 🚀
+- 🎉 [**Release Notes 1.1.0**](docs/RELEASE_NOTES.md) - Import assisté & nettoyage des doublons 🚀
 - 📖 [**Guide d'installation**](docs/INSTALLATION_GUIDE.md) - Installation détaillée
 - 🚀 [**Démarrage rapide**](docs/QUICK_START.md) - Guide pas à pas
 - 📘 [**Documentation complète**](docs/DOCUMENTATION.md) - Toutes les fonctionnalités
@@ -172,25 +178,23 @@ Documentation complète disponible dans le dossier [`docs/`](docs/) :
 
 ## 🎯 Statut de Production
 
-### v1.0.0 - Production Ready ✅
+### v1.1.0 - Production ✅
 
 | Critère | Status |
 |---------|--------|
 | Tests unitaires | ✅ 78/78 passent |
-| Sécurité | ✅ Aucune faille critique |
-| Documentation | ✅ Complète |
+| Import PML assisté | ✅ Prévisualisation + résolution de conflits |
+| Nettoyage doublons | ✅ Module admin `/admin/cleanup-duplicates` |
+| UI | ✅ Headers unifiés, cartes classement corrigées |
 | Build | ✅ Sans erreurs |
-| Performance | ✅ Optimisée |
-| Fonctionnalités | ✅ Toutes implémentées |
+| Documentation | ✅ À jour (RELEASE_NOTES) |
 
-**Application prête pour déploiement en production ! Voir [Release Notes v1.0.0](docs/RELEASE_1.0.0.md).**
+**Release détaillée :** voir [RELEASE_NOTES.md](docs/RELEASE_NOTES.md) (déploiement du 25/01/2026).
 
-### Prochaines Versions (v1.1+)
+### Prochaines Versions (v1.2+)
 
-Développement en cours sur la branche [`develop-1.x`](https://github.com/Thorinval/CharacterManager/tree/develop-1.x)
-- 🔄 Improvements & optimisations
-- 🎨 Améliorations UX/UI
-- ⚡ Nouvelles fonctionnalités
+- Branche [`develop-1.x`](https://github.com/Thorinval/CharacterManager/tree/develop-1.x) : refonte du classement et itérations UX
+- Version 1.2.0 préparée pour validation
 
 Consultez la [Roadmap](docs/ROADMAP.md) pour les détails.
 
