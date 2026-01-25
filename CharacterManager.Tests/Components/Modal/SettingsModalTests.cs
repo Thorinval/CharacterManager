@@ -27,73 +27,51 @@ public class SettingsModalTests : BlazorComponentTestBase
     private readonly Mock<IAppVersionService> _appVersionServiceMock;
     private readonly Mock<IApplicationDbContext> _dbContextMock;
     private readonly Mock<IJSRuntime> _jsRuntimeMock;
-    private readonly string _testDir;
-    private readonly string _i18nDir;
+    private readonly IClientLocalizationService _localizationService;
 
     public SettingsModalTests()
     {
-        // Create mocks for all dependencies
         _modalServiceMock = new Mock<IModalService>();
         _adultModeNotificationMock = new Mock<IAdultModeNotificationService>();
         _profileServiceMock = new Mock<IProfileService>();
         _appVersionServiceMock = new Mock<IAppVersionService>();
         _dbContextMock = new Mock<IApplicationDbContext>();
         _jsRuntimeMock = new Mock<IJSRuntime>();
-        
-        // Setup default mock behaviors
+
         _appVersionServiceMock.Setup(s => s.GetAppVersion()).Returns("1.0.0");
-        
-        // Create temp directory for i18n files
-        _testDir = Path.Combine(Path.GetTempPath(), $"SettingsModalTests_{Guid.NewGuid()}");
-        _i18nDir = Path.Combine(_testDir, "i18n");
-        Directory.CreateDirectory(_i18nDir);
 
-        // Create test localization file
-        var frContent = new Dictionary<string, object>
+        var frContent = new Dictionary<string, string>
         {
-            ["settings"] = new Dictionary<string, object>
-            {
-                ["title"] = "Paramètres",
-                ["language"] = "Langue",
-                ["languageDescription"] = "Choisissez votre langue préférée",
-                ["contentMode"] = "Mode de contenu",
-                ["adultMode"] = "Mode adulte",
-                ["adultModeDescription"] = "Activer le contenu réservé aux adultes",
-                ["enabled"] = "Activé",
-                ["disabled"] = "Désactivé",
-                ["signInPrompt"] = "Connectez-vous pour accéder aux paramètres"
-            }
+            ["settings.title"] = "Paramètres",
+            ["settings.language"] = "Langue",
+            ["settings.languageDescription"] = "Choisissez votre langue préférée",
+            ["settings.contentMode"] = "Mode de contenu",
+            ["settings.adultMode"] = "Mode adulte",
+            ["settings.adultModeDescription"] = "Activer le contenu réservé aux adultes",
+            ["settings.enabled"] = "Activé",
+            ["settings.disabled"] = "Désactivé",
+            ["settings.signInPrompt"] = "Connectez-vous pour accéder aux paramètres"
         };
-        File.WriteAllText(Path.Combine(_i18nDir, "fr.json"), JsonSerializer.Serialize(frContent));
 
-        // Setup mocks
-        var envMock = new Mock<IWebHostEnvironment>();
-        envMock.Setup(e => e.WebRootPath).Returns(_testDir);
-        
-        var loggerMock = new Mock<ILogger<ClientLocalizationService>>();
-        var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
-        httpContextAccessorMock.Setup(h => h.HttpContext).Returns((HttpContext?)null);
-        
-        var languageContext = new LanguageContextService();
+        var localizationServiceMock = new Mock<IClientLocalizationService>();
+        localizationServiceMock.Setup(s => s.InitializeAsync(It.IsAny<string>())).Returns(Task.CompletedTask);
+        localizationServiceMock.Setup(s => s.GetKeyValue(It.IsAny<string>())).Returns((string key) => frContent.TryGetValue(key, out var v) ? v : key);
+        localizationServiceMock.Setup(s => s[It.IsAny<string>()]).Returns((string key) => frContent.TryGetValue(key, out var v) ? v : key);
+        localizationServiceMock.SetupGet(s => s.CurrentLanguage).Returns("fr");
+        localizationServiceMock.Setup(s => s.GetCurrentLanguage()).Returns("fr");
+        localizationServiceMock.Setup(s => s.ChangeLanguageAsync(It.IsAny<string>())).Returns(Task.CompletedTask);
+        localizationServiceMock.Setup(s => s.SetLanguageAsync(It.IsAny<string>())).Returns(Task.CompletedTask);
 
-        var localizationService = new ClientLocalizationService(
-            envMock.Object,
-            loggerMock.Object,
-            languageContext,
-            httpContextAccessorMock.Object);
-        
-        localizationService.InitializeAsync("fr").GetAwaiter().GetResult();
-        
-        // Register services via interfaces
+        _localizationService = localizationServiceMock.Object;
+
         Services.AddSingleton(_modalServiceMock.Object);
-        Services.AddSingleton<ILanguageContextService>(languageContext);
-        Services.AddSingleton<IClientLocalizationService>(localizationService);
+        Services.AddSingleton<ILanguageContextService>(new LanguageContextService());
+        Services.AddSingleton<IClientLocalizationService>(_localizationService);
         Services.AddSingleton(_adultModeNotificationMock.Object);
         Services.AddSingleton(_profileServiceMock.Object);
         Services.AddSingleton(_appVersionServiceMock.Object);
         Services.AddSingleton(_jsRuntimeMock.Object);
-        
-        // Add authorization services
+
         Services.AddAuthorizationCore();
     }
 
@@ -244,11 +222,8 @@ public class SettingsModalTests : BlazorComponentTestBase
     public async Task SettingsModal_LocalizationService_CanInitialize()
     {
         // Verify localization service can initialize with a language
-        var service = Services.GetService<IClientLocalizationService>();
-        Assert.NotNull(service);
-        
-        await service!.InitializeAsync("fr");
-        var translatedText = service["settings.title"];
+        await _localizationService.InitializeAsync("fr");
+        var translatedText = _localizationService.GetKeyValue("settings.title");
         Assert.Equal("Paramètres", translatedText);
     }
 

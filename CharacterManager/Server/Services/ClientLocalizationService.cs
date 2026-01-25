@@ -15,6 +15,8 @@ public class ClientLocalizationService : IClientLocalizationService
     private readonly LanguageContextService _languageContext;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private Dictionary<string, object>? _currentResources;
+    private Dictionary<string, string>? _flatResources;
+    private JsonElement? _currentRoot;
     private string _currentLanguage = "fr";
     private readonly object _lock = new();
 
@@ -59,6 +61,8 @@ public class ClientLocalizationService : IClientLocalizationService
                 json,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
             );
+            _currentRoot = JsonDocument.Parse(json).RootElement.Clone();
+            _flatResources = BuildFlatMap(_currentRoot.Value);
         }
         catch (Exception ex)
         {
@@ -74,6 +78,33 @@ public class ClientLocalizationService : IClientLocalizationService
     public string GetKeyValue(string key)
     {
         EnsureResourcesLoaded();
+
+        if (_flatResources != null && _flatResources.TryGetValue(key, out var flatValue))
+        {
+            return flatValue;
+        }
+
+        if (_currentRoot.HasValue)
+        {
+            var element = _currentRoot.Value;
+            var keysPath = key.Split('.');
+            foreach (var k in keysPath)
+            {
+                if (element.ValueKind == JsonValueKind.Object && element.TryGetProperty(k, out var child))
+                {
+                    element = child;
+                    continue;
+                }
+
+                element = default;
+                break;
+            }
+
+            if (element.ValueKind != JsonValueKind.Undefined && element.ValueKind != JsonValueKind.Null)
+            {
+                return ConvertToString(element, key);
+            }
+        }
         if (_currentResources != null && _currentResources.TryGetValue(key, out var directValue))
         {
             return ConvertToString(directValue, key);
@@ -205,13 +236,44 @@ public class ClientLocalizationService : IClientLocalizationService
                     json,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
                 );
+                _currentRoot = JsonDocument.Parse(json).RootElement.Clone();
+                _flatResources = BuildFlatMap(_currentRoot.Value);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erreur lors du chargement lazy des ressources: {Message}", ex.Message);
                 _currentResources = new Dictionary<string, object>();
+                _currentRoot = null;
+                _flatResources = null;
             }
         }
+    }
+
+    private static Dictionary<string, string> BuildFlatMap(JsonElement root)
+    {
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        void Walk(JsonElement element, string prefix)
+        {
+            switch (element.ValueKind)
+            {
+                case JsonValueKind.Object:
+                    foreach (var property in element.EnumerateObject())
+                    {
+                        var nextPrefix = string.IsNullOrEmpty(prefix) ? property.Name : $"{prefix}.{property.Name}";
+                        Walk(property.Value, nextPrefix);
+                    }
+                    break;
+                case JsonValueKind.Array:
+                    break;
+                default:
+                    result[prefix] = ConvertToString(element, prefix);
+                    break;
+            }
+        }
+
+        Walk(root, string.Empty);
+        return result;
     }
 }
 
