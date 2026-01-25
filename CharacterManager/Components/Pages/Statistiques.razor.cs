@@ -126,13 +126,13 @@ public partial class Statistiques : IAsyncDisposable
     {
         try
         {
-            // Récupérer les données de la meilleure équipe et de l'équipe sélectionnée
-            var bestTeamData = GetBestTeamPowerEvolutionData();
+            // Récupérer les données de l'équipe sélectionnée et de la meilleure équipe
             var selectedTeamData = GetSelectedTeamPowerEvolutionData();
+            var bestTeamData = GetBestTeamPowerEvolutionData();
 
             // Fusionner les dates et créer les labels
-            var allDates = bestTeamData.Select(d => d.Date)
-                .Union(selectedTeamData.Select(d => d.Date))
+            var allDates = selectedTeamData.Select(d => d.Date)
+                .Union(bestTeamData.Select(d => d.Date))
                 .OrderBy(d => d)
                 .ToList();
 
@@ -144,19 +144,19 @@ public partial class Statistiques : IAsyncDisposable
             // Créer les datasets pour les deux courbes
             var datasets = new List<object>();
 
-            // Courbe 1: Meilleure équipe
-            var bestTeamPowerData = allDates.Select(date =>
+            // Courbe 1: Équipe sélectionnée (historique complet)
+            var selectedTeamPowerData = allDates.Select(date =>
             {
-                var record = bestTeamData.FirstOrDefault(d => d.Date == date);
+                var record = selectedTeamData.FirstOrDefault(d => d.Date == date);
                 return record != null ? (object)record.TotalPower : null;
             }).ToList();
 
             datasets.Add(new
             {
-                label = LocalizationService.GetKeyValue("statistics.bestTeamPower"),
-                data = bestTeamPowerData,
-                borderColor = ColorSecondaryPurple,
-                backgroundColor = ColorWithAlpha(ColorSecondaryPurple, 0.1),
+                label = LocalizationService.GetKeyValue("statistics.selectedTeamPower"),
+                data = selectedTeamPowerData,
+                borderColor = ColorPrimaryPurple,
+                backgroundColor = ColorWithAlpha(ColorPrimaryPurple, 0.1),
                 borderWidth = 2,
                 fill = false,
                 spanGaps = true,
@@ -165,19 +165,19 @@ public partial class Statistiques : IAsyncDisposable
                 tension = 0.3
             });
 
-            // Courbe 2: Équipe sélectionnée (si elle existe)
-            if (selectedTeamData.Any())
+            // Courbe 2: Meilleure équipe (uniquement aujourd'hui)
+            if (bestTeamData.Any())
             {
-                var selectedTeamPowerData = allDates.Select(date =>
+                var bestTeamPowerData = allDates.Select(date =>
                 {
-                    var record = selectedTeamData.FirstOrDefault(d => d.Date == date);
+                    var record = bestTeamData.FirstOrDefault(d => d.Date == date);
                     return record != null ? (object)record.TotalPower : null;
                 }).ToList();
 
                 datasets.Add(new
                 {
-                    label = LocalizationService.GetKeyValue("statistics.selectedTeamPower"),
-                    data = selectedTeamPowerData,
+                    label = LocalizationService.GetKeyValue("statistics.bestTeamPower"),
+                    data = bestTeamPowerData,
                     borderColor = ColorAccentPink,
                     backgroundColor = ColorWithAlpha(ColorAccentPink, 0.1),
                     borderWidth = 2,
@@ -456,22 +456,19 @@ public partial class Statistiques : IAsyncDisposable
         return result;
     }
 
-    private List<TeamPowerEvolutionData> GetBestTeamPowerEvolutionData()
+    private List<TeamPowerEvolutionData> GetSelectedTeamPowerEvolutionData()
     {
         var result = new List<TeamPowerEvolutionData>();
         
         if (DbContext == null)
             return result;
 
-        // Récupérer l'historique des classements triés par date
+        // Récupérer l'historique des classements triés par date (équipe sélectionnée à chaque date)
         var allHistories = DbContext.HistoriquesClassement
             .OrderBy(h => h.DateEnregistrement)
             .ToList();
 
-        if (!allHistories.Any())
-            return result;
-
-        // Créer une entrée pour chaque enregistrement de classement avec la puissance totale
+        // Ajouter les données historiques de l'équipe sélectionnée
         foreach (var history in allHistories)
         {
             result.Add(new TeamPowerEvolutionData
@@ -481,16 +478,6 @@ public partial class Statistiques : IAsyncDisposable
             });
         }
 
-        return result;
-    }
-
-    private List<TeamPowerEvolutionData> GetSelectedTeamPowerEvolutionData()
-    {
-        var result = new List<TeamPowerEvolutionData>();
-        
-        if (DbContext == null)
-            return result;
-
         // Ajouter la puissance actuelle de l'équipe sélectionnée
         var currentSelectedPower = PersonnageService.GetPuissanceEscouade();
         if (currentSelectedPower > 0)
@@ -499,6 +486,27 @@ public partial class Statistiques : IAsyncDisposable
             {
                 Date = DateOnly.FromDateTime(DateTime.Now),
                 TotalPower = currentSelectedPower
+            });
+        }
+
+        return result;
+    }
+
+    private List<TeamPowerEvolutionData> GetBestTeamPowerEvolutionData()
+    {
+        var result = new List<TeamPowerEvolutionData>();
+        
+        if (DbContext == null)
+            return result;
+
+        // Calculer la puissance maximale actuelle (meilleure équipe possible)
+        var currentBestPower = PersonnageService.GetPuissanceMaxEscouade();
+        if (currentBestPower > 0)
+        {
+            result.Add(new TeamPowerEvolutionData
+            {
+                Date = DateOnly.FromDateTime(DateTime.Now),
+                TotalPower = currentBestPower
             });
         }
 
