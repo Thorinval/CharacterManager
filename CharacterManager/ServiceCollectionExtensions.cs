@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
     {
         // Register scoped services (order matters: ProfileService before PersonnageService)
         services.AddScoped<ProfileService>();
+        services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
         services.AddScoped<HistoriqueModificationService>();  // BEFORE PersonnageService
         services.AddScoped<PersonnageService>();
         services.AddScoped(provider => new PmlImportService(

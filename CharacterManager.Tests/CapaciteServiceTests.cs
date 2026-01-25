@@ -181,7 +181,7 @@ public class CapaciteServiceTests : IDisposable
         _context.Capacites.Add(capacite);
         await _context.SaveChangesAsync();
 
-        var updated = new Capacite { Nom = "Test", Description = null, Icon = null };
+        var updated = new Capacite { Nom = "Test", Description = null!, Icon = null! };
 
         // Act
         var result = await _service.UpdateAsync(capacite.Id, updated);

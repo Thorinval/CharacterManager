@@ -5,6 +5,21 @@ All PowerShell scripts have been centralized in the `scripts/` folder for better
 
 ## Quick Start
 
+### Configure UTF-8 Encoding for PowerShell
+To properly display test output with correct accents and special characters, configure UTF-8 encoding:
+
+**Option 1: For a single command**
+```powershell
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+```
+
+**Option 2: Using the test runner script**
+The `run-tests.ps1` script automatically configures UTF-8 encoding, so use:
+```powershell
+./run-tests.ps1              # Normal tests
+./run-tests.ps1 -coverage    # With code coverage
+```
+
 ### Create a New Release
 From the project root directory, run:
 
