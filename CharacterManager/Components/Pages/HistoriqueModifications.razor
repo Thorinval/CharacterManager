@@ -11,6 +11,27 @@
 <script src="/js/historique.js"></script>
 
 <div class="container-fluid py-4">
+    <!-- Toast d'import en cours -->
+    @if (isImporting)
+    {
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11; width: 100%; max-width: 400px;">
+            <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header bg-primary text-white">
+                    <i class="bi bi-hourglass-split me-2"></i>
+                    <strong class="me-auto">Import en cours...</strong>
+                </div>
+                <div class="toast-body">
+                    <div class="progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+                    </div>
+                    <div class="mt-2 small text-muted">
+                        Veuillez patienter pendant le traitement de votre fichier...
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
     <div class="page-header-banner">
         <h1><i class="bi bi-clock-history"></i> Historique des modifications</h1>
     </div>
@@ -30,7 +51,7 @@
         <div class="card-body">
             @if (!previewComplete && !importComplete)
             {
-                <EditForm OnValidSubmit="HandlePreview">
+                <EditForm Model="@this" OnValidSubmit="HandlePreview">
                     <div class="row g-3 align-items-end">
                         <div class="col-md-6">
                             <label class="form-label">Fichier historique (.json)</label>
@@ -49,11 +70,15 @@
                 </EditForm>
             }
 
-            @if (previewComplete)
+            @if (previewComplete && !isImporting)
             {
                 <div class="alert alert-info d-flex justify-content-between align-items-center">
                     <div>
-                        <strong>Pré-rapport :</strong> @(previewResult?.ValidCount ?? 0) entrées prêtes à être importées.
+                        <strong>Pré-rapport :</strong> @(previewResult?.ValidCount ?? 0) entrée(s) prête(s) à être importée(s).
+                        @if (previewResult?.DuplicateCount > 0)
+                        {
+                            <span class="text-info ms-2">(@previewResult.DuplicateCount doublon(s) ignoré(s))</span>
+                        }
                         @if (!string.IsNullOrEmpty(previewResult?.Error))
                         {
                             <span class="text-danger ms-2">@previewResult.Error</span>
@@ -73,23 +98,68 @@
                 {
                     <div class="border rounded p-3 bg-light mb-3">
                         <h6 class="mb-2">Rapport détaillé</h6>
-                        @foreach (var categoryGroup in previewResult.Logs.GroupBy(l => l.Category).OrderBy(g => g.Key.ToString()))
+                        
+                        @* Grouper par niveau (OK, Warning, Error, Duplicate) *@
+                        @foreach (var levelGroup in previewResult.Logs.GroupBy(l => l.Level).OrderBy(g => g.Key))
                         {
-                            <div class="mb-2">
-                                <div class="fw-bold text-uppercase small">@categoryGroup.Key</div>
-                                @foreach (var dataGroup in categoryGroup.GroupBy(l => l.DataType).OrderBy(g => g.Key))
+                            var levelId = $"level_{levelGroup.Key}";
+                            var levelCount = levelGroup.Count();
+                            var levelBadgeClass = GetLevelBadgeClass(levelGroup.Key);
+                            var levelLabel = GetLevelLabel(levelGroup.Key);
+                            var isLevelExpanded = expandedCollapseSections.Contains(levelId);
+                            
+                            <div class="card mb-2">
+                                <div class="card-header p-2" style="cursor: pointer;" @onclick="() => ToggleCollapse(levelId)">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="badge @levelBadgeClass">@levelLabel</span>
+                                            <span class="ms-2">@levelCount entrée(s)</span>
+                                        </div>
+                                        <i class="bi bi-chevron-@(isLevelExpanded ? "up" : "down")"></i>
+                                    </div>
+                                </div>
+                                @if (isLevelExpanded)
                                 {
-                                    <div class="ms-3 mb-1">
-                                        <div class="fw-semibold">@dataGroup.Key</div>
-                                        <ul class="list-unstyled ms-2 mb-2">
-                                            @foreach (var log in dataGroup)
-                                            {
-                                                <li class="d-flex align-items-center gap-2">
-                                                    <span class="badge rounded-pill @GetBadgeClass(log)">@GetBadgeLabel(log)</span>
-                                                    <span>@log.Message</span>
-                                                </li>
-                                            }
-                                        </ul>
+                                    <div class="card-body p-2">
+                                        @* Grouper par catégorie *@
+                                        @foreach (var categoryGroup in levelGroup.GroupBy(l => l.Category).OrderBy(g => g.Key.ToString()))
+                                        {
+                                            <div class="mb-2">
+                                                <div class="fw-bold text-uppercase small text-muted">@categoryGroup.Key</div>
+                                                
+                                                @* Grouper par type de données (Création, Modification, Suppression) *@
+                                                @foreach (var dataGroup in categoryGroup.GroupBy(l => l.DataType).OrderBy(g => g.Key))
+                                                {
+                                                    var dataId = $"{levelId}_{categoryGroup.Key}_{dataGroup.Key}".Replace(" ", "_");
+                                                    var dataCount = dataGroup.Count();
+                                                    var isDataExpanded = expandedCollapseSections.Contains(dataId);
+                                                    
+                                                    <div class="ms-3 mb-2">
+                                                        <div class="border-start border-3 ps-2" style="cursor: pointer;" @onclick="() => ToggleCollapse(dataId)">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <div>
+                                                                    <span class="fw-semibold">@dataGroup.Key</span>
+                                                                    <span class="badge bg-secondary rounded-pill ms-2">@dataCount</span>
+                                                                </div>
+                                                                <i class="bi bi-chevron-@(isDataExpanded ? "down" : "right")"></i>
+                                                            </div>
+                                                        </div>
+                                                        @if (isDataExpanded)
+                                                        {
+                                                            <ul class="list-unstyled ms-4 mt-2 mb-2">
+                                                                @foreach (var log in dataGroup)
+                                                                {
+                                                                    <li class="d-flex align-items-start gap-2 mb-1">
+                                                                        <i class="bi bi-dot"></i>
+                                                                        <span class="small">@log.Message</span>
+                                                                    </li>
+                                                                }
+                                                            </ul>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
                                     </div>
                                 }
                             </div>
@@ -134,11 +204,15 @@
                 }
             }
 
-            @if (importComplete && importResult != null)
+            @if (importComplete && !isImporting && importResult != null)
             {
                 <div class="alert @(importResult.IsSuccess ? "alert-success" : "alert-danger")">
                     <strong>@(importResult.IsSuccess ? "Import réussi" : "Import en échec")</strong>
                     <div>@importResult.SuccessCount entrée(s) traitée(s)</div>
+                    @if (importResult.DuplicateCount > 0)
+                    {
+                        <div class="text-info">@importResult.DuplicateCount doublon(s) ignoré(s)</div>
+                    }
                     @if (!string.IsNullOrEmpty(importResult.Error))
                     {
                         <div class="text-danger">@importResult.Error</div>
@@ -220,8 +294,23 @@
                         <i class="bi bi-arrow-counterclockwise"></i> Réinitialiser
                     </button>
                     <button class="btn btn-outline-success btn-sm ms-2" @onclick="ExporterHistorique">
-                        <i class="bi bi-download"></i> Exporter (JSON)
+                        <i class="bi bi-download"></i> Exporter (filtré)
                     </button>
+                    <button class="btn btn-outline-info btn-sm ms-2" @onclick="ExporterTout">
+                        <i class="bi bi-download"></i> Exporter tout
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm ms-2" @onclick="NettoyerDoublons">
+                        <i class="bi bi-eraser"></i> Nettoyer les doublons
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm ms-2" @onclick="SupprimerTout">
+                        <i class="bi bi-trash"></i> Supprimer tout
+                    </button>
+                    @if (selectedIds.Any())
+                    {
+                        <button class="btn btn-danger btn-sm ms-2" @onclick="SupprimerSelection">
+                            <i class="bi bi-trash"></i> Supprimer la sélection (@selectedIds.Count)
+                        </button>
+                    }
                 </div>
             </div>
         </div>
@@ -289,6 +378,11 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
+                                <th style="width: 40px;">
+                                    <input type="checkbox" class="form-check-input" 
+                                        @onchange="(ChangeEventArgs e) => SelectionnerTout((bool)e.Value!)" 
+                                        checked="@(historique.Any() && selectedIds.Count == historique.Count)" />
+                                </th>
                                 <th style="cursor: pointer;" @onclick="() => TrierPar(nameof(HistoriqueModification.DateInsertion))">
                                     Date Création
                                     @if (colonneTriActuelle == nameof(HistoriqueModification.DateInsertion))
@@ -352,12 +446,18 @@
                                         <span class="ms-2">@(ordreTriDescendant ? "▼" : "▲")</span>
                                     }
                                 </th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var modif in historique)
                             {
                                 <tr>
+                                    <td style="width: 40px;">
+                                        <input type="checkbox" class="form-check-input" 
+                                            @onchange="(ChangeEventArgs e) => ToggleSelection(modif.Id, (bool)e.Value!)" 
+                                            checked="@selectedIds.Contains(modif.Id)" />
+                                    </td>
                                     <td>
                                         <small>@(modif.EstImportation ? modif.DateInsertion.ToLocalTime().ToString("dd/MM/yyyy") : modif.DateInsertion.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss"))</small>
                                     </td>
@@ -377,6 +477,11 @@
                                     <td><code>@FormatValue(modif.AncienneValeur)</code></td>
                                     <td><code>@FormatValue(modif.NouvelleValeur)</code></td>
                                     <td><small>@modif.Description</small></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => SupprimerLigne(modif.Id)" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
@@ -395,7 +500,7 @@
     private string filtreTypeModification = "";
     private string filtreNomEntite = "";
     private string filtreChampModifie = "";
-    private DateTime? dateDebut = DateTime.Today;
+    private DateTime? dateDebut = DateTime.Today.AddMonths(-1);
     private DateTime? dateFin = DateTime.Today.AddDays(1).AddSeconds(-1);
     
     private string colonneTriActuelle = nameof(HistoriqueModification.DateMiseAJour);
@@ -414,6 +519,8 @@
     private bool showConflictResolver;
     private Dictionary<string, bool?> conflictDecisions = new();
     private List<string> champsDisponibles = new();
+    private HashSet<string> expandedCollapseSections = new();
+    private HashSet<int> selectedIds = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -564,8 +671,8 @@
         filtreTypeModification = "";
         filtreNomEntite = "";
         filtreChampModifie = "";
-        dateDebut = null;
-        dateFin = null;
+        dateDebut = DateTime.Today.AddMonths(-1);
+        dateFin = DateTime.Today.AddDays(1).AddSeconds(-1);
         colonneTriActuelle = nameof(HistoriqueModification.DateMiseAJour);
         ordreTriDescendant = true;
         await ChargerHistorique();
@@ -658,6 +765,18 @@
         finally
         {
             isImporting = false;
+            
+            // Initialiser tous les groupes de premier niveau comme expandés
+            if (previewResult?.Logs.Any() == true)
+            {
+                expandedCollapseSections.Clear();
+                foreach (var levelGroup in previewResult.Logs.GroupBy(l => l.Level))
+                {
+                    var levelId = $"level_{levelGroup.Key}";
+                    expandedCollapseSections.Add(levelId);
+                }
+            }
+            
             await InvokeAsync(StateHasChanged);
         }
     }
@@ -737,6 +856,7 @@
     {
         ImportLogLevel.Error => "bg-danger text-white",
         ImportLogLevel.Warning => "bg-warning text-dark",
+        ImportLogLevel.Duplicate => "bg-info text-white",
         _ => "bg-success text-white"
     };
 
@@ -744,6 +864,175 @@
     {
         ImportLogLevel.Error => "ERREUR",
         ImportLogLevel.Warning => "Warning",
+        ImportLogLevel.Duplicate => "Doublon",
         _ => "Ok"
     };
+
+    private static string GetLevelBadgeClass(ImportLogLevel level) => level switch
+    {
+        ImportLogLevel.Error => "bg-danger text-white",
+        ImportLogLevel.Warning => "bg-warning text-dark",
+        ImportLogLevel.Duplicate => "bg-info text-white",
+        _ => "bg-success text-white"
+    };
+
+    private static string GetLevelLabel(ImportLogLevel level) => level switch
+    {
+        ImportLogLevel.Error => "ERREURS",
+        ImportLogLevel.Warning => "AVERTISSEMENTS",
+        ImportLogLevel.Duplicate => "DOUBLONS",
+        _ => "VALIDÉS"
+    };
+
+    private async Task ExporterTout()
+    {
+        try
+        {
+            var json = await HistoriqueService.ExporterToutAsync();
+            var fileName = $"historique_complet_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+            
+            await JSRuntime.InvokeVoidAsync("downloadFile", fileName, json, "application/json");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de l'export: {ex.Message}");
+        }
+    }
+
+    private async Task SupprimerTout()
+    {
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm", "Êtes-vous sûr de vouloir supprimer TOUT l'historique ? Cette action est irréversible.");
+        if (!confirm)
+            return;
+
+        try
+        {
+            var count = await HistoriqueService.SupprimerToutAsync();
+            await JSRuntime.InvokeVoidAsync("alert", $"{count} entrée(s) supprimée(s)");
+            await ChargerHistorique();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de la suppression: {ex.Message}");
+        }
+    }
+
+    private async Task SupprimerLigne(int id)
+    {
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm", "Êtes-vous sûr de vouloir supprimer cette entrée ?");
+        if (!confirm)
+            return;
+
+        try
+        {
+            var success = await HistoriqueService.SupprimerAsync(id);
+            if (success)
+            {
+                await ChargerHistorique();
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Entrée introuvable");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de la suppression: {ex.Message}");
+        }
+    }
+
+    private async Task NettoyerDoublons()
+    {
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm", "Voulez-vous nettoyer les doublons ? Les entrées en double seront supprimées (la plus récente sera conservée).");
+        if (!confirm)
+            return;
+
+        try
+        {
+            chargement = true;
+            var count = await HistoriqueService.NettoyerDoublonsAsync();
+            await JSRuntime.InvokeVoidAsync("alert", $"{count} doublon(s) supprimé(s)");
+            await ChargerHistorique();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors du nettoyage: {ex.Message}");
+        }
+        finally
+        {
+            chargement = false;
+        }
+    }
+
+    private void ToggleCollapse(string id)
+    {
+        if (expandedCollapseSections.Contains(id))
+        {
+            expandedCollapseSections.Remove(id);
+        }
+        else
+        {
+            expandedCollapseSections.Add(id);
+        }
+    }
+
+    private void ToggleSelection(int id, bool selected)
+    {
+        if (selected)
+        {
+            selectedIds.Add(id);
+        }
+        else
+        {
+            selectedIds.Remove(id);
+        }
+    }
+
+    private void SelectionnerTout(bool selected)
+    {
+        if (selected)
+        {
+            selectedIds.Clear();
+            if (historique != null)
+            {
+                foreach (var item in historique)
+                {
+                    selectedIds.Add(item.Id);
+                }
+            }
+        }
+        else
+        {
+            selectedIds.Clear();
+        }
+    }
+
+    private async Task SupprimerSelection()
+    {
+        var count = selectedIds.Count;
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm", $"Êtes-vous sûr de vouloir supprimer {count} entrée(s) ? Cette action est irréversible.");
+        if (!confirm)
+            return;
+
+        try
+        {
+            var idList = selectedIds.ToList();
+            int deletedCount = 0;
+            
+            foreach (var id in idList)
+            {
+                var success = await HistoriqueService.SupprimerAsync(id);
+                if (success)
+                    deletedCount++;
+            }
+            
+            selectedIds.Clear();
+            await JSRuntime.InvokeVoidAsync("alert", $"{deletedCount} entrée(s) supprimée(s)");
+            await ChargerHistorique();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de la suppression: {ex.Message}");
+        }
+    }
 }

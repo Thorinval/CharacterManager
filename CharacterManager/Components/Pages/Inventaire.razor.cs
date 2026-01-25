@@ -12,6 +12,7 @@ using CharacterManager.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 
 public partial class Inventaire : IAsyncDisposable
 {
@@ -124,6 +125,10 @@ public partial class Inventaire : IAsyncDisposable
 
     // Mode d'affichage
     internal string viewMode = AppConstants.Defaults.ViewModeGrid;
+
+    // Import
+    [SuppressMessage("CodeQuality", "IDE0052:Remove unread private members", Justification = "Field is bound in Razor view")]
+    private bool isImporting = false;
 
     // JavaScript interop constants
     private const string JsAlert = "alert";
@@ -846,6 +851,7 @@ public partial class Inventaire : IAsyncDisposable
             return;
         }
 
+        isImporting = true;
         try
         {
             using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
@@ -879,6 +885,11 @@ public partial class Inventaire : IAsyncDisposable
         catch (Exception ex)
         {
             await JSRuntime.InvokeVoidAsync(JsAlert, $"Erreur lors de l'import: {ex.Message}");
+        }
+        finally
+        {
+            isImporting = false;
+            await InvokeAsync(StateHasChanged);
         }
     }
 

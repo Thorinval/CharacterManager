@@ -10,5 +10,6 @@ public class ImportPreviewResult
     public List<ImportLogEntry> Logs { get; set; } = new();
     public List<ImportConflict> Conflicts { get; set; } = new();
     public int ValidCount { get; set; }
+    public int DuplicateCount { get; set; }
     public bool HasConflicts => Conflicts.Count > 0;
 }

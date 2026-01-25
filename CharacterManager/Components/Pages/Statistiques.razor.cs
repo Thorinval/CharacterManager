@@ -123,11 +123,12 @@ public partial class Statistiques : IAsyncDisposable
         var personnagesAvecHistorique = new List<string>();
         foreach (var personnage in allPersonnages)
         {
-            var donnees = dailyData.Select(w => 
-                w.LevelsByPersonnage.ContainsKey(personnage) ? w.LevelsByPersonnage[personnage] : 0
-            ).ToList();
+            // Vérifier qu'il y a au moins une donnée réelle pour ce personnage
+            var aDonnees = dailyData.Any(w => 
+                w.LevelsByPersonnage.ContainsKey(personnage) && w.LevelsByPersonnage[personnage] > 0
+            );
             
-            if (donnees.Any(d => d > 0))
+            if (aDonnees)
             {
                 personnagesAvecHistorique.Add(personnage);
             }
@@ -145,14 +146,18 @@ public partial class Statistiques : IAsyncDisposable
         for (int i = 0; i < personnages.Count; i++)
         {
             var personnageName = personnages[i];
+            // Utiliser null au lieu de 0 pour les données manquantes
             var data = dailyData.Select(w => 
-                w.LevelsByPersonnage.ContainsKey(personnageName) ? w.LevelsByPersonnage[personnageName] : 0
+                w.LevelsByPersonnage.ContainsKey(personnageName) 
+                    ? (object)w.LevelsByPersonnage[personnageName] 
+                    : null
             ).ToList();
 
-            var nonZeroValues = data.Where(d => d > 0).ToList();
-            if (nonZeroValues.Any())
+            // Trouver le niveau minimum parmi les valeurs non nulles
+            var nonNullValues = data.Where(d => d != null).Cast<int>().ToList();
+            if (nonNullValues.Any())
             {
-                minLevel = Math.Min(minLevel, nonZeroValues.Min());
+                minLevel = Math.Min(minLevel, nonNullValues.Min());
             }
 
             datasets.Add(new
@@ -183,28 +188,28 @@ public partial class Statistiques : IAsyncDisposable
         if (mercenaires == null || !mercenaires.Any() || DbContext == null)
             return result;
 
-        // Créer un set des noms de mercenaires pour filtrage rapide
-        var mercenairesNames = mercenaires.Select(m => m.Nom).ToHashSet();
-
-        // Récupérer l'historique complet des modifications de niveau
+        // Récupérer l'historique complet des modifications de niveau pour les mercenaires uniquement
+        // en faisant une jointure avec la table Personnages pour vérifier le type
         var allHistories = DbContext.HistoriquesModifications
             .Where(h => h.TypeEntite == TypeEntite.Personnage && h.ChampModifie == "Niveau")
+            .Join(DbContext.Personnages,
+                h => h.EntiteId,
+                p => p.Id,
+                (h, p) => new { History = h, Personnage = p })
+            .Where(x => x.Personnage.Type == TypePersonnage.Mercenaire)
+            .Select(x => x.History)
             .OrderBy(h => h.DateModification)
             .ToList();
 
         if (!allHistories.Any())
             return result;
 
-        // Grouper par jour, en filtrant pour ne garder que les mercenaires
+        // Grouper par jour
         var grouped = new Dictionary<DateTime, Dictionary<string, int>>();
         
-        // Ajouter l'historique groupé par jour (uniquement les mercenaires)
+        // Ajouter l'historique groupé par jour
         foreach (var history in allHistories)
         {
-            // Vérifier que c'est un mercenaire
-            if (!mercenairesNames.Contains(history.NomEntite))
-                continue;
-
             var dayStart = history.DateModification.Date;
             if (!grouped.ContainsKey(dayStart))
                 grouped[dayStart] = new Dictionary<string, int>();

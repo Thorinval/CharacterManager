@@ -259,6 +259,35 @@ public class HistoriqueModificationService
     }
 
     /// <summary>
+    /// Supprime tout l'historique
+    /// </summary>
+    public async Task<int> SupprimerToutAsync()
+    {
+        var tous = await _context.HistoriquesModifications.ToListAsync();
+        var count = tous.Count;
+        
+        _context.HistoriquesModifications.RemoveRange(tous);
+        await _context.SaveChangesAsync();
+
+        return count;
+    }
+
+    /// <summary>
+    /// Supprime une entrée spécifique de l'historique
+    /// </summary>
+    public async Task<bool> SupprimerAsync(int id)
+    {
+        var historique = await _context.HistoriquesModifications.FindAsync(id);
+        if (historique == null)
+            return false;
+
+        _context.HistoriquesModifications.Remove(historique);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
+    /// <summary>
     /// Exporte l'historique en JSON
     /// </summary>
     public async Task<string> ExporterAsync(DateTime? dateDebut = null, DateTime? dateFin = null)
@@ -271,6 +300,64 @@ public class HistoriqueModificationService
         {
             WriteIndented = true
         });
+    }
+
+    /// <summary>
+    /// Exporte tout l'historique en JSON sans restriction de dates
+    /// </summary>
+    public async Task<string> ExporterToutAsync()
+    {
+        var historique = await _context.HistoriquesModifications
+            .OrderByDescending(h => h.DateModification)
+            .ToListAsync();
+
+        return JsonSerializer.Serialize(historique, new JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+    }
+
+    /// <summary>
+    /// Détecte et supprime les doublons dans l'historique
+    /// Un doublon est défini par : même TypeEntite, EntiteId, ChampModifie, DateModification et TypeModification
+    /// En cas de doublon, conserve l'entrée la plus récente (DateInsertion la plus récente)
+    /// </summary>
+    /// <returns>Le nombre de doublons supprimés</returns>
+    public async Task<int> NettoyerDoublonsAsync()
+    {
+        var tousLesHistoriques = await _context.HistoriquesModifications
+            .OrderBy(h => h.DateModification)
+            .ToListAsync();
+
+        var groupes = tousLesHistoriques
+            .GroupBy(h => new
+            {
+                h.TypeEntite,
+                h.EntiteId,
+                h.ChampModifie,
+                h.DateModification,
+                h.TypeModification
+            })
+            .Where(g => g.Count() > 1)
+            .ToList();
+
+        var aSupprimer = new List<HistoriqueModification>();
+
+        foreach (var groupe in groupes)
+        {
+            // Conserver la plus récente (DateInsertion la plus élevée)
+            var aConserver = groupe.OrderByDescending(h => h.DateInsertion).First();
+            var doublons = groupe.Where(h => h.Id != aConserver.Id).ToList();
+            aSupprimer.AddRange(doublons);
+        }
+
+        if (aSupprimer.Any())
+        {
+            _context.HistoriquesModifications.RemoveRange(aSupprimer);
+            await _context.SaveChangesAsync();
+        }
+
+        return aSupprimer.Count;
     }
 
     /// <summary>
@@ -308,39 +395,7 @@ public class HistoriqueModificationService
 
                 if (modification.TypeEntite == TypeEntite.Personnage)
                 {
-                    var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.Nom == modification.NomEntite);
-
-                    if (personnage == null && modification.TypeModification != TypeModification.Suppression)
-                    {
-                        // Conflit : personnage absent et pas de trace de suppression
-                        preview.Conflicts.Add(new ImportConflict
-                        {
-                            PersonnageName = modification.NomEntite,
-                            ChampModifie = dataType,
-                            DateClassement = date,
-                            AncienneValeur = modification.AncienneValeur,
-                            NouvelleValeur = modification.NouvelleValeur
-                        });
-
-                        logs.Add(new ImportLogEntry
-                        {
-                            Level = ImportLogLevel.Warning,
-                            Category = ImportLogCategory.Historique,
-                            DataType = dataType,
-                            Message = $"Modification ignorée (personnage inexistant): {modification.NomEntite} ({dataType}) le {date}"
-                        });
-
-                        continue;
-                    }
-
-                    preview.ValidCount++;
-                    logs.Add(new ImportLogEntry
-                    {
-                        Level = ImportLogLevel.Ok,
-                        Category = ImportLogCategory.Historique,
-                        DataType = dataType,
-                        Message = $"Prêt à importer: {modification.NomEntite} ({dataType}) le {date}"
-                    });
+                    await HandlePersonnagePreviewAsync(modification, dataType, date, preview, logs);
                 }
             }
 
@@ -355,6 +410,66 @@ public class HistoriqueModificationService
         }
 
         return preview;
+    }
+
+    private async Task HandlePersonnagePreviewAsync(HistoriqueModification modification, string dataType, DateOnly date, ImportPreviewResult preview, List<ImportLogEntry> logs)
+    {
+        var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.Nom == modification.NomEntite);
+
+        if (personnage == null && modification.TypeModification != TypeModification.Suppression)
+        {
+            preview.Conflicts.Add(new ImportConflict
+            {
+                PersonnageName = modification.NomEntite,
+                ChampModifie = dataType,
+                DateClassement = date,
+                AncienneValeur = modification.AncienneValeur,
+                NouvelleValeur = modification.NouvelleValeur
+            });
+
+            logs.Add(new ImportLogEntry
+            {
+                Level = ImportLogLevel.Warning,
+                Category = ImportLogCategory.Historique,
+                DataType = dataType,
+                Message = $"Modification ignorée (personnage inexistant): {modification.NomEntite} ({dataType}) le {date}"
+            });
+
+            return;
+        }
+
+        if (personnage != null)
+        {
+            var existingModification = await _context.HistoriquesModifications
+                .FirstOrDefaultAsync(h =>
+                    h.TypeEntite == modification.TypeEntite &&
+                    h.EntiteId == personnage.Id &&
+                    h.ChampModifie == modification.ChampModifie &&
+                    h.DateModification == modification.DateModification &&
+                    h.TypeModification == modification.TypeModification);
+
+            if (existingModification != null)
+            {
+                preview.DuplicateCount++;
+                logs.Add(new ImportLogEntry
+                {
+                    Level = ImportLogLevel.Duplicate,
+                    Category = ImportLogCategory.Historique,
+                    DataType = dataType,
+                    Message = $"Doublon détecté (déjà en base): {modification.NomEntite} ({dataType}) le {date}"
+                });
+                return;
+            }
+        }
+
+        preview.ValidCount++;
+        logs.Add(new ImportLogEntry
+        {
+            Level = ImportLogLevel.Ok,
+            Category = ImportLogCategory.Historique,
+            DataType = dataType,
+            Message = $"Prêt à importer: {modification.NomEntite} ({dataType}) le {date}"
+        });
     }
 
     /// <summary>
@@ -413,6 +528,28 @@ public class HistoriqueModificationService
             }
             else if (personnage != null)
             {
+                // Vérifier si la modification existe déjà en base
+                var existingModification = await _context.HistoriquesModifications
+                    .FirstOrDefaultAsync(h =>
+                        h.TypeEntite == modification.TypeEntite &&
+                        h.EntiteId == personnage.Id &&
+                        h.ChampModifie == modification.ChampModifie &&
+                        h.DateModification == modification.DateModification &&
+                        h.TypeModification == modification.TypeModification);
+
+                if (existingModification != null)
+                {
+                    result.DuplicateCount++;
+                    logs.Add(new ImportLogEntry
+                    {
+                        Level = ImportLogLevel.Duplicate,
+                        Category = ImportLogCategory.Historique,
+                        DataType = dataType,
+                        Message = $"Doublon ignoré (déjà en base): {modification.NomEntite} ({dataType}) le {date}"
+                    });
+                    return;
+                }
+
                 await ApplyHistoriqueImport(modification, personnage.Id, logs);
                 result.SuccessCount++;
             }

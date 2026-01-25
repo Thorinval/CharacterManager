@@ -1097,13 +1097,17 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
     /// </summary>
     private async Task<Personnage?> GetOrCreatePersonnageForModification(HistoriqueModificationImportRequest request)
     {
-        var personnage = await _context.Personnages.FirstOrDefaultAsync(p => p.Nom == request.NomPersonnage);
+        // Normaliser le nom en majuscules pour la recherche
+        var nomNormalise = request.NomPersonnage.ToUpperInvariant();
+        
+        var personnage = await _context.Personnages
+            .FirstOrDefaultAsync(p => p.Nom.ToUpper() == nomNormalise);
         
         if (personnage == null)
         {
             personnage = new Personnage
             {
-                Nom = request.NomPersonnage,
+                Nom = nomNormalise, // Stocker en majuscules
                 Niveau = 1,
                 Type = TypePersonnage.Mercenaire,
                 Rang = 1,
@@ -1115,7 +1119,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
             };
             _context.Personnages.Add(personnage);
             await _context.SaveChangesAsync();
-            AddLog(request.Logs, ImportLogLevel.Warning, request.Category, "Creation", $"Personnage créé automatiquement lors de l'import: {request.NomPersonnage}", request.Errors);
+            AddLog(request.Logs, ImportLogLevel.Warning, request.Category, "Creation", $"Personnage créé automatiquement lors de l'import: {nomNormalise}", request.Errors);
         }
 
         return personnage;
@@ -1505,7 +1509,7 @@ public class PmlImportService(ApplicationDbContext context, HistoriqueModificati
 
         existing ??= _context.Personnages
             .Include(p => p.Capacites)
-            .FirstOrDefault(p => p.Nom == normalizedName);
+            .FirstOrDefault(p => p.Nom.ToUpper() == normalizedName);
 
         if (existing != null)
         {

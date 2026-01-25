@@ -31,6 +31,7 @@ public partial class Classements
     internal int nbMercenairesMax = 0;
     internal int nbAndroidsMax = 0;
     internal InputFile? inputFileRef;
+    internal bool isImporting = false;
 
     internal PersonnageClassement Commandant => historique.Commandant ?? new PersonnageClassement { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
 
@@ -88,9 +89,14 @@ public partial class Classements
 
     internal static string GetImageUrl(string nomPersonnage)
     {
-        // Normalize the name: remove spaces, convert to lowercase
-        var normalized = nomPersonnage.ToLower().Replace(" ", "_").Replace("'", "");
-        return $"{AppConstants.Paths.ImagesPersonnages}/{normalized}{AppConstants.ImageSuffixes.SmallPortrait}{AppConstants.FileExtensions.Png}";
+        // Retourner l'image par défaut si le nom est vide ou null
+        if (string.IsNullOrWhiteSpace(nomPersonnage))
+        {
+            return AppConstants.Paths.DefaultPortrait;
+        }
+
+        // Utilise le helper qui gère le dossier spécifique du personnage
+        return PersonnageImageUrlHelper.GetImageSmallPortraitUrl(nomPersonnage);
     }
 
     // ...removed duplicate RenderStars, use TemplateEscouade.GetRankStars instead
@@ -139,6 +145,7 @@ public partial class Classements
             return;
         }
 
+        isImporting = true;
         try
         {
             using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
@@ -172,6 +179,11 @@ public partial class Classements
         catch (Exception ex)
         {
             await JSRuntime.InvokeVoidAsync(Identifier, $"Erreur lors de l'import: {ex.Message}");
+        }
+        finally
+        {
+            isImporting = false;
+            await InvokeAsync(StateHasChanged);
         }
     }
 

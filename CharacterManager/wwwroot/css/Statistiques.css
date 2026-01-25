@@ -116,6 +116,16 @@
     max-height: 300px;
 }
 
+/* Hauteur augmentée pour le graphique d'evolution des niveaux */
+.level-evolution-card .stat-card-body {
+    min-height: 420px;
+}
+
+.level-evolution-card .stat-card-body canvas {
+    max-height: 420px;
+    height: 420px;
+}
+
 .stat-card-footer {
     padding: 20px;
     background: #f8f9fa;

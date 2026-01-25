@@ -132,14 +132,7 @@ export async function createLineChart(canvasId, labels, datasets, options = {}) 
                 maintainAspectRatio: true,
                 plugins: {
                     legend: {
-                        position: 'right',
-                        labels: {
-                            padding: 15,
-                            font: {
-                                size: 12
-                            },
-                            usePointStyle: true
-                        }
+                        display: false
                     }
                 },
                 scales: {

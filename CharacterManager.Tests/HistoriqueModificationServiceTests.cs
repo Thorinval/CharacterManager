@@ -563,4 +563,294 @@ public class HistoriqueModificationServiceTests : IDisposable
         Assert.Equal(2, resultat[0].EntiteId); // La plus récente d'abord
         Assert.Equal(1, resultat[1].EntiteId);
     }
+
+    [Fact]
+    public async Task PreviewImport_ShouldDetectDuplicates_WhenModificationAlreadyExists()
+    {
+        // Arrange: créer un personnage et une modification existante
+        var personnage = new Personnage { Nom = "GABRIEL", Type = TypePersonnage.Mercenaire, Puissance = 2000 };
+        _context.Personnages.Add(personnage);
+        await _context.SaveChangesAsync();
+
+        var existing = new HistoriqueModification
+        {
+            TypeEntite = TypeEntite.Personnage,
+            EntiteId = personnage.Id,
+            NomEntite = personnage.Nom,
+            TypeModification = TypeModification.Modification,
+            ChampModifie = "Puissance",
+            AncienneValeur = "1800",
+            NouvelleValeur = "2000",
+            DateModification = new DateTime(2026, 1, 20, 0, 0, 0, DateTimeKind.Utc)
+        };
+        _context.HistoriquesModifications.Add(existing);
+        await _context.SaveChangesAsync();
+
+        // JSON contenant la même modification (doublon)
+        var json = $"[{{\"TypeEntite\":0,\"EntiteId\":{personnage.Id},\"NomEntite\":\"GABRIEL\",\"TypeModification\":1,\"ChampModifie\":\"Puissance\",\"AncienneValeur\":\"1800\",\"NouvelleValeur\":\"2000\",\"DateModification\":\"2026-01-20T00:00:00Z\"}}]";
+        await using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
+
+        // Act
+        var preview = await _service.PreviewImportAsync(stream);
+
+        // Assert
+        Assert.True(preview.IsSuccess);
+        Assert.Equal(0, preview.ValidCount); // Aucune entrée valide (doublon)
+        Assert.Equal(1, preview.DuplicateCount); // Un doublon détecté
+        Assert.Single(preview.Logs);
+        Assert.Equal(ImportLogLevel.Duplicate, preview.Logs[0].Level);
+        Assert.Contains("Doublon détecté", preview.Logs[0].Message);
+    }
+
+    [Fact]
+    public async Task ImportAsync_ShouldIgnoreDuplicates_WhenModificationAlreadyExists()
+    {
+        // Arrange: créer un personnage et une modification existante
+        var personnage = new Personnage { Nom = "GABRIEL", Type = TypePersonnage.Mercenaire, Puissance = 2000 };
+        _context.Personnages.Add(personnage);
+        await _context.SaveChangesAsync();
+
+        var existing = new HistoriqueModification
+        {
+            TypeEntite = TypeEntite.Personnage,
+            EntiteId = personnage.Id,
+            NomEntite = personnage.Nom,
+            TypeModification = TypeModification.Modification,
+            ChampModifie = "Puissance",
+            AncienneValeur = "1800",
+            NouvelleValeur = "2000",
+            DateModification = new DateTime(2026, 1, 20, 0, 0, 0, DateTimeKind.Utc)
+        };
+        _context.HistoriquesModifications.Add(existing);
+        await _context.SaveChangesAsync();
+
+        // JSON contenant la même modification (doublon) + une nouvelle
+        var json = $"[{{\"TypeEntite\":0,\"EntiteId\":{personnage.Id},\"NomEntite\":\"GABRIEL\",\"TypeModification\":1,\"ChampModifie\":\"Puissance\",\"AncienneValeur\":\"1800\",\"NouvelleValeur\":\"2000\",\"DateModification\":\"2026-01-20T00:00:00Z\"}},{{\"TypeEntite\":0,\"EntiteId\":{personnage.Id},\"NomEntite\":\"GABRIEL\",\"TypeModification\":1,\"ChampModifie\":\"Puissance\",\"AncienneValeur\":\"2000\",\"NouvelleValeur\":\"2200\",\"DateModification\":\"2026-01-22T00:00:00Z\"}}]";
+        await using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
+
+        // Act
+        var result = await _service.ImportAsync(stream, new Dictionary<string, bool>());
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(1, result.SuccessCount); // Une seule nouvelle entrée importée
+        Assert.Equal(1, result.DuplicateCount); // Un doublon ignoré
+        
+        var allModifications = await _context.HistoriquesModifications.Where(h => h.EntiteId == personnage.Id).ToListAsync();
+        Assert.Equal(2, allModifications.Count); // L'existante + la nouvelle (pas de duplication)
+    }
+
+    [Fact]
+    public async Task SupprimerAsync_ShouldDeleteSpecificEntry()
+    {
+        // Arrange: créer deux entrées d'historique
+        var modif1 = new HistoriqueModification
+        {
+            TypeEntite = TypeEntite.Personnage,
+            EntiteId = 1,
+            NomEntite = "Test1",
+            TypeModification = TypeModification.Creation,
+            DateModification = DateTime.UtcNow
+        };
+        var modif2 = new HistoriqueModification
+        {
+            TypeEntite = TypeEntite.Personnage,
+            EntiteId = 2,
+            NomEntite = "Test2",
+            TypeModification = TypeModification.Creation,
+            DateModification = DateTime.UtcNow
+        };
+        _context.HistoriquesModifications.AddRange(modif1, modif2);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.SupprimerAsync(modif1.Id);
+
+        // Assert
+        Assert.True(result);
+        var remaining = await _context.HistoriquesModifications.ToListAsync();
+        Assert.Single(remaining);
+        Assert.Equal(modif2.Id, remaining[0].Id);
+    }
+
+    [Fact]
+    public async Task SupprimerAsync_ShouldReturnFalse_WhenEntryDoesNotExist()
+    {
+        // Act
+        var result = await _service.SupprimerAsync(999);
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task SupprimerToutAsync_ShouldDeleteAllEntries()
+    {
+        // Arrange: créer plusieurs entrées
+        var modifs = new[]
+        {
+            new HistoriqueModification { TypeEntite = TypeEntite.Personnage, EntiteId = 1, NomEntite = "Test1", TypeModification = TypeModification.Creation, DateModification = DateTime.UtcNow },
+            new HistoriqueModification { TypeEntite = TypeEntite.Personnage, EntiteId = 2, NomEntite = "Test2", TypeModification = TypeModification.Modification, DateModification = DateTime.UtcNow },
+            new HistoriqueModification { TypeEntite = TypeEntite.Piece, EntiteId = 3, NomEntite = "Test3", TypeModification = TypeModification.Suppression, DateModification = DateTime.UtcNow }
+        };
+        _context.HistoriquesModifications.AddRange(modifs);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var count = await _service.SupprimerToutAsync();
+
+        // Assert
+        Assert.Equal(3, count);
+        var remaining = await _context.HistoriquesModifications.ToListAsync();
+        Assert.Empty(remaining);
+    }
+
+    [Fact]
+    public async Task ExporterToutAsync_ShouldExportAllEntries()
+    {
+        // Arrange: créer plusieurs entrées
+        var modif1 = new HistoriqueModification
+        {
+            TypeEntite = TypeEntite.Personnage,
+            EntiteId = 1,
+            NomEntite = "Test1",
+            TypeModification = TypeModification.Creation,
+            ChampModifie = "Puissance",
+            DateModification = new DateTime(2026, 1, 20, 0, 0, 0, DateTimeKind.Utc)
+        };
+        var modif2 = new HistoriqueModification
+        {
+            TypeEntite = TypeEntite.Personnage,
+            EntiteId = 2,
+            NomEntite = "Test2",
+            TypeModification = TypeModification.Modification,
+            ChampModifie = "Niveau",
+            DateModification = new DateTime(2026, 1, 22, 0, 0, 0, DateTimeKind.Utc)
+        };
+        _context.HistoriquesModifications.AddRange(modif1, modif2);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var json = await _service.ExporterToutAsync();
+
+        // Assert
+        Assert.NotEmpty(json);
+        Assert.Contains("Test1", json);
+        Assert.Contains("Test2", json);
+        Assert.Contains("Puissance", json);
+        Assert.Contains("Niveau", json);
+    }
+
+    [Fact]
+    public async Task NettoyerDoublonsAsync_ShouldRemoveDuplicates_KeepingMostRecent()
+    {
+        // Arrange: créer des doublons (même TypeEntite, EntiteId, ChampModifie, DateModification, TypeModification)
+        var dateModif = new DateTime(2026, 1, 20, 0, 0, 0, DateTimeKind.Utc);
+        
+        var modif1 = new HistoriqueModification
+        {
+            TypeEntite = TypeEntite.Personnage,
+            EntiteId = 1,
+            NomEntite = "Test",
+            TypeModification = TypeModification.Modification,
+            ChampModifie = "Puissance",
+            DateModification = dateModif,
+            DateInsertion = new DateTime(2026, 1, 20, 10, 0, 0, DateTimeKind.Utc), // Plus ancienne
+            AncienneValeur = "100",
+            NouvelleValeur = "150"
+        };
+        
+        var modif2 = new HistoriqueModification
+        {
+            TypeEntite = TypeEntite.Personnage,
+            EntiteId = 1,
+            NomEntite = "Test",
+            TypeModification = TypeModification.Modification,
+            ChampModifie = "Puissance",
+            DateModification = dateModif,
+            DateInsertion = new DateTime(2026, 1, 20, 11, 0, 0, DateTimeKind.Utc), // Plus récente - à conserver
+            AncienneValeur = "100",
+            NouvelleValeur = "150"
+        };
+        
+        var modif3 = new HistoriqueModification
+        {
+            TypeEntite = TypeEntite.Personnage,
+            EntiteId = 1,
+            NomEntite = "Test",
+            TypeModification = TypeModification.Modification,
+            ChampModifie = "Puissance",
+            DateModification = dateModif,
+            DateInsertion = new DateTime(2026, 1, 20, 9, 0, 0, DateTimeKind.Utc), // Plus ancienne
+            AncienneValeur = "100",
+            NouvelleValeur = "150"
+        };
+        
+        // Ajouter une modification différente (pas un doublon)
+        var modif4 = new HistoriqueModification
+        {
+            TypeEntite = TypeEntite.Personnage,
+            EntiteId = 1,
+            NomEntite = "Test",
+            TypeModification = TypeModification.Modification,
+            ChampModifie = "Niveau", // Champ différent
+            DateModification = dateModif,
+            DateInsertion = new DateTime(2026, 1, 20, 10, 0, 0, DateTimeKind.Utc)
+        };
+
+        _context.HistoriquesModifications.AddRange(modif1, modif2, modif3, modif4);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var count = await _service.NettoyerDoublonsAsync();
+
+        // Assert
+        Assert.Equal(2, count); // 2 doublons supprimés (modif1 et modif3)
+        
+        var remaining = await _context.HistoriquesModifications.ToListAsync();
+        Assert.Equal(2, remaining.Count); // Il reste modif2 (la plus récente) et modif4 (pas un doublon)
+        
+        // Vérifier que la plus récente a été conservée
+        var puissanceEntry = remaining.FirstOrDefault(h => h.ChampModifie == "Puissance");
+        Assert.NotNull(puissanceEntry);
+        Assert.Equal(modif2.DateInsertion, puissanceEntry.DateInsertion);
+        
+        // Vérifier que l'entrée non-doublon est toujours là
+        var niveauEntry = remaining.FirstOrDefault(h => h.ChampModifie == "Niveau");
+        Assert.NotNull(niveauEntry);
+    }
+
+    [Fact]
+    public async Task NettoyerDoublonsAsync_ShouldReturnZero_WhenNoDuplicates()
+    {
+        // Arrange: créer des entrées uniques
+        var modif1 = new HistoriqueModification
+        {
+            TypeEntite = TypeEntite.Personnage,
+            EntiteId = 1,
+            NomEntite = "Test1",
+            TypeModification = TypeModification.Creation,
+            DateModification = DateTime.UtcNow
+        };
+        
+        var modif2 = new HistoriqueModification
+        {
+            TypeEntite = TypeEntite.Personnage,
+            EntiteId = 2,
+            NomEntite = "Test2",
+            TypeModification = TypeModification.Creation,
+            DateModification = DateTime.UtcNow
+        };
+
+        _context.HistoriquesModifications.AddRange(modif1, modif2);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var count = await _service.NettoyerDoublonsAsync();
+
+        // Assert
+        Assert.Equal(0, count);
+        var remaining = await _context.HistoriquesModifications.ToListAsync();
+        Assert.Equal(2, remaining.Count);
+    }
 }

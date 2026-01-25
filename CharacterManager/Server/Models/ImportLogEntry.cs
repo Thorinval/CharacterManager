@@ -4,7 +4,8 @@ public enum ImportLogLevel
 {
     Ok,
     Warning,
-    Error
+    Error,
+    Duplicate
 }
 
 public enum ImportLogCategory

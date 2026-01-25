@@ -12,6 +12,27 @@
 <link rel="stylesheet" href="/css/Inventaire.css" />
 
 <div class="container-fluid py-4">
+    <!-- Toast d'import en cours -->
+    @if (isImporting)
+    {
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11; width: 100%; max-width: 400px;">
+            <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header bg-primary text-white">
+                    <i class="bi bi-hourglass-split me-2"></i>
+                    <strong class="me-auto">Import en cours...</strong>
+                </div>
+                <div class="toast-body">
+                    <div class="progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+                    </div>
+                    <div class="mt-2 small text-muted">
+                        Veuillez patienter pendant le traitement de votre fichier...
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
     <div class="page-header-banner">
         <h1 class="page-title"><i class="bi bi-box-seam"></i>
             <LocalizedText Key="inventory.title" />
