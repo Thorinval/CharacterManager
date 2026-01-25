@@ -111,6 +111,7 @@
         isProcessing = true;
         previewLog = string.Empty;
 
+        var originalOut = Console.Out;
         try
         {
             var cleanup = new CleanupPersonnageDuplicates(DbContext);
@@ -129,7 +130,7 @@
         }
         finally
         {
-            Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
+            Console.SetOut(originalOut);
             isProcessing = false;
         }
     }
@@ -145,6 +146,7 @@
         isProcessing = true;
         executionLog = string.Empty;
 
+        var originalOut = Console.Out;
         try
         {
             var cleanup = new CleanupPersonnageDuplicates(DbContext);
@@ -164,7 +166,7 @@
         }
         finally
         {
-            Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
+            Console.SetOut(originalOut);
             isProcessing = false;
         }
     }
