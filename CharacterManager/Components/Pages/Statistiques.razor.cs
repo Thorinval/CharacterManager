@@ -16,6 +16,10 @@ public partial class Statistiques : IAsyncDisposable
     public ApplicationDbContext DbContext { get; set; } = null!;
 
     private IJSObjectReference? chartModule;
+    
+    private const string ColorPrimaryPurple = "#667eea";
+    private const string ColorSecondaryPurple = "#764ba2";
+    private const string ColorAccentPink = "#f093fb";
 
     protected override void OnInitialized()
     {
@@ -76,6 +80,12 @@ public partial class Statistiques : IAsyncDisposable
 
                 // Créer le graphique d'évolution des niveaux
                 await InitializeLevelEvolutionChart();
+
+                // Créer le graphique d'évolution de la puissance des mercenaires
+                await InitializePowerEvolutionChart();
+
+                // Créer le graphique d'évolution des classements
+                await InitializeClassementEvolutionChart();
             }
             catch (Exception ex)
             {
@@ -109,6 +119,78 @@ public partial class Statistiques : IAsyncDisposable
         catch (Exception ex)
         {
             Console.WriteLine($"Erreur lors de la création du graphique d'évolution: {ex.Message}");
+        }
+    }
+
+    private async Task InitializePowerEvolutionChart()
+    {
+        try
+        {
+            var dailyData = GetPowerEvolutionData();
+            if (!dailyData.Any())
+                return;
+
+            var labels = dailyData.Select(d => FormatDateForClassement(d.Date)).ToList();
+            var data = dailyData.Select(d => (object)d.PuissanceMercenaires).ToList();
+
+            var dataset = new
+            {
+                label = LocalizationService.GetKeyValue("statistics.mercenairePower"),
+                data = data,
+                borderColor = ColorPrimaryPurple,
+                backgroundColor = ColorWithAlpha(ColorPrimaryPurple, 0.1),
+                borderWidth = 2,
+                fill = true,
+                spanGaps = true,
+                pointRadius = 3,
+                pointHoverRadius = 5,
+                tension = 0.3
+            };
+
+            await chartModule!.InvokeVoidAsync("createLineChart", "chartPowerEvolution", labels, 
+                new[] { dataset }, new { showDayNumbers = false });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur lors de la création du graphique de puissance: {ex.Message}");
+        }
+    }
+
+    private async Task InitializeClassementEvolutionChart()
+    {
+        try
+        {
+            var dailyData = GetClassementEvolutionData();
+            if (!dailyData.Any())
+                return;
+
+            var labels = dailyData.Select(d => FormatDateForClassement(d.Date)).ToList();
+
+            // Préparer les datasets pour chaque type de classement
+            var datasets = new List<object>();
+            var classementTypes = new[] { TypeClassement.Nutaku, TypeClassement.Top150, TypeClassement.France };
+            var colors = new[] { ColorPrimaryPurple, ColorSecondaryPurple, ColorAccentPink };
+
+            for (int i = 0; i < classementTypes.Length; i++)
+            {
+                var type = classementTypes[i];
+                var data = dailyData.Select(d => (object)(d.Classements.ContainsKey(type) ? d.Classements[type] : 0)).ToList();
+
+                datasets.Add(new
+                {
+                    label = GetClassementTypeLabel(type),
+                    data = data,
+                    backgroundColor = ColorWithAlpha(colors[i], 0.7),
+                    borderColor = colors[i],
+                    borderWidth = 1
+                });
+            }
+
+            await chartModule!.InvokeVoidAsync("createBarChart", "chartClassementEvolution", labels, datasets);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur lors de la création du graphique de classement: {ex.Message}");
         }
     }
 
@@ -250,6 +332,21 @@ public partial class Statistiques : IAsyncDisposable
         return $"{date.Day:D2} {month}";
     }
 
+    private static string FormatDateForClassement(DateOnly date)
+    {
+        var monthNames = new[] { "JAN", "FEV", "MAR", "AVR", "MAI", "JUN", "JUL", "AOU", "SEP", "OCT", "NOV", "DEC" };
+        var month = monthNames[date.Month - 1];
+        return $"{date.Day:D2} {month}";
+    }
+
+    private string GetClassementTypeLabel(TypeClassement type) => type switch
+    {
+        TypeClassement.Nutaku => this.LocalizationService.GetKeyValue("statistics.classementNutaku"),
+        TypeClassement.Top150 => this.LocalizationService.GetKeyValue("statistics.classementTop150"),
+        TypeClassement.France => this.LocalizationService.GetKeyValue("statistics.classementFrance"),
+        _ => "Unknown"
+    };
+
     private static List<string> GenerateColors(int count)
     {
         var baseColors = new[]
@@ -281,10 +378,86 @@ public partial class Statistiques : IAsyncDisposable
         return hexColor;
     }
 
+    private List<PowerEvolutionData> GetPowerEvolutionData()
+    {
+        var result = new List<PowerEvolutionData>();
+        
+        if (DbContext == null)
+            return result;
+
+        // Récupérer l'historique des classements triés par date
+        var allHistories = DbContext.HistoriquesClassement
+            .OrderBy(h => h.DateEnregistrement)
+            .ToList();
+
+        if (!allHistories.Any())
+            return result;
+
+        // Créer une entrée pour chaque enregistrement de classement
+        foreach (var history in allHistories)
+        {
+            result.Add(new PowerEvolutionData
+            {
+                Date = history.DateEnregistrement,
+                PuissanceMercenaires = history.PuissanceMercenaires
+            });
+        }
+
+        return result;
+    }
+
+    private List<ClassementEvolutionData> GetClassementEvolutionData()
+    {
+        var result = new List<ClassementEvolutionData>();
+        
+        if (DbContext == null)
+            return result;
+
+        // Récupérer l'historique des classements triés par date
+        var allHistories = DbContext.HistoriquesClassement
+            .Include(h => h.Classements)
+            .OrderBy(h => h.DateEnregistrement)
+            .ToList();
+
+        if (!allHistories.Any())
+            return result;
+
+        // Créer une entrée pour chaque enregistrement de classement
+        foreach (var history in allHistories)
+        {
+            var classementValues = new Dictionary<TypeClassement, int>();
+            
+            foreach (var classement in history.Classements)
+            {
+                classementValues[classement.Type] = classement.Valeur;
+            }
+
+            result.Add(new ClassementEvolutionData
+            {
+                Date = history.DateEnregistrement,
+                Classements = classementValues
+            });
+        }
+
+        return result;
+    }
+
     class LevelEvolutionData
     {
         public DateTime Date { get; set; }
         public Dictionary<string, int> LevelsByPersonnage { get; set; } = new();
+    }
+
+    class PowerEvolutionData
+    {
+        public DateOnly Date { get; set; }
+        public int PuissanceMercenaires { get; set; }
+    }
+
+    class ClassementEvolutionData
+    {
+        public DateOnly Date { get; set; }
+        public Dictionary<TypeClassement, int> Classements { get; set; } = new();
     }
 
     private static Dictionary<TypeAttaque, int> CalculerStatistiquesParTypeAttaque(IEnumerable<Personnage> mercenaires)

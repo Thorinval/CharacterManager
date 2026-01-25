@@ -191,3 +191,77 @@ export async function createLineChart(canvasId, labels, datasets, options = {}) 
         console.error('Erreur lors de la création du graphique de ligne:', error);
     }
 }
+
+// Créer un graphique en barres
+export async function createBarChart(canvasId, labels, datasets, options = {}) {
+    try {
+        // Charger Chart.js si nécessaire
+        await loadChartJs();
+
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) {
+            console.error(`Canvas avec l'id ${canvasId} non trouvé`);
+            return;
+        }
+
+        // Détruire le graphique existant s'il y en a un
+        const existingChart = Chart.getChart(ctx);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+
+        // Créer le nouveau graphique en barres
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.dataset.label || '';
+                                const value = context.parsed.y || 0;
+                                return `${label}: ${value}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 0
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Rang'
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Erreur lors de la création du graphique en barres:', error);
+    }
+}

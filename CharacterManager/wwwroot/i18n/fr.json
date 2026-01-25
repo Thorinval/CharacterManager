@@ -401,8 +401,11 @@
     "chartTitleFaction": "Mercenaires par Faction",
     "chartTitleRank": "Mercenaires par Rang",
     "chartTitleLevelEvolution": "Évolution des Niveaux",
+    "chartTitlePowerEvolution": "Évolution de la Puissance des Mercenaires",
+    "chartTitleClassementEvolution": "Évolution des Classements",
     "rankLabel": "Rang",
     "mercenaires": "Mercenaires",
+    "mercenairePower": "Puissance Mercenaires",
     "totalMercenaries": "Total Mercenaires",
     "power": "Puissance",
     "averagePower": "Puissance Moyenne",
@@ -411,7 +414,10 @@
     "highestLevel": "Plus Haut Niveau",
     "lowestLevel": "Plus Bas Niveau",
     "mostPowerful": "Plus Puissant",
-    "leastPowerful": "Moins Puissant"
+    "leastPowerful": "Moins Puissant",
+    "classementNutaku": "Nutaku",
+    "classementTop150": "Top 150",
+    "classementFrance": "France"
   },
   "errors": {
     "system": "Erreur système",
