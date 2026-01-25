@@ -1,12 +1,25 @@
 # Character Manager
 
-> **Version actuelle**: 1.0.0 🎉  
-> **Version prête pour test**: 1.1.0  
-> **Déploiement**: À venir après validation de test
+> **Version actuelle**: 1.1.0 🎉  
+> **Version prête pour test**: 1.2.0  
+> **Déploiement**: Prod - 25 janvier 2026
 
 ---
 
-## ✅ 1.1.0 (Prêt pour test - 24 Janvier 2026)
+## ✅ 1.1.0 (Publié - 25 Janvier 2026)
+
+### 📦 Contenu principal
+
+- Normalisation des noms de personnages et prévention des doublons lors des imports
+- Service et page admin pour nettoyer les doublons de personnages et corriger les références
+- Améliorations UI : en-têtes uniformisés, cartes classement corrigées, graphiques statistiques ajustés
+- Import PML enrichi : prévisualisation, résolution de conflits, logs structurés
+- Tests unitaires et corrections de régressions sur historique et classement
+
+### 🚀 Notes de déploiement
+
+- Mise à jour de la base recommandée avant nettoyage des doublons (backup conseillé)
+- Accès admin au module de nettoyage via `/admin/cleanup-duplicates`
 
 ### ⚔️ Fonctionnalités Commandants
 
