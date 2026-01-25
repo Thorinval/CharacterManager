@@ -406,6 +406,8 @@
     "rankLabel": "Rang",
     "mercenaires": "Mercenaires",
     "teamPower": "Puissance de l'Équipe",
+    "bestTeamPower": "Meilleure Équipe",
+    "selectedTeamPower": "Équipe Sélectionnée",
     "totalMercenaries": "Total Mercenaires",
     "power": "Puissance",
     "averagePower": "Puissance Moyenne",

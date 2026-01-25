@@ -126,29 +126,71 @@ public partial class Statistiques : IAsyncDisposable
     {
         try
         {
-            var dailyData = GetPowerEvolutionData();
-            if (!dailyData.Any())
+            // Récupérer les données de la meilleure équipe et de l'équipe sélectionnée
+            var bestTeamData = GetBestTeamPowerEvolutionData();
+            var selectedTeamData = GetSelectedTeamPowerEvolutionData();
+
+            // Fusionner les dates et créer les labels
+            var allDates = bestTeamData.Select(d => d.Date)
+                .Union(selectedTeamData.Select(d => d.Date))
+                .OrderBy(d => d)
+                .ToList();
+
+            if (!allDates.Any())
                 return;
 
-            var labels = dailyData.Select(d => FormatDateForClassement(d.Date)).ToList();
-            var data = dailyData.Select(d => (object)d.PuissanceMercenaires).ToList();
+            var labels = allDates.Select(d => FormatDateForClassement(d)).ToList();
 
-            var dataset = new
+            // Créer les datasets pour les deux courbes
+            var datasets = new List<object>();
+
+            // Courbe 1: Meilleure équipe
+            var bestTeamPowerData = allDates.Select(date =>
             {
-                label = LocalizationService.GetKeyValue("statistics.teamPower"),
-                data = data,
-                borderColor = ColorPrimaryPurple,
-                backgroundColor = ColorWithAlpha(ColorPrimaryPurple, 0.1),
+                var record = bestTeamData.FirstOrDefault(d => d.Date == date);
+                return record != null ? (object)record.TotalPower : null;
+            }).ToList();
+
+            datasets.Add(new
+            {
+                label = LocalizationService.GetKeyValue("statistics.bestTeamPower"),
+                data = bestTeamPowerData,
+                borderColor = ColorSecondaryPurple,
+                backgroundColor = ColorWithAlpha(ColorSecondaryPurple, 0.1),
                 borderWidth = 2,
                 fill = false,
                 spanGaps = true,
                 pointRadius = 3,
                 pointHoverRadius = 5,
                 tension = 0.3
-            };
+            });
+
+            // Courbe 2: Équipe sélectionnée (si elle existe)
+            if (selectedTeamData.Any())
+            {
+                var selectedTeamPowerData = allDates.Select(date =>
+                {
+                    var record = selectedTeamData.FirstOrDefault(d => d.Date == date);
+                    return record != null ? (object)record.TotalPower : null;
+                }).ToList();
+
+                datasets.Add(new
+                {
+                    label = LocalizationService.GetKeyValue("statistics.selectedTeamPower"),
+                    data = selectedTeamPowerData,
+                    borderColor = ColorAccentPink,
+                    backgroundColor = ColorWithAlpha(ColorAccentPink, 0.1),
+                    borderWidth = 2,
+                    fill = false,
+                    spanGaps = true,
+                    pointRadius = 3,
+                    pointHoverRadius = 5,
+                    tension = 0.3
+                });
+            }
 
             await chartModule!.InvokeVoidAsync("createLineChart", "chartPowerEvolution", labels, 
-                new[] { dataset }, new { showDayNumbers = false });
+                datasets, new { showDayNumbers = false });
         }
         catch (Exception ex)
         {
@@ -378,34 +420,6 @@ public partial class Statistiques : IAsyncDisposable
         return hexColor;
     }
 
-    private List<PowerEvolutionData> GetPowerEvolutionData()
-    {
-        var result = new List<PowerEvolutionData>();
-        
-        if (DbContext == null)
-            return result;
-
-        // Récupérer l'historique des classements triés par date
-        var allHistories = DbContext.HistoriquesClassement
-            .OrderBy(h => h.DateEnregistrement)
-            .ToList();
-
-        if (!allHistories.Any())
-            return result;
-
-        // Créer une entrée pour chaque enregistrement de classement
-        foreach (var history in allHistories)
-        {
-            result.Add(new PowerEvolutionData
-            {
-                Date = history.DateEnregistrement,
-                PuissanceMercenaires = history.PuissanceMercenaires
-            });
-        }
-
-        return result;
-    }
-
     private List<ClassementEvolutionData> GetClassementEvolutionData()
     {
         var result = new List<ClassementEvolutionData>();
@@ -442,22 +456,71 @@ public partial class Statistiques : IAsyncDisposable
         return result;
     }
 
+    private List<TeamPowerEvolutionData> GetBestTeamPowerEvolutionData()
+    {
+        var result = new List<TeamPowerEvolutionData>();
+        
+        if (DbContext == null)
+            return result;
+
+        // Récupérer l'historique des classements triés par date
+        var allHistories = DbContext.HistoriquesClassement
+            .OrderBy(h => h.DateEnregistrement)
+            .ToList();
+
+        if (!allHistories.Any())
+            return result;
+
+        // Créer une entrée pour chaque enregistrement de classement avec la puissance totale
+        foreach (var history in allHistories)
+        {
+            result.Add(new TeamPowerEvolutionData
+            {
+                Date = history.DateEnregistrement,
+                TotalPower = history.PuissanceTotale
+            });
+        }
+
+        return result;
+    }
+
+    private List<TeamPowerEvolutionData> GetSelectedTeamPowerEvolutionData()
+    {
+        var result = new List<TeamPowerEvolutionData>();
+        
+        if (DbContext == null)
+            return result;
+
+        // Ajouter la puissance actuelle de l'équipe sélectionnée
+        var currentSelectedPower = PersonnageService.GetPuissanceEscouade();
+        if (currentSelectedPower > 0)
+        {
+            result.Add(new TeamPowerEvolutionData
+            {
+                Date = DateOnly.FromDateTime(DateTime.Now),
+                TotalPower = currentSelectedPower
+            });
+        }
+
+        return result;
+    }
+
     class LevelEvolutionData
     {
         public DateTime Date { get; set; }
         public Dictionary<string, int> LevelsByPersonnage { get; set; } = new();
     }
 
-    class PowerEvolutionData
-    {
-        public DateOnly Date { get; set; }
-        public int PuissanceMercenaires { get; set; }
-    }
-
     class ClassementEvolutionData
     {
         public DateOnly Date { get; set; }
         public Dictionary<TypeClassement, int> Classements { get; set; } = new();
+    }
+
+    class TeamPowerEvolutionData
+    {
+        public DateOnly Date { get; set; }
+        public int TotalPower { get; set; }
     }
 
     private static Dictionary<TypeAttaque, int> CalculerStatistiquesParTypeAttaque(IEnumerable<Personnage> mercenaires)

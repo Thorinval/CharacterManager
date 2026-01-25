@@ -407,6 +407,8 @@
     "rankLabel": "Rank",
     "mercenaires": "Mercenaries",
     "teamPower": "Team Power",
+    "bestTeamPower": "Best Team",
+    "selectedTeamPower": "Selected Team",
     "totalMercenaries": "Total Mercenaries",
     "power": "Power",
     "averagePower": "Average Power",
