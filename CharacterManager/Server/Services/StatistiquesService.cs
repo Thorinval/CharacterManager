@@ -1,5 +1,6 @@
 using CharacterManager.Server.Data;
 using CharacterManager.Server.Models;
+using CharacterManager.Server.Constants;
 using Microsoft.EntityFrameworkCore;
 
 namespace CharacterManager.Server.Services;
@@ -8,33 +9,6 @@ public class StatistiquesService
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly PersonnageService _personnageService;
-
-    #region Constantes
-
-    // Champs modifiables historisés
-    private const string CHAMP_NIVEAU = "Niveau";
-    private const string CHAMP_SELECTIONNE = "Selectionne";
-    private const string CHAMP_PUISSANCE = "Puissance";
-    private const string CHAMP_RANG = "Rang";
-
-    // Valeurs booléennes en string
-    private const string VALEUR_TRUE = "true";
-    private const string VALEUR_FALSE = "false";
-
-    // Noms des mois
-    private static readonly string[] MOIS_NAMES = { "JAN", "FEV", "MAR", "AVR", "MAI", "JUN", "JUL", "AOU", "SEP", "OCT", "NOV", "DEC" };
-
-    // Clés de localisation
-    private const string KEY_CLASSEMENT_NUTAKU = "statistics.classementNutaku";
-    private const string KEY_CLASSEMENT_TOP150 = "statistics.classementTop150";
-    private const string KEY_CLASSEMENT_FRANCE = "statistics.classementFrance";
-
-    // Couleurs hex
-    private const string COLOR_PRIMARY_PURPLE = "#667eea";
-    private const string COLOR_SECONDARY_PURPLE = "#764ba2";
-    private const string COLOR_ACCENT_PINK = "#f093fb";
-
-    #endregion
 
     public StatistiquesService(ApplicationDbContext dbContext, PersonnageService personnageService)
     {
@@ -55,7 +29,7 @@ public class StatistiquesService
         // Récupérer l'historique complet des modifications de niveau pour les mercenaires uniquement
         // en faisant une jointure avec la table Personnages pour vérifier le type
         var allHistories = _dbContext.HistoriquesModifications
-            .Where(h => h.TypeEntite == TypeEntite.Personnage && h.ChampModifie == CHAMP_NIVEAU)
+            .Where(h => h.TypeEntite == TypeEntite.Personnage && h.ChampModifie == StatisticsConstants.HistoryFields.Niveau)
             .Join(_dbContext.Personnages,
                 h => h.EntiteId,
                 p => p.Id,
@@ -248,7 +222,7 @@ public class StatistiquesService
         // Appliquer les modifications antérieures au premier classement pour retrouver l'état initial
         var modificationsAntérieures = _dbContext.HistoriquesModifications
             .Where(h => h.TypeEntite == TypeEntite.Personnage 
-                     && h.ChampModifie == CHAMP_SELECTIONNE
+                     && h.ChampModifie == StatisticsConstants.HistoryFields.Selectionne
                      && h.DateModification <= dateDebut)
             .OrderByDescending(h => h.DateModification)
             .ToList();
@@ -256,7 +230,7 @@ public class StatistiquesService
         // Inverser les modifications pour revenir à l'état initial
         foreach (var modif in modificationsAntérieures)
         {
-            if (modif.AncienneValeur?.ToLower() == VALEUR_TRUE)
+            if (modif.AncienneValeur?.ToLower() == AppConstants.BooleanStrings.True)
                 personnagesSelectionnes.Add(modif.EntiteId);
             else
                 personnagesSelectionnes.Remove(modif.EntiteId);
@@ -283,18 +257,18 @@ public class StatistiquesService
             foreach (var modif in groupe)
             {
                 // Vérifier si la sélection a changé
-                if (modif.ChampModifie == CHAMP_SELECTIONNE)
+                if (modif.ChampModifie == StatisticsConstants.HistoryFields.Selectionne)
                 {
                     selectionModifiee = true;
                     // Mettre à jour l'état de la sélection
-                    if (modif.NouvelleValeur?.ToLower() == VALEUR_TRUE)
+                    if (modif.NouvelleValeur?.ToLower() == AppConstants.BooleanStrings.True)
                         personnagesSelectionnes.Add(modif.EntiteId);
                     else
                         personnagesSelectionnes.Remove(modif.EntiteId);
                 }
 
                 // Vérifier si une modification de puissance concerne un personnage sélectionné
-                if (modif.ChampModifie == CHAMP_PUISSANCE && personnagesSelectionnes.Contains(modif.EntiteId))
+                if (modif.ChampModifie == StatisticsConstants.HistoryFields.Puissance && personnagesSelectionnes.Contains(modif.EntiteId))
                 {
                     puissanceModifiee = true;
                     // Calculer la différence de puissance
@@ -384,7 +358,7 @@ public class StatistiquesService
         // Appliquer les modifications antérieures au premier classement pour retrouver l'état initial
         var modificationsAntérieures = _dbContext.HistoriquesModifications
             .Where(h => h.TypeEntite == TypeEntite.Personnage 
-                     && h.ChampModifie == CHAMP_SELECTIONNE
+                     && h.ChampModifie == StatisticsConstants.HistoryFields.Selectionne
                      && h.DateModification <= dateDebut)
             .OrderByDescending(h => h.DateModification)
             .ToList();
@@ -392,7 +366,7 @@ public class StatistiquesService
         // Inverser les modifications pour revenir à l'état initial
         foreach (var modif in modificationsAntérieures)
         {
-            if (modif.AncienneValeur?.ToLower() == VALEUR_TRUE)
+            if (modif.AncienneValeur?.ToLower() == AppConstants.BooleanStrings.True)
                 personnagesSelectionnes.Add(modif.EntiteId);
             else
                 personnagesSelectionnes.Remove(modif.EntiteId);
@@ -419,16 +393,16 @@ public class StatistiquesService
             foreach (var modif in groupe)
             {
                 // Suivre l'état de la sélection
-                if (modif.ChampModifie == CHAMP_SELECTIONNE)
+                if (modif.ChampModifie == StatisticsConstants.HistoryFields.Selectionne)
                 {
-                    if (modif.NouvelleValeur?.ToLower() == VALEUR_TRUE)
+                    if (modif.NouvelleValeur?.ToLower() == AppConstants.BooleanStrings.True)
                         personnagesSelectionnes.Add(modif.EntiteId);
                     else
                         personnagesSelectionnes.Remove(modif.EntiteId);
                 }
 
                 // Suivre la puissance de l'équipe
-                if (modif.ChampModifie == CHAMP_PUISSANCE && personnagesSelectionnes.Contains(modif.EntiteId))
+                if (modif.ChampModifie == StatisticsConstants.HistoryFields.Puissance && personnagesSelectionnes.Contains(modif.EntiteId))
                 {
                     if (int.TryParse(modif.AncienneValeur, out int anciennePuissance) &&
                         int.TryParse(modif.NouvelleValeur, out int nouvellePuissance))
@@ -438,7 +412,7 @@ public class StatistiquesService
                 }
 
                 // Si le personnage modifié N'EST PAS dans l'équipe, recalculer la puissance max
-                if ((modif.ChampModifie == CHAMP_PUISSANCE || modif.ChampModifie == CHAMP_NIVEAU || modif.ChampModifie == CHAMP_RANG) 
+                if ((modif.ChampModifie == StatisticsConstants.HistoryFields.Puissance || modif.ChampModifie == StatisticsConstants.HistoryFields.Niveau || modif.ChampModifie == StatisticsConstants.HistoryFields.Rang) 
                     && !personnagesSelectionnes.Contains(modif.EntiteId))
                 {
                     recalculerMax = true;
@@ -492,21 +466,21 @@ public class StatistiquesService
 
     public static string FormatDateWithDay(DateTime date)
     {
-        var month = MOIS_NAMES[date.Month - 1];
+        var month = StatisticsConstants.MonthNames.Values[date.Month - 1];
         return $"{date.Day:D2} {month}";
     }
 
     public static string FormatDateForClassement(DateOnly date)
     {
-        var month = MOIS_NAMES[date.Month - 1];
+        var month = StatisticsConstants.MonthNames.Values[date.Month - 1];
         return $"{date.Day:D2} {month}";
     }
 
     public static string GetClassementTypeLabel(TypeClassement type, Func<string, string> localizationFunction) => type switch
     {
-        TypeClassement.Nutaku => localizationFunction(KEY_CLASSEMENT_NUTAKU),
-        TypeClassement.Top150 => localizationFunction(KEY_CLASSEMENT_TOP150),
-        TypeClassement.France => localizationFunction(KEY_CLASSEMENT_FRANCE),
+        TypeClassement.Nutaku => localizationFunction(StatisticsConstants.LocalizationKeys.ClassementNutaku),
+        TypeClassement.Top150 => localizationFunction(StatisticsConstants.LocalizationKeys.ClassementTop150),
+        TypeClassement.France => localizationFunction(StatisticsConstants.LocalizationKeys.ClassementFrance),
         _ => "Unknown"
     };
 
@@ -527,7 +501,7 @@ public class StatistiquesService
         return colors;
     }
 
-    public static string ColorWithAlpha(string hexColor, double alpha)
+    public static string ColorWithAlpha(string hexColor, double alpha = StatisticsConstants.ChartFormatting.AlphaFill)
     {
         // Convert hex color to rgba
         var hex = hexColor.TrimStart('#');

@@ -233,4 +233,13 @@ public static class AppConstants
         public const string ViewModeGrid = "grid";
         public const string ViewModeList = "list";
     }
+
+    /// <summary>
+    /// Valeurs booléennes communes en string (pour historique, API, etc.)
+    /// </summary>
+    public static class BooleanStrings
+    {
+        public const string True = "true";
+        public const string False = "false";
+    }
 }
