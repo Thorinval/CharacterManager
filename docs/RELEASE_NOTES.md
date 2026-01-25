@@ -1,6 +1,136 @@
 # Character Manager
 
-> **Version actuelle**: 1.0.0 🎉
+> **Version actuelle**: 1.1.0 🎉  
+> **Version prête pour test**: 1.2.0  
+> **Déploiement**: Prod - 25 janvier 2026
+
+---
+
+## ✅ 1.1.0 (Publié - 25 Janvier 2026)
+
+### 📦 Contenu principal
+
+- Normalisation des noms de personnages et prévention des doublons lors des imports
+- Service et page admin pour nettoyer les doublons de personnages et corriger les références
+- Améliorations UI : en-têtes uniformisés, cartes classement corrigées, graphiques statistiques ajustés
+- Import PML enrichi : prévisualisation, résolution de conflits, logs structurés
+- Tests unitaires et corrections de régressions sur historique et classement
+
+### 🚀 Notes de déploiement
+
+- Mise à jour de la base recommandée avant nettoyage des doublons (backup conseillé)
+- Accès admin au module de nettoyage via `/admin/cleanup-duplicates`
+
+### ⚔️ Fonctionnalités Commandants
+
+⚡ - **Puissance réelle des commandants** : Ajout du calcul automatique de la puissance réelle des commandants (Puissance + Rang × 20)
+
+📊 - **Affichage puissance réelle** : La puissance réelle s'affiche en gras entre parenthèses à côté de la puissance de base sur toutes les pages
+
+🔄 - **Tri par puissance réelle** : Le tri par puissance dans l'inventaire utilise maintenant la puissance réelle pour les commandants
+
+📍 - **Affichage multi-pages** : Puissance réelle visible sur Inventaire (grille/liste), Escouade, Meilleure Escouade, Classements, et modal de création de classement
+
+### 🎨 Interface Utilisateur
+
+✨ - **Uniformisation complète des headers** : Tous les headers de pages utilisent maintenant un style transparent cohérent avec border-bottom subtile, inspiré de la page MaisonLucie
+
+🎨 - **Suppression des fonds blancs** : Fonds opaques remplacés par des backgrounds transparents sur toutes les pages (Capacites, Inventaire, Templates, Historique, etc.)
+
+📐 - **Espacement optimisé** : Ajout de padding-top au main-content pour éviter les collisions avec la top bar
+
+🎯 - **Icônes cohérentes** : Standardisation de la couleur des icônes (#667eea) et du texte (#1e293b) sur tous les headers
+
+✏️ - **Label "Dans l'équipe"** : Remplacement du label "sélectionné" par "Dans l'équipe" avec checkbox inline
+
+📏 - **Optimisation de l'espace** : Alignement de "Dans l'équipe" et "Niveau" sur la même ligne avec espacement optimisé
+
+🔢 - **Ajustements des inputs** : Réduction de la largeur du champ Niveau (70px) et agrandissement du champ Puissance (120px)
+
+🖼️ - **Images des cartes** : Ajustement de la hauteur des images (350px) avec object-fit cover pour éviter les troncatures et bandes blanches
+
+### 🏠 Maison de Lucie
+
+✏️ - **Édition des pièces** : Possibilité de modifier les pièces directement dans l'interface avec mode édition interactif
+
+💾 - **Historisation** : Toutes les modifications de pièces sont automatiquement enregistrées dans l'historique
+
+🎯 - **Champs éditables** : Niveau, Puissance Tactique, Puissance Stratégique, et état Selectionnée
+
+🖌️ - **Feedback visuel** : Bordure bleue sur les cartes en mode édition, boutons Sauvegarder/Annuler
+
+### 🌍 Localisation
+
+🔤 - **Nouvelle clé "Dans l'équipe"** : Ajout de la clé `inventory.inTeam` en français ("Dans l'équipe") et anglais ("In team")
+
+### 📥 Import/Export PML
+
+🔍 - **Prévisualisation d'import** : Nouveau workflow en 3 étapes avec pré-rapport avant intégration
+
+📊 - **Logs structurés** : Logs d'import organisés par catégorie (Général, Classement, Commandant, Mercenaires, Androides, Lucie, Capacités) avec niveaux (Ok ✅ / Warning ⚠️ / Error ❌)
+
+⚔️ - **Détection de conflits** : Identification automatique des conflits sur les historiques de modification (personnage, champ, date)
+
+🛠️ - **Résolution de conflits** : Interface dédiée permettant de choisir pour chaque conflit entre nouvelle valeur ou ancienne valeur
+
+📋 - **Compteurs en temps réel** : Affichage du nombre de conflits total, résolus et non résolus
+
+✅ - **Actions groupées** : Boutons "Tout valider" et "Tout refuser" pour résoudre tous les conflits en un clic
+
+🔒 - **Validation stricte** : Impossible d'appliquer l'import tant que tous les conflits ne sont pas résolus
+
+📄 - **Rapport final détaillé** : Après import, affichage d'un rapport complet avec :
+
+- Statistiques de résolution (X conflits résolus, Y nouvelles valeurs appliquées, Z anciennes conservées)
+- Tableau des résolutions avec badges visuels (✅ Nouvelle appliquée / 🔄 Ancienne conservée)
+- Mise en valeur des valeurs appliquées (vert gras) et ignorées (barré gris)
+- Rapport d'import détaillé avec logs groupés par catégorie et type de données
+
+💾 - **Nouveaux modèles de données** :
+
+- `ImportPreviewResult` : Résultat de prévisualisation avec logs et conflits
+- `ImportConflict` : Représentation d'un conflit avec anciennes/nouvelles valeurs
+- `ConflictResolutionApplied` : Résolution appliquée avec indication si écrasée ou conservée
+- `ImportLogEntry` : Log structuré avec niveau, catégorie, type de données et message
+
+### 🔍 Logging
+
+📊 - **Logs contextuels EF Core** : Ajout de logs debug avec contexte avant les requêtes FirstOrDefault pour faciliter le diagnostic
+
+🔧 - **Services enrichis** : PersonnageService, ProfileService et PmlExportService incluent maintenant des logs détaillés
+
+⚙️ - **Configuration Serilog** : Niveau Debug activé pour CharacterManager.Server.Services
+
+### 🐛 Corrections
+
+✅ - **Fichiers JSON i18n** : Correction des accolades fermantes manquantes dans fr.json et en.json
+
+✅ - **Structure HTML Capacites** : Correction des balises div mal fermées causant des erreurs de build
+
+✅ - **CSS Cleanup** : Suppression des overrides CSS locaux redondants, unification dans app.css
+
+### 🧪 Tests
+
+✅ - **Tests unitaires mis à jour** : Ajout des mocks ILogger dans PersonnageServiceTests et PmlImportServiceTests
+
+✅ - **Tous les tests passent** : 78/78 tests réussis avec les nouvelles dépendances
+
+✅ - **Couverture de tests augmentée** : Ajout de 2 nouveaux tests pour:
+
+- Détection des conflits d'import d'historique (personnage manquant)
+- Recalculation des anciennes valeurs lorsqu'une modification antérieure arrive
+
+✅ - **Total tests unitaires** : 23/23 tests HistoriqueModificationServiceTests passent
+
+### 📋 État de la version
+
+**Status**: ✅ Prête pour test en environnement de validation
+
+- Toutes les fonctionnalités implémentées
+- Tous les tests unitaires passent
+- Build sans erreurs
+- Aucune nouvelle fonctionnalité dans cette version (focus sur stabilité et import de l'historique)
+- Version sera mise à jour lors du déploiement en production
 
 ---
 
@@ -243,7 +373,7 @@
 
 ✨ - Architecture: DLL `CharacterManager.Resources.Personnages` avec 126 images embarquées
 
-✨ - API: Endpoint `/api/resources/personnages/{personnage}/{fichier}` pour servir les images
+✨ - API: Endpoint `/api/v1/resources/personnages/{personnage}/{fichier}` pour servir les images
 
 ✨ - Services: `PersonnageResourceManager` pour accès aux ressources
 

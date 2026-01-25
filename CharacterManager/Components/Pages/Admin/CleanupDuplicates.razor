@@ -1,0 +1,180 @@
+@page "/admin/cleanup-duplicates"
+@using CharacterManager.Server.Services
+@using CharacterManager.Server.Data
+@using CharacterManager.Scripts
+@using Microsoft.AspNetCore.Components.Web
+@inject ApplicationDbContext DbContext
+@inject IJSRuntime JSRuntime
+
+<div class="container-fluid py-4">
+    <div class="page-header-banner">
+        <h1><i class="bi bi-trash"></i> Nettoyage des doublons de personnages</h1>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            <i class="bi bi-exclamation-triangle"></i> <strong>ATTENTION</strong>
+        </div>
+        <div class="card-body">
+            <p>Cette opération va:</p>
+            <ul>
+                <li>Identifier les personnages avec des noms identiques (en ignorant la casse)</li>
+                <li>Garder l'entrée la plus ancienne (ID le plus petit)</li>
+                <li>Mettre à jour toutes les références dans les autres tables</li>
+                <li>Supprimer les doublons</li>
+            </ul>
+            <p class="text-danger"><strong>Cette opération est irréversible. Faites une sauvegarde de votre base de données avant de continuer.</strong></p>
+        </div>
+    </div>
+
+    @if (!executed)
+    {
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5>Étape 1: Prévisualisation (Mode DRY RUN)</h5>
+                <p>Cliquez sur le bouton ci-dessous pour prévisualiser les doublons qui seront nettoyés.</p>
+                <button class="btn btn-primary" @onclick="PreviewCleanup" disabled="@isProcessing">
+                    @if (isProcessing)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    Prévisualiser
+                </button>
+            </div>
+        </div>
+
+        @if (previewResult != null)
+        {
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Résultats de la prévisualisation</h5>
+                </div>
+                <div class="card-body">
+                    @if (previewResult.DuplicatesFound == 0)
+                    {
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle"></i> Aucun doublon trouvé !
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i> <strong>@previewResult.DuplicatesFound groupe(s) de doublons trouvé(s)</strong>
+                        </div>
+                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; max-height: 400px; overflow-y: auto;">@previewLog</pre>
+                        
+                        <hr />
+                        
+                        <h5>Étape 2: Exécution du nettoyage</h5>
+                        <p class="text-danger"><strong>ATTENTION: Cette action est irréversible !</strong></p>
+                        <button class="btn btn-danger" @onclick="ExecuteCleanup" disabled="@isProcessing">
+                            @if (isProcessing)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                            }
+                            Exécuter le nettoyage
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <i class="bi bi-check-circle"></i> Nettoyage terminé
+            </div>
+            <div class="card-body">
+                <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px;">@executionLog</pre>
+                
+                <hr />
+                
+                <button class="btn btn-primary" @onclick="Reset">
+                    Nouvelle prévisualisation
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool isProcessing = false;
+    private bool executed = false;
+    private CleanupPersonnageDuplicates.CleanupResult? previewResult;
+    private CleanupPersonnageDuplicates.CleanupResult? executionResult;
+    private string previewLog = string.Empty;
+    private string executionLog = string.Empty;
+
+    private async Task PreviewCleanup()
+    {
+        isProcessing = true;
+        previewLog = string.Empty;
+
+        try
+        {
+            var cleanup = new CleanupPersonnageDuplicates(DbContext);
+            
+            // Capturer la sortie console
+            using var sw = new StringWriter();
+            Console.SetOut(sw);
+            
+            previewResult = await cleanup.ExecuteAsync(dryRun: true);
+            
+            previewLog = sw.ToString();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de la prévisualisation: {ex.Message}");
+        }
+        finally
+        {
+            Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
+            isProcessing = false;
+        }
+    }
+
+    private async Task ExecuteCleanup()
+    {
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm", 
+            "ATTENTION: Cette action est irréversible. Êtes-vous sûr de vouloir supprimer les doublons ?");
+        
+        if (!confirm)
+            return;
+
+        isProcessing = true;
+        executionLog = string.Empty;
+
+        try
+        {
+            var cleanup = new CleanupPersonnageDuplicates(DbContext);
+            
+            // Capturer la sortie console
+            using var sw = new StringWriter();
+            Console.SetOut(sw);
+            
+            executionResult = await cleanup.ExecuteAsync(dryRun: false);
+            
+            executionLog = sw.ToString();
+            executed = true;
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors du nettoyage: {ex.Message}");
+        }
+        finally
+        {
+            Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
+            isProcessing = false;
+        }
+    }
+
+    private void Reset()
+    {
+        executed = false;
+        previewResult = null;
+        executionResult = null;
+        previewLog = string.Empty;
+        executionLog = string.Empty;
+    }
+}

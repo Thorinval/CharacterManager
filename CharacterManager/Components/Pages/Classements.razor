@@ -1,4 +1,4 @@
-@page "/historique"
+@page "/classements"
 @using CharacterManager.Server.Constants
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @rendermode InteractiveServer
@@ -9,32 +9,54 @@
 @using CharacterManager.Components
 @using CharacterManager.Components.Modal
 
-<link rel="stylesheet" href="/css/Historique.css" />
+<link rel="stylesheet" href="/css/Classements.css" />
 
-<PageTitle><LocalizedText Key="history.title" /></PageTitle>
+<div class="container-fluid py-4">
 
 <div class="page-header-banner">
+    <h1><i class="bi bi-calendar-event"></i> <LocalizedText Key="ranking.title" /></h1>
 </div>
+
+<!-- Toast d'import en cours -->
+@if (isImporting)
+{
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11; width: 100%; max-width: 400px;">
+        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-primary text-white">
+                <i class="bi bi-hourglass-split me-2"></i>
+                <strong class="me-auto">Import en cours...</strong>
+            </div>
+            <div class="toast-body">
+                <div class="progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+                </div>
+                <div class="mt-2 small text-muted">
+                    Veuillez patienter pendant le traitement de votre fichier...
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 <div class="historique-container">
     <div class="container-fluid mt-4 mb-4">
         <div class="controls-section mb-4">
             <div class="row">
                 <div class="col-md-4">
-                    <label for="dateDebut" class="form-label"><LocalizedText Key="history.startDate" /></label>
+                    <label for="dateDebut" class="form-label"><LocalizedText Key="ranking.startDate" /></label>
                     <input type="date" id="dateDebut" class="form-control" @bind="dateDebut" />
                 </div>
                 <div class="col-md-4">
-                    <label for="dateFin" class="form-label"><LocalizedText Key="history.endDate" /></label>
+                    <label for="dateFin" class="form-label"><LocalizedText Key="ranking.endDate" /></label>
                     <input type="date" id="dateFin" class="form-control" @bind="dateFin" />
                 </div>
                 <div class="col-md-4 d-flex align-items-end gap-2 flex-wrap">
-                    <button class="btn btn-primary" @onclick="ShowCreerClassementModalAsync"><LocalizedText Key="history.create" /></button>
-                    <button class="btn btn-primary" @onclick="FiltrerHistorique"><LocalizedText Key="history.filter" /></button>
-                    <button class="btn btn-secondary" @onclick="ReinitialiserFiltres"><LocalizedText Key="history.reset" /></button>
-                    <button class="btn btn-success" @onclick="ExporterHistorique" title=""><i class="bi bi-download"></i> <LocalizedText Key="history.export" /></button>
-                    <button class="btn btn-info" @onclick="ImporterHistorique" title=""><i class="bi bi-upload"></i> <LocalizedText Key="history.import" /></button>
-                    <button class="btn btn-danger" @onclick="ViderHistorique" title=""><LocalizedText Key="history.clear" /></button>
+                    <button class="btn btn-primary" @onclick="ShowCreerClassementModalAsync"><LocalizedText Key="ranking.create" /></button>
+                    <button class="btn btn-primary" @onclick="FiltrerHistorique"><LocalizedText Key="ranking.filter" /></button>
+                    <button class="btn btn-secondary" @onclick="ReinitialiserFiltres"><LocalizedText Key="ranking.reset" /></button>
+                    <button class="btn btn-success" @onclick="ExporterHistorique" title=""><i class="bi bi-download"></i> <LocalizedText Key="ranking.export" /></button>
+                    <button class="btn btn-info" @onclick="ImporterHistorique" title=""><i class="bi bi-upload"></i> <LocalizedText Key="ranking.import" /></button>
+                    <button class="btn btn-danger" @onclick="ViderHistorique" title=""><LocalizedText Key="ranking.clear" /></button>
                 </div>
             </div>
         </div>
@@ -45,22 +67,22 @@
                 <table class="table table-hover historique-table">
                     <thead class="table-dark">
                         <tr>
-                            <th class="col-date"><LocalizedText Key="history.table.date" /></th>
-                            <th class="col-ligue"><LocalizedText Key="history.table.league" /></th>
-                            <th class="col-score"><LocalizedText Key="history.table.score" /></th>
-                            <th class="col-puissance"><LocalizedText Key="history.table.power" /></th>
-                            <th class="col-classement"><LocalizedText Key="history.table.rank" /></th>
-                            <th class="text-center"><LocalizedText Key="history.table.commander" /></th>
+                            <th class="col-date"><LocalizedText Key="ranking.table.date" /></th>
+                            <th class="col-ligue"><LocalizedText Key="ranking.table.league" /></th>
+                            <th class="col-score"><LocalizedText Key="ranking.table.score" /></th>
+                            <th class="col-puissance"><LocalizedText Key="ranking.table.power" /></th>
+                            <th class="col-classement"><LocalizedText Key="ranking.table.rank" /></th>
+                            <th class="text-center"><LocalizedText Key="ranking.table.commander" /></th>
                             @for (int i = 1; i <= nbMercenairesMax; i++)
                             {
-                                <th class="text-center"><LocalizedText Key="history.table.mercenary" /> @i</th>
+                                <th class="text-center"><LocalizedText Key="ranking.table.mercenary" /> @i</th>
                             }
                             @for (int i = 1; i <= nbAndroidsMax; i++)
                             {
-                                <th class="text-center"><LocalizedText Key="history.table.android" /> @i</th>
+                                <th class="text-center"><LocalizedText Key="ranking.table.android" /> @i</th>
                             }
-                            <th class="col-lucie"><LocalizedText Key="history.table.lucie" /></th>
-                            <th class="col-actions"><LocalizedText Key="history.table.actions" /></th>
+                            <th class="col-lucie"><LocalizedText Key="ranking.table.lucie" /></th>
+                            <th class="col-actions"><LocalizedText Key="ranking.table.actions" /></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -80,14 +102,13 @@
                                         <td>
                                             <div class="personnage-card">
                                                 <div class="card-header-row">
-                                                    <div class="card-rarity rarity-@historique.Commandant?.Rarete.ToString().ToLower()">@historique.Commandant?.Rarete</div>
                                                     <div class="card-name">@historique.Commandant?.Nom</div>
                                                 </div>
-                                                <img src="@GetImageUrl(historique.Commandant?.Nom ?? string.Empty)" alt="@historique.Commandant?.Nom" class="card-image" onerror="this.onerror=null; this.src='/api/resources/interface/default_portrait.png';" />
+                                                <img src="@GetImageUrl(historique.Commandant?.Nom ?? string.Empty)" alt="@historique.Commandant?.Nom" class="card-image" onerror="this.onerror=null; this.src='/api/v1/resources/interface/default_portrait.png';" />
                                                 <div class="card-info">
                                                     <div>Niv: @historique.Commandant?.Niveau</div>
                                                     <div class="card-stars">@CharacterManager.Components.Pages.TemplateEscouade.GetRankStars(historique.Commandant?.Rang ?? 0)</div>
-                                                    <div>Puiss: @historique.Commandant?.Puissance</div>
+                                                    <div>Puiss réelle: @(historique.Commandant != null ? historique.Commandant.PuissanceReelleCommandant() : 0)</div>
                                                 </div>
                                             </div>
                                         </td>
@@ -100,10 +121,9 @@
                                             <td>
                                                 <div class="personnage-card">
                                                     <div class="card-header-row">
-                                                        <div class="card-rarity rarity-@merc.Rarete.ToString().ToLower()">@merc.Rarete</div>
                                                         <div class="card-name">@merc.Nom</div>
                                                     </div>
-                                                    <img src="@GetImageUrl(merc.Nom)" alt="@merc.Nom" class="card-image" onerror="this.onerror=null; this.src='/api/resources/interface/default_portrait.png';" />
+                                                    <img src="@GetImageUrl(merc.Nom)" alt="@merc.Nom" class="card-image" onerror="this.onerror=null; this.src='/api/v1/resources/interface/default_portrait.png';" />
                                                     <div class="card-info">
                                                         <div>Niv: @merc.Niveau</div>
                                                         <div class="card-stars">@CharacterManager.Components.Pages.TemplateEscouade.GetRankStars(merc.Rang)</div>
@@ -126,10 +146,9 @@
                                             <td>
                                                 <div class="personnage-card">
                                                     <div class="card-header-row">
-                                                        <div class="card-rarity rarity-@android.Rarete.ToString().ToLower()">@android.Rarete</div>
                                                         <div class="card-name">@android.Nom</div>
                                                     </div>
-                                                    <img src="@GetImageUrl(android.Nom)" alt="@android.Nom" class="card-image" onerror="this.onerror=null; this.src='/api/resources/interface/default_portrait.png';" />
+                                                    <img src="@GetImageUrl(android.Nom)" alt="@android.Nom" class="card-image" onerror="this.onerror=null; this.src='/api/v1/resources/interface/default_portrait.png';" />
                                                     <div class="card-info">
                                                         <div>Niv: @android.Niveau</div>
                                                         <div>Puiss: @android.Puissance</div>
@@ -183,10 +202,11 @@
         else
         {
             <div class="alert alert-info" role="alert">
-                <LocalizedText Key="history.empty" />
+                <LocalizedText Key="ranking.empty" />
             </div>
         }
     </div>
+</div>
 </div>
 
 <InputFile id="historiqueFileInput" @ref="inputFileRef" OnChange="HandleFileSelected" accept=".pml" style="display:none;" />

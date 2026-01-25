@@ -19,6 +19,7 @@
     "warning": "Avertissement",
     "info": "Information",
     "close": "Fermer",
+    "update": "Mettre à jour",
     "back": "Retour"
   },
   "navigation": {
@@ -175,6 +176,7 @@
     "rank": "Rang",
     "power": "Puissance",
     "selectAll": "Tout sélectionner",
+    "inTeam": "Dans l'équipe",
     "showAll": "Tous",
     "showOnlyCommandants": "Commandants",
     "showOnlyMercenaires": "Mercenaires",
@@ -209,6 +211,64 @@
     "empty": "Aucun template enregistré.",
     "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce template ?"
   },
+
+  "capacities": {
+    "title": "Gestion des Capacités",
+    "new": "Nouvelle Capacité",
+    "empty": "Aucune capacité disponible.",
+    "noDescription": "Aucune description",
+    "modal": {
+      "editTitle": "Éditer Capacité",
+      "createTitle": "Nouvelle Capacité"
+    },
+    "fields": {
+      "nameLabel": "Nom *",
+      "namePlaceholder": "Nom de la capacité",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Description de la capacité",
+      "iconLabel": "Icône (nom Bootstrap Icons sans le préfixe 'bi-')",
+      "iconPlaceholder": "ex: lightning-charge-fill"
+    },
+    "preview": "Aperçu:",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette capacité ?",
+    "nothingToExport": "Aucune capacité à exporter",
+    "importSuccessCount": "Import réussi : {0} capacité(s) importée(s)"
+  },
+
+  "leagueHistory": {
+    "title": "Historique des Ligues",
+    "newEntry": "Nouvelle date de montée",
+    "emptyPrompt": "Aucune date enregistrée",
+    "addFirst": "Ajouter la première date",
+    "table": {
+      "date": "Date",
+      "league": "Ligue",
+      "notes": "Notes",
+      "actions": "Actions"
+    },
+    "badge": {
+      "eliteTop50": "Elite - Top 50",
+      "leagueN": "Ligue {0}"
+    },
+    "labels": {
+      "dateMontee": "Date de montée",
+      "ligue": "Ligue",
+      "select": "Sélectionner",
+      "notesOptional": "Notes (optionnel)",
+      "notesPlaceholder": "Ajouter des notes..."
+    },
+    "modal": {
+      "editTitle": "Éditer la date de montée",
+      "createTitle": "Nouvelle date de montée"
+    },
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette date de montée ?",
+    "import": {
+      "selectPml": "Veuillez sélectionner un fichier PML.",
+      "successCount": "{0} enregistrement(s) importé(s) avec succès.",
+      "none": "Aucun enregistrement importé.",
+      "detailsPreview": "Détails (aperçu):"
+    }
+  },
   "manageUsers": {
     "title": "Gestion utilisateurs",
     "heading": "Gestion des utilisateurs",
@@ -241,7 +301,7 @@
     "messageCopied": "Mot de passe copié dans le presse-papiers",
     "messageDeleted": "Utilisateur supprimé"
   },
-  "history": {
+  "ranking": {
     "title": "Classements",
     "subtitle": "Historique des escouades",
     "filters": "Filtres",
@@ -340,10 +400,53 @@
     "chartTitleAttackType": "Mercenaires par Type d'Attaque",
     "chartTitleFaction": "Mercenaires par Faction",
     "chartTitleRank": "Mercenaires par Rang",
+    "chartTitleLevelEvolution": "Évolution des Niveaux",
     "rankLabel": "Rang",
+    "mercenaires": "Mercenaires",
     "totalMercenaries": "Total Mercenaires",
+    "power": "Puissance",
     "averagePower": "Puissance Moyenne",
+    "level": "Niveau",
+    "averageLevel": "Niveau Moyen",
+    "highestLevel": "Plus Haut Niveau",
+    "lowestLevel": "Plus Bas Niveau",
     "mostPowerful": "Plus Puissant",
     "leastPowerful": "Moins Puissant"
-  } 
+  },
+  "errors": {
+    "system": "Erreur système",
+    "updateError": "Erreur lors de la mise à jour",
+    "exportError": "Erreur lors de l'export",
+    "importError": "Erreur lors de l'import",
+    "loadingError": "Erreur lors du chargement",
+    "saveError": "Erreur lors de l'enregistrement",
+    "deleteError": "Erreur lors de la suppression",
+    "chartCreationError": "Erreur lors de la création des graphiques",
+    "configLoadError": "Erreur lors du chargement de la configuration",
+    "invalidFile": "Le fichier n'est pas valide",
+    "emptyFile": "Le fichier est vide",
+    "xmlParsingError": "Erreur lors de l'analyse du fichier XML",
+    "noSectionsFound": "Aucune section reconnue trouvée dans le fichier",
+    "templateNameRequired": "Un template doit avoir un nom",
+    "historiquInvalide": "Historique invalide: date ou données manquantes",
+    "capacityNameRequired": "Le nom de la capacité est requis",
+    "capacityNotFound": "Aucune capacité avec l'ID fourni n'a été trouvée",
+    "historiqueNotFound": "Aucun historique avec l'ID fourni n'a été trouvé",
+    "imageLoadError": "Erreur lors du chargement de l'image",
+    "resourcesListError": "Erreur lors du listage des ressources",
+    "personalized": "{operation}: {detail}",
+    "personnageImageLoadError": "Erreur lors de la récupération de l'image",
+    "lucieMaxPieces": "Maximum {0} pièces peuvent être sélectionnées"
+  },
+  "warnings": {
+    "system": "Avertissement système",
+    "lucieImportWarning": "Attention: Plus de {0} pièces sélectionnées dans l'import"
+  },
+  "messages": {
+    "processing": "Traitement en cours...",
+    "importSuccess": "Import réussi",
+    "exportSuccess": "Export réussi",
+    "operationSuccess": "Opération réussie",
+    "autoImportAttempt": "Tentative d'import automatique du fichier de configuration"
+  }
 }

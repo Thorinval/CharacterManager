@@ -7,7 +7,7 @@ using CharacterManager.Server.Services;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Constants;
 using CharacterManager.Components.Modal;
-public partial class Historique
+public partial class Classements
 {
     [Inject]
     public HistoriqueClassementService HistoriqueService { get; set; } = null!;
@@ -31,8 +31,9 @@ public partial class Historique
     internal int nbMercenairesMax = 0;
     internal int nbAndroidsMax = 0;
     internal InputFile? inputFileRef;
+    internal bool isImporting = false;
 
-    internal Personnage Commandant => historique.Commandant ?? new Personnage { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
+    internal PersonnageClassement Commandant => historique.Commandant ?? new PersonnageClassement { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
 
     internal HistoriqueClassement historique = new();
 
@@ -88,9 +89,14 @@ public partial class Historique
 
     internal static string GetImageUrl(string nomPersonnage)
     {
-        // Normalize the name: remove spaces, convert to lowercase
-        var normalized = nomPersonnage.ToLower().Replace(" ", "_").Replace("'", "");
-        return $"{AppConstants.Paths.ImagesPersonnages}/{normalized}{AppConstants.ImageSuffixes.SmallPortrait}{AppConstants.FileExtensions.Png}";
+        // Retourner l'image par défaut si le nom est vide ou null
+        if (string.IsNullOrWhiteSpace(nomPersonnage))
+        {
+            return AppConstants.Paths.DefaultPortrait;
+        }
+
+        // Utilise le helper qui gère le dossier spécifique du personnage
+        return PersonnageImageUrlHelper.GetImageSmallPortraitUrl(nomPersonnage);
     }
 
     // ...removed duplicate RenderStars, use TemplateEscouade.GetRankStars instead
@@ -139,6 +145,7 @@ public partial class Historique
             return;
         }
 
+        isImporting = true;
         try
         {
             using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
@@ -172,6 +179,11 @@ public partial class Historique
         catch (Exception ex)
         {
             await JSRuntime.InvokeVoidAsync(Identifier, $"Erreur lors de l'import: {ex.Message}");
+        }
+        finally
+        {
+            isImporting = false;
+            await InvokeAsync(StateHasChanged);
         }
     }
 

@@ -105,9 +105,6 @@ namespace CharacterManager.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("CommandantId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateOnly>("DateEnregistrement")
                         .HasColumnType("TEXT");
 
@@ -130,8 +127,6 @@ namespace CharacterManager.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CommandantId");
 
                     b.ToTable("HistoriquesClassement");
                 });
@@ -168,6 +163,12 @@ namespace CharacterManager.Migrations
                     b.Property<string>("ChampModifie")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("DateInsertion")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DateMiseAJour")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("DateModification")
                         .HasColumnType("TEXT");
 
@@ -175,6 +176,9 @@ namespace CharacterManager.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("EntiteId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("EstImportation")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("NomEntite")
@@ -291,6 +295,52 @@ namespace CharacterManager.Migrations
                     b.HasDiscriminator().HasValue("Personnage");
 
                     b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("CharacterManager.Server.Models.PersonnageClassement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("HistoriqueClassementAndroideId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("HistoriqueClassementCommandantId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("HistoriqueClassementMercenaireId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("IdOrigine")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Niveau")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Nom")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Puissance")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Rang")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HistoriqueClassementAndroideId");
+
+                    b.HasIndex("HistoriqueClassementCommandantId")
+                        .IsUnique();
+
+                    b.HasIndex("HistoriqueClassementMercenaireId");
+
+                    b.ToTable("PersonnagesClassement");
                 });
 
             modelBuilder.Entity("CharacterManager.Server.Models.Piece", b =>
@@ -444,36 +494,6 @@ namespace CharacterManager.Migrations
                     b.ToTable("Templates");
                 });
 
-            modelBuilder.Entity("HistoriqueClassementPersonnageHistorique", b =>
-                {
-                    b.Property<int>("HistoriqueClassementId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MercenairesId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("HistoriqueClassementId", "MercenairesId");
-
-                    b.HasIndex("MercenairesId");
-
-                    b.ToTable("HistoriqueClassementMercenaires", (string)null);
-                });
-
-            modelBuilder.Entity("HistoriqueClassementPersonnageHistorique1", b =>
-                {
-                    b.Property<int>("AndroidesId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("HistoriqueClassement1Id")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("AndroidesId", "HistoriqueClassement1Id");
-
-                    b.HasIndex("HistoriqueClassement1Id");
-
-                    b.ToTable("HistoriqueClassementAndroides", (string)null);
-                });
-
             modelBuilder.Entity("CharacterManager.Server.Models.PersonnageHistorique", b =>
                 {
                     b.HasBaseType("CharacterManager.Server.Models.Personnage");
@@ -518,14 +538,22 @@ namespace CharacterManager.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("CharacterManager.Server.Models.HistoriqueClassement", b =>
+            modelBuilder.Entity("CharacterManager.Server.Models.PersonnageClassement", b =>
                 {
-                    b.HasOne("CharacterManager.Server.Models.PersonnageHistorique", "Commandant")
-                        .WithMany()
-                        .HasForeignKey("CommandantId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                    b.HasOne("CharacterManager.Server.Models.HistoriqueClassement", null)
+                        .WithMany("Androides")
+                        .HasForeignKey("HistoriqueClassementAndroideId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                    b.Navigation("Commandant");
+                    b.HasOne("CharacterManager.Server.Models.HistoriqueClassement", null)
+                        .WithOne("Commandant")
+                        .HasForeignKey("CharacterManager.Server.Models.PersonnageClassement", "HistoriqueClassementCommandantId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("CharacterManager.Server.Models.HistoriqueClassement", null)
+                        .WithMany("Mercenaires")
+                        .HasForeignKey("HistoriqueClassementMercenaireId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("CharacterManager.Server.Models.Piece", b =>
@@ -534,36 +562,6 @@ namespace CharacterManager.Migrations
                         .WithMany("Pieces")
                         .HasForeignKey("LucieHouseId")
                         .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("HistoriqueClassementPersonnageHistorique", b =>
-                {
-                    b.HasOne("CharacterManager.Server.Models.HistoriqueClassement", null)
-                        .WithMany()
-                        .HasForeignKey("HistoriqueClassementId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CharacterManager.Server.Models.PersonnageHistorique", null)
-                        .WithMany()
-                        .HasForeignKey("MercenairesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("HistoriqueClassementPersonnageHistorique1", b =>
-                {
-                    b.HasOne("CharacterManager.Server.Models.PersonnageHistorique", null)
-                        .WithMany()
-                        .HasForeignKey("AndroidesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CharacterManager.Server.Models.HistoriqueClassement", null)
-                        .WithMany()
-                        .HasForeignKey("HistoriqueClassement1Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("CharacterManager.Server.Models.PieceHistorique", b =>
@@ -577,7 +575,13 @@ namespace CharacterManager.Migrations
 
             modelBuilder.Entity("CharacterManager.Server.Models.HistoriqueClassement", b =>
                 {
+                    b.Navigation("Androides");
+
                     b.Navigation("Classements");
+
+                    b.Navigation("Commandant");
+
+                    b.Navigation("Mercenaires");
 
                     b.Navigation("Pieces");
                 });

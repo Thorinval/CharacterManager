@@ -258,8 +258,8 @@
 
 .personnage-card-image-editable {
     width: 100%;
-    aspect-ratio: 4 / 5;
-    object-fit: contain;
+    height: 350px;
+    object-fit: cover;
     object-position: center;
     background-color: #f0f0f0;
     border-radius: 8px;
@@ -758,3 +758,4 @@
     font-size: 0.6rem;
     font-weight: bold;
 }
+/* Page Header is inherited from app.css - no overrides needed */

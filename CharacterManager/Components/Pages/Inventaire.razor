@@ -11,15 +11,37 @@
 
 <link rel="stylesheet" href="/css/Inventaire.css" />
 
-<head>
-    <title>
-        <LocalizedText Key="inventory.title" />
-    </title>
-</head>
+<div class="container-fluid py-4">
+    <!-- Toast d'import en cours -->
+    @if (isImporting)
+    {
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11; width: 100%; max-width: 400px;">
+            <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header bg-primary text-white">
+                    <i class="bi bi-hourglass-split me-2"></i>
+                    <strong class="me-auto">Import en cours...</strong>
+                </div>
+                <div class="toast-body">
+                    <div class="progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+                    </div>
+                    <div class="mt-2 small text-muted">
+                        Veuillez patienter pendant le traitement de votre fichier...
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 
-<Toast @ref="toastRef" />
+    <div class="page-header-banner">
+        <h1 class="page-title"><i class="bi bi-box-seam"></i>
+            <LocalizedText Key="inventory.title" />
+        </h1>
+    </div>
 
-<div class="mb-3" style="padding-top: 1rem;">
+    <Toast @ref="toastRef" />
+
+    <div class="mb-3" style="padding-top: 1rem;">
         <div class="row g-3 align-items-center">
             <div class="col-lg-4 col-md-12">
                 <div class="sort-controls d-flex flex-wrap align-items-center gap-2">
@@ -72,11 +94,13 @@
                         <i class="bi bi-download"></i>
                         <LocalizedText Key="inventory.export" />
                     </button>
-                    <label class="btn btn-info mb-0" for="importInventaireFile" title="@LocalizationService.GetKeyValue("inventory.import")">
+                    <label class="btn btn-info mb-0" for="importInventaireFile"
+                        title="@LocalizationService.GetKeyValue("inventory.import")">
                         <i class="bi bi-upload"></i>
                         <LocalizedText Key="inventory.import" />
                     </label>
-                    <InputFile id="importInventaireFile" class="d-none" accept=".pml,.xml" OnChange="HandleImportInventaire" />
+                    <InputFile id="importInventaireFile" class="d-none" accept=".pml,.xml"
+                        OnChange="HandleImportInventaire" />
                     <button class="btn btn-danger" @onclick="DeleteSelectedPersonnages"
                         disabled="@(!selectedPersonnages.Any())" title="Supprimer les personnages sélectionnés">
                         <i class="bi bi-trash-fill"></i>
@@ -123,7 +147,7 @@
             <li class="nav-item">
                 <button
                     class="nav-link d-flex align-items-center
-                                                                           @(SelectedFilter == option.Value ? "active glow-active" : "")"
+                                                                               @(SelectedFilter == option.Value ? "active glow-active" : "")"
                     @onclick="() => OnFilterClicked(option.Value)">
 
                     <span class="me-2">
@@ -163,29 +187,33 @@
 
                             <div class="card-name-header">
                                 <div class="personnage-name-top">@personnage.Nom</div>
-                                <div class="card-rarity-text rarity-text-@personnage.Rarete.ToString().ToLower()">@personnage.Rarete</div>
+                                <div class="card-rarity-text rarity-text-@personnage.Rarete.ToString().ToLower()">@personnage.Rarete
+                                </div>
                             </div>
 
                             <img src="@personnage.GetImageUrl(true)" alt="@personnage.Nom" class="personnage-card-image-editable"
                                 @onclick="() => ViewPersonnage(personnage.Id)" style="cursor: pointer;"
-                                onerror="this.onerror=null; this.src='/api/resources/interface/default_portrait.png';" />
+                                onerror="this.onerror=null; this.src='/api/v1/resources/interface/default_portrait.png';" />
                             <div class="personnage-card-info">
-                                <div class="editable-field">
-                                    <label for=@( $"niveauInput_p{personnage.Id}")>
-                                        <LocalizedText Key="inventory.level" />:
-                                    </label>
-                                    <input id=@($"niveauInput_p{personnage.Id}") type="number" min="1" max="200"
-                                        class="form-control form-control-sm" value="@personnage.Niveau"
-                                        @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Niveau", e.Value?.ToString() ?? "1"))"
-                                        @onclick:stopPropagation="true" />
-                                </div>
-                                <div class="editable-field">
-                                    <label for=@($"selectionneInput_p{personnage.Id}")>
-                                        <LocalizedText Key="inventory.selected" />
-                                    </label>
-                                    <InputCheckbox id=@($"selectionneInput_p{personnage.Id}") Value="@personnage.Selectionne"
-                                        ValueChanged="@( (bool value) => OnSelectionneChanged(personnage.Id, value) )"
-                                        ValueExpression="@(() => personnage.Selectionne)" @onclick:stopPropagation="true" />
+                                <div class="editable-field" style="display:flex;align-items:center;gap:16px;flex-wrap:nowrap;min-width:0;">
+                                    <div style="display:flex;align-items:center;gap:4px;min-width:0;">
+                                        <label for=@($"selectionneInput_p{personnage.Id}") style="margin:0;white-space:nowrap;flex-shrink:0;">
+                                            @LocalizationService.GetKeyValue("inventory.inTeam")
+                                        </label>
+                                        <InputCheckbox id=@($"selectionneInput_p{personnage.Id}") Value="@personnage.Selectionne"
+                                            ValueChanged="@( (bool value) => OnSelectionneChanged(personnage.Id, value) )"
+                                            ValueExpression="@(() => personnage.Selectionne)" @onclick:stopPropagation="true" style="width:auto;flex-shrink:0;" />
+                                    </div>
+                                    <div style="display:flex;align-items:center;gap:2px;min-width:0;">
+                                        <label for=@($"niveauInput_p{personnage.Id}") style="margin:0;white-space:nowrap;flex-shrink:0;">
+                                            <LocalizedText Key="inventory.level" />:
+                                        </label>
+                                        <input id=@($"niveauInput_p{personnage.Id}") type="number" min="1" max="200"
+                                            class="form-control form-control-sm" style="width:70px;flex-shrink:0;"
+                                            value="@personnage.Niveau"
+                                            @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Niveau", e.Value?.ToString() ?? "1"))"
+                                            @onclick:stopPropagation="true" />
+                                    </div>
                                 </div>
 
                                 @if (personnage.Type != TypePersonnage.Androide)
@@ -211,15 +239,21 @@
                                     <label for=@($"puissanceInput_p{personnage.Id}")>
                                         <LocalizedText Key="inventory.power" />:
                                     </label>
-                                    <div class="input-group input-group-sm">
+                                    <div class="input-group input-group-sm" style="align-items:center;">
                                         <button class="btn btn-outline-secondary" type="button"
-                                            @onclick="() => ChangePuissance(personnage.Id, -5)" @onclick:stopPropagation="true">-</button>
+                                            @onclick="() => ChangePuissance(personnage.Id, -5)"
+                                            @onclick:stopPropagation="true">-</button>
                                         <input id=@($"puissanceInput_p{personnage.Id}") type="number" min="0"
-                                            class="form-control form-control-sm text-center" value="@personnage.Puissance"
+                                            class="form-control form-control-sm text-center" style="max-width:120px;" value="@personnage.Puissance"
                                             @onchange="@((ChangeEventArgs e) => UpdatePersonnageField(personnage.Id, "Puissance", e.Value?.ToString() ?? "0"))"
                                             @onclick:stopPropagation="true" />
                                         <button class="btn btn-outline-secondary" type="button"
-                                            @onclick="() => ChangePuissance(personnage.Id, 5)" @onclick:stopPropagation="true">+</button>
+                                            @onclick="() => ChangePuissance(personnage.Id, 5)"
+                                            @onclick:stopPropagation="true">+</button>
+                                        @if (personnage.Type == TypePersonnage.Commandant)
+                                        {
+                                            <span class="ms-2" style="white-space:nowrap;">(<strong>@personnage.PuissanceReelleCommandant()</strong>)</span>
+                                        }
                                     </div>
                                 </div>
 
@@ -247,7 +281,7 @@
                                     @onchange="() => ToggleSelection(personnage.Id)" />
                             </div>
                             <img src="@personnage.GetImageUrl(true)" alt="@personnage.Nom" class="personnage-card-image-list"
-                                onerror="this.onerror=null; this.src='/api/resources/interface/default_portrait.png';" />
+                                onerror="this.onerror=null; this.src='/api/v1/resources/interface/default_portrait.png';" />
                             <div class="personnage-info-list">
                                 <span class="personnage-name" style="font-weight: 700;">@personnage.Nom</span>
                                 <span class="list-separator">|</span>
@@ -256,6 +290,11 @@
                                 <span>Rareté: @personnage.Rarete</span>
                                 <span class="list-separator">|</span>
                                 <span>Puissance: @personnage.Puissance</span>
+                                @if (personnage.Type == TypePersonnage.Commandant)
+                                {
+                                    <span class="list-separator">|</span>
+                                    <span>Puissance réelle: @personnage.PuissanceReelleCommandant()</span>
+                                }
                                 <span class="list-separator">|</span>
                                 <span>Niveau: @personnage.Niveau</span>
                                 <span class="list-separator">|</span>
@@ -343,7 +382,8 @@
                                     @onclick="() => ChangePuissancePiece(piece.Id, TypeBonus.Strategique, -5)"
                                     @onclick:stopPropagation="true">-</button>
                                 <input id=@($"aspectsStrategiquesInput_l{piece.Id}") type="number" min="0"
-                                    class="form-control form-control-sm text-center" value="@piece.AspectsStrategiques.Puissance"
+                                    class="form-control form-control-sm text-center"
+                                    value="@piece.AspectsStrategiques.Puissance"
                                     @onchange="@((ChangeEventArgs e) => UpdatePieceField(piece.Id, "PuissanceStrategique", e.Value?.ToString() ?? "0"))"
                                     @onclick:stopPropagation="true" />
                                 <button class="btn btn-outline-secondary" type="button"
@@ -364,7 +404,8 @@
             <LocalizedText Key="inventory.empty" />
         </p>
     }
-}
+
+</div>
 
 @if (showModal)
 {
@@ -491,4 +532,5 @@
                 </div>
             </div>
         </div>
-    </div>}
+    </div>
+}

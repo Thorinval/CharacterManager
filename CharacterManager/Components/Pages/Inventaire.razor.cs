@@ -12,6 +12,7 @@ using CharacterManager.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 
 public partial class Inventaire : IAsyncDisposable
 {
@@ -29,6 +30,9 @@ public partial class Inventaire : IAsyncDisposable
 
     [Inject]
     public PmlExportService PmlExportService { get; set; } = null!;
+
+    [Inject]
+    public HistoriqueModificationService HistoriqueModificationService { get; set; } = null!;
 
     [Inject]
     public IModalService ModalService { get; set; } = null!;
@@ -121,6 +125,10 @@ public partial class Inventaire : IAsyncDisposable
 
     // Mode d'affichage
     internal string viewMode = AppConstants.Defaults.ViewModeGrid;
+
+    // Import
+    [SuppressMessage("CodeQuality", "IDE0052:Remove unread private members", Justification = "Field is bound in Razor view")]
+    private bool isImporting = false;
 
     // JavaScript interop constants
     private const string JsAlert = "alert";
@@ -438,8 +446,8 @@ public partial class Inventaire : IAsyncDisposable
     private List<Personnage> SortByPuissance(List<Personnage> source, Dictionary<TypePersonnage, int> typeOrder)
     {
         return sortAscending
-            ? [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Type == TypePersonnage.Commandant ? p.Puissance + p.Rang * 20 : p.Puissance)]
-            : [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Type == TypePersonnage.Commandant ? p.Puissance + p.Rang * 20 : p.Puissance)];
+            ? [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenBy(p => p.Type == TypePersonnage.Commandant ? p.PuissanceReelleCommandant() : p.Puissance)]
+            : [.. source.OrderBy(p => typeOrder.GetValueOrDefault(p.Type, 99)).ThenByDescending(p => p.Type == TypePersonnage.Commandant ? p.PuissanceReelleCommandant() : p.Puissance)];
     }
 
     private List<Personnage> SortByName(List<Personnage> source, Dictionary<TypePersonnage, int> typeOrder)
@@ -700,16 +708,100 @@ public partial class Inventaire : IAsyncDisposable
 
     internal async Task ResetAll()
     {
-        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Êtes-vous sûr de vouloir supprimer toutes les données ? Cette action est irréversible.");
-        if (confirmed)
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Un export complet (inventaire + classements + ligue + historique des modifications + capacités) sera téléchargé avant la suppression. Continuer ?");
+        if (!confirmed)
         {
-            PersonnageService.DeleteAll();
-            selectedPersonnages.Clear();
-            LuciePieces.Clear();
-            lucieHouse = null;
+            return;
+        }
 
-            await LoadPersonnagesAsync();
-            await LoadLucieHouseAsync();
+        // Option : enregistrer des suppressions dans l'historique avant de purger
+        var logSuppressions = await JSRuntime.InvokeAsync<bool>("confirm", "Ajouter des entrées de suppression dans l'historique des modifications avant le reset ?");
+
+        await ExportFullBackupForReset();
+
+        if (logSuppressions)
+        {
+            await AddSuppressionHistoryBeforeReset();
+        }
+
+        PersonnageService.DeleteAll();
+        selectedPersonnages.Clear();
+        LuciePieces.Clear();
+        lucieHouse = null;
+
+        await LoadPersonnagesAsync();
+        await LoadLucieHouseAsync();
+    }
+
+    private async Task AddSuppressionHistoryBeforeReset()
+    {
+        try
+        {
+            var now = DateTime.UtcNow;
+
+            // Personnages
+            var persos = await DbContext.Personnages.AsNoTracking().ToListAsync();
+            foreach (var p in persos)
+            {
+                await HistoriqueModificationService.EnregistrerSuppressionAsync(
+                    TypeEntite.Personnage,
+                    p.Id,
+                    p.Nom,
+                    p,
+                    "Reset inventaire",
+                    now,
+                    estImportation: true);
+            }
+
+            // Pièces Lucie (si présente)
+            var house = await DbContext.LucieHouses.Include(l => l.Pieces).AsNoTracking().FirstOrDefaultAsync();
+            if (house?.Pieces != null)
+            {
+                foreach (var piece in house.Pieces)
+                {
+                    await HistoriqueModificationService.EnregistrerSuppressionAsync(
+                        TypeEntite.Piece,
+                        piece.Id,
+                        piece.Nom,
+                        piece,
+                        "Reset inventaire",
+                        now,
+                        estImportation: true);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync(JsAlert, $"Erreur lors de l'ajout des suppressions dans l'historique: {ex.Message}");
+        }
+    }
+
+    private async Task ExportFullBackupForReset()
+    {
+        try
+        {
+            // Export PML complet (inventaire + classements + ligues + capacités)
+            var options = PmlExportOptions.FromBooleans(
+                exportInventory: true,
+                exportTemplates: true,
+                exportBestSquad: true,
+                exportHistories: true,
+                exportLeagueHistory: true,
+                exportCapacites: true);
+
+            var pmlBytes = await PmlExportService.ExportPmlAsync(options);
+            var timestamp = DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime);
+            var pmlFileName = $"backup_complet_{timestamp}{AppConstants.FileExtensions.Pml}";
+            await JSRuntime.InvokeVoidAsync("downloadFile", pmlFileName, Convert.ToBase64String(pmlBytes));
+
+            // Export historique des modifications en JSON
+            var historiqueJson = await HistoriqueModificationService.ExporterAsync();
+            var histoFileName = $"historique_modifications_{timestamp}.json";
+            await JSRuntime.InvokeVoidAsync("downloadFile", histoFileName, historiqueJson, "application/json");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync(JsAlert, $"Erreur lors de l'export avant réinitialisation: {ex.Message}");
         }
     }
 
@@ -759,6 +851,7 @@ public partial class Inventaire : IAsyncDisposable
             return;
         }
 
+        isImporting = true;
         try
         {
             using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
@@ -792,6 +885,11 @@ public partial class Inventaire : IAsyncDisposable
         catch (Exception ex)
         {
             await JSRuntime.InvokeVoidAsync(JsAlert, $"Erreur lors de l'import: {ex.Message}");
+        }
+        finally
+        {
+            isImporting = false;
+            await InvokeAsync(StateHasChanged);
         }
     }
 
@@ -1006,23 +1104,32 @@ public partial class Inventaire : IAsyncDisposable
         var piece = lucieHouse.Pieces.FirstOrDefault(p => p.Id == pieceId);
         if (piece == null) return;
 
+        object? ancienneValeur = null;
+        object? nouvelleValeur = null;
+
         switch (field)
         {
             case "Niveau":
                 if (int.TryParse(value, out var niveau))
                 {
+                    ancienneValeur = piece.Niveau;
+                    nouvelleValeur = niveau;
                     piece.Niveau = niveau;
                 }
                 break;
             case "PuissanceStrategique":
                 if (int.TryParse(value, out var puissance))
                 {
+                    ancienneValeur = piece.AspectsStrategiques.Puissance;
+                    nouvelleValeur = puissance;
                     piece.AspectsStrategiques.Puissance = puissance;
                 }
                 break;
             case "PuissanceTactique":
                 if (int.TryParse(value, out var puissanceTactique))
                 {
+                    ancienneValeur = piece.AspectsTactiques.Puissance;
+                    nouvelleValeur = puissanceTactique;
                     piece.AspectsTactiques.Puissance = puissanceTactique;
                 }
                 break;
@@ -1031,6 +1138,18 @@ public partial class Inventaire : IAsyncDisposable
         await EnsureLuciePieceAspectColumnsAsync(force: false);
         DbContext.Pieces.Update(piece);
         await DbContext.SaveChangesAsync();
+        
+        // Historiser la modification si des valeurs ont été changées
+        if (ancienneValeur != null)
+        {
+            await PersonnageService.UpdatePieceAsync(
+                pieceId,
+                field,
+                ancienneValeur,
+                nouvelleValeur!,
+                piece.Nom);
+        }
+        
         await InvokeAsync(StateHasChanged);
         toastRef?.Show($"{piece.Nom} - {field} mis à jour: {value}", "success");
     }

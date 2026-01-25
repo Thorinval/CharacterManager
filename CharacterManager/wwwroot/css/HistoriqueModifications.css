@@ -1,21 +1,4 @@
-/* Historique des modifications */
-.page-header-banner {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 1.5rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.page-header-banner h3 {
-    margin: 0;
-    font-weight: 600;
-}
-
-.page-header-banner i {
-    font-size: 1.5rem;
-    margin-right: 0.5rem;
-}
+/* Historique des modifications - inherits from app.css */
 
 /* Cartes de statistiques */
 .card {

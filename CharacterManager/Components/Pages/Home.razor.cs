@@ -232,7 +232,7 @@ public partial class Home : IAsyncDisposable
             return this.LocalizationService.GetKeyValue("home.eliteTop50");
         }
 
-        return $"{this.LocalizationService.GetKeyValue("history.table.league")} {ligue.Value}";
+        return $"{this.LocalizationService.GetKeyValue("leagueHistory.table.league")} {ligue.Value}";
     }
 
     private static Dictionary<Faction, int> CalculerMercenairesParFaction(IEnumerable<Personnage> mercenaires)

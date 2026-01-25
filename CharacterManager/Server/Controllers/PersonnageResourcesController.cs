@@ -8,7 +8,7 @@ using CharacterManager.Resources.Personnages;
 /// Les images sont organisées par personnage dans la DLL CharacterManager.Resources.Personnages.
 /// </summary>
 [ApiController]
-[Route("api/resources/personnages")]
+[Route("api/v1/resources/personnages")]
 public class PersonnageResourcesController : ControllerBase
 {
     private readonly ILogger<PersonnageResourcesController> _logger;

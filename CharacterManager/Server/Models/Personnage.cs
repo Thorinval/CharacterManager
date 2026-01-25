@@ -74,6 +74,11 @@ public class Personnage
     [System.ComponentModel.DataAnnotations.Schema.NotMapped]
     public string ImageUrlSelected => PersonnageImageUrlHelper.GetImageSmallSelectUrl(Nom);
 
+    public int PuissanceReelleCommandant()
+    {
+        return Puissance + (Rang * 20);
+    }
+
     // Colonnes stockées pour compatibilité avec l'ancien schéma (remplies automatiquement au save)
     [System.ComponentModel.DataAnnotations.Schema.Column("ImageUrlDetail")]
     public string ImageUrlDetailStored { get; set; } = string.Empty;

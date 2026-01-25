@@ -12,7 +12,7 @@ public static class AppConstants
         public const string Home = "/";
         public const string Inventaire = "/inventaire";
         public const string Templates = "/templates";
-        public const string Historique = "/historique";
+        public const string Historique = "/classements";
         public const string ImportPml = "/import-pml";
         public const string Escouade = "/escouade";
         public const string MeilleurEscouade = "/meilleur-escouade";
@@ -38,18 +38,18 @@ public static class AppConstants
     public static class Paths
     {
         // Images de personnages désormais servies via la DLL de ressources (v0.12.1+)
-        public const string ImagesPersonnages = "/api/resources/personnages";
+        public const string ImagesPersonnages = "/api/v1/resources/personnages";
         public const string ImagesPersonnagesLegacy = "/images/personnages"; // Pour compatibilité v0.12.0
         public const string ImagesAdultes = "/images/personnages/adult";
         // Images d'interface désormais servies via la DLL de ressources
-        public const string ImagesInterface = "/api/resources/interface";
+        public const string ImagesInterface = "/api/v1/resources/interface";
         public const string I18nFolder = "i18n";
         public const string WwwRoot = "wwwroot";
 
         // Images par défaut
-        public const string DefaultPortrait = "/api/resources/interface/default_portrait.png";
-        public const string GenericCommandantHeader = "/api/resources/interface/fondheader.png";
-        public const string HomeDefaultBackground = "/api/resources/interface/fondheader.png";
+        public const string DefaultPortrait = "/api/v1/resources/interface/default_portrait.png";
+        public const string GenericCommandantHeader = "/api/v1/resources/interface/fondheader.png";
+        public const string HomeDefaultBackground = "/api/v1/resources/interface/fondheader.png";
     }
 
     /// <summary>

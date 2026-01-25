@@ -273,7 +273,7 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext)
         writer.WriteEndElement();
     }
 
-    private static void WritePerson(System.Xml.XmlWriter writer, Personnage? p)
+    private static void WritePerson(System.Xml.XmlWriter writer, PersonnageClassement? p)
     {
         if (p == null)
         {

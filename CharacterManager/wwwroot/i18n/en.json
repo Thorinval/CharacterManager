@@ -19,6 +19,7 @@
     "warning": "Warning",
     "info": "Information",
     "close": "Close",
+    "update": "Update",
     "back": "Back"
   },
   "navigation": {
@@ -175,6 +176,7 @@
     "rank": "Rank",
     "power": "Power",
     "selectAll": "Select All",
+    "inTeam": "In team",
     "showAll": "All",
     "showOnlyCommanders": "Commanders",
     "showOnlyMercenaries": "Mercenaries",
@@ -210,6 +212,64 @@
     "empty": "No templates saved.",
     "confirmDelete": "Are you sure you want to delete this template?"
   },
+
+  "capacities": {
+    "title": "Capacity Management",
+    "new": "New Capacity",
+    "empty": "No capacities available.",
+    "noDescription": "No description",
+    "modal": {
+      "editTitle": "Edit Capacity",
+      "createTitle": "New Capacity"
+    },
+    "fields": {
+      "nameLabel": "Name *",
+      "namePlaceholder": "Capacity name",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Capacity description",
+      "iconLabel": "Icon (Bootstrap Icons name without 'bi-' prefix)",
+      "iconPlaceholder": "e.g., lightning-charge-fill"
+    },
+    "preview": "Preview:",
+    "confirmDelete": "Are you sure you want to delete this capacity?",
+    "nothingToExport": "No capacities to export",
+    "importSuccessCount": "Import successful: {0} capacity(ies) imported"
+  },
+
+  "leagueHistory": {
+    "title": "League History",
+    "newEntry": "New promotion date",
+    "emptyPrompt": "No dates recorded",
+    "addFirst": "Add the first date",
+    "table": {
+      "date": "Date",
+      "league": "League",
+      "notes": "Notes",
+      "actions": "Actions"
+    },
+    "badge": {
+      "eliteTop50": "Elite - Top 50",
+      "leagueN": "League {0}"
+    },
+    "labels": {
+      "dateMontee": "Promotion date",
+      "ligue": "League",
+      "select": "Select",
+      "notesOptional": "Notes (optional)",
+      "notesPlaceholder": "Add notes..."
+    },
+    "modal": {
+      "editTitle": "Edit promotion date",
+      "createTitle": "New promotion date"
+    },
+    "confirmDelete": "Are you sure you want to delete this promotion date?",
+    "import": {
+      "selectPml": "Please select a PML file.",
+      "successCount": "{0} record(s) imported successfully.",
+      "none": "No records imported.",
+      "detailsPreview": "Details (preview):"
+    }
+  },
   "manageUsers": {
     "title": "User Management",
     "heading": "User Management",
@@ -242,7 +302,7 @@
     "messageCopied": "Password copied to clipboard",
     "messageDeleted": "User deleted"
   },
-  "history": {
+  "ranking": {
     "title": "Rankings",
     "subtitle": "Ranking History",
     "filters": "Filters",
@@ -341,10 +401,53 @@
     "chartTitleAttackType": "Mercenaries by Attack Type",
     "chartTitleFaction": "Mercenaries by Faction",
     "chartTitleRank": "Mercenaries by Rank",
+    "chartTitleLevelEvolution": "Level Evolution",
     "rankLabel": "Rank",
+    "mercenaires": "Mercenaries",
     "totalMercenaries": "Total Mercenaries",
+    "power": "Power",
     "averagePower": "Average Power",
+    "level": "Level",
+    "averageLevel": "Average Level",
+    "highestLevel": "Highest Level",
+    "lowestLevel": "Lowest Level",
     "mostPowerful": "Most Powerful",
     "leastPowerful": "Least Powerful"
+  },
+  "errors": {
+    "system": "System error",
+    "updateError": "Update error",
+    "exportError": "Export error",
+    "importError": "Import error",
+    "loadingError": "Loading error",
+    "saveError": "Save error",
+    "deleteError": "Delete error",
+    "chartCreationError": "Error creating charts",
+    "configLoadError": "Error loading configuration",
+    "invalidFile": "Invalid file",
+    "emptyFile": "File is empty",
+    "xmlParsingError": "XML parsing error",
+    "noSectionsFound": "No recognized sections found in file",
+    "templateNameRequired": "Template must have a name",
+    "historiqueInvalide": "Invalid history: missing date or data",
+    "capacityNameRequired": "Capacity name is required",
+    "capacityNotFound": "Capacity not found",
+    "historiqueNotFound": "History not found",
+    "imageLoadError": "Error loading image",
+    "resourcesListError": "Error listing resources",
+    "personalized": "{operation}: {detail}",
+    "personnageImageLoadError": "Error retrieving character image",
+    "lucieMaxPieces": "Maximum {0} pieces can be selected"
+  },
+  "warnings": {
+    "system": "System warning",
+    "lucieImportWarning": "Warning: More than {0} pieces selected during import"
+  },
+  "messages": {
+    "processing": "Processing...",
+    "importSuccess": "Import successful",
+    "exportSuccess": "Export successful",
+    "operationSuccess": "Operation successful",
+    "autoImportAttempt": "Attempting to auto-import configuration file"
   }
 }

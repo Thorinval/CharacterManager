@@ -30,16 +30,6 @@
         <div class="bloc-infos-premium">
 
             <div class="info-item">
-                <label for="dateEnregistrementInput">
-                    <i class="bi bi-calendar3"></i>
-                    Date
-                </label>
-                <InputDate Type="InputDateType.Date" id="dateEnregistrementInput" @bind-Value="form.DateEnregistrement"
-                    class="@($"form-control form-control-sm {GetValidationClass(nameof(form.DateEnregistrement))}")" />
-                <ValidationMessage For="@(() => form.DateEnregistrement)" />
-            </div>
-
-            <div class="info-item">
                 <label for="ligueInput">
                     <i class="bi bi-shield-check"></i>
                     Ligue
@@ -152,19 +142,17 @@
                         <div class="mercenaires-grid">
                             <div class="personnage-card personnage-card-small">
                                 <div class="card-header-row">
-                                    <div class="card-rarity rarity-@Commandant.Rarete.ToString().ToLower()">
-                                        @Commandant.Rarete
-                                    </div>
                                     <div class="card-name">@Commandant.Nom</div>
                                 </div>
 
                                 <img src="@Commandant.GetImageUrl(true)" alt="@Commandant.Nom" class="card-image"
-                                    onerror="this.onerror=null; this.src='/api/resources/interface/default_portrait.png';" />
+                                    onerror="this.onerror=null; this.src='/api/v1/resources/interface/default_portrait.png';" />
 
                                 <div class="card-info">
                                     <div>Niv: @Commandant.Niveau</div>
                                     <div class="card-stars">@TemplateEscouade.GetRankStars(Commandant.Rang)</div>
                                     <div>Puiss: @Commandant.Puissance</div>
+                                    <div>Puiss réelle: @(Commandant?.PuissanceReelleCommandant() ?? 0)</div>
                                 </div>
                             </div>
                         </div>
@@ -178,12 +166,11 @@
                             {
                                 <div class="personnage-card personnage-card-small">
                                     <div class="card-header-row">
-                                        <div class="card-rarity rarity-@m.Rarete.ToString().ToLower()">@m.Rarete</div>
                                         <div class="card-name">@m.Nom</div>
                                     </div>
 
                                     <img src="@m.GetImageUrl(true)" alt="@m.Nom" class="card-image"
-                                        onerror="this.onerror=null; this.src='/api/resources/interface/default_portrait.png';" />
+                                        onerror="this.onerror=null; this.src='/api/v1/resources/interface/default_portrait.png';" />
 
                                     <div class="card-info">
                                         <div>Niv: @m.Niveau</div>
@@ -206,12 +193,11 @@
                             {
                                 <div class="personnage-card personnage-card-small">
                                     <div class="card-header-row">
-                                        <div class="card-rarity rarity-@a.Rarete.ToString().ToLower()">@a.Rarete</div>
                                         <div class="card-name">@a.Nom</div>
                                     </div>
 
                                     <img src="@a.GetImageUrl(true)" alt="@a.Nom" class="card-image"
-                                        onerror="this.onerror=null; this.src='/api/resources/interface/default_portrait.png';" />
+                                        onerror="this.onerror=null; this.src='/api/v1/resources/interface/default_portrait.png';" />
 
                                     <div class="card-info">
                                         <div>Niv: @a.Niveau</div>
@@ -250,9 +236,9 @@
 </div>
 
 @code {
-    private PersonnageHistorique Commandant { get; set; } = default!;
-    private List<PersonnageHistorique> Mercenaires { get; set; } = new();
-    private List<PersonnageHistorique> Androides { get; set; } = new();
+    private PersonnageClassement Commandant { get; set; } = default!;
+    private List<PersonnageClassement> Mercenaires { get; set; } = new();
+    private List<PersonnageClassement> Androides { get; set; } = new();
     private List<PieceHistorique> Pieces { get; set; } = new();
 
     private readonly List<int> LigueSteps = Enumerable.Range(1, 25).Reverse().ToList();
@@ -288,9 +274,9 @@
                 France = Existing.Classements.FirstOrDefault(c => c.Type == TypeClassement.France)?.Valeur
             };
 
-            Commandant = Existing.Commandant ?? new PersonnageHistorique { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
-            Mercenaires = Existing.Mercenaires?.ToList() ?? new List<PersonnageHistorique>();
-            Androides = Existing.Androides?.ToList() ?? new List<PersonnageHistorique>();
+            Commandant = Existing.Commandant ?? new PersonnageClassement { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
+            Mercenaires = Existing.Mercenaires?.ToList() ?? new List<PersonnageClassement>();
+            Androides = Existing.Androides?.ToList() ?? new List<PersonnageClassement>();
             Pieces = Existing.Pieces?.ToList() ?? new List<PieceHistorique>();
             
             // Charger les puissances historisées
@@ -304,41 +290,11 @@
             form.DateEnregistrement = DateOnly.FromDateTime(DateTime.Now);
 
             var cmd = PersonnageService.GetCommandants(true).FirstOrDefault();
-            Commandant = cmd != null ? new PersonnageHistorique
-            {
-                IdOrigine = cmd.Id,
-                Nom = cmd.Nom,
-                Niveau = cmd.Niveau,
-                Rang = cmd.Rang,
-                Rarete = cmd.Rarete,
-                Puissance = cmd.Puissance,
-                Type = cmd.Type,
-                Capacites = cmd.Capacites,
-            } : new PersonnageHistorique { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
+            Commandant = cmd != null ? PersonnageClassement.FromPersonnage(cmd) : new PersonnageClassement { Nom = "Aucun", Type = Server.Models.TypePersonnage.Commandant };
 
-            Mercenaires = PersonnageService.GetMercenaires(true)?.Select(m => new PersonnageHistorique
-            {
-                IdOrigine = m.Id,
-                Nom = m.Nom,
-                Niveau = m.Niveau,
-                Rang = m.Rang,
-                Rarete = m.Rarete,
-                Puissance = m.Puissance,
-                Type = m.Type,
-                Capacites = m.Capacites,
-            }).ToList() ?? new List<PersonnageHistorique>();
+            Mercenaires = PersonnageService.GetMercenaires(true)?.Select(PersonnageClassement.FromPersonnage).ToList() ?? new List<PersonnageClassement>();
 
-            Androides = PersonnageService.GetAndroides(true)?.Select(a => new PersonnageHistorique
-            {
-                IdOrigine = a.Id,
-                Nom = a.Nom,
-                Niveau = a.Niveau,
-                Rang = a.Rang,
-                Rarete = a.Rarete,
-                Puissance = a.Puissance,
-                Type = a.Type,
-                Capacites = a.Capacites,
-            }).ToList() ?? new List<PersonnageHistorique>();
+            Androides = PersonnageService.GetAndroides(true)?.Select(PersonnageClassement.FromPersonnage).ToList() ?? new List<PersonnageClassement>();
 
             Pieces = PersonnageService.GetPieces(true)?.Select(p => new PieceHistorique
             {
@@ -357,7 +313,7 @@
         editContext = new EditContext(form);
         isValid = IsEdit ? editContext.Validate() : false;
 
-        editContext.OnFieldChanged += (_, __) =>
+        editContext.OnFieldChanged += (_, e) =>
         {
             isValid = editContext.Validate();
             InvokeAsync(StateHasChanged);
@@ -414,7 +370,7 @@
 
         HistoriqueClassement historique = new HistoriqueClassement
         {
-            DateEnregistrement = form.DateEnregistrement,
+            DateEnregistrement = DateOnly.FromDateTime(DateTime.Now),
             Ligue = form.Ligue ?? 0,
             Score = form.Score ?? 0,
             Classements = new List<Classement>(),

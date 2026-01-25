@@ -295,7 +295,7 @@ body {
    ============================================================ */
 
 .main-content {
-    margin-left: 72px;
+    margin-left: 32px;
     /* Décalage en mode compact */
     transition: margin-left 0.25s ease;
     width: 100%;
@@ -303,7 +303,7 @@ body {
     overflow: auto;
     background: transparent;
     border-radius: 12px;
-    padding: 0 40px 40px 40px;
+    padding: 2rem 40px 40px 40px;
     border: none;
     box-shadow: none;
     flex: 1;
@@ -312,7 +312,7 @@ body {
 }
 
 .layout-container.rail-expanded .main-content {
-    margin-left: 200px;
+    margin-left: 160px;
     /* Décalage quand rail étendu */
 }
 
@@ -496,4 +496,88 @@ body {
     padding-top: 12px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     text-align: right;
+}
+
+/* ============================================================
+   UNIFIED PAGE HEADER STYLING - All pages
+   ============================================================ */
+
+/* Standard page header for all pages - transparent like MaisonLucie */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 0 2rem 0;
+    padding: 0 0 1.25rem 0;
+    background: transparent;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.page-header h1 i {
+    font-size: 2rem;
+    color: #667eea;
+    min-width: 2rem;
+}
+
+/* Page header banner - transparent background like MaisonLucie */
+.page-header-banner {
+    background: transparent;
+    color: #1e293b;
+    padding: 0 0 1.25rem 0;
+    margin: 0 0 2rem 0;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.page-header-banner h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #1e293b;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.page-header-banner h1 i {
+    font-size: 2rem;
+    color: #667eea;
+}
+
+.page-header-banner .page-title {
+    color: #1e293b;
+}
+
+.page-header-banner .page-title i {
+    color: #667eea;
+}
+
+/* Page title styling */
+.page-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #1e293b;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.page-title i {
+    font-size: 2rem;
+    color: #667eea;
 }

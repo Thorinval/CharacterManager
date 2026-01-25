@@ -8,91 +8,93 @@
 @inject PmlExportService PmlExportService
 @inject PmlImportService PmlImportService
 @inject IJSRuntime JS
-
-<PageTitle>Historique des Ligues</PageTitle>
+@inject ClientLocalizationService LocalizationService
 
 <link rel="stylesheet" href="/css/Histoligues.css" />
 
-<div class="histoligues-container">
-    <div class="histoligues-header">
+<div class="container-fluid py-4">
+    <div class="page-header-banner">
         <h1>
             <i class="bi bi-trophy"></i>
-            Historique des Ligues
+            @LocalizationService.GetKeyValue("leagueHistory.title")
         </h1>
+    </div>
+    <div class="templates-header">
         <div class="histoligues-actions">
             <button class="btn btn-primary" @onclick="OpenCreateModal">
                 <i class="bi bi-plus-circle"></i>
-                Nouvelle date de montée
+                @LocalizationService.GetKeyValue("leagueHistory.newEntry")
             </button>
             <button class="btn btn-success" @onclick="ExporterHistoriquesLigue">
                 <i class="bi bi-download"></i>
-                Exporter
+                @LocalizationService.GetKeyValue("common.export")
             </button>
             <label class="btn btn-info mb-0" for="importLeagueHistoryFile">
                 <i class="bi bi-upload"></i>
-                Importer
+                @LocalizationService.GetKeyValue("common.import")
             </label>
             <InputFile id="importLeagueHistoryFile" class="d-none" accept=".pml" OnChange="ImporterHistoriquesLigue" />
         </div>
     </div>
-
-    @if (historiques == null)
-    {
-        <p class="loading">Chargement...</p>
-    }
-    else if (!historiques.Any())
-    {
-        <div class="empty-state">
-            <i class="bi bi-inbox"></i>
-            <p>Aucune date enregistrée</p>
-            <button class="btn btn-primary" @onclick="OpenCreateModal">
-                Ajouter la première date
-            </button>
-        </div>
-    }
-    else
-    {
-        <div class="table-container">
-            <table class="table-histoligues">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Ligue</th>
-                        <th>Notes</th>
-                        <th class="actions-column">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var historique in historiques)
-                    {
-                        <tr>
-                            <td class="date-cell">@historique.DateMontee.ToString("dd/MM/yyyy")</td>
-                            <td class="ligue-cell">
-                                @if (historique.Ligue == 50)
-                                {
-                                    <span class="ligue-badge elite">Elite - Top 50</span>
-                                }
-                                else
-                                {
-                                    <span class="ligue-badge ligue-@historique.Ligue">Ligue @historique.Ligue</span>
-                                }
-                            </td>
-                            <td class="notes-cell">@(string.IsNullOrEmpty(historique.Notes) ? "-" : historique.Notes)</td>
-                            <td class="actions-cell">
-                                <button class="btn-icon btn-edit" @onclick="() => OpenEditModal(historique)" title="Éditer">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn-icon btn-delete" @onclick="() => DeleteHistorique(historique.Id)" title="Supprimer">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
 </div>
+
+@if (historiques == null)
+{
+    <p class="loading">@LocalizationService.GetKeyValue("common.loading")</p>
+}
+else if (!historiques.Any())
+{
+    <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <p>@LocalizationService.GetKeyValue("leagueHistory.emptyPrompt")</p>
+        <button class="btn btn-primary" @onclick="OpenCreateModal">
+            @LocalizationService.GetKeyValue("leagueHistory.addFirst")
+        </button>
+    </div>
+}
+else
+{
+    <div class="table-container">
+        <table class="table-histoligues">
+            <thead>
+                <tr>
+                    <th>@LocalizationService.GetKeyValue("leagueHistory.table.date")</th>
+                    <th>@LocalizationService.GetKeyValue("leagueHistory.table.league")</th>
+                    <th>@LocalizationService.GetKeyValue("leagueHistory.table.notes")</th>
+                    <th class="actions-column">@LocalizationService.GetKeyValue("leagueHistory.table.actions")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var historique in historiques)
+                {
+                    <tr>
+                        <td class="date-cell">@historique.DateMontee.ToString("dd/MM/yyyy")</td>
+                        <td class="ligue-cell">
+                            @if (historique.Ligue == 50)
+                            {
+                                <span class="ligue-badge elite">@LocalizationService.GetKeyValue("leagueHistory.badge.eliteTop50")</span>
+                            }
+                            else
+                            {
+                                <span class="ligue-badge ligue-@historique.Ligue">@string.Format(LocalizationService.GetKeyValue("leagueHistory.badge.leagueN"), historique.Ligue)</span>
+                            }
+                        </td>
+                        <td class="notes-cell">@(string.IsNullOrEmpty(historique.Notes) ? "-" : historique.Notes)</td>
+                        <td class="actions-cell">
+                            <button class="btn-icon btn-edit" @onclick="() => OpenEditModal(historique)" title="@LocalizationService.GetKeyValue("common.edit")">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn-icon btn-delete" @onclick="() => DeleteHistorique(historique.Id)"
+                                title="@LocalizationService.GetKeyValue("common.delete")">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
 
 <!-- Modal Créer/Éditer -->
 @if (showModal)
@@ -100,36 +102,37 @@
     <div class="modal-overlay" @onclick="CloseModal">
         <div class="modal-content" @onclick:stopPropagation="true">
             <div class="modal-header">
-                <h3>@(isEdit ? "Éditer la date de montée" : "Nouvelle date de montée")</h3>
+                <h3>@(isEdit ? LocalizationService.GetKeyValue("leagueHistory.modal.editTitle") : LocalizationService.GetKeyValue("leagueHistory.modal.createTitle"))</h3>
                 <button class="btn-close" @onclick="CloseModal">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Date de montée</label>
+                    <label>@LocalizationService.GetKeyValue("leagueHistory.labels.dateMontee")</label>
                     <InputDate Type="InputDateType.Date" @bind-Value="formModel.DateMontee" class="form-control" />
                 </div>
                 <div class="form-group">
-                    <label>Ligue</label>
+                    <label>@LocalizationService.GetKeyValue("leagueHistory.labels.ligue")</label>
                     <select @bind="formModel.Ligue" class="form-control">
-                        <option value="">Sélectionner</option>
+                        <option value="">@LocalizationService.GetKeyValue("leagueHistory.labels.select")</option>
                         @foreach (var ligue in LigueSteps)
                         {
-                            <option value="@ligue">Ligue @ligue</option>
+                            <option value="@ligue">@string.Format(LocalizationService.GetKeyValue("leagueHistory.badge.leagueN"), ligue)</option>
                         }
-                        <option value="50">Elite - Top 50</option>
+                        <option value="50">@LocalizationService.GetKeyValue("leagueHistory.badge.eliteTop50")</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Notes (optionnel)</label>
-                    <textarea @bind="formModel.Notes" class="form-control" rows="3" placeholder="Ajouter des notes..."></textarea>
+                    <label>@LocalizationService.GetKeyValue("leagueHistory.labels.notesOptional")</label>
+                    <textarea @bind="formModel.Notes" class="form-control" rows="3"
+                        placeholder="@LocalizationService.GetKeyValue("leagueHistory.labels.notesPlaceholder")"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" @onclick="CloseModal">Annuler</button>
+                <button class="btn btn-secondary" @onclick="CloseModal">@LocalizationService.GetKeyValue("common.cancel")</button>
                 <button class="btn btn-primary" @onclick="SaveHistorique" disabled="@(formModel.Ligue == 0)">
-                    @(isEdit ? "Mettre à jour" : "Créer")
+                    @(isEdit ? LocalizationService.GetKeyValue("common.update") : LocalizationService.GetKeyValue("common.add"))
                 </button>
             </div>
         </div>
@@ -198,7 +201,7 @@
 
     private async Task DeleteHistorique(int id)
     {
-        bool confirmed = await JS.InvokeAsync<bool>("confirm", "Êtes-vous sûr de vouloir supprimer cette date de montée ?");
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", LocalizationService.GetKeyValue("leagueHistory.confirmDelete"));
         if (confirmed)
         {
             await HistoriqueLigueService.DeleteAsync(id);
@@ -211,20 +214,21 @@
         try
         {
             var options = PmlExportOptions.FromBooleans(
-                exportInventory: false,
-                exportTemplates: false,
-                exportBestSquad: false,
-                exportHistories: false,
-                exportLeagueHistory: true);
+            exportInventory: false,
+            exportTemplates: false,
+            exportBestSquad: false,
+            exportHistories: false,
+            exportLeagueHistory: true);
 
             var bytes = await PmlExportService.ExportPmlAsync(options);
-            var fileName = $"{AppConstants.ExportPrefixes.HistoriqueLigues}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
+            var fileName =
+            $"{AppConstants.ExportPrefixes.HistoriqueLigues}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
             var base64 = Convert.ToBase64String(bytes);
             await JS.InvokeVoidAsync("downloadFile", fileName, base64);
         }
         catch (Exception ex)
         {
-            await JS.InvokeVoidAsync("alert", $"Erreur lors de l'export: {ex.Message}");
+            await JS.InvokeVoidAsync("alert", $"{LocalizationService.GetKeyValue("errors.exportError")}: {ex.Message}");
         }
     }
 
@@ -240,7 +244,7 @@
 
         if (!isSupported)
         {
-            await JS.InvokeVoidAsync("alert", "Veuillez sélectionner un fichier PML.");
+            await JS.InvokeVoidAsync("alert", LocalizationService.GetKeyValue("leagueHistory.import.selectPml"));
             return;
         }
 
@@ -248,27 +252,27 @@
         {
             using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
             var result = await PmlImportService.ImportPmlAsync(
-                stream,
-                file.Name,
-                importInventory: false,
-                importTemplates: false,
-                importBestSquad: false,
-                importHistories: false,
-                importLeagueHistory: true);
+            stream,
+            file.Name,
+            importInventory: false,
+            importTemplates: false,
+            importBestSquad: false,
+            importHistories: false,
+            importLeagueHistory: true);
 
             var importMessage = result.SuccessCount > 0
-                ? $"{result.SuccessCount} enregistrement(s) importé(s) avec succès."
-                : "Aucun enregistrement importé.";
+            ? string.Format(LocalizationService.GetKeyValue("leagueHistory.import.successCount"), result.SuccessCount)
+            : LocalizationService.GetKeyValue("leagueHistory.import.none");
 
             if (!string.IsNullOrEmpty(result.Error))
             {
-                importMessage += $"\nErreur: {result.Error}";
+                importMessage += $"\n{LocalizationService.GetKeyValue("errors.importError")}: {result.Error}";
             }
 
             if (result.Errors.Count > 0)
             {
                 var preview = string.Join("\n", result.Errors.Take(3));
-                importMessage += $"\nDétails (aperçu):\n{preview}";
+                importMessage += $"\n{LocalizationService.GetKeyValue("leagueHistory.import.detailsPreview")}:\n{preview}";
             }
 
             await JS.InvokeVoidAsync("alert", importMessage);
@@ -276,7 +280,7 @@
         }
         catch (Exception ex)
         {
-            await JS.InvokeVoidAsync("alert", $"Erreur lors de l'import: {ex.Message}");
+            await JS.InvokeVoidAsync("alert", $"{LocalizationService.GetKeyValue("errors.importError")}: {ex.Message}");
         }
     }
 }

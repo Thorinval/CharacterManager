@@ -7,6 +7,7 @@ using CharacterManager.Server.Data;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Xunit;
 using Moq;
 using Microsoft.AspNetCore.Http;
@@ -29,7 +30,8 @@ public class PmlImportServiceTests : IDisposable
     _context.Database.EnsureCreated();
 
     _pmlImportService = new PmlImportService(_context);
-    _pmlExportService = new PmlExportService(_context);
+    var exportLoggerMock = new Mock<ILogger<PmlExportService>>();
+    _pmlExportService = new PmlExportService(_context, exportLoggerMock.Object);
 
     SeedPersonnages();
   }
@@ -65,6 +67,89 @@ public class PmlImportServiceTests : IDisposable
     });
 
     _context.SaveChanges();
+  }
+
+  [Fact]
+  public async Task ImportPmlAsync_ShouldBlockInventoryWhenExistingPersonnages()
+  {
+    // Arrange: base already seeded with 2 personnages
+    var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<InventairePML version=""1.0"" exportDate=""2025-12-20T15:30:00Z"">
+  <inventaire>
+    <Personnage>
+      <Nom>NOUVEAU</Nom>
+      <Rarete>SR</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>1500</Puissance>
+      <PA>100</PA>
+      <PV>200</PV>
+      <Niveau>5</Niveau>
+      <Rang>1</Rang>
+      <Role>Guerrière</Role>
+      <Faction>Ordre</Faction>
+      <Selectionne>false</Selectionne>
+    </Personnage>
+  </inventaire>
+</InventairePML>";
+
+    var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
+
+    // Act
+    var result = await _pmlImportService.ImportPmlAsync(stream, importInventory: true, importTemplates: false, importBestSquad: false, importHistories: false, importLeagueHistory: false);
+
+    // Assert: should be blocked (success count = 0) because DB not empty
+    Assert.False(result.IsSuccess);
+    Assert.Equal(0, result.SuccessCount);
+    Assert.Contains(result.Errors, e => e.Contains("Import d'inventaire impossible"));
+
+    var existingCount = await _context.Personnages.CountAsync();
+    Assert.Equal(2, existingCount); // no new insert
+  }
+
+  [Fact]
+  public async Task ImportInventaire_ShouldCreateHistoriqueEntries_WhenHistoriqueServiceProvided()
+  {
+    // Arrange
+    var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        .UseInMemoryDatabase(Guid.NewGuid().ToString())
+        .Options;
+    await using var ctx = new ApplicationDbContext(options);
+    var histoService = new HistoriqueModificationService(ctx);
+    var service = new PmlImportService(ctx, histoService);
+
+    var pmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<InventairePML version=""1.0"" exportDate=""2026-01-24T00:00:00Z"">
+  <inventaire>
+    <Personnage>
+      <Nom>ALPHA</Nom>
+      <Rarete>R</Rarete>
+      <Type>Mercenaire</Type>
+      <Puissance>900</Puissance>
+      <PA>50</PA>
+      <PV>120</PV>
+      <Niveau>3</Niveau>
+      <Rang>0</Rang>
+      <Role>Guerrière</Role>
+      <Faction>Ordre</Faction>
+      <Selectionne>true</Selectionne>
+    </Personnage>
+  </inventaire>
+</InventairePML>";
+
+    await using var stream = new MemoryStream(Encoding.UTF8.GetBytes(pmlContent));
+
+    // Act
+    var result = await service.ImportPmlAsync(stream);
+
+    // Assert
+    Assert.True(result.IsSuccess);
+    Assert.Equal(1, result.SuccessCount);
+
+    var histos = await ctx.HistoriquesModifications.Where(h => h.TypeModification == TypeModification.Creation).ToListAsync();
+    Assert.Single(histos);
+    Assert.Equal("ALPHA", histos[0].NomEntite);
+    Assert.Equal(TypeEntite.Personnage, histos[0].TypeEntite);
+    Assert.True(histos[0].EstImportation);
   }
 
   public void Dispose()

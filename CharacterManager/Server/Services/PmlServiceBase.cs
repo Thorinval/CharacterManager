@@ -133,7 +133,7 @@ public abstract class PmlServiceBase(ApplicationDbContext context)
         var personnage = new Personnage
         {
             Id = id,
-            Nom = nom.Trim(),
+            Nom = nom.Trim().ToUpperInvariant(), // Normaliser en majuscules
             Rarete = ParseRarete(element.Element(AppConstants.XmlElements.Rarete)?.Value),
             Type = ParseType(element.Element(AppConstants.XmlElements.Type)?.Value),
             Puissance = int.TryParse(element.Element(AppConstants.XmlElements.Puissance)?.Value, out var p) ? p : 0,

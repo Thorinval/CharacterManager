@@ -1,8 +1,10 @@
 .historique-container {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(147, 112, 219, 0.1) 100%);
+    background: transparent;
     min-height: 100vh;
     padding: 20px 0;
 }
+
+/* Page Header Banner - inherits from app.css */
 
 .controls-section {
     background: rgba(255, 255, 255, 0.95);
@@ -55,7 +57,7 @@
 .ranking-inline .chip {
     background: rgba(102, 126, 234, 0.12);
     border: 1px solid rgba(102, 126, 234, 0.25);
-    color: #2c3e50;
+    color: #0f172a;
     padding: 2px 6px;
     border-radius: 999px;
     white-space: nowrap;
@@ -64,19 +66,19 @@
 .ranking-inline .chip-nutaku {
     background: rgba(66, 153, 225, 0.2);
     border: 1px solid rgba(66, 153, 225, 0.4);
-    color: #2c5282;
+    color: #0f172a;
 }
 
 .ranking-inline .chip-top {
     background: rgba(237, 137, 54, 0.2);
     border: 1px solid rgba(237, 137, 54, 0.4);
-    color: #c05621;
+    color: #1f1302;
 }
 
 .ranking-inline .chip-pays {
     background: rgba(72, 187, 120, 0.2);
     border: 1px solid rgba(72, 187, 120, 0.4);
-    color: #2f855a;
+    color: #124029;
 }
 
 .ranking-inline .chip i {
@@ -104,13 +106,14 @@
     gap: 4px;
     margin-bottom: 0.25rem;
     width: 100%;
-    justify-content: flex-start;
+    justify-content: center;
 }
 
 .card-name {
     font-weight: bold;
     font-size: 0.75rem;
-    text-align: left;
+    text-align: center;
+    text-transform: uppercase;
     color: #2c3e50;
     line-height: 1.2;
     flex: 1;
@@ -126,19 +129,19 @@
 }
 
 .rarity-ssr {
-    color: #d4af37;
+    color: #0f172a;
     background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .rarity-sr {
-    color: #8b5cf6;
+    color: #0f172a;
     background: linear-gradient(135deg, #c39bd3 0%, #9b59b6 100%);
     font-weight: bold;
 }
 
 .rarity-r {
-    color: #3498db;
+    color: #0f172a;
     background: linear-gradient(135deg, #85c1e9 0%, #5dade2 100%);
     font-weight: bold;
 }
@@ -246,9 +249,9 @@ td.ranking-inline.info-cell {
     align-items: center;
     padding: 6px 8px;
     border-radius: 8px;
-    background: rgba(155, 89, 182, 0.12);
-    border: 1px solid rgba(155, 89, 182, 0.35);
-    color: #4b365f;
+    background: #f4e9ff;
+    border: 1px solid #b68cd6;
+    color: #111827;
     font-weight: 600;
     gap: 8px;
 }
@@ -277,10 +280,10 @@ td.ranking-inline.info-cell {
     justify-content: center;
     padding: 2px 8px;
     border-radius: 999px;
-    background: rgba(0, 0, 0, 0.06);
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: #e5e7eb;
+    border: 1px solid #cbd5e1;
     font-size: 0.85rem;
-    color: #2c2540;
+    color: #111827;
     min-width: 46px;
 }
 
@@ -315,22 +318,22 @@ td.ranking-inline.info-cell {
 
 .badge-rarity[data-rarity="R"] {
     background-color: #a0aec0;
-    color: white;
+    color: #0f172a;
 }
 
 .badge-rarity[data-rarity="SR"] {
     background-color: #4299e1;
-    color: white;
+    color: #0f172a;
 }
 
 .badge-rarity[data-rarity="SSR"] {
     background-color: #ed8936;
-    color: white;
+    color: #0f172a;
 }
 
 .badge-rarity[data-rarity="Inconnu"] {
-    background-color: #718096;
-    color: white;
+    background-color: #4a5568;
+    color: #ffffff;
 }
 
 .table-responsive {

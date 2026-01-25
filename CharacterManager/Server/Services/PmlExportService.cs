@@ -2,6 +2,7 @@ using CharacterManager.Server.Models;
 using CharacterManager.Server.Data;
 using CharacterManager.Server.Constants;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Xml;
 
@@ -12,8 +13,9 @@ namespace CharacterManager.Server.Services;
 /// Extension .pml pour les fichiers d'export
 /// Supporte les sections : HistoriqueClassements, inventaire, template, capacités
 /// </summary>
-public class PmlExportService(ApplicationDbContext context) : PmlServiceBase(context)
+public class PmlExportService(ApplicationDbContext context, ILogger<PmlExportService> logger) : PmlServiceBase(context)
 {
+    private readonly ILogger<PmlExportService> _logger = logger;
     /// <summary>
     /// Exporte les données sélectionnées au format PML
     /// </summary>
@@ -189,7 +191,7 @@ public class PmlExportService(ApplicationDbContext context) : PmlServiceBase(con
         writer.WriteEndElement();
     }
 
-    private static void ExportHistoriqueCommandantElement(XmlWriter writer, PersonnageHistorique? commandant)
+    private static void ExportHistoriqueCommandantElement(XmlWriter writer, PersonnageClassement? commandant)
     {
         if (commandant != null)
         {
@@ -198,7 +200,7 @@ public class PmlExportService(ApplicationDbContext context) : PmlServiceBase(con
             {
                 writer.WriteAttributeString(AppConstants.XmlElements.Id, commandant.Id.ToString());
             }
-            WritePersonnageData(writer, commandant);
+            WritePersonnageClassementData(writer, commandant);
             writer.WriteEndElement();
         }
     }
@@ -216,7 +218,7 @@ public class PmlExportService(ApplicationDbContext context) : PmlServiceBase(con
         }
     }
 
-    private static void ExportListAndroides(XmlWriter writer, List<PersonnageHistorique> listAndroides)
+    private static void ExportListAndroides(XmlWriter writer, List<PersonnageClassement> listAndroides)
     {
         if (listAndroides.Count != 0)
         {
@@ -228,14 +230,14 @@ public class PmlExportService(ApplicationDbContext context) : PmlServiceBase(con
                 {
                     writer.WriteAttributeString(AppConstants.XmlElements.Id, androide.Id.ToString());
                 }
-                WritePersonnageData(writer, androide);
+                WritePersonnageClassementData(writer, androide);
                 writer.WriteEndElement();
             }
             writer.WriteEndElement();
         }
     }
 
-    private static void ExportListMercenaires(XmlWriter writer, List<PersonnageHistorique> listMercenaires)
+    private static void ExportListMercenaires(XmlWriter writer, List<PersonnageClassement> listMercenaires)
     {
         if (listMercenaires.Count != 0)
         {
@@ -247,7 +249,7 @@ public class PmlExportService(ApplicationDbContext context) : PmlServiceBase(con
                 {
                     writer.WriteAttributeString(AppConstants.XmlElements.Id, mercenaire.Id.ToString());
                 }
-                WritePersonnageData(writer, mercenaire);
+                WritePersonnageClassementData(writer, mercenaire);
                 writer.WriteEndElement();
             }
             writer.WriteEndElement();
@@ -378,7 +380,7 @@ public class PmlExportService(ApplicationDbContext context) : PmlServiceBase(con
 
     private async Task WriteLucieHouseDatas(XmlWriter writer)
     {
-        var lucieHouse = await _context.LucieHouses.Include(l => l.Pieces).FirstOrDefaultAsync();
+        var lucieHouse = await _context.LucieHouses.Include(l => l.Pieces).OrderBy(l => l.Id).FirstOrDefaultAsync();
         if (lucieHouse != null)
         {
             writer.WriteStartElement(AppConstants.XmlElements.LucieHouse);
@@ -456,6 +458,18 @@ public class PmlExportService(ApplicationDbContext context) : PmlServiceBase(con
     }
 
     /// <summary>
+    /// Helper method to write PersonnageClassement data to XML
+    /// </summary>
+    private static void WritePersonnageClassementData(XmlWriter writer, PersonnageClassement personnage)
+    {
+        writer.WriteElementString(AppConstants.XmlElements.Nom, personnage.Nom);
+        writer.WriteElementString(AppConstants.XmlElements.Type, personnage.Type.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Puissance, personnage.Puissance.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Niveau, personnage.Niveau.ToString());
+        writer.WriteElementString(AppConstants.XmlElements.Rang, personnage.Rang.ToString());
+    }
+
+    /// <summary>
     /// Exporte les données d'inventaire au format PML
     /// </summary>
     public Task<byte[]> ExporterInventairePmlAsync(IEnumerable<Personnage> personnages)
@@ -479,6 +493,7 @@ public class PmlExportService(ApplicationDbContext context) : PmlServiceBase(con
             WritePersonnagesDatas(personnages, writer);
 
             // Export Lucie House as part of the inventory payload (no extra checkbox/UI toggle)
+            _logger.LogDebug("[PmlExportService.ExportConfiguration] Récupération de la Lucie House avec pièces");
             var lucieHouse = _context.LucieHouses.Include(l => l.Pieces).FirstOrDefault();
             if (lucieHouse != null)
             {
@@ -583,6 +598,7 @@ public class PmlExportService(ApplicationDbContext context) : PmlServiceBase(con
                 var personnageIds = template.GetPersonnageIds();
                 foreach (var personnageId in personnageIds)
                 {
+                    _logger.LogDebug("[PmlExportService.ExportToFileAsync] Récupération du personnage template avec ID: {PersonnageId}", personnageId);
                     var personnage = _context.Personnages
                         .Include(p => p.Capacites)
                         .FirstOrDefault(p => p.Id == personnageId);
