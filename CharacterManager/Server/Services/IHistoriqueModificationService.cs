@@ -1,6 +1,7 @@
 using CharacterManager.Server.Constants;
 using CharacterManager.Server.Models;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 
 namespace CharacterManager.Server.Services;
 
@@ -60,6 +61,16 @@ public interface IHistoriqueModificationService
     Task<List<HistoriqueModification>> GetHistoriqueEntiteAsync(TypeEntite typeEntite, int entiteId);
 
     /// <summary>
+    /// Récupère l'historique avec filtres optionnels
+    /// </summary>
+    Task<List<HistoriqueModification>> GetHistoriqueAsync(
+        TypeEntite? typeEntite = null,
+        int? entiteId = null,
+        DateTime? dateDebut = null,
+        DateTime? dateFin = null,
+        int? limit = null);
+
+    /// <summary>
     /// Récupère l'historique des modifications récentes
     /// </summary>
     Task<List<HistoriqueModification>> GetHistoriqueRecentAsync(int nombre = 50);
@@ -70,7 +81,47 @@ public interface IHistoriqueModificationService
     Task ViderHistoriqueAsync();
 
     /// <summary>
+    /// Supprime l'historique plus ancien qu'une date donnée
+    /// </summary>
+    Task<int> SupprimerHistoriqueAvantAsync(DateTime date);
+
+    /// <summary>
+    /// Supprime tout l'historique
+    /// </summary>
+    Task<int> SupprimerToutAsync();
+
+    /// <summary>
+    /// Supprime une entrée spécifique de l'historique
+    /// </summary>
+    Task<bool> SupprimerAsync(int id);
+
+    /// <summary>
     /// Exporte l'historique en JSON
     /// </summary>
     Task<string> ExporterAsync(DateTime? dateDebut = null, DateTime? dateFin = null);
+
+    /// <summary>
+    /// Exporte tout l'historique en JSON sans restriction de dates
+    /// </summary>
+    Task<string> ExporterToutAsync();
+
+    /// <summary>
+    /// Détecte et supprime les doublons dans l'historique
+    /// </summary>
+    Task<int> NettoyerDoublonsAsync();
+
+    /// <summary>
+    /// Compte le nombre d'entrées dans l'historique
+    /// </summary>
+    Task<int> GetCountAsync(TypeEntite? typeEntite = null);
+
+    /// <summary>
+    /// Prévisualise un import d'historique (JSON) sans écrire en base
+    /// </summary>
+    Task<ImportPreviewResult> PreviewImportAsync(Stream jsonStream);
+
+    /// <summary>
+    /// Importe l'historique (JSON) avec résolutions de conflits
+    /// </summary>
+    Task<ImportResult> ImportAsync(Stream jsonStream, Dictionary<string, bool> conflictResolutions, List<ImportConflict>? originalConflicts = null);
 }

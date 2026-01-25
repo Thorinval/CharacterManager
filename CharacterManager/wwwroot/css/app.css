@@ -303,7 +303,7 @@ body {
     overflow: auto;
     background: transparent;
     border-radius: 12px;
-    padding: 2rem 40px 40px 40px;
+    padding: 0rem 40px 40px 40px;
     border: none;
     box-shadow: none;
     flex: 1;

@@ -26,7 +26,7 @@ public class HistoriqueModificationsTests : TestContext
         var service = new HistoriqueModificationService(_db);
 
         Services.AddSingleton(_db);
-        Services.AddSingleton(service);
+        Services.AddSingleton<IHistoriqueModificationService>(service);
 
         JSInterop.Mode = JSRuntimeMode.Loose;
         JSInterop.Setup<bool>("confirm", _ => true).SetResult(true);
