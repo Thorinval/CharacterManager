@@ -15,6 +15,7 @@ public class EscouadePreviewEditorTests : IDisposable
 {
     private readonly TestContext ctx;
     private readonly ApplicationDbContext dbContext;
+    private bool disposed;
 
     public EscouadePreviewEditorTests()
     {
@@ -27,10 +28,23 @@ public class EscouadePreviewEditorTests : IDisposable
         ctx.Services.AddSingleton<IAdultModeNotificationService, AdultModeNotificationService>();
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
-        ctx?.Dispose();
-        dbContext?.Dispose();
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposed)
+        {
+            if (disposing)
+            {
+                ctx?.Dispose();
+                dbContext?.Dispose();
+            }
+            disposed = true;
+        }
     }
 
     [Fact]

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CharacterManager.Tests
 {
-    public class PmlExportServiceTests : IDisposable
+    public sealed class PmlExportServiceTests : IDisposable
     {
         private readonly ApplicationDbContext _context;
         private readonly PmlExportService _service;
@@ -29,21 +29,12 @@ namespace CharacterManager.Tests
             _service = new PmlExportService(_context, loggerMock.Object);
         }
 
-        void IDisposable.Dispose()
-        {
-            Dispose(true);
-        }
-
-        protected virtual void Dispose(bool disposing)
+        public void Dispose()
         {
             if (_disposed)
                 return;
 
-            if (disposing)
-            {
-                _context?.Dispose();
-            }
-
+            _context?.Dispose();
             _disposed = true;
         }
 

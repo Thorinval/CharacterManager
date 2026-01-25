@@ -51,15 +51,18 @@ public class SettingsModalTests : BlazorComponentTestBase
         // Create test localization file
         var frContent = new Dictionary<string, object>
         {
-            ["settings.title"] = "Paramètres",
-            ["settings.language"] = "Langue",
-            ["settings.languageDescription"] = "Choisissez votre langue préférée",
-            ["settings.contentMode"] = "Mode de contenu",
-            ["settings.adultMode"] = "Mode adulte",
-            ["settings.adultModeDescription"] = "Activer le contenu réservé aux adultes",
-            ["settings.enabled"] = "Activé",
-            ["settings.disabled"] = "Désactivé",
-            ["settings.signInPrompt"] = "Connectez-vous pour accéder aux paramètres"
+            ["settings"] = new Dictionary<string, object>
+            {
+                ["title"] = "Paramètres",
+                ["language"] = "Langue",
+                ["languageDescription"] = "Choisissez votre langue préférée",
+                ["contentMode"] = "Mode de contenu",
+                ["adultMode"] = "Mode adulte",
+                ["adultModeDescription"] = "Activer le contenu réservé aux adultes",
+                ["enabled"] = "Activé",
+                ["disabled"] = "Désactivé",
+                ["signInPrompt"] = "Connectez-vous pour accéder aux paramètres"
+            }
         };
         File.WriteAllText(Path.Combine(_i18nDir, "fr.json"), JsonSerializer.Serialize(frContent));
 
@@ -238,11 +241,15 @@ public class SettingsModalTests : BlazorComponentTestBase
     }
 
     [Fact]
-    public void SettingsModal_LocalizationService_CanInitialize()
+    public async Task SettingsModal_LocalizationService_CanInitialize()
     {
-        // Verify localization service is properly accessible
+        // Verify localization service can initialize with a language
         var service = Services.GetService<IClientLocalizationService>();
         Assert.NotNull(service);
+        
+        await service!.InitializeAsync("fr");
+        var translatedText = service["settings.title"];
+        Assert.Equal("Paramètres", translatedText);
     }
 
     #endregion

@@ -12,11 +12,12 @@ using Xunit;
 
 namespace CharacterManager.Tests.Components.Modal;
 
-public class PersonnageCapacitesModalTests : IDisposable
+public sealed class PersonnageCapacitesModalTests : IDisposable
 {
     private readonly TestContext ctx;
     private readonly ApplicationDbContext dbContext;
     private readonly Mock<IModalService> modalServiceMock;
+    private bool disposed;
 
     public PersonnageCapacitesModalTests()
     {
@@ -36,10 +37,14 @@ public class PersonnageCapacitesModalTests : IDisposable
         ctx.Services.AddScoped<ICapaciteService, CapaciteService>();
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
-        ctx?.Dispose();
-        dbContext?.Dispose();
+        if (!disposed)
+        {
+            ctx?.Dispose();
+            dbContext?.Dispose();
+            disposed = true;
+        }
     }
 
     [Fact]

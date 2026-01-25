@@ -74,6 +74,10 @@ public class ClientLocalizationService : IClientLocalizationService
     public string GetKeyValue(string key)
     {
         EnsureResourcesLoaded();
+        if (_currentResources != null && _currentResources.TryGetValue(key, out var directValue))
+        {
+            return ConvertToString(directValue, key);
+        }
 
         var keys = key.Split('.');
         object? current = _currentResources;
@@ -89,6 +93,11 @@ public class ClientLocalizationService : IClientLocalizationService
 
         return ConvertToString(current, key);
     }
+
+    /// <summary>
+    /// Indexeur pour récupérer une traduction par clé, équivalent à GetKeyValue.
+    /// </summary>
+    public string this[string key] => GetKeyValue(key);
 
     /// <summary>
     /// Récupère une valeur imbriquée depuis un JsonElement ou Dictionary

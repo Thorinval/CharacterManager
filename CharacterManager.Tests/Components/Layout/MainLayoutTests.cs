@@ -17,7 +17,7 @@ namespace CharacterManager.Tests.Components.Layout;
 /// Integration tests for MainLayout.razor component
 /// Tests verify that services are properly injected via interfaces
 /// </summary>
-public class MainLayoutComponentTests : IDisposable
+public class MainLayoutComponentTests
 {
     private readonly Mock<IAppVersionService> _versionServiceMock;
     private readonly Mock<IModalService> _modalServiceMock;
@@ -32,11 +32,6 @@ public class MainLayoutComponentTests : IDisposable
         _versionServiceMock.Setup(x => x.GetAppVersion()).Returns("1.0.0");
         _versionServiceMock.Setup(x => x.GetAuthor()).Returns("Test Author");
         _versionServiceMock.Setup(x => x.GetDescription()).Returns("Test Description");
-    }
-
-    void IDisposable.Dispose()
-    {
-        // Cleanup if needed
     }
 
     #region Component Type Tests

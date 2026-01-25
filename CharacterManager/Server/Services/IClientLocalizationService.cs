@@ -17,6 +17,11 @@ public interface IClientLocalizationService
     string GetKeyValue(string key);
 
     /// <summary>
+    /// Indexeur pratique pour récupérer une traduction par clé (notation identique à GetKeyValue).
+    /// </summary>
+    string this[string key] { get; }
+
+    /// <summary>
     /// Obtient la langue actuelle
     /// </summary>
     string CurrentLanguage { get; }
