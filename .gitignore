@@ -53,6 +53,10 @@ Thumbs.db
 # Publish output
 publish/
 
+# Test results
+TestResults/
+testResults/
+
 #logs
 logs/
 CharacterManager/logs/
