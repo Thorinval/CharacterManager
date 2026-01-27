@@ -1,5 +1,6 @@
 using CharacterManager.Server.Data;
 using CharacterManager.Server.Models;
+using CharacterManager.Server.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -329,7 +330,8 @@ public class PersonnageService : IPersonnageService
             personnage.Id,
             personnage.Nom,
             new { personnage.Nom, personnage.Type, personnage.Niveau, personnage.Puissance },
-            "Création d'un personnage");
+            "Création d'un personnage",
+            source: SourceModification.Inventaire);
     }
 
     public async Task UpdateAsync(Personnage personnage)
@@ -383,7 +385,8 @@ public class PersonnageService : IPersonnageService
                     champ,
                     ancienne,
                     nouvelle,
-                    $"Modification de {champ}");
+                    $"Modification de {champ}",
+                    source: SourceModification.Inventaire);
             }
         }
     }
@@ -423,7 +426,8 @@ public class PersonnageService : IPersonnageService
                 personnage.Id,
                 personnage.Nom,
                 new { personnage.Nom, personnage.Type, personnage.Niveau, personnage.Puissance },
-                "Suppression d'un personnage");
+                "Suppression d'un personnage",
+                source: SourceModification.Inventaire);
 
             _context.Personnages.Remove(personnage);
             await _context.SaveChangesAsync();
@@ -598,7 +602,8 @@ public class PersonnageService : IPersonnageService
                 "Affection",
                 ancienneAffection,
                 boundedAffection,
-                $"Modification de l'affection de la Maison de Lucie");
+                $"Modification de l'affection de la Maison de Lucie",
+                source: SourceModification.Inventaire);
         }
         
         return lucieHouse.Affection;
@@ -624,7 +629,8 @@ public class PersonnageService : IPersonnageService
                 champModifie,
                 ancienneValeur,
                 nouvelleValeur,
-                $"Modification de {champModifie} pour {nomPiece}");
+                $"Modification de {champModifie} pour {nomPiece}",
+                source: SourceModification.Inventaire);
 
             // Sauvegarder les modifications
             _context.Pieces.Update(piece);
@@ -676,28 +682,38 @@ public class PersonnageService : IPersonnageService
         {
             await _historiqueService.EnregistrerModificationAsync(
                 TypeEntite.Piece, piece.Id, piece.Nom, "Niveau", ancienNiveau, piece.Niveau, 
-                $"Modification du niveau de {piece.Nom}");
+                $"Modification du niveau de {piece.Nom}",
+                source: SourceModification.Inventaire);
         }
         if (ancienneSelection != piece.Selectionnee)
         {
             await _historiqueService.EnregistrerModificationAsync(
                 TypeEntite.Piece, piece.Id, piece.Nom, "Selectionnee", ancienneSelection, piece.Selectionnee,
-                $"Modification de la sélection de {piece.Nom}");
+                $"Modification de la sélection de {piece.Nom}",
+                source: SourceModification.Inventaire);
         }
         if (anciennePuissanceTactique != piece.AspectsTactiques?.Puissance)
         {
             await _historiqueService.EnregistrerModificationAsync(
                 TypeEntite.Piece, piece.Id, piece.Nom, "AspectsTactiques.Puissance", 
                 anciennePuissanceTactique, piece.AspectsTactiques?.Puissance,
-                $"Modification de la puissance tactique de {piece.Nom}");
+                $"Modification de la puissance tactique de {piece.Nom}",
+                source: SourceModification.Inventaire);
         }
         if (anciennePuissanceStrategique != piece.AspectsStrategiques?.Puissance)
         {
             await _historiqueService.EnregistrerModificationAsync(
                 TypeEntite.Piece, piece.Id, piece.Nom, "AspectsStrategiques.Puissance", 
                 anciennePuissanceStrategique, piece.AspectsStrategiques?.Puissance,
-                $"Modification de la puissance stratégique de {piece.Nom}");
+                $"Modification de la puissance stratégique de {piece.Nom}",
+                source: SourceModification.Inventaire);
         }
+
+        // Enregistrer la puissance globale de Lucie (sélectionnée et max) après toute modification
+        var puissanceSelectionnee = GetPuissanceLucieEscouade();
+        var puissanceMax = GetPuissanceMaxLucieEscouade();
+        await _historiqueService.EnregistrerPuissanceLucieAsync(estPuissanceMax: false, puissanceSelectionnee);
+        await _historiqueService.EnregistrerPuissanceLucieAsync(estPuissanceMax: true, puissanceMax);
     }
 }
 

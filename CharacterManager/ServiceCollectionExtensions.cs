@@ -14,10 +14,21 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IHostEnvironment environment)
     {
+        // Enable in-memory caching for computed statistics and other features
+        services.AddMemoryCache();
+
         // Register scoped services (order matters: ProfileService before PersonnageService)
         services.AddScoped<IProfileService, ProfileService>();
         services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
-        services.AddScoped<IHistoriqueModificationService, HistoriqueModificationService>();  // BEFORE PersonnageService
+        
+        // Register HistoriqueModificationService with lazy timeline service to break circular dependency
+        services.AddScoped<IHistoriqueModificationService>(provider =>
+        {
+            var context = provider.GetRequiredService<ApplicationDbContext>();
+            var timelineServiceLazy = new Lazy<ITeamPowerTimelineService>(() => provider.GetRequiredService<ITeamPowerTimelineService>());
+            return new HistoriqueModificationService(context, timelineServiceLazy);
+        });
+        
         services.AddScoped<IPersonnageService, PersonnageService>();
         services.AddScoped<IPmlImportService>(provider => new PmlImportService(
             provider.GetRequiredService<ApplicationDbContext>(),
@@ -29,6 +40,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IClientLocalizationService, ClientLocalizationService>();
         services.AddScoped<IDatabaseInitializationService, DatabaseInitializationService>();
         services.AddScoped<IStatistiquesService, StatistiquesService>();
+        services.AddScoped<ITeamPowerTimelineService, TeamPowerTimelineService>();
 
         // Register singleton services
         services.AddSingleton<IAppVersionService, AppVersionService>();

@@ -74,7 +74,9 @@ public class CreerClassementModalTests : BlazorComponentTestBase
         Services.AddSingleton<ILanguageContextService>(languageContext);
         Services.AddSingleton<IClientLocalizationService>(localizationService);
         Services.AddSingleton(_personnageService);
+        Services.AddSingleton<IPersonnageService>(_personnageService);
         Services.AddSingleton(_historiqueClassementService);
+        Services.AddSingleton<IHistoriqueClassementService>(_historiqueClassementService);
         Services.AddSingleton(_context);
     }
 

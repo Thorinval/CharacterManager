@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+using System.Text;
 
 namespace CharacterManager.Tests;
 
@@ -16,6 +17,9 @@ public class DatabaseInitializationServiceTests : IDisposable
 
     public DatabaseInitializationServiceTests()
     {
+        // Configure l'encodage de la console en UTF-8 pour l'affichage correct des accents
+        Console.OutputEncoding = Encoding.UTF8;
+
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;

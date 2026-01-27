@@ -14,4 +14,9 @@ public interface IDatabaseInitializationService
     /// Initializes default AppSettings and checks database state
     /// </summary>
     Task InitializeAppSettingsAndCheckStateAsync();
+
+        /// <summary>
+        /// Génère rétroactivement l'historique de puissance Lucie à partir des classements et modifications existants
+        /// </summary>
+        Task<(int ClassementsTraites, int JoursTraites)> GenerateLuciePowerHistoryAsync(IHistoriqueModificationService historiqueService, IPersonnageService personnageService);
 }

@@ -1,4 +1,5 @@
 using CharacterManager.Server.Models;
+using CharacterManager.Server.Models.Enums;
 using CharacterManager.Server.Data;
 using CharacterManager.Server.Constants;
 using Microsoft.EntityFrameworkCore;
@@ -41,9 +42,10 @@ public class HistoriqueModificationImportRequest
 /// Extension .pml pour les fichiers d'import
 /// Supporte les sections : HistoriqueClassements, inventaire, template
 /// </summary>
-public class PmlImportService(ApplicationDbContext context, IHistoriqueModificationService? historiqueService = null) : PmlServiceBase(context), IPmlImportService
+public class PmlImportService(ApplicationDbContext context, IHistoriqueModificationService? historiqueService = null, ITeamPowerTimelineService? timelineService = null) : PmlServiceBase(context), IPmlImportService
 {
     private readonly IHistoriqueModificationService? _historiqueService = historiqueService;
+    private readonly ITeamPowerTimelineService? _timelineService = timelineService;
 
     // Constantes pour les types de données dans les logs
     private const string DataTypePuissance = "Puissance";
@@ -117,6 +119,20 @@ public class PmlImportService(ApplicationDbContext context, IHistoriqueModificat
             }
 
             result.IsSuccess = result.SuccessCount > 0 && string.IsNullOrEmpty(result.Error);
+
+            // Recomputer la timeline matérialisée après un import succès
+            if (result.IsSuccess && _timelineService != null)
+            {
+                try
+                {
+                    await _timelineService.RecomputeAllAsync();
+                }
+                catch (Exception ex)
+                {
+                    // Log l'erreur mais ne pas bloquer l'import
+                    result.Errors.Add($"Erreur lors de la récomputation de la timeline: {ex.Message}");
+                }
+            }
 
             // Enregistrer le nom du fichier importé
             if (!string.IsNullOrEmpty(fileName))
@@ -499,7 +515,15 @@ public class PmlImportService(ApplicationDbContext context, IHistoriqueModificat
 
                     if (_historiqueService != null)
                     {
-                        await _historiqueService.EnregistrerCreationAsync(TypeEntite.Personnage, persisted.Id, persisted.Nom, persisted, "Import inventaire", DateTime.UtcNow, estImportation: true);
+                        await _historiqueService.EnregistrerCreationAsync(
+                            TypeEntite.Personnage, 
+                            persisted.Id, 
+                            persisted.Nom, 
+                            persisted, 
+                            "Import inventaire", 
+                            DateTime.UtcNow, 
+                            estImportation: true,
+                            source: SourceModification.ImportPml);
                     }
                 }
             }
@@ -757,6 +781,7 @@ public class PmlImportService(ApplicationDbContext context, IHistoriqueModificat
     private async Task<int> ImportHistoriquesClassementAsync(IEnumerable<XElement> historiqueClassementElements, List<string> errors, List<ImportLogEntry> logs)
     {
         int importedCount = 0;
+        int? lastLuciePower = null;  // Track dernière puissance Lucie importée
 
         foreach (var historiqueClassementElement in historiqueClassementElements)
         {
@@ -838,7 +863,13 @@ public class PmlImportService(ApplicationDbContext context, IHistoriqueModificat
                 // Créer les entrées d'historique de modification pour chaque personnage du classement
                 if (_historiqueService != null)
                 {
-                    await CreateHistoriqueModificationsForClassement(historiqueClassement, errors, logs, null, forceOverwriteSameDate);
+                    await CreateHistoriqueModificationsForClassement(historiqueClassement, errors, logs, null, forceOverwriteSameDate, lastLuciePower);
+                }
+
+                // Tracker la dernière puissance Lucie pour la prochaine itération
+                if (historiqueClassement.PuissanceLucie > 0)
+                {
+                    lastLuciePower = historiqueClassement.PuissanceLucie;
                 }
             }
             catch (Exception ex)
@@ -1009,7 +1040,7 @@ public class PmlImportService(ApplicationDbContext context, IHistoriqueModificat
     /// Crée les entrées d'historique de modification pour chaque personnage du classement
     /// avec option de résoudre les conflits
     /// </summary>
-    private async Task CreateHistoriqueModificationsForClassement(HistoriqueClassement historiqueClassement, List<string> errors, List<ImportLogEntry> logs, Dictionary<string, bool>? conflictResolutions = null, bool forceOverwriteSameDate = false)
+    private async Task CreateHistoriqueModificationsForClassement(HistoriqueClassement historiqueClassement, List<string> errors, List<ImportLogEntry> logs, Dictionary<string, bool>? conflictResolutions = null, bool forceOverwriteSameDate = false, int? lastLuciePower = null)
     {
         if (_historiqueService == null)
             return;
@@ -1028,10 +1059,22 @@ public class PmlImportService(ApplicationDbContext context, IHistoriqueModificat
             await TryCreateHistoriqueModifications(mercenaire, dateClassement, errors, logs, ImportLogCategory.Mercenaires, conflictResolutions, forceOverwriteSameDate);
         }
 
-        // Vérifier et créer l'historique pour chaque androïde
-        foreach (var androide in historiqueClassement.Androides)
+        // Enregistrer la puissance de Lucie du classement
+        // Note: Lors de l'import, selected et max sont identiques (pas de détail des pièces)
+        var dateClassementDateTime = dateClassement.ToDateTime(TimeOnly.MinValue);
+        var puissanceLucieSelectionnee = historiqueClassement.PuissanceLucie;
+        
+        if (puissanceLucieSelectionnee > 0)
         {
-            await TryCreateHistoriqueModifications(androide, dateClassement, errors, logs, ImportLogCategory.Androides, conflictResolutions, forceOverwriteSameDate);
+            await _historiqueService.EnregistrerPuissanceLucieAsync(
+                estPuissanceMax: false, 
+                puissanceLucieSelectionnee, 
+                dateClassementDateTime,
+                estImportation: true,
+                ancienneValeur: lastLuciePower);  // Passer la dernière valeur connue
+        
+            AddLog(logs, ImportLogLevel.Ok, ImportLogCategory.Lucie, "Puissance", 
+                $"Puissance Lucie enregistrée pour le {dateClassement}: {puissanceLucieSelectionnee}", errors);
         }
     }
 
@@ -1083,21 +1126,47 @@ public class PmlImportService(ApplicationDbContext context, IHistoriqueModificat
         if (personnage == null)
             return;
 
-        // Vérifier si une modification existe déjà ce jour-là
+        var nomEntite = personnage.Nom;
+
+        // Vérifier si une modification existe déjà ce jour-là pour ce champ
+        // IMPORTANT: On vérifie TOUS les personnages avec ce nom, pas seulement l'ID trouvé,
+        // car il peut y avoir eu des suppressions/recréations qui changent l'ID
+        var nomNormalise = NormalizeUpper(request.NomPersonnage);
+        var allPersonnageIds = await _context.Personnages
+            .Where(p => p.Nom.ToUpper() == nomNormalise)
+            .Select(p => p.Id)
+            .ToListAsync();
+
         var existingModification = await _context.HistoriquesModifications
             .Where(h => h.TypeEntite == typeEntite
-                && h.EntiteId == personnage.Id
+                && allPersonnageIds.Contains(h.EntiteId)
                 && h.ChampModifie == request.ChampModifie
                 && h.DateModification.Date == dateTimeClassement.Date)
+            .OrderByDescending(h => h.DateModification)
             .FirstOrDefaultAsync();
 
         if (existingModification != null)
         {
-            await HandleExistingModification(existingModification, request, typeEntite, personnage.Id, dateTimeClassement);
+            // Vérifier si la valeur est déjà la bonne
+            var existingValue = existingModification.NouvelleValeur != null 
+                ? JsonSerializer.Deserialize<object>(existingModification.NouvelleValeur)?.ToString()
+                : null;
+            var newValue = request.NouvelleValeur.ToString();
+
+            if (existingValue == newValue)
+            {
+                // La modification existe déjà avec la bonne valeur, on ne fait rien
+                AddLog(request.Logs, ImportLogLevel.Ok, request.Category, request.ChampModifie, 
+                    $"{request.ChampModifie} de {request.NomPersonnage} déjà à jour pour le {request.DateClassement} (valeur {request.NouvelleValeur}).");
+                return;
+            }
+
+            // La modification existe mais avec une valeur différente
+            await HandleExistingModification(existingModification, request, typeEntite, existingModification.EntiteId, dateTimeClassement, nomEntite);
             return;
         }
 
-        await CreateNewModification(request, typeEntite, personnage.Id, dateTimeClassement);
+        await CreateNewModification(request, typeEntite, personnage.Id, dateTimeClassement, nomEntite);
     }
 
     /// <summary>
@@ -1106,7 +1175,7 @@ public class PmlImportService(ApplicationDbContext context, IHistoriqueModificat
     private async Task<Personnage?> GetOrCreatePersonnageForModification(HistoriqueModificationImportRequest request)
     {
         // Normaliser le nom en majuscules pour la recherche
-        var nomNormalise = request.NomPersonnage.ToUpperInvariant();
+        var nomNormalise = NormalizeUpper(request.NomPersonnage);
         
         var personnage = await _context.Personnages
             .FirstOrDefaultAsync(p => p.Nom.ToUpper() == nomNormalise);
@@ -1136,7 +1205,7 @@ public class PmlImportService(ApplicationDbContext context, IHistoriqueModificat
     /// <summary>
     /// Gère le cas où une modification existe déjà pour le même jour
     /// </summary>
-    private async Task HandleExistingModification(HistoriqueModification existingModification, HistoriqueModificationImportRequest request, TypeEntite typeEntite, int personnageId, DateTime dateTimeClassement)
+    private async Task HandleExistingModification(HistoriqueModification existingModification, HistoriqueModificationImportRequest request, TypeEntite typeEntite, int personnageId, DateTime dateTimeClassement, string nomEntite)
     {
         var conflictKey = $"{request.NomPersonnage}_{request.ChampModifie}_{request.DateClassement}";
         var shouldOverwrite = request.ForceOverwriteSameDate;
@@ -1148,7 +1217,7 @@ public class PmlImportService(ApplicationDbContext context, IHistoriqueModificat
 
         if (shouldOverwrite)
         {
-            await UpdateExistingModification(existingModification, request, typeEntite, personnageId, dateTimeClassement);
+            await UpdateExistingModification(existingModification, request, typeEntite, personnageId, dateTimeClassement, nomEntite);
         }
         else
         {
@@ -1159,7 +1228,7 @@ public class PmlImportService(ApplicationDbContext context, IHistoriqueModificat
     /// <summary>
     /// Met à jour une modification d'historique existante
     /// </summary>
-    private async Task UpdateExistingModification(HistoriqueModification existingModification, HistoriqueModificationImportRequest request, TypeEntite typeEntite, int personnageId, DateTime dateTimeClassement)
+    private async Task UpdateExistingModification(HistoriqueModification existingModification, HistoriqueModificationImportRequest request, TypeEntite typeEntite, int personnageId, DateTime dateTimeClassement, string nomEntite)
     {
         var previousMod = await _context.HistoriquesModifications
             .Where(h => h.TypeEntite == typeEntite
@@ -1173,9 +1242,14 @@ public class PmlImportService(ApplicationDbContext context, IHistoriqueModificat
             ? JsonSerializer.Deserialize<object>(previousMod.NouvelleValeur)
             : request.NouvelleValeur;
 
+        existingModification.NomEntite = nomEntite;
         existingModification.AncienneValeur = ancienneVal != null ? JsonSerializer.Serialize(ancienneVal) : null;
         existingModification.NouvelleValeur = JsonSerializer.Serialize(request.NouvelleValeur);
-        existingModification.DateMiseAJour = dateTimeClassement;
+        existingModification.DateModification = dateTimeClassement;
+        existingModification.DateMiseAJour = DateTime.UtcNow;
+        existingModification.Description = $"Mise à jour du classement du {request.DateClassement}";
+        existingModification.EstImportation = true;
+        existingModification.Source = SourceModification.ImportClassement;
         _context.HistoriquesModifications.Update(existingModification);
         await _context.SaveChangesAsync();
         AddLog(request.Logs, ImportLogLevel.Warning, request.Category, request.ChampModifie, $"Modification du {request.ChampModifie} pour {request.NomPersonnage} mise à jour pour le {request.DateClassement}.", request.Errors);
@@ -1186,7 +1260,7 @@ public class PmlImportService(ApplicationDbContext context, IHistoriqueModificat
     /// <summary>
     /// Crée une nouvelle modification d'historique
     /// </summary>
-    private async Task CreateNewModification(HistoriqueModificationImportRequest request, TypeEntite typeEntite, int personnageId, DateTime dateTimeClassement)
+    private async Task CreateNewModification(HistoriqueModificationImportRequest request, TypeEntite typeEntite, int personnageId, DateTime dateTimeClassement, string nomEntite)
     {
         var previousModification = await _context.HistoriquesModifications
             .Where(h => h.TypeEntite == typeEntite
@@ -1205,13 +1279,14 @@ public class PmlImportService(ApplicationDbContext context, IHistoriqueModificat
             await _historiqueService!.EnregistrerModificationAsync(
                 typeEntite,
                 personnageId,
-                request.NomPersonnage,
+                nomEntite,
                 request.ChampModifie,
                 ancienneValeurNew,
                 request.NouvelleValeur,
                 $"Mise à jour du classement du {request.DateClassement}",
                 dateTimeClassement,
-                estImportation: true);
+                estImportation: true,
+                source: SourceModification.ImportClassement);
 
             AddLog(request.Logs, ImportLogLevel.Ok, request.Category, request.ChampModifie, $"{request.ChampModifie} de {request.NomPersonnage} enregistré pour le {request.DateClassement} (valeur {request.NouvelleValeur}).");
 

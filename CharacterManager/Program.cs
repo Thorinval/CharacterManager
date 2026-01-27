@@ -4,6 +4,10 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using CharacterManager.Components;
 using Serilog;
+using System.Text;
+
+// Set console encoding to UTF-8 for proper display of accented characters
+Console.OutputEncoding = Encoding.UTF8;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +27,16 @@ using (var scope = app.Services.CreateScope())
     var dbInitService = scope.ServiceProvider.GetRequiredService<IDatabaseInitializationService>();
 
     await dbInitService.InitializeDatabaseAsync();
-    await dbInitService.InitializeAppSettingsAndCheckStateAsync();
+    
+    // Initialize with service provider if it's the concrete implementation
+    if (dbInitService is DatabaseInitializationService concreteService)
+    {
+        await concreteService.InitializeAppSettingsAndCheckStateAsync(scope.ServiceProvider);
+    }
+    else
+    {
+        await dbInitService.InitializeAppSettingsAndCheckStateAsync();
+    }
 }
 
 // Security pipeline

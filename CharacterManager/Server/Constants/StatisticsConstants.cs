@@ -14,6 +14,8 @@ public static class StatisticsConstants
         public const string Selectionne = "Selectionne";
         public const string Puissance = "Puissance";
         public const string Rang = "Rang";
+        public const string PuissanceLucieSelectionnee = "PuissanceLucieSelectionnee";
+        public const string PuissanceLucieMax = "PuissanceLucieMax";
     }
 
     /// <summary>

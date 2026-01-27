@@ -163,9 +163,18 @@
                                     }
 
                                     <td class="lucie-cell">
-                                        @if (historique.Pieces?.Any() == true)
-                                        {
-                                            <div class="lucie-pills">
+                                        <div class="lucie-pills">
+                                            @if (historique.PuissanceLucie > 0)
+                                            {
+                                                <div class="lucie-pill" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold;" title="Puissance totale de Lucie">
+                                                    <div class="lucie-pill-header">
+                                                        <span class="lucie-pill-name">Puissance totale :</span>
+                                                    </div>
+                                                    <span class="lucie-pill-power">@historique.PuissanceLucie</span>
+                                                </div>
+                                            }
+                                            @if (historique.Pieces?.Any() == true)
+                                            {
                                                 @foreach (var piece in historique.Pieces)
                                                 {
                                                     <div class="lucie-pill" title="Puissance @piece.PuissanceLegacy">
@@ -176,12 +185,12 @@
                                                         <span class="lucie-pill-power">@piece.PuissanceLegacy</span>
                                                     </div>
                                                 }
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <span class="pill pill-puissance">Aucune pièce</span>
-                                        }
+                                            }
+                                            else if (historique.PuissanceLucie == 0)
+                                            {
+                                                <span class="pill pill-puissance">Aucune pièce</span>
+                                            }
+                                        </div>
                                     </td>
                                     <td>
                                         <div class="action-buttons">

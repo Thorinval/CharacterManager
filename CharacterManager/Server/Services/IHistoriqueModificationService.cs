@@ -1,5 +1,6 @@
 using CharacterManager.Server.Constants;
 using CharacterManager.Server.Models;
+using CharacterManager.Server.Models.Enums;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
@@ -20,7 +21,8 @@ public interface IHistoriqueModificationService
         object? donnees,
         string? description = null,
         DateTime? dateModification = null,
-        bool estImportation = false);
+        bool estImportation = false,
+        SourceModification source = SourceModification.NonSpecifiee);
 
     /// <summary>
     /// Enregistre une modification d'entité
@@ -41,7 +43,8 @@ public interface IHistoriqueModificationService
         object? nouvelleValeur,
         string? description = null,
         DateTime? dateModification = null,
-        bool estImportation = false);
+        bool estImportation = false,
+        SourceModification source = SourceModification.NonSpecifiee);
 
     /// <summary>
     /// Enregistre une suppression d'entité
@@ -53,7 +56,8 @@ public interface IHistoriqueModificationService
         object? donnees,
         string? description = null,
         DateTime? dateModification = null,
-        bool estImportation = false);
+        bool estImportation = false,
+        SourceModification source = SourceModification.NonSpecifiee);
 
     /// <summary>
     /// Récupère l'historique des modifications d'une entité
@@ -124,4 +128,11 @@ public interface IHistoriqueModificationService
     /// Importe l'historique (JSON) avec résolutions de conflits
     /// </summary>
     Task<ImportResult> ImportAsync(Stream jsonStream, Dictionary<string, bool> conflictResolutions, List<ImportConflict>? originalConflicts = null);
-}
+
+    /// <summary>
+    /// Enregistre ou met à jour la puissance de Lucie pour le jour courant.
+    /// Gère 2 types : puissance sélectionnée (EstPuissanceMax=false) et puissance max (EstPuissanceMax=true).
+    /// Si un enregistrement existe déjà pour le jour, on met à jour la nouvelle valeur.
+    /// Sinon, on crée un nouvel enregistrement en reprenant la dernière puissance des jours précédents comme ancienne valeur.
+    /// </summary>
+    Task EnregistrerPuissanceLucieAsync(bool estPuissanceMax, int puissance, DateTime? dateModification = null, bool estImportation = false, int? ancienneValeur = null);}

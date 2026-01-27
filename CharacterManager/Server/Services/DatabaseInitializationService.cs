@@ -2,6 +2,7 @@ using CharacterManager.Server.Data;
 using CharacterManager.Server.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace CharacterManager.Server.Services;
@@ -13,11 +14,13 @@ public class DatabaseInitializationService : IDatabaseInitializationService
 {
     private readonly ApplicationDbContext _db;
     private readonly ILogger<DatabaseInitializationService> _logger;
+    private readonly IServiceProvider? _serviceProvider;
 
-    public DatabaseInitializationService(ApplicationDbContext db, ILogger<DatabaseInitializationService> logger)
+    public DatabaseInitializationService(ApplicationDbContext db, ILogger<DatabaseInitializationService> logger, IServiceProvider? serviceProvider = null)
     {
         _db = db;
         _logger = logger;
+        _serviceProvider = serviceProvider;
     }
 
     /// <summary>
@@ -53,6 +56,14 @@ public class DatabaseInitializationService : IDatabaseInitializationService
     /// </summary>
     public async Task InitializeAppSettingsAndCheckStateAsync()
     {
+        await InitializeAppSettingsAndCheckStateAsync(_serviceProvider);
+    }
+
+    /// <summary>
+    /// Initializes default AppSettings and checks database state, with optional service provider for timeline seeding
+    /// </summary>
+    public async Task InitializeAppSettingsAndCheckStateAsync(IServiceProvider? serviceProvider)
+    {
         try
         {
             var settings = await _db.AppSettings.OrderBy(x => x.Id).FirstOrDefaultAsync();
@@ -84,6 +95,23 @@ public class DatabaseInitializationService : IDatabaseInitializationService
             if (dbIsEmpty)
             {
                 Console.WriteLine("[Init] La base de données est vide. Préparez l'import d'un fichier .pml pour initialisation.");
+            }
+
+            // Seed timeline if empty (non-blocking)
+            if (serviceProvider != null)
+            {
+                try
+                {
+                    var timelineService = serviceProvider.GetService<ITeamPowerTimelineService>();
+                    if (timelineService != null)
+                    {
+                        await timelineService.SeedIfEmptyAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to seed timeline; it will be populated on first data change");
+                }
             }
         }
         catch (Exception ex)
@@ -305,6 +333,21 @@ public class DatabaseInitializationService : IDatabaseInitializationService
     {
         try
         {
+            // Check if using a relational database provider
+            if (!_db.Database.IsRelational())
+            {
+                // For in-memory database, check if the property exists in the entity model
+                var entityType = _db.Model.GetEntityTypes()
+                    .FirstOrDefault(e => e.GetTableName()?.Equals(table, StringComparison.OrdinalIgnoreCase) == true);
+                
+                if (entityType != null)
+                {
+                    return entityType.GetProperties()
+                        .Any(p => p.Name.Equals(column, StringComparison.OrdinalIgnoreCase));
+                }
+                return false;
+            }
+
             using var conn = (SqliteConnection)_db.Database.GetDbConnection();
             if (conn.State != System.Data.ConnectionState.Open)
                 await conn.OpenAsync();
@@ -361,6 +404,119 @@ public class DatabaseInitializationService : IDatabaseInitializationService
         }
         return false;
     }
+
+        /// <summary>
+        /// Génère rétroactivement l'historique de puissance Lucie à partir des classements et modifications existants
+        /// </summary>
+        public async Task<(int ClassementsTraites, int JoursTraites)> GenerateLuciePowerHistoryAsync(IHistoriqueModificationService historiqueService, IPersonnageService personnageService)
+        {
+            int classementCount = 0;
+            int jourCount = 0;
+
+            try
+            {
+                _logger.LogInformation("[LucieHistory] Début de la génération de l'historique de puissance Lucie");
+
+                // 1. Traiter les classements existants
+                var classements = await _db.HistoriquesClassement
+                    .OrderBy(h => h.DateEnregistrement)
+                    .ToListAsync();
+
+                _logger.LogInformation("[LucieHistory] Trouvé {Count} classements", classements.Count);
+
+                foreach (var classement in classements)
+                {
+                    var dateClassement = classement.DateEnregistrement.ToDateTime(TimeOnly.MinValue);
+                    var puissanceLucie = classement.PuissanceLucie;
+
+                    // Vérifier si un enregistrement existe déjà
+                    var existeDeja = await _db.HistoriquesModifications
+                        .AnyAsync(h => h.TypeEntite == TypeEntite.Piece
+                            && h.EntiteId == -1
+                            && h.ChampModifie == Constants.StatisticsConstants.HistoryFields.PuissanceLucieSelectionnee
+                            && h.DateModification.Date == dateClassement.Date);
+
+                    if (!existeDeja && puissanceLucie > 0)
+                    {
+                        await historiqueService.EnregistrerPuissanceLucieAsync(false, puissanceLucie, dateClassement);
+                        await historiqueService.EnregistrerPuissanceLucieAsync(true, puissanceLucie, dateClassement);
+                        classementCount++;
+                        _logger.LogInformation("[LucieHistory] ✓ {Date}: Puissance {Power}", classement.DateEnregistrement, puissanceLucie);
+                    }
+                }
+
+                _logger.LogInformation("[LucieHistory] {Count} classements traités", classementCount);
+
+                // 2. Traiter les modifications de pièces
+                var modificationsPieces = await _db.HistoriquesModifications
+                    .Where(h => h.TypeEntite == TypeEntite.Piece
+                        && h.EntiteId > 0
+                        && (h.ChampModifie == "AspectsTactiques.Puissance"
+                            || h.ChampModifie == "AspectsStrategiques.Puissance"
+                            || h.ChampModifie == "Selectionnee"))
+                    .OrderBy(h => h.DateModification)
+                    .ToListAsync();
+
+                _logger.LogInformation("[LucieHistory] Trouvé {Count} modifications de pièces", modificationsPieces.Count);
+
+                var joursAvecModifications = modificationsPieces
+                    .Select(m => m.DateModification.Date)
+                    .Distinct()
+                    .OrderBy(d => d)
+                    .ToList();
+
+                _logger.LogInformation("[LucieHistory] Sur {Count} jours distincts", joursAvecModifications.Count);
+
+                foreach (var jour in joursAvecModifications)
+                {
+                    // Vérifier si un enregistrement existe déjà
+                    var existeDeja = await _db.HistoriquesModifications
+                        .AnyAsync(h => h.TypeEntite == TypeEntite.Piece
+                            && h.EntiteId == -1
+                            && h.ChampModifie == Constants.StatisticsConstants.HistoryFields.PuissanceLucieSelectionnee
+                            && h.DateModification.Date == jour);
+
+                    if (!existeDeja)
+                    {
+                        // Utiliser la puissance actuelle comme valeur de référence
+                        var puissanceSelectionnee = personnageService.GetPuissanceLucieEscouade();
+                        var puissanceMax = personnageService.GetPuissanceMaxLucieEscouade();
+
+                        if (puissanceSelectionnee > 0 || puissanceMax > 0)
+                        {
+                            await historiqueService.EnregistrerPuissanceLucieAsync(false, puissanceSelectionnee, jour);
+                            await historiqueService.EnregistrerPuissanceLucieAsync(true, puissanceMax, jour);
+                            jourCount++;
+                            _logger.LogInformation("[LucieHistory] ✓ {Date:yyyy-MM-dd}: Sélection={Selection}, Max={Max}", jour, puissanceSelectionnee, puissanceMax);
+                        }
+                    }
+                }
+
+                _logger.LogInformation("[LucieHistory] {Count} jours traités", jourCount);
+
+                // 3. Vérification finale
+                var totalLucieSelectionnee = await _db.HistoriquesModifications
+                    .CountAsync(h => h.TypeEntite == TypeEntite.Piece
+                        && h.EntiteId == -1
+                        && h.ChampModifie == Constants.StatisticsConstants.HistoryFields.PuissanceLucieSelectionnee);
+
+                var totalLucieMax = await _db.HistoriquesModifications
+                    .CountAsync(h => h.TypeEntite == TypeEntite.Piece
+                        && h.EntiteId == -2
+                        && h.ChampModifie == Constants.StatisticsConstants.HistoryFields.PuissanceLucieMax);
+
+                _logger.LogInformation("[LucieHistory] Enregistrements PuissanceLucieSelectionnee: {Count}", totalLucieSelectionnee);
+                _logger.LogInformation("[LucieHistory] Enregistrements PuissanceLucieMax: {Count}", totalLucieMax);
+                _logger.LogInformation("[LucieHistory] Génération terminée avec succès");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[LucieHistory] Erreur lors de la génération de l'historique");
+                throw;
+            }
+
+            return (classementCount, jourCount);
+        }
 }
 
 

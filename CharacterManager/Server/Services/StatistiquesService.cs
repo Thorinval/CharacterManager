@@ -193,6 +193,22 @@ public class StatistiquesService : IStatistiquesService
 
     public List<TeamPowerEvolutionData> GetSelectedTeamPowerEvolutionData()
     {
+        // Try to return from materialized timeline first
+        try
+        {
+            var cached = _dbContext.TeamPowerTimelineRecords
+                .Where(r => r.Type == Models.Enums.TeamPowerTimelineType.Selected)
+                .OrderBy(r => r.Date)
+                .Select(r => new TeamPowerEvolutionData { Date = r.Date, TotalPower = r.TotalPower })
+                .ToList();
+            if (cached.Any())
+                return cached;
+        }
+        catch
+        {
+            // Fallback to compute if table missing
+        }
+
         var result = new List<TeamPowerEvolutionData>();
 
         var premierClassement = _dbContext.HistoriquesClassement
@@ -209,11 +225,12 @@ public class StatistiquesService : IStatistiquesService
         });
 
         var dateDebut = premierClassement.DateEnregistrement.ToDateTime(TimeOnly.MinValue);
-        var personnagesSelectionnes = GetInitialSelectedPersonnages(dateDebut);
-        int puissanceActuelle = premierClassement.PuissanceTotale;
 
+        // Récupérer les modifications affectant l'équipe sélectionnée
         var modifications = _dbContext.HistoriquesModifications
-            .Where(h => h.TypeEntite == TypeEntite.Personnage && h.DateModification > dateDebut)
+            .Where(h => (h.TypeEntite == TypeEntite.Personnage || 
+                        (h.TypeEntite == TypeEntite.Piece && h.EntiteId == -1 && h.ChampModifie == StatisticsConstants.HistoryFields.PuissanceLucieSelectionnee))
+                     && h.DateModification > dateDebut)
             .OrderBy(h => h.DateModification)
             .ToList();
 
@@ -221,59 +238,102 @@ public class StatistiquesService : IStatistiquesService
             .GroupBy(m => DateOnly.FromDateTime(m.DateModification))
             .OrderBy(g => g.Key);
 
-        ProcessSelectedTeamModifications(modificationsParDate, personnagesSelectionnes, ref puissanceActuelle, result);
+        // Pour chaque date de modification, recalculer complètement la puissance sélectionnée
+        // en prenant en compte l'historique complet jusqu'à cette date, sans utiliser de deltas
+        ProcessSelectedTeamDailyModifications(modificationsParDate, result);
         AddOtherClassements(premierClassement.DateEnregistrement, result);
         AddCurrentSelectedPower(result);
 
         return result.OrderBy(r => r.Date).ToList();
     }
 
-    private void ProcessSelectedTeamModifications(
+    private void ProcessSelectedTeamDailyModifications(
         IOrderedEnumerable<IGrouping<DateOnly, HistoriqueModification>> modificationsParDate,
-        HashSet<int> personnagesSelectionnes,
-        ref int puissanceActuelle,
         List<TeamPowerEvolutionData> result)
     {
-        foreach (var groupe in modificationsParDate)
+        foreach (var dateKey in modificationsParDate.Select(groupe => groupe.Key))
         {
-            var (selectionModifiee, puissanceModifiee, updatedPower) = ProcessSelectedTeamGroup(groupe, personnagesSelectionnes, puissanceActuelle);
-            puissanceActuelle = updatedPower;
+            // Recalculer complètement l'équipe sélectionnée à cette date
+            // en prenant les états actuels de chaque personnage et la puissance Lucie
+            var dateTime = dateKey.ToDateTime(TimeOnly.MinValue);
+            var puissanceSelectionnee = CalculateSelectedTeamPowerAtDate(dateTime);
 
-            if (selectionModifiee || puissanceModifiee)
+            if (result.Count == 0 || result[result.Count - 1].TotalPower != puissanceSelectionnee)
             {
                 result.Add(new TeamPowerEvolutionData
                 {
-                    Date = groupe.Key,
-                    TotalPower = puissanceActuelle
+                    Date = dateKey,
+                    TotalPower = puissanceSelectionnee
                 });
             }
         }
     }
 
-    private static (bool SelectionModifiee, bool PuissanceModifiee, int UpdatedPower) ProcessSelectedTeamGroup(
-        IGrouping<DateOnly, HistoriqueModification> groupe,
-        HashSet<int> personnagesSelectionnes,
-        int puissanceActuelle)
+    /// <summary>
+    /// Calcule la puissance totale de l'équipe sélectionnée à une date donnée en prenant la dernière valeur connue de chaque personnage
+    /// </summary>
+    private int CalculateSelectedTeamPowerAtDate(DateTime dateTime)
     {
-        bool selectionModifiee = false;
-        bool puissanceModifiee = false;
+        // Appliquer les modifications de sélection jusqu'à cette date
+        var modificationsSelection = _dbContext.HistoriquesModifications
+            .Where(h => h.TypeEntite == TypeEntite.Personnage 
+                     && h.ChampModifie == StatisticsConstants.HistoryFields.Selectionne
+                     && h.DateModification <= dateTime)
+            .OrderByDescending(h => h.DateModification)
+            .ToList();
 
-        foreach (var modif in groupe)
+        // Construire l'état de sélection à cette date
+        var selectionStates = new Dictionary<int, bool>();
+        foreach (var modif in modificationsSelection.Where(m => !selectionStates.ContainsKey(m.EntiteId)))
         {
-            if (modif.ChampModifie == StatisticsConstants.HistoryFields.Selectionne)
-            {
-                selectionModifiee = true;
-                UpdateSelectionState(modif, personnagesSelectionnes);
-            }
+            selectionStates[modif.EntiteId] = modif.NouvelleValeur?.ToLower() == AppConstants.BooleanStrings.True;
+        }
 
-            if (modif.ChampModifie == StatisticsConstants.HistoryFields.Puissance && personnagesSelectionnes.Contains(modif.EntiteId))
+        // Reconstruire l'ensemble des personnages sélectionnés à cette date
+        var personnagesSelectionnésAtDate = new HashSet<int>();
+        foreach (var p in _dbContext.Personnages.Where(x => x.GetType() == typeof(Personnage)).ToList())
+        {
+            if (selectionStates.ContainsKey(p.Id))
             {
-                puissanceModifiee = true;
-                puissanceActuelle = UpdateTeamPower(modif, personnagesSelectionnes, puissanceActuelle);
+                if (selectionStates[p.Id])
+                    personnagesSelectionnésAtDate.Add(p.Id);
+            }
+            else if (p.Selectionne)
+            {
+                personnagesSelectionnésAtDate.Add(p.Id);
             }
         }
 
-        return (selectionModifiee, puissanceModifiee, puissanceActuelle);
+        // Calculer la puissance totale : personnages sélectionnés + puissance Lucie sélectionnée
+        var puissancePersonnages = _dbContext.Personnages
+            .Where(p => p.GetType() == typeof(Personnage) && personnagesSelectionnésAtDate.Contains(p.Id))
+            .AsEnumerable()
+            .Sum(p => GetPersonnagePuissanceAtDate(p.Id, dateTime));
+
+        var puissanceLucie = GetSelectedLuciePowerAtDate(dateTime);
+
+        return puissancePersonnages + puissanceLucie;
+    }
+
+    /// <summary>
+    /// Récupère la puissance sélectionnée de Lucie à une date donnée (dernière valeur connue)
+    /// </summary>
+    private int GetSelectedLuciePowerAtDate(DateTime dateTime)
+    {
+        // Chercher l'historique des modifications de puissance sélectionnée de Lucie
+        var historyAtDate = _dbContext.HistoriquesModifications
+            .Where(h => h.EntiteId == -1 
+                     && h.TypeEntite == TypeEntite.Piece
+                     && h.ChampModifie == StatisticsConstants.HistoryFields.PuissanceLucieSelectionnee
+                     && h.DateModification <= dateTime)
+            .OrderByDescending(h => h.DateModification)
+            .FirstOrDefault();
+
+        if (historyAtDate != null && int.TryParse(historyAtDate.NouvelleValeur, out int selectedValue))
+            return selectedValue;
+
+        // Pas d'historique : retourner 0
+        return 0;
     }
 
     private void AddOtherClassements(DateOnly premierClassementDate, List<TeamPowerEvolutionData> result)
@@ -296,22 +356,42 @@ public class StatistiquesService : IStatistiquesService
     private void AddCurrentSelectedPower(List<TeamPowerEvolutionData> result)
     {
         var today = DateOnly.FromDateTime(DateTime.Now);
-        if (!result.Any(r => r.Date == today))
+        var currentPower = _personnageService.GetPuissanceEscouade();
+
+        // Mettre à jour l'entrée du jour si elle existe, sinon l'ajouter
+        var todayEntry = result.FirstOrDefault(r => r.Date == today);
+        if (todayEntry != null)
         {
-            var currentPower = _personnageService.GetPuissanceEscouade();
-            if (currentPower > 0)
+            todayEntry.TotalPower = currentPower;
+        }
+        else if (currentPower > 0)
+        {
+            result.Add(new TeamPowerEvolutionData
             {
-                result.Add(new TeamPowerEvolutionData
-                {
-                    Date = today,
-                    TotalPower = currentPower
-                });
-            }
+                Date = today,
+                TotalPower = currentPower
+            });
         }
     }
 
     public List<TeamPowerEvolutionData> GetBestTeamPowerEvolutionData()
     {
+        // Try to return from materialized timeline first
+        try
+        {
+            var cached = _dbContext.TeamPowerTimelineRecords
+                .Where(r => r.Type == Models.Enums.TeamPowerTimelineType.Best)
+                .OrderBy(r => r.Date)
+                .Select(r => new TeamPowerEvolutionData { Date = r.Date, TotalPower = r.TotalPower })
+                .ToList();
+            if (cached.Any())
+                return cached;
+        }
+        catch
+        {
+            // Fallback to compute if table missing
+        }
+
         var result = new List<TeamPowerEvolutionData>();
 
         var premierClassement = _dbContext.HistoriquesClassement
@@ -328,11 +408,12 @@ public class StatistiquesService : IStatistiquesService
         });
 
         var dateDebut = premierClassement.DateEnregistrement.ToDateTime(TimeOnly.MinValue);
-        var personnagesSelectionnes = GetInitialSelectedPersonnages(dateDebut);
-        int puissanceEquipe = premierClassement.PuissanceTotale;
 
+        // Récupérer les modifications des personnages ET de la puissance de Lucie max
         var modifications = _dbContext.HistoriquesModifications
-            .Where(h => h.TypeEntite == TypeEntite.Personnage && h.DateModification > dateDebut)
+            .Where(h => (h.TypeEntite == TypeEntite.Personnage || 
+                        (h.TypeEntite == TypeEntite.Piece && h.EntiteId == -2 && h.ChampModifie == StatisticsConstants.HistoryFields.PuissanceLucieMax))
+                     && h.DateModification > dateDebut)
             .OrderBy(h => h.DateModification)
             .ToList();
 
@@ -340,125 +421,223 @@ public class StatistiquesService : IStatistiquesService
             .GroupBy(m => DateOnly.FromDateTime(m.DateModification))
             .OrderBy(g => g.Key);
 
-        ProcessDailyModifications(modificationsParDate, personnagesSelectionnes, ref puissanceEquipe, result);
+        // Si aucun historique exploitable avant la première date d'historique, aligner la courbe "meilleure" sur l'équipe sélectionnée
+        var earliestHistoryDate = modificationsParDate.Any() ? modificationsParDate.First().Key : (DateOnly?)null;
+        if (earliestHistoryDate.HasValue)
+        {
+            var selectedTimeline = GetSelectedTeamPowerEvolutionData();
+            var preHistoryPoints = selectedTimeline.Where(p => p.Date < earliestHistoryDate.Value).ToList();
+            
+            foreach (var point in preHistoryPoints)
+            {
+                var existing = result.FirstOrDefault(r => r.Date == point.Date);
+                if (existing != null)
+                {
+                    existing.TotalPower = point.TotalPower;
+                }
+                else
+                {
+                    result.Add(new TeamPowerEvolutionData { Date = point.Date, TotalPower = point.TotalPower });
+                }
+            }
+            
+            result = result.OrderBy(r => r.Date).ToList();
+        }
+
+        ProcessDailyModifications(modificationsParDate, result);
         AddCurrentBestPower(result);
 
         return result.OrderBy(r => r.Date).ToList();
     }
 
-    private HashSet<int> GetInitialSelectedPersonnages(DateTime dateDebut)
-    {
-        var personnagesSelectionnes = new HashSet<int>(
-            _dbContext.Personnages
-                .Where(p => p.Selectionne)
-                .Select(p => p.Id)
-        );
-        
-        var modificationsAntérieures = _dbContext.HistoriquesModifications
-            .Where(h => h.TypeEntite == TypeEntite.Personnage 
-                     && h.ChampModifie == StatisticsConstants.HistoryFields.Selectionne
-                     && h.DateModification <= dateDebut)
-            .OrderByDescending(h => h.DateModification)
-            .ToList();
-
-        foreach (var modif in modificationsAntérieures)
-        {
-            if (modif.AncienneValeur?.ToLower() == AppConstants.BooleanStrings.True)
-                personnagesSelectionnes.Add(modif.EntiteId);
-            else
-                personnagesSelectionnes.Remove(modif.EntiteId);
-        }
-
-        return personnagesSelectionnes;
-    }
-
     private void ProcessDailyModifications(IOrderedEnumerable<IGrouping<DateOnly, HistoriqueModification>> modificationsParDate, 
-        HashSet<int> personnagesSelectionnes, ref int puissanceEquipe, List<TeamPowerEvolutionData> result)
+        List<TeamPowerEvolutionData> result)
     {
-        foreach (var groupe in modificationsParDate)
+        foreach (var dateKey in modificationsParDate.Select(groupe => groupe.Key))
         {
-            var (needsRecalculation, updatedPower) = ProcessModificationGroup(groupe, personnagesSelectionnes, puissanceEquipe);
-            puissanceEquipe = updatedPower;
+            // Pour la meilleure équipe, toujours recalculer au lieu d'utiliser des deltas
+            // car les modifications Lucie Max ne correspondent pas à la base sélectionnée
+            var puissanceMax = CalculateBestTeamPowerAtDate(dateKey);
 
-            var puissanceMax = needsRecalculation 
-                ? _personnageService.GetPuissanceMaxEscouade() 
-                : puissanceEquipe;
-
-            if (result[result.Count - 1].TotalPower != puissanceMax)
+            if (result.Count == 0 || result[result.Count - 1].TotalPower != puissanceMax)
             {
                 result.Add(new TeamPowerEvolutionData
                 {
-                    Date = groupe.Key,
+                    Date = dateKey,
                     TotalPower = puissanceMax
                 });
             }
         }
     }
 
-    private static (bool NeedsRecalculation, int UpdatedPower) ProcessModificationGroup(
-        IGrouping<DateOnly, HistoriqueModification> groupe, 
-        HashSet<int> personnagesSelectionnes, 
-        int puissanceEquipe)
+    /// <summary>
+    /// Calcule la meilleure puissance d'équipe possible à une date donnée en utilisant l'historique
+    /// </summary>
+    private int CalculateBestTeamPowerAtDateForDateTime(DateTime dateTime, bool useCurrentState = false)
     {
-        bool recalculerMax = false;
 
-        foreach (var modif in groupe)
-        {
-            UpdateSelectionState(modif, personnagesSelectionnes);
-            puissanceEquipe = UpdateTeamPower(modif, personnagesSelectionnes, puissanceEquipe);
-            
-            if (ShouldRecalculateMaxPower(modif, personnagesSelectionnes))
-                recalculerMax = true;
-        }
+        // Récupérer tous les personnages et leurs états à cette date
+        var mercenairesAtDate = _dbContext.Personnages
+            .Where(p => p.Type == TypePersonnage.Mercenaire && p.GetType() == typeof(Personnage))
+            .AsEnumerable()
+            .Select(p => new
+            {
+                Personnage = p,
+                Puissance = GetPersonnagePuissanceAtDate(p.Id, dateTime),
+                Niveau = GetPersonnagePropertyAtDate(p.Id, StatisticsConstants.HistoryFields.Niveau, dateTime, p.Niveau),
+                Rang = GetPersonnagePropertyAtDate(p.Id, StatisticsConstants.HistoryFields.Rang, dateTime, p.Rang)
+            })
+            .OrderByDescending(x => x.Puissance)
+            .Take(8)
+            .ToList();
 
-        return (recalculerMax, puissanceEquipe);
+        var androidesAtDate = _dbContext.Personnages
+            .Where(p => p.Type == TypePersonnage.Androide && p.GetType() == typeof(Personnage))
+            .AsEnumerable()
+            .Select(p => new
+            {
+                Personnage = p,
+                Puissance = GetPersonnagePuissanceAtDate(p.Id, dateTime)
+            })
+            .OrderByDescending(x => x.Puissance)
+            .Take(3)
+            .ToList();
+
+        var commandantsAtDate = _dbContext.Personnages
+            .Where(p => p.Type == TypePersonnage.Commandant && p.GetType() == typeof(Personnage))
+            .AsEnumerable()
+            .Select(p => new
+            {
+                Personnage = p,
+                Puissance = GetPersonnagePuissanceAtDate(p.Id, dateTime),
+                Rang = GetPersonnagePropertyAtDate(p.Id, StatisticsConstants.HistoryFields.Rang, dateTime, p.Rang)
+            })
+            .OrderByDescending(x => x.Puissance + x.Rang * 20)
+            .Take(1)
+            .ToList();
+
+        // Calculer la meilleure puissance Lucie à cette date (reconstruire depuis l'historique et les pièces)
+        var bestLuciePowerAtDate = CalculateBestLuciePowerAtDate(dateTime, useCurrentState);
+
+        var bestMercenairePower = mercenairesAtDate.Sum(m => m.Puissance);
+        var bestAndroidePower = androidesAtDate.Sum(a => a.Puissance);
+        var bestCommandantPower = commandantsAtDate.Any() 
+            ? commandantsAtDate[0].Puissance + commandantsAtDate[0].Rang * 20 
+            : 0;
+
+        return bestMercenairePower + bestAndroidePower + bestCommandantPower + bestLuciePowerAtDate;
     }
 
-    private static void UpdateSelectionState(HistoriqueModification modif, HashSet<int> personnagesSelectionnes)
+    /// <summary>
+    /// Surcharge pour DateOnly qui convertit à minuit du jour
+    /// </summary>
+    private int CalculateBestTeamPowerAtDate(DateOnly date)
     {
-        if (modif.ChampModifie == StatisticsConstants.HistoryFields.Selectionne)
-        {
-            if (modif.NouvelleValeur?.ToLower() == AppConstants.BooleanStrings.True)
-                personnagesSelectionnes.Add(modif.EntiteId);
-            else
-                personnagesSelectionnes.Remove(modif.EntiteId);
-        }
+        var dateTime = date.ToDateTime(TimeOnly.MinValue);
+        return CalculateBestTeamPowerAtDateForDateTime(dateTime, false);
     }
 
-    private static int UpdateTeamPower(HistoriqueModification modif, HashSet<int> personnagesSelectionnes, int puissanceEquipe)
+    /// <summary>
+    /// Calcule la meilleure puissance Lucie possible à une date donnée
+    /// </summary>
+    private int CalculateBestLuciePowerAtDate(DateTime date, bool useCurrentState = false)
     {
-        if (modif.ChampModifie == StatisticsConstants.HistoryFields.Puissance 
-            && personnagesSelectionnes.Contains(modif.EntiteId) 
-            && int.TryParse(modif.AncienneValeur, out int anciennePuissance)
-            && int.TryParse(modif.NouvelleValeur, out int nouvellePuissance))
+        // Si explicitement demandé, utiliser l'état actuel
+        if (useCurrentState)
         {
-            return puissanceEquipe + (nouvellePuissance - anciennePuissance);
+            return _personnageService.GetPuissanceMaxLucieEscouade();
         }
-        return puissanceEquipe;
+
+        // Chercher d'abord l'historique spécifique au max (EntiteId=-2)
+        var historyMaxAtDate = _dbContext.HistoriquesModifications
+            .Where(h => h.EntiteId == -2 
+                     && h.TypeEntite == TypeEntite.Piece
+                     && h.ChampModifie == StatisticsConstants.HistoryFields.PuissanceLucieMax
+                     && h.DateModification <= date)
+            .OrderByDescending(h => h.DateModification)
+            .FirstOrDefault();
+
+        if (historyMaxAtDate != null && int.TryParse(historyMaxAtDate.NouvelleValeur, out int maxValue))
+            return maxValue;
+
+        // Fallback: si pas d'historique max, utiliser la puissance sélectionnée (EntiteId=-1)
+        // Cela permet d'aligner les courbes lors des imports sans détail de pièces
+        var historySelectedAtDate = _dbContext.HistoriquesModifications
+            .Where(h => h.EntiteId == -1 
+                     && h.TypeEntite == TypeEntite.Piece
+                     && h.ChampModifie == StatisticsConstants.HistoryFields.PuissanceLucieSelectionnee
+                     && h.DateModification <= date)
+            .OrderByDescending(h => h.DateModification)
+            .FirstOrDefault();
+
+        if (historySelectedAtDate != null && int.TryParse(historySelectedAtDate.NouvelleValeur, out int selectedValue))
+            return selectedValue;
+
+        // Pas d'historique du tout avant cette date : considérer 0 (pas de données)
+        return 0;
     }
 
-    private static bool ShouldRecalculateMaxPower(HistoriqueModification modif, HashSet<int> personnagesSelectionnes)
+    /// <summary>
+    /// Récupère la puissance d'un personnage à une date donnée
+    /// </summary>
+    private int GetPersonnagePuissanceAtDate(int personnageId, DateTime date)
     {
-        return (modif.ChampModifie == StatisticsConstants.HistoryFields.Puissance 
-                || modif.ChampModifie == StatisticsConstants.HistoryFields.Niveau 
-                || modif.ChampModifie == StatisticsConstants.HistoryFields.Rang) 
-            && !personnagesSelectionnes.Contains(modif.EntiteId);
+        // Chercher la dernière modification de puissance avant ou à cette date
+        var lastModif = _dbContext.HistoriquesModifications
+            .Where(h => h.EntiteId == personnageId 
+                     && h.TypeEntite == TypeEntite.Personnage
+                     && h.ChampModifie == StatisticsConstants.HistoryFields.Puissance
+                     && h.DateModification <= date)
+            .OrderByDescending(h => h.DateModification)
+            .FirstOrDefault();
+
+        if (lastModif != null && int.TryParse(lastModif.NouvelleValeur, out int value))
+            return value;
+
+        // Sinon, retourner la puissance actuelle
+        var personnage = _dbContext.Personnages.Find(personnageId);
+        return personnage?.Puissance ?? 0;
+    }
+
+    /// <summary>
+    /// Récupère une propriété numérique d'un personnage à une date donnée
+    /// </summary>
+    private int GetPersonnagePropertyAtDate(int personnageId, string property, DateTime date, int defaultValue)
+    {
+        // Chercher la dernière modification avant ou à cette date
+        var lastModif = _dbContext.HistoriquesModifications
+            .Where(h => h.EntiteId == personnageId 
+                     && h.TypeEntite == TypeEntite.Personnage
+                     && h.ChampModifie == property
+                     && h.DateModification <= date)
+            .OrderByDescending(h => h.DateModification)
+            .FirstOrDefault();
+
+        if (lastModif != null && int.TryParse(lastModif.NouvelleValeur, out int value))
+            return value;
+
+        return defaultValue;
     }
 
     private void AddCurrentBestPower(List<TeamPowerEvolutionData> result)
     {
         var today = DateOnly.FromDateTime(DateTime.Now);
-        if (!result.Any(r => r.Date == today))
+        // Recalculer la meilleure puissance aujourd'hui en utilisant l'état actuel (pas l'historique)
+        var currentBestPower = CalculateBestTeamPowerAtDateForDateTime(DateTime.Now, true);
+
+        // Mettre à jour l'entrée du jour si elle existe, sinon l'ajouter
+        var todayEntry = result.FirstOrDefault(r => r.Date == today);
+        if (todayEntry != null)
         {
-            var currentBestPower = _personnageService.GetPuissanceMaxEscouade();
-            if (currentBestPower > 0)
+            todayEntry.TotalPower = currentBestPower;
+        }
+        else if (currentBestPower > 0)
+        {
+            result.Add(new TeamPowerEvolutionData
             {
-                result.Add(new TeamPowerEvolutionData
-                {
-                    Date = today,
-                    TotalPower = currentBestPower
-                });
-            }
+                Date = today,
+                TotalPower = currentBestPower
+            });
         }
     }
 

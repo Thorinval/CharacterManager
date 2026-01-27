@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using CharacterManager.Server.Models;
+using CharacterManager.Server.Models.Enums;
 using CharacterManager.Server.Services;
 using CharacterManager.Server.Constants;
 using CharacterManager.Components;
@@ -753,7 +754,8 @@ public partial class Inventaire : IAsyncDisposable
                     p,
                     "Reset inventaire",
                     now,
-                    estImportation: true);
+                    estImportation: true,
+                    source: SourceModification.Inventaire);
             }
 
             // PiÃ¨ces Lucie (si prÃ©sente)
@@ -769,7 +771,8 @@ public partial class Inventaire : IAsyncDisposable
                         piece,
                         "Reset inventaire",
                         now,
-                        estImportation: true);
+                        estImportation: true,
+                        source: SourceModification.Inventaire);
                 }
             }
         }
@@ -1026,6 +1029,22 @@ public partial class Inventaire : IAsyncDisposable
         try
         {
             var conn = DbContext.Database.GetDbConnection();
+            
+            // Check if using in-memory database
+            if (conn.GetType().Name.Contains("InMemory"))
+            {
+                // For in-memory database, check if the property exists in the entity model
+                var entityType = DbContext.Model.GetEntityTypes()
+                    .FirstOrDefault(e => e.GetTableName()?.Equals(table, StringComparison.OrdinalIgnoreCase) == true);
+                
+                if (entityType != null)
+                {
+                    return entityType.GetProperties()
+                        .Any(p => p.Name.Equals(column, StringComparison.OrdinalIgnoreCase));
+                }
+                return false;
+            }
+
             var shouldClose = conn.State != System.Data.ConnectionState.Open;
 
             if (shouldClose)
@@ -1066,10 +1085,8 @@ public partial class Inventaire : IAsyncDisposable
     {
         try
         {
-            var conn = DbContext.Database.GetDbConnection();
-            
-            // Check if using in-memory database (won't have sqlite_master)
-            if (conn.GetType().Name.Contains("InMemory"))
+            // Check if using a relational database provider before accessing GetDbConnection()
+            if (!DbContext.Database.IsRelational())
             {
                 // For in-memory, check if the entity type exists in the model
                 var entityType = DbContext.Model.FindEntityType(table);
@@ -1083,6 +1100,7 @@ public partial class Inventaire : IAsyncDisposable
                     e.GetTableName()?.Equals(table, StringComparison.OrdinalIgnoreCase) == true);
             }
 
+            var conn = DbContext.Database.GetDbConnection();
             var shouldClose = conn.State != System.Data.ConnectionState.Open;
 
             if (shouldClose)

@@ -1,7 +1,9 @@
 @page "/historique-modifications"
 @using CharacterManager.Server.Models
+@using CharacterManager.Server.Models.Enums
 @using CharacterManager.Server.Services
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
 @inject IHistoriqueModificationService HistoriqueService
 @inject IJSRuntime JSRuntime
 
@@ -404,6 +406,13 @@
                                         <span class="ms-2">@(ordreTriDescendant ? "▼" : "▲")</span>
                                     }
                                 </th>
+                                <th style="cursor: pointer;" @onclick="() => TrierPar(nameof(HistoriqueModification.Source))">
+                                    Source
+                                    @if (colonneTriActuelle == nameof(HistoriqueModification.Source))
+                                    {
+                                        <span class="ms-2">@(ordreTriDescendant ? "▼" : "▲")</span>
+                                    }
+                                </th>
                                 <th style="cursor: pointer;" @onclick="() => TrierPar(nameof(HistoriqueModification.TypeEntite))">
                                     Entité
                                     @if (colonneTriActuelle == nameof(HistoriqueModification.TypeEntite))
@@ -467,6 +476,11 @@
                                     <td>
                                         <span class="badge bg-@GetBadgeClass(modif.TypeModification)">
                                             @GetTypeModificationLabel(modif.TypeModification)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-@GetSourceBadgeClass(modif.Source)">
+                                            @GetSourceLabel(modif.Source)
                                         </span>
                                     </td>
                                     <td>
@@ -631,6 +645,11 @@
                     ? historique.OrderByDescending(h => h.TypeModification).ToList()
                     : historique.OrderBy(h => h.TypeModification).ToList(),
             
+            nameof(HistoriqueModification.Source) => 
+                ordreTriDescendant 
+                    ? historique.OrderByDescending(h => h.Source).ToList()
+                    : historique.OrderBy(h => h.Source).ToList(),
+            
             nameof(HistoriqueModification.TypeEntite) => 
                 ordreTriDescendant 
                     ? historique.OrderByDescending(h => h.TypeEntite).ToList()
@@ -682,14 +701,43 @@
     {
         try
         {
-            var json = await HistoriqueService.ExporterAsync(dateDebut, dateFin);
-            var fileName = $"historique_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+            Console.WriteLine("[ExporterHistorique] Début de l'export...");
+            Console.WriteLine($"[ExporterHistorique] Période: {dateDebut:dd/MM/yyyy} - {dateFin:dd/MM/yyyy}");
             
+            var json = await HistoriqueService.ExporterAsync(dateDebut, dateFin);
+            
+            Console.WriteLine($"[ExporterHistorique] JSON généré: {json.Length} caractères");
+            Console.WriteLine($"[ExporterHistorique] Taille estimée: {json.Length / 1024.0:F2} KB");
+            
+            var fileName = $"historique_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+            Console.WriteLine($"[ExporterHistorique] Nom du fichier: {fileName}");
+            
+            // Vérifier que JSRuntime est disponible
+            if (JSRuntime == null)
+            {
+                throw new InvalidOperationException("JSRuntime n'est pas disponible");
+            }
+            
+            Console.WriteLine("[ExporterHistorique] Appel de downloadFile...");
             await JSRuntime.InvokeVoidAsync("downloadFile", fileName, json, "application/json");
+            Console.WriteLine("[ExporterHistorique] Appel JavaScript terminé avec succès");
+            
+            // Afficher un message de confirmation à l'utilisateur
+            await JSRuntime.InvokeVoidAsync("console.log", $"✅ Export réussi: {fileName} ({json.Length / 1024.0:F2} KB)");
+        }
+        catch (JSException jsEx)
+        {
+            Console.WriteLine($"[ExporterHistorique] ERREUR JavaScript: {jsEx.GetType().Name}");
+            Console.WriteLine($"[ExporterHistorique] Message: {jsEx.Message}");
+            Console.WriteLine($"[ExporterHistorique] StackTrace: {jsEx.StackTrace}");
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur JavaScript lors de l'export:\n\n{jsEx.Message}\n\nConsultez la console du navigateur (F12) pour plus de détails.");
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de l'export: {ex.Message}");
+            Console.WriteLine($"[ExporterHistorique] ERREUR: {ex.GetType().Name}");
+            Console.WriteLine($"[ExporterHistorique] Message: {ex.Message}");
+            Console.WriteLine($"[ExporterHistorique] StackTrace: {ex.StackTrace}");
+            await JSRuntime.InvokeVoidAsync("alert", $"Erreur lors de l'export:\n\nType: {ex.GetType().Name}\nMessage: {ex.Message}\n\nConsultez la console du navigateur (F12) et la console serveur pour plus de détails.");
         }
     }
 
@@ -712,6 +760,30 @@
             TypeModification.Modification => "Modification",
             TypeModification.Suppression => "Suppression",
             _ => type.ToString()
+        };
+    }
+
+    private string GetSourceLabel(SourceModification source)
+    {
+        return source switch
+        {
+            SourceModification.NonSpecifiee => "Non spécifiée",
+            SourceModification.Inventaire => "Inventaire",
+            SourceModification.ImportPml => "Import PML",
+            SourceModification.ImportClassement => "Import Classement",
+            _ => source.ToString()
+        };
+    }
+
+    private string GetSourceBadgeClass(SourceModification source)
+    {
+        return source switch
+        {
+            SourceModification.NonSpecifiee => "secondary",
+            SourceModification.Inventaire => "primary",
+            SourceModification.ImportPml => "info",
+            SourceModification.ImportClassement => "success",
+            _ => "secondary"
         };
     }
 
