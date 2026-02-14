@@ -54,7 +54,7 @@ export async function createPieChart(canvasId, labels, data, colors) {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         position: 'bottom',

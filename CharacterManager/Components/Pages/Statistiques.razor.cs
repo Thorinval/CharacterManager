@@ -218,8 +218,9 @@ public partial class Statistiques : IAsyncDisposable
                 });
             }
 
-            await chartModule!.InvokeVoidAsync("createLineChart", "chartPowerEvolution", labels, 
-                datasets, new { showDayNumbers = false });
+
+            await chartModule!.InvokeVoidAsync("createLineChart", "chartPowerEvolution", labels, datasets,
+                new { minLevel = 15000 });
         }
         catch (Exception ex)
         {
