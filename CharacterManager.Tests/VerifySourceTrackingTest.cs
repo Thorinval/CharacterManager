@@ -115,9 +115,22 @@ public class VerifySourceTrackingTest : IDisposable
         Assert.Equal("Test NonSpecifiee", historiques[3].NomEntite);
         Assert.Equal(TypeModification.Modification, historiques[3].TypeModification);
 
-        // Cleanup
-        _context.HistoriquesModifications.RemoveRange(historiques);
-        await _context.SaveChangesAsync();
+        // Cleanup - use fresh context to avoid concurrency issues
+        using (var cleanupContext = new ApplicationDbContext(
+            new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlite("Data Source=D:\\Devs\\CharacterManager\\CharacterManager\\charactermanager.db")
+                .Options))
+        {
+            var recordsToDelete = await cleanupContext.HistoriquesModifications
+                .Where(h => h.EntiteId >= 999901 && h.EntiteId <= 999904)
+                .ToListAsync();
+            
+            if (recordsToDelete.Count > 0)
+            {
+                cleanupContext.HistoriquesModifications.RemoveRange(recordsToDelete);
+                await cleanupContext.SaveChangesAsync();
+            }
+        }
 
         Console.WriteLine("✅ Tous les tests de source tracking réussis!");
         Console.WriteLine($"   - Inventaire: {historiques[0].Source} ✓");
