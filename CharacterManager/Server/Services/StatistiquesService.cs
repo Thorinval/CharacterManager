@@ -572,9 +572,23 @@ public class StatistiquesService : IStatistiquesService
     /// </summary>
     private int CalculateBestTeamPowerAtDateForDateTime(DateTime dateTime, bool useCurrentState = false)
     {
+        var mercenairesAtDate = GetBestMercenairesAtDate(dateTime, useCurrentState);
+        var androidesAtDate = GetBestAndroidesAtDate(dateTime, useCurrentState);
+        var commandantsAtDate = GetBestCommandantsAtDate(dateTime, useCurrentState);
+        var bestLuciePowerAtDate = CalculateBestLuciePowerAtDate(dateTime, useCurrentState);
 
-        // Récupérer tous les personnages et leurs états à cette date
-        var mercenairesAtDate = _dbContext.Personnages
+        var bestMercenairePower = mercenairesAtDate.Sum(m => m.Puissance);
+        var bestAndroidePower = androidesAtDate.Sum(a => a.Puissance);
+        var bestCommandantPower = commandantsAtDate.Any() 
+            ? commandantsAtDate[0].Puissance + commandantsAtDate[0].Rang * 20 
+            : 0;
+
+        return bestMercenairePower + bestAndroidePower + bestCommandantPower + bestLuciePowerAtDate;
+    }
+
+    private List<dynamic> GetBestMercenairesAtDate(DateTime dateTime, bool useCurrentState)
+    {
+        return _dbContext.Personnages
             .Where(p => p.Type == TypePersonnage.Mercenaire && p.GetType() == typeof(Personnage))
             .AsEnumerable()
             .Select(p => new
@@ -587,9 +601,12 @@ public class StatistiquesService : IStatistiquesService
             .Where(x => x.Puissance > 0)
             .OrderByDescending(x => x.Puissance)
             .Take(8)
-            .ToList();
+            .ToList<dynamic>();
+    }
 
-        var androidesAtDate = _dbContext.Personnages
+    private List<dynamic> GetBestAndroidesAtDate(DateTime dateTime, bool useCurrentState)
+    {
+        return _dbContext.Personnages
             .Where(p => p.Type == TypePersonnage.Androide && p.GetType() == typeof(Personnage))
             .AsEnumerable()
             .Select(p => new
@@ -600,9 +617,12 @@ public class StatistiquesService : IStatistiquesService
             .Where(x => x.Puissance > 0)
             .OrderByDescending(x => x.Puissance)
             .Take(3)
-            .ToList();
+            .ToList<dynamic>();
+    }
 
-        var commandantsAtDate = _dbContext.Personnages
+    private List<dynamic> GetBestCommandantsAtDate(DateTime dateTime, bool useCurrentState)
+    {
+        return _dbContext.Personnages
             .Where(p => p.Type == TypePersonnage.Commandant && p.GetType() == typeof(Personnage))
             .AsEnumerable()
             .Select(p => new
@@ -614,18 +634,7 @@ public class StatistiquesService : IStatistiquesService
             .Where(x => x.Puissance > 0)
             .OrderByDescending(x => x.Puissance + x.Rang * 20)
             .Take(1)
-            .ToList();
-
-        // Calculer la meilleure puissance Lucie à cette date (reconstruire depuis l'historique et les pièces)
-        var bestLuciePowerAtDate = CalculateBestLuciePowerAtDate(dateTime, useCurrentState);
-
-        var bestMercenairePower = mercenairesAtDate.Sum(m => m.Puissance);
-        var bestAndroidePower = androidesAtDate.Sum(a => a.Puissance);
-        var bestCommandantPower = commandantsAtDate.Any() 
-            ? commandantsAtDate[0].Puissance + commandantsAtDate[0].Rang * 20 
-            : 0;
-
-        return bestMercenairePower + bestAndroidePower + bestCommandantPower + bestLuciePowerAtDate;
+            .ToList<dynamic>();
     }
 
     /// <summary>
