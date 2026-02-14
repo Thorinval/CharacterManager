@@ -31,6 +31,16 @@ public class VerifySourceTrackingTest : IDisposable
     {
         var timestamp = DateTime.UtcNow;
 
+        // Cleanup any existing test data first
+        var existingRecords = await _context.HistoriquesModifications
+            .Where(h => h.EntiteId >= 999901 && h.EntiteId <= 999904)
+            .ToListAsync();
+        if (existingRecords.Count > 0)
+        {
+            _context.HistoriquesModifications.RemoveRange(existingRecords);
+            await _context.SaveChangesAsync();
+        }
+
         // Test 1: Création depuis Inventaire
         await _historiqueService.EnregistrerCreationAsync(
             TypeEntite.Personnage,

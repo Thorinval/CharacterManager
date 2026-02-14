@@ -580,9 +580,9 @@ public class StatistiquesService : IStatistiquesService
             .Select(p => new
             {
                 Personnage = p,
-                Puissance = GetPersonnagePuissanceAtDate(p.Id, dateTime),
-                Niveau = GetPersonnagePropertyAtDate(p.Id, StatisticsConstants.HistoryFields.Niveau, dateTime, p.Niveau),
-                Rang = GetPersonnagePropertyAtDate(p.Id, StatisticsConstants.HistoryFields.Rang, dateTime, p.Rang)
+                Puissance = useCurrentState ? p.Puissance : GetPersonnagePuissanceAtDate(p.Id, dateTime),
+                Niveau = useCurrentState ? p.Niveau : GetPersonnagePropertyAtDate(p.Id, StatisticsConstants.HistoryFields.Niveau, dateTime, p.Niveau),
+                Rang = useCurrentState ? p.Rang : GetPersonnagePropertyAtDate(p.Id, StatisticsConstants.HistoryFields.Rang, dateTime, p.Rang)
             })
             .Where(x => x.Puissance > 0)
             .OrderByDescending(x => x.Puissance)
@@ -595,7 +595,7 @@ public class StatistiquesService : IStatistiquesService
             .Select(p => new
             {
                 Personnage = p,
-                Puissance = GetPersonnagePuissanceAtDate(p.Id, dateTime)
+                Puissance = useCurrentState ? p.Puissance : GetPersonnagePuissanceAtDate(p.Id, dateTime)
             })
             .Where(x => x.Puissance > 0)
             .OrderByDescending(x => x.Puissance)
@@ -608,8 +608,8 @@ public class StatistiquesService : IStatistiquesService
             .Select(p => new
             {
                 Personnage = p,
-                Puissance = GetPersonnagePuissanceAtDate(p.Id, dateTime),
-                Rang = GetPersonnagePropertyAtDate(p.Id, StatisticsConstants.HistoryFields.Rang, dateTime, p.Rang)
+                Puissance = useCurrentState ? p.Puissance : GetPersonnagePuissanceAtDate(p.Id, dateTime),
+                Rang = useCurrentState ? p.Rang : GetPersonnagePropertyAtDate(p.Id, StatisticsConstants.HistoryFields.Rang, dateTime, p.Rang)
             })
             .Where(x => x.Puissance > 0)
             .OrderByDescending(x => x.Puissance + x.Rang * 20)
@@ -722,8 +722,8 @@ public class StatistiquesService : IStatistiquesService
     private void AddCurrentBestPower(List<TeamPowerEvolutionData> result)
     {
         var today = DateOnly.FromDateTime(DateTime.Now);
-        // Recalculer la meilleure puissance aujourd'hui en utilisant l'état actuel (pas l'historique)
-        var currentBestPower = CalculateBestTeamPowerAtDateForDateTime(DateTime.Now, true);
+        // Use the live service calculation to ensure consistency with GetPuissanceMaxEscouade
+        var currentBestPower = _personnageService.GetPuissanceMaxEscouade();
 
         // Mettre à jour l'entrée du jour si elle existe, sinon l'ajouter
         var todayEntry = result.FirstOrDefault(r => r.Date == today);
