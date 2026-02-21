@@ -84,6 +84,9 @@ public class DebugAddCurrentBestPowerTest
             {
                 _output.WriteLine("  Aucune");
             }
+
+            // Assert
+            Assert.True(liveMaxEscouade > 0, "Max escouade power should be greater than 0");
         }
         catch (Microsoft.Data.Sqlite.SqliteException ex)
         {

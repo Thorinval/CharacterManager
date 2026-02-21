@@ -31,14 +31,20 @@ public class VerifySourceTrackingTest : IDisposable
     {
         var timestamp = DateTime.UtcNow;
 
-        // Cleanup any existing test data first
-        var existingRecords = await _context.HistoriquesModifications
-            .Where(h => h.EntiteId >= 999901 && h.EntiteId <= 999904)
-            .ToListAsync();
-        if (existingRecords.Count > 0)
+        // Cleanup any existing test data first using a fresh context to avoid tracking issues
+        using (var cleanupContextBefore = new ApplicationDbContext(
+            new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlite("Data Source=D:\\Devs\\CharacterManager\\CharacterManager\\charactermanager.db")
+                .Options))
         {
-            _context.HistoriquesModifications.RemoveRange(existingRecords);
-            await _context.SaveChangesAsync();
+            var existingRecords = await cleanupContextBefore.HistoriquesModifications
+                .Where(h => h.EntiteId >= 999900 && h.EntiteId <= 999999)
+                .ToListAsync();
+            if (existingRecords.Count > 0)
+            {
+                cleanupContextBefore.HistoriquesModifications.RemoveRange(existingRecords);
+                await cleanupContextBefore.SaveChangesAsync();
+            }
         }
 
         // Test 1: Création depuis Inventaire
@@ -122,13 +128,30 @@ public class VerifySourceTrackingTest : IDisposable
                 .Options))
         {
             var recordsToDelete = await cleanupContext.HistoriquesModifications
-                .Where(h => h.EntiteId >= 999901 && h.EntiteId <= 999904)
+                .Where(h => h.EntiteId >= 999900 && h.EntiteId <= 999999)
+                .AsNoTracking()
                 .ToListAsync();
             
             if (recordsToDelete.Count > 0)
             {
-                cleanupContext.HistoriquesModifications.RemoveRange(recordsToDelete);
-                await cleanupContext.SaveChangesAsync();
+                foreach (var record in recordsToDelete)
+                {
+                    cleanupContext.HistoriquesModifications.Remove(record);
+                }
+                try
+                {
+                    await cleanupContext.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    // If concurrency exception, reload and try again
+                    cleanupContext.ChangeTracker.Clear();
+                    var reloadedRecords = await cleanupContext.HistoriquesModifications
+                        .Where(h => h.EntiteId >= 999900 && h.EntiteId <= 999999)
+                        .ToListAsync();
+                    cleanupContext.HistoriquesModifications.RemoveRange(reloadedRecords);
+                    await cleanupContext.SaveChangesAsync();
+                }
             }
         }
 

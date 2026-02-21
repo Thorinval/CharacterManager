@@ -228,7 +228,7 @@ public partial class Home : IAsyncDisposable
         }
     }
 
-    private string FormatLigueLabel(int? ligue)
+    internal string FormatLigueLabel(int? ligue)
     {
         if (!ligue.HasValue)
         {
@@ -243,14 +243,14 @@ public partial class Home : IAsyncDisposable
         return $"{this.LocalizationService.GetKeyValue("leagueHistory.table.league")} {ligue.Value}";
     }
 
-    private static Dictionary<Faction, int> CalculerMercenairesParFaction(IEnumerable<Personnage> mercenaires)
+    internal static Dictionary<Faction, int> CalculerMercenairesParFaction(IEnumerable<Personnage> mercenaires)
     {
         return mercenaires
             .GroupBy(m => m.Faction)
             .ToDictionary(g => g.Key, g => g.Count());
     }
 
-    private static Dictionary<TypeAttaque, int> CalculerMercenairesParTypeAttaque(IEnumerable<Personnage> mercenaires)
+    internal static Dictionary<TypeAttaque, int> CalculerMercenairesParTypeAttaque(IEnumerable<Personnage> mercenaires)
     {
         return mercenaires
             .GroupBy(m => m.TypeAttaque)
@@ -299,7 +299,7 @@ public partial class Home : IAsyncDisposable
         _ => "bi-question-circle"
     };
 
-    private static Dictionary<Faction, int> CalculerCompositionParFaction(
+    internal static Dictionary<Faction, int> CalculerCompositionParFaction(
         IEnumerable<Personnage> mercenaires,
         IEnumerable<Personnage> androides,
         Personnage? commandant)
@@ -317,7 +317,7 @@ public partial class Home : IAsyncDisposable
             .ToDictionary(static g => g.Key, static g => g.Count());
     }
 
-    private static Dictionary<TypeAttaque, int> CalculerCompositionParTypeAttaque(
+    internal static Dictionary<TypeAttaque, int> CalculerCompositionParTypeAttaque(
         IEnumerable<Personnage> mercenaires,
         IEnumerable<Personnage> androides,
         Personnage? commandant)
@@ -335,7 +335,7 @@ public partial class Home : IAsyncDisposable
             .ToDictionary(static g => g.Key, static g => g.Count());
     }
 
-    private static int GetClassementValeur(HistoriqueClassement historique, TypeClassement type)
+    internal static int GetClassementValeur(HistoriqueClassement historique, TypeClassement type)
     {
         return historique.Classements.FirstOrDefault(c => c.Type == type)?.Valeur ?? 0;
     }

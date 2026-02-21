@@ -3,7 +3,6 @@ using CharacterManager.Server.Models;
 using CharacterManager.Server.Models.Enums;
 using CharacterManager.Server.Services;
 using Microsoft.EntityFrameworkCore;
-using Xunit;
 
 namespace CharacterManager.Tests;
 
@@ -108,9 +107,29 @@ public class TestNoDuplicateHistoriqueOnImportTest : IDisposable
         Assert.True(finalEntry.EstImportation);
         Assert.Equal(SourceModification.ImportClassement, finalEntry.Source);
 
-        // Nettoyage
-        _context.HistoriquesModifications.Remove(finalEntry);
-        await _context.SaveChangesAsync();
+        // Nettoyage - utiliser un nouveau contexte pour éviter les problèmes de concurrence
+        using (var cleanupContext = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlite("Data Source=D:\\Devs\\CharacterManager\\CharacterManager\\charactermanager.db")
+            .Options))
+        {
+            try
+            {
+                var entryToDelete = await cleanupContext.HistoriquesModifications.FirstAsync(h => h.Id == finalEntry.Id);
+                cleanupContext.HistoriquesModifications.Remove(entryToDelete);
+                await cleanupContext.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // If concurrency exception, reload and try again
+                cleanupContext.ChangeTracker.Clear();
+                var reloadedEntry = await cleanupContext.HistoriquesModifications.FirstOrDefaultAsync(h => h.Id == finalEntry.Id);
+                if (reloadedEntry != null)
+                {
+                    cleanupContext.HistoriquesModifications.Remove(reloadedEntry);
+                    await cleanupContext.SaveChangesAsync();
+                }
+            }
+        }
 
         Console.WriteLine($"\n✅ TEST RÉUSSI: Pas de doublon créé lors de l'import!");
     }

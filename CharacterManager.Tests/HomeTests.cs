@@ -427,29 +427,417 @@ public class HomeTests : IDisposable
         Assert.Contains("15", result); // Should contain the day
     }
 
-    [Fact]
-    public void GetFactionLabel_ShouldReturnLocalizedValue()
+    [Theory]
+    [InlineData(Faction.Syndicat, "Syndicat")]
+    [InlineData(Faction.Pacificateurs, "Pacificateurs")]
+    [InlineData(Faction.HommesLibres, "Hommes Libres")]
+    public void GetFactionLabel_ShouldReturnLocalizedValueForAllFactions(Faction faction, string expected)
     {
         // Act
-        var result = _home.GetFactionLabel(Faction.Syndicat);
+        var result = _home.GetFactionLabel(faction);
 
         // Assert
-        Assert.Equal("Syndicat", result);
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData(TypeAttaque.Melee, "Mêlée")]
+    [InlineData(TypeAttaque.Distance, "Distance")]
+    [InlineData(TypeAttaque.Androide, "Androïde")]
+    [InlineData(TypeAttaque.Commandant, "Commandant")]
+    public void GetTypeAttaqueLabel_ShouldReturnLocalizedValueForAllTypes(TypeAttaque type, string expected)
+    {
+        // Act
+        var result = _home.GetTypeAttaqueLabel(type);
+
+        // Assert
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData(null, "Aucune")]
+    [InlineData(50, "Elite Top 50")]
+    [InlineData(10, "Ligue 10")]
+    [InlineData(1, "Ligue 1")]
+    public void FormatLigueLabel_ShouldReturnCorrectLabel(int? ligue, string expected)
+    {
+        // Act
+        var result = _home.FormatLigueLabel(ligue);
+
+        // Assert
+        Assert.Equal(expected, result);
     }
 
     [Fact]
-    public void GetTypeAttaqueLabel_ShouldReturnLocalizedValue()
+    public void FormatDate_WithFrenchCulture_ShouldFormatWithFrenchDate()
     {
+        // Arrange
+        _localizationServiceMock.Setup(l => l.GetCurrentLanguage()).Returns("fr-FR");
+        var date = new DateTime(2025, 1, 15, 14, 30, 0, DateTimeKind.Utc);
+
         // Act
-        var result = _home.GetTypeAttaqueLabel(TypeAttaque.Melee);
+        var result = _home.FormatDate(date);
 
         // Assert
-        Assert.Equal("Mêlée", result);
+        Assert.Contains("15/01/2025", result);
+    }
+
+    [Fact]
+    public void FormatDate_WithEnglishCulture_ShouldFormatWithEnglishDate()
+    {
+        // Arrange
+        _localizationServiceMock.Setup(l => l.GetCurrentLanguage()).Returns("en-US");
+        var date = new DateTime(2025, 1, 15, 14, 30, 0, DateTimeKind.Utc);
+
+        // Act
+        var result = _home.FormatDate(date);
+
+        // Assert
+        Assert.Contains("2025-01-15", result);
+    }
+
+    #region Adult Mode Tests - Additional scenarios
+
+    [Fact]
+    public async Task GetAdultModeFromSettingsAsync_WithEnabledSetting_ShouldReturnTrue()
+    {
+        // Arrange
+        var settings = new AppSettings { IsAdultModeEnabled = true };
+        _context.AppSettings.Add(settings);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var method = typeof(Home).GetMethod("GetAdultModeFromSettingsAsync",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var task = method?.Invoke(_home, null) as Task<bool>;
+        var result = await task!;
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task GetAdultModeFromSettingsAsync_WithDisabledSetting_ShouldReturnFalse()
+    {
+        // Arrange
+        var settings = new AppSettings { IsAdultModeEnabled = false };
+        _context.AppSettings.Add(settings);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var method = typeof(Home).GetMethod("GetAdultModeFromSettingsAsync",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var task = method?.Invoke(_home, null) as Task<bool>;
+        var result = await task!;
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task GetAdultModeFromSettingsAsync_WithNoSettings_ShouldReturnFalse()
+    {
+        // Act
+        var method = typeof(Home).GetMethod("GetAdultModeFromSettingsAsync",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var task = method?.Invoke(_home, null) as Task<bool>;
+        var result = await task!;
+
+        // Assert
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task GetAdultModeForAuthenticatedUserAsync_WithValidProfile_ShouldReturnProfileSetting()
+    {
+        // Arrange
+        var profile = new Profile { Username = "testuser", AdultMode = true };
+        _context.Profiles.Add(profile);
+        await _context.SaveChangesAsync();
+
+        var claims = new[] { new Claim(ClaimTypes.Name, "testuser") };
+        var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
+
+        _profileServiceMock.Setup(x => x.GetByUsernameAsync("testuser"))
+            .ReturnsAsync(profile);
+
+        // Act
+        var method = typeof(Home).GetMethod("GetAdultModeForAuthenticatedUserAsync",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var task = method?.Invoke(_home, new object[] { claimsPrincipal }) as Task<bool>;
+        var result = await task!;
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task GetAdultModeForAuthenticatedUserAsync_WithNullProfile_ShouldReturnSettingValue()
+    {
+        // Arrange
+        var settings = new AppSettings { IsAdultModeEnabled = true };
+        _context.AppSettings.Add(settings);
+        await _context.SaveChangesAsync();
+
+        var claims = new[] { new Claim(ClaimTypes.Name, "unknownuser") };
+        var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
+
+        _profileServiceMock.Setup(x => x.GetByUsernameAsync("unknownuser"))
+            .ReturnsAsync((Profile?)null);
+
+        // Act
+        var method = typeof(Home).GetMethod("GetAdultModeForAuthenticatedUserAsync",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var task = method?.Invoke(_home, new object[] { claimsPrincipal }) as Task<bool>;
+        var result = await task!;
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task GetCurrentAdultModeAsync_WithUnauthenticatedUser_ShouldReturnSettingValue()
+    {
+        // Arrange
+        var settings = new AppSettings { IsAdultModeEnabled = true };
+        _context.AppSettings.Add(settings);
+        await _context.SaveChangesAsync();
+
+        var httpContext = new DefaultHttpContext();
+        _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
+
+        // Act
+        var method = typeof(Home).GetMethod("GetCurrentAdultModeAsync",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var task = method?.Invoke(_home, null) as Task<bool>;
+        var result = await task!;
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task OnInitializedAsync_ShouldLoadLastClassement()
+    {
+        // Arrange
+        var classement = new HistoriqueClassement();
+        classement.Classements.Add(new() { Type = TypeClassement.Nutaku, Valeur = 100 });
+        classement.Classements.Add(new() { Type = TypeClassement.Top150, Valeur = 50 });
+        classement.Classements.Add(new() { Type = TypeClassement.France, Valeur = 75 });
+        
+        _context.HistoriquesClassement.Add(classement);
+        await _context.SaveChangesAsync();
+
+        _personnageServiceMock.Setup(x => x.GetPuissanceEscouade()).Returns(1000);
+        _personnageServiceMock.Setup(x => x.GetPuissanceMaxEscouade()).Returns(1500);
+        _personnageServiceMock.Setup(x => x.GetPuissanceLucieEscouade()).Returns(500);
+        _personnageServiceMock.Setup(x => x.GetMercenairesAsync(It.IsAny<bool>()))
+            .ReturnsAsync(new List<Personnage>());
+        _personnageServiceMock.Setup(x => x.GetInventoryCounts())
+            .Returns((0, 0, 0));
+        _personnageServiceMock.Setup(x => x.GetTopMercenairesAsync(It.IsAny<int>()))
+            .ReturnsAsync(new List<Personnage>());
+        _personnageServiceMock.Setup(x => x.GetTopAndroidesAsync(It.IsAny<int>()))
+            .ReturnsAsync(new List<Personnage>());
+        _personnageServiceMock.Setup(x => x.GetTopCommandantAsync())
+            .ReturnsAsync((Personnage?)null);
+        _personnageServiceMock.Setup(x => x.GetPuissanceMaxLucieEscouade()).Returns(800);
+        
+        _historiqueLigueServiceMock.Setup(x => x.GetHighestLeagueAsync())
+            .ReturnsAsync((int?)null);
+        _pmlImportServiceMock.Setup(x => x.GetLastImportedDateAsync())
+            .ReturnsAsync((DateTime?)null);
+        _pmlExportServiceMock.Setup(x => x.GetLastExportDate())
+            .ReturnsAsync((DateTime?)null);
+        _pmlImportServiceMock.Setup(x => x.GetLastImportedFileName())
+            .ReturnsAsync((string?)null);
+        _historiqueClassementServiceMock.Setup(x => x.GetHistoriqueRecentAsync(1))
+            .ReturnsAsync(new List<HistoriqueClassement> { classement });
+        _capaciteServiceMock.Setup(x => x.GetCount()).Returns(0);
+
+        // Act
+        await CallOnInitializedAsync();
+
+        // Assert
+        Assert.NotNull(_home.lastClassementSummary);
+        Assert.Equal(100, _home.lastClassementSummary.Value.Nutaku);
+        Assert.Equal(50, _home.lastClassementSummary.Value.Top150);
+        Assert.Equal(75, _home.lastClassementSummary.Value.France);
+    }
+
+    [Fact]
+    public async Task OnInitializedAsync_ShouldLoadCapacitesCount()
+    {
+        // Arrange
+        _personnageServiceMock.Setup(x => x.GetPuissanceEscouade()).Returns(1000);
+        _personnageServiceMock.Setup(x => x.GetPuissanceMaxEscouade()).Returns(1500);
+        _personnageServiceMock.Setup(x => x.GetPuissanceLucieEscouade()).Returns(500);
+        _personnageServiceMock.Setup(x => x.GetMercenairesAsync(It.IsAny<bool>()))
+            .ReturnsAsync(new List<Personnage>());
+        _personnageServiceMock.Setup(x => x.GetInventoryCounts())
+            .Returns((0, 0, 0));
+        _personnageServiceMock.Setup(x => x.GetTopMercenairesAsync(It.IsAny<int>()))
+            .ReturnsAsync(new List<Personnage>());
+        _personnageServiceMock.Setup(x => x.GetTopAndroidesAsync(It.IsAny<int>()))
+            .ReturnsAsync(new List<Personnage>());
+        _personnageServiceMock.Setup(x => x.GetTopCommandantAsync())
+            .ReturnsAsync((Personnage?)null);
+        _personnageServiceMock.Setup(x => x.GetPuissanceMaxLucieEscouade()).Returns(800);
+        
+        _historiqueLigueServiceMock.Setup(x => x.GetHighestLeagueAsync())
+            .ReturnsAsync((int?)null);
+        _pmlImportServiceMock.Setup(x => x.GetLastImportedDateAsync())
+            .ReturnsAsync((DateTime?)null);
+        _pmlExportServiceMock.Setup(x => x.GetLastExportDate())
+            .ReturnsAsync((DateTime?)null);
+        _pmlImportServiceMock.Setup(x => x.GetLastImportedFileName())
+            .ReturnsAsync((string?)null);
+        _historiqueClassementServiceMock.Setup(x => x.GetHistoriqueRecentAsync(1))
+            .ReturnsAsync(new List<HistoriqueClassement>());
+        _capaciteServiceMock.Setup(x => x.GetCount()).Returns(42);
+
+        // Act
+        await CallOnInitializedAsync();
+
+        // Assert
+        Assert.Equal(42, _home.capacitesCount);
+    }
+
+    [Fact]
+    public async Task OnInitializedAsync_ShouldLoadHighestLigue()
+    {
+        // Arrange
+        _personnageServiceMock.Setup(x => x.GetPuissanceEscouade()).Returns(1000);
+        _personnageServiceMock.Setup(x => x.GetPuissanceMaxEscouade()).Returns(1500);
+        _personnageServiceMock.Setup(x => x.GetPuissanceLucieEscouade()).Returns(500);
+        _personnageServiceMock.Setup(x => x.GetMercenairesAsync(It.IsAny<bool>()))
+            .ReturnsAsync(new List<Personnage>());
+        _personnageServiceMock.Setup(x => x.GetInventoryCounts())
+            .Returns((1, 2, 3));
+        _personnageServiceMock.Setup(x => x.GetTopMercenairesAsync(It.IsAny<int>()))
+            .ReturnsAsync(new List<Personnage>());
+        _personnageServiceMock.Setup(x => x.GetTopAndroidesAsync(It.IsAny<int>()))
+            .ReturnsAsync(new List<Personnage>());
+        _personnageServiceMock.Setup(x => x.GetTopCommandantAsync())
+            .ReturnsAsync((Personnage?)null);
+        _personnageServiceMock.Setup(x => x.GetPuissanceMaxLucieEscouade()).Returns(800);
+        
+        _historiqueLigueServiceMock.Setup(x => x.GetHighestLeagueAsync())
+            .ReturnsAsync(25);
+        _pmlImportServiceMock.Setup(x => x.GetLastImportedDateAsync())
+            .ReturnsAsync((DateTime?)null);
+        _pmlExportServiceMock.Setup(x => x.GetLastExportDate())
+            .ReturnsAsync((DateTime?)null);
+        _pmlImportServiceMock.Setup(x => x.GetLastImportedFileName())
+            .ReturnsAsync((string?)null);
+        _historiqueClassementServiceMock.Setup(x => x.GetHistoriqueRecentAsync(1))
+            .ReturnsAsync(new List<HistoriqueClassement>());
+        _capaciteServiceMock.Setup(x => x.GetCount()).Returns(0);
+
+        // Act
+        await CallOnInitializedAsync();
+
+        // Assert
+        Assert.Equal("Ligue 25", _home.highestLigueLabel);
+    }
+
+    [Fact]
+    public async Task OnInitializedAsync_ShouldLoadImportExportDates()
+    {
+        // Arrange
+        var importDate = new DateTime(2024, 12, 25, 10, 30, 0, DateTimeKind.Utc);
+        var exportDate = new DateTime(2024, 12, 26, 14, 45, 0, DateTimeKind.Utc);
+
+        _personnageServiceMock.Setup(x => x.GetPuissanceEscouade()).Returns(1000);
+        _personnageServiceMock.Setup(x => x.GetPuissanceMaxEscouade()).Returns(1500);
+        _personnageServiceMock.Setup(x => x.GetPuissanceLucieEscouade()).Returns(500);
+        _personnageServiceMock.Setup(x => x.GetMercenairesAsync(It.IsAny<bool>()))
+            .ReturnsAsync(new List<Personnage>());
+        _personnageServiceMock.Setup(x => x.GetInventoryCounts())
+            .Returns((0, 0, 0));
+        _personnageServiceMock.Setup(x => x.GetTopMercenairesAsync(It.IsAny<int>()))
+            .ReturnsAsync(new List<Personnage>());
+        _personnageServiceMock.Setup(x => x.GetTopAndroidesAsync(It.IsAny<int>()))
+            .ReturnsAsync(new List<Personnage>());
+        _personnageServiceMock.Setup(x => x.GetTopCommandantAsync())
+            .ReturnsAsync((Personnage?)null);
+        _personnageServiceMock.Setup(x => x.GetPuissanceMaxLucieEscouade()).Returns(800);
+        
+        _historiqueLigueServiceMock.Setup(x => x.GetHighestLeagueAsync())
+            .ReturnsAsync((int?)null);
+        _pmlImportServiceMock.Setup(x => x.GetLastImportedDateAsync())
+            .ReturnsAsync(importDate);
+        _pmlExportServiceMock.Setup(x => x.GetLastExportDate())
+            .ReturnsAsync(exportDate);
+        _pmlImportServiceMock.Setup(x => x.GetLastImportedFileName())
+            .ReturnsAsync("export_20241225.pml");
+        _historiqueClassementServiceMock.Setup(x => x.GetHistoriqueRecentAsync(1))
+            .ReturnsAsync(new List<HistoriqueClassement>());
+        _capaciteServiceMock.Setup(x => x.GetCount()).Returns(0);
+
+        // Act
+        await CallOnInitializedAsync();
+
+        // Assert
+        Assert.NotNull(_home.lastImportDate);
+        Assert.NotNull(_home.lastExportDate);
+        Assert.Equal("export_20241225.pml", _home.lastImportFileName);
+    }
+
+    [Fact]
+    public async Task OnInitializedAsync_WithBestSquadComposition_ShouldLoadCorrectly()
+    {
+        // Arrange
+        var topMercenaires = new List<Personnage>
+        {
+            new() { Faction = Faction.Syndicat, TypeAttaque = TypeAttaque.Melee },
+            new() { Faction = Faction.Pacificateurs, TypeAttaque = TypeAttaque.Distance },
+        };
+        var topAndroides = new List<Personnage>
+        {
+            new() { Faction = Faction.HommesLibres, TypeAttaque = TypeAttaque.Androide },
+        };
+        var topCommandant = new Personnage { Faction = Faction.Syndicat, TypeAttaque = TypeAttaque.Commandant };
+
+        _personnageServiceMock.Setup(x => x.GetPuissanceEscouade()).Returns(1000);
+        _personnageServiceMock.Setup(x => x.GetPuissanceMaxEscouade()).Returns(1500);
+        _personnageServiceMock.Setup(x => x.GetPuissanceLucieEscouade()).Returns(500);
+        _personnageServiceMock.Setup(x => x.GetMercenairesAsync(true))
+            .ReturnsAsync(new List<Personnage>());
+        _personnageServiceMock.Setup(x => x.GetMercenairesAsync(false))
+            .ReturnsAsync(new List<Personnage>());
+        _personnageServiceMock.Setup(x => x.GetInventoryCounts())
+            .Returns((0, 0, 0));
+        _personnageServiceMock.Setup(x => x.GetTopMercenairesAsync(It.IsAny<int>()))
+            .ReturnsAsync(topMercenaires);
+        _personnageServiceMock.Setup(x => x.GetTopAndroidesAsync(It.IsAny<int>()))
+            .ReturnsAsync(topAndroides);
+        _personnageServiceMock.Setup(x => x.GetTopCommandantAsync())
+            .ReturnsAsync(topCommandant);
+        _personnageServiceMock.Setup(x => x.GetPuissanceMaxLucieEscouade()).Returns(800);
+        
+        _historiqueLigueServiceMock.Setup(x => x.GetHighestLeagueAsync())
+            .ReturnsAsync((int?)null);
+        _pmlImportServiceMock.Setup(x => x.GetLastImportedDateAsync())
+            .ReturnsAsync((DateTime?)null);
+        _pmlExportServiceMock.Setup(x => x.GetLastExportDate())
+            .ReturnsAsync((DateTime?)null);
+        _pmlImportServiceMock.Setup(x => x.GetLastImportedFileName())
+            .ReturnsAsync((string?)null);
+        _historiqueClassementServiceMock.Setup(x => x.GetHistoriqueRecentAsync(1))
+            .ReturnsAsync(new List<HistoriqueClassement>());
+        _capaciteServiceMock.Setup(x => x.GetCount()).Returns(0);
+
+        // Act
+        await CallOnInitializedAsync();
+
+        // Assert
+        Assert.Equal(2, _home.bestSquadFactions[Faction.Syndicat]);
+        Assert.Equal(1, _home.bestSquadFactions[Faction.Pacificateurs]);
+        Assert.Equal(1, _home.bestSquadFactions[Faction.HommesLibres]);
     }
 
     #endregion
-
-    #region Adult Mode Tests
 
     [Fact]
     public async Task OnAdultModeChanged_ShouldUpdateIsAdultModeEnabled()
