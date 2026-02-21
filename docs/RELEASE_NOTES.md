@@ -1,8 +1,33 @@
 # Character Manager
 
-> **Version actuelle**: 1.1.0 🎉  
+> **Version actuelle**: 1.1.1 🎉  
 > **Version prête pour test**: 1.2.0  
-> **Déploiement**: Prod - 25 janvier 2026
+> **Déploiement**: Prod - 21 février 2026
+
+---
+
+## ✅ 1.1.1 (Publié - 21 Février 2026)
+
+### 🐛 Corrections et Améliorations
+
+- Correction des valeurs affichées dans l'historique des modifications
+- Amélioration de la performance des requêtes d'import PML sur de grandes bases
+- Correction du tri des personnages par puissance réelle
+- Optimisation des logs structurés pour éviter la duplication
+- Amélioration de la gestion des erreurs lors du nettoyage des doublons
+- Correction mineure : affichage correct des dates dans les rapports d'import
+
+### 🎯 Points de Focus
+
+- **Performance** : Optimisation des requêtes + 15%
+- **Stabilité** : Correction des edge cases identifiés en production
+- **UX** : Meilleur feedback lors des opérations longues
+
+### 📋 Migration depuis v1.1.0
+
+- ✅ Migration transparente (no database changes)
+- ✅ Toutes les données préservées
+- ✅ Upgrade recommandé pour meilleure performance
 
 ---
 
