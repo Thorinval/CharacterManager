@@ -1,0 +1,155 @@
+Summary
+  Generated on: 25/01/2026 - 21:33:12
+  Coverage date: 25/01/2026 - 15:00:09 - 25/01/2026 - 21:32:56
+  Parser: MultiReport (16x Cobertura)
+  Assemblies: 3
+  Classes: 129
+  Files: 136
+  Line coverage: 73.4%
+  Covered lines: 16092
+  Uncovered lines: 5819
+  Coverable lines: 21911
+  Total lines: 32215
+  Branch coverage: 37.4% (1558 of 4160)
+  Covered branches: 1558
+  Total branches: 4160
+  Method coverage: 69.9% (964 of 1379)
+  Full method coverage: 53.9% (744 of 1379)
+  Covered methods: 964
+  Fully covered methods: 744
+  Total methods: 1379
+
+CharacterManager                                                          73.4%
+  CharacterManager.Components.EscouadePreviewEditor                       77.2%
+  CharacterManager.Components.Forms.InputDateOnly                         44.4%
+  CharacterManager.Components.Layout.MainLayout                           85.7%
+  CharacterManager.Components.LocalizationProvider                        85.1%
+  CharacterManager.Components.LocalizedText                                100%
+  CharacterManager.Components.Modal.AboutModal                            87.5%
+  CharacterManager.Components.Modal.ChangelogModal                         100%
+  CharacterManager.Components.Modal.CreerClassementModal                    50%
+  CharacterManager.Components.Modal.DetailPersonnageModal                   65%
+  CharacterManager.Components.Modal.ImportExportPmlModal                   7.2%
+  CharacterManager.Components.Modal.ManageUsersModal                      21.3%
+  CharacterManager.Components.Modal.MarkdownModal                         90.9%
+  CharacterManager.Components.Modal.ModalHost                               97%
+  CharacterManager.Components.Modal.PersonnageCapacitesModal              82.9%
+  CharacterManager.Components.Modal.RoadmapModal                           100%
+  CharacterManager.Components.Modal.SettingsModal                         45.1%
+  CharacterManager.Components.Pages.Admin.CleanupDuplicates               82.8%
+  CharacterManager.Components.Pages.Capacites                             60.9%
+  CharacterManager.Components.Pages.ChangePassword                        16.1%
+  CharacterManager.Components.Pages.Classements                           50.2%
+  CharacterManager.Components.Pages.Error                                  100%
+  CharacterManager.Components.Pages.Escouade                              64.6%
+  CharacterManager.Components.Pages.Histoligues                           57.3%
+  CharacterManager.Components.Pages.HistoriqueModifications               27.3%
+  CharacterManager.Components.Pages.Home                                  46.5%
+  CharacterManager.Components.Pages.Inventaire                            23.7%
+  CharacterManager.Components.Pages.Login                                   85%
+  CharacterManager.Components.Pages.MaisonLucie                           56.8%
+  CharacterManager.Components.Pages.ManageUsers                           14.2%
+  CharacterManager.Components.Pages.MeilleurEscouade                      97.1%
+  CharacterManager.Components.Pages.Statistiques                          32.8%
+  CharacterManager.Components.Pages.TemplateEscouade                        31%
+  CharacterManager.Components.Pages.Templates                             29.5%
+  CharacterManager.Components.Routes                                        75%
+  CharacterManager.Components.Toast                                        100%
+  CharacterManager.Components.UpdateNotification                          92.3%
+  CharacterManager.Migrations.AddDatesToHistoriqueModifications           88.7%
+  CharacterManager.Migrations.AddDiscriminatorToPersonnageAndPiece        99.6%
+  CharacterManager.Migrations.AddEstImportationToHistoriqueModification   99.1%
+  CharacterManager.Migrations.AddHistoriqueLigue                          99.2%
+  CharacterManager.Migrations.AddHistoriqueModifications                  99.3%
+  CharacterManager.Migrations.AddPowerHistorization                       97.9%
+  CharacterManager.Migrations.AddPuissanceTotaleToHistoriqueClassement    98.8%
+  CharacterManager.Migrations.AddRelationToPersonnage                     98.5%
+  CharacterManager.Migrations.AddRoadmapNotes                               96%
+  CharacterManager.Migrations.ApplicationDbContextModelSnapshot            100%
+  CharacterManager.Migrations.AppSettings                                 96.2%
+  CharacterManager.Migrations.ConsolidateHistoriqueModificationsPerDay    97.7%
+  CharacterManager.Migrations.HistoriqueClassement                        96.7%
+  CharacterManager.Migrations.LucieHouse                                    99%
+  CharacterManager.Migrations.PersonnageHistorique                        95.4%
+  CharacterManager.Migrations.PieceHistorique                             99.6%
+  CharacterManager.Migrations.Profiles                                    98.9%
+  CharacterManager.Migrations.RefactorToPersonnageClassement              89.3%
+  CharacterManager.Migrations.RemovePersonnageDescription                 98.4%
+  CharacterManager.Migrations.RemoveRareteFromPersonnageClassement        98.5%
+  CharacterManager.Migrations.SetDefaultTimestampsForHistorique           99.6%
+  CharacterManager.Scripts.CleanupPersonnageDuplicates                    94.8%
+  CharacterManager.Server.ApplicationStartup                              68.5%
+  CharacterManager.Server.Constants.StatisticsConstants                    100%
+  CharacterManager.Server.Controllers.PersonnageResourcesController       78.1%
+  CharacterManager.Server.Controllers.ResourcesController                 66.6%
+  CharacterManager.Server.Data.ApplicationDbContext                       98.6%
+  CharacterManager.Server.Models.Action                                    100%
+  CharacterManager.Server.Models.AppSettings                               100%
+  CharacterManager.Server.Models.Aspect                                    100%
+  CharacterManager.Server.Models.Capacite                                  100%
+  CharacterManager.Server.Models.Classement                                100%
+  CharacterManager.Server.Models.ClassementFormModel                       100%
+  CharacterManager.Server.Models.ConflictResolutionApplied                  50%
+  CharacterManager.Server.Models.DonneesEscouadeSerialisees                100%
+  CharacterManager.Server.Models.HistoriqueClassement                      100%
+  CharacterManager.Server.Models.HistoriqueLigue                           100%
+  CharacterManager.Server.Models.HistoriqueModification                    100%
+  CharacterManager.Server.Models.ImportLogEntry                            100%
+  CharacterManager.Server.Models.ImportPreviewResult                       100%
+  CharacterManager.Server.Models.ImportResult                              100%
+  CharacterManager.Server.Models.LucieHouse                                 50%
+  CharacterManager.Server.Models.Personnage                                100%
+  CharacterManager.Server.Models.PersonnageClassement                       50%
+  CharacterManager.Server.Models.PersonnageHistorique                        0%
+  CharacterManager.Server.Models.PersonnageImageConfig                     100%
+  CharacterManager.Server.Models.PersonnagesImagesConfiguration            100%
+  CharacterManager.Server.Models.PersonnelHistorique                       100%
+  CharacterManager.Server.Models.Piece                                    67.8%
+  CharacterManager.Server.Models.PieceHistorique                            50%
+  CharacterManager.Server.Models.PmlExportOptions                         81.1%
+  CharacterManager.Server.Models.Profile                                   100%
+  CharacterManager.Server.Models.RoadmapNote                               100%
+  CharacterManager.Server.Models.Template                                 94.7%
+  CharacterManager.Server.ServiceCollectionExtensions                      100%
+  CharacterManager.Server.Services.AdultModeNotificationService            100%
+  CharacterManager.Server.Services.AppVersionService                      75.9%
+  CharacterManager.Server.Services.AuthenticationHelper                   92.5%
+  CharacterManager.Server.Services.CapaciteService                         100%
+  CharacterManager.Server.Services.ClassementEvolutionData                 100%
+  CharacterManager.Server.Services.ClientLocalizationService              82.8%
+  CharacterManager.Server.Services.ConflictResolution                        0%
+  CharacterManager.Server.Services.DatabaseInitializationService            21%
+  CharacterManager.Server.Services.GitHubAsset                             100%
+  CharacterManager.Server.Services.GitHubRelease                           100%
+  CharacterManager.Server.Services.HistoriqueClassementService            25.5%
+  CharacterManager.Server.Services.HistoriqueLigueService                  100%
+  CharacterManager.Server.Services.HistoriqueModificationImportRequest       0%
+  CharacterManager.Server.Services.HistoriqueModificationService          90.2%
+  CharacterManager.Server.Services.ImportConflict                         83.3%
+  CharacterManager.Server.Services.ImportResultWithConflicts                 0%
+  CharacterManager.Server.Services.LanguageContextService                  100%
+  CharacterManager.Server.Services.LanguageOption                          100%
+  CharacterManager.Server.Services.LevelEvolutionData                      100%
+  CharacterManager.Server.Services.LocalizationService                    84.7%
+  CharacterManager.Server.Services.ModalService                            100%
+  CharacterManager.Server.Services.ModificationHistoriqueRequest           100%
+  CharacterManager.Server.Services.PersonnageImageUrlHelper                100%
+  CharacterManager.Server.Services.PersonnageService                        82%
+  CharacterManager.Server.Services.PmlExportService                       55.5%
+  CharacterManager.Server.Services.PmlImportOptions                        100%
+  CharacterManager.Server.Services.PmlImportService                       23.8%
+  CharacterManager.Server.Services.PmlServiceBase                         56.7%
+  CharacterManager.Server.Services.ProfileService                         89.6%
+  CharacterManager.Server.Services.ReleaseVersion                            0%
+  CharacterManager.Server.Services.StatistiquesService                    48.1%
+  CharacterManager.Server.Services.TeamPowerEvolutionData                   50%
+  CharacterManager.Server.Services.UpdateInfo                              100%
+  CharacterManager.Server.Services.UpdateService                          57.6%
+  CharacterManager.Server.Services.VersionsList                              0%
+  Program                                                                    0%
+
+CharacterManager.Resources.Interface                                      77.7%
+  CharacterManager.Resources.Interface.InterfaceResourceManager           77.7%
+
+CharacterManager.Resources.Personnages                                      80%
+  CharacterManager.Resources.Personnages.PersonnageResourceManager          80%

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using CharacterManager.Server.Data;
 using CharacterManager.Server.Models;
+using CharacterManager.Server.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using CharacterManager.Server.Constants;
 
@@ -20,18 +21,21 @@ public class ModificationHistoriqueRequest
     public string? Description { get; set; }
     public DateTime? DateModification { get; set; }
     public bool EstImportation { get; set; } = false;
+    public SourceModification Source { get; set; } = SourceModification.NonSpecifiee;
 }
 
 /// <summary>
 /// Service de gestion de l'historique des modifications
 /// </summary>
-public class HistoriqueModificationService
+public class HistoriqueModificationService : IHistoriqueModificationService
 {
     private readonly ApplicationDbContext _context;
+    private readonly Lazy<ITeamPowerTimelineService>? _timelineService;
 
-    public HistoriqueModificationService(ApplicationDbContext context)
+    public HistoriqueModificationService(ApplicationDbContext context, Lazy<ITeamPowerTimelineService>? timelineService = null)
     {
         _context = context;
+        _timelineService = timelineService;
     }
 
     /// <summary>
@@ -44,7 +48,8 @@ public class HistoriqueModificationService
         object? donnees,
         string? description = null,
         DateTime? dateModification = null,
-        bool estImportation = false)
+        bool estImportation = false,
+        SourceModification source = SourceModification.NonSpecifiee)
     {
         var timestamp = dateModification ?? DateTime.UtcNow;
 
@@ -59,7 +64,8 @@ public class HistoriqueModificationService
             DateMiseAJour = timestamp,
             NouvelleValeur = donnees != null ? JsonSerializer.Serialize(donnees) : null,
             Description = description ?? $"Création de {nomEntite}",
-            EstImportation = estImportation
+            EstImportation = estImportation,
+            Source = source
         };
 
         _context.HistoriquesModifications.Add(historique);
@@ -97,7 +103,8 @@ public class HistoriqueModificationService
         object? nouvelleValeur,
         string? description = null,
         DateTime? dateModification = null,
-        bool estImportation = false)
+        bool estImportation = false,
+        SourceModification source = SourceModification.NonSpecifiee)
     {
         var request = new ModificationHistoriqueRequest
         {
@@ -109,7 +116,8 @@ public class HistoriqueModificationService
             NouvelleValeur = nouvelleValeur,
             Description = description,
             DateModification = dateModification,
-            EstImportation = estImportation
+            EstImportation = estImportation,
+            Source = source
         };
 
         await EnregistrerModificationInternalAsync(request);
@@ -118,8 +126,9 @@ public class HistoriqueModificationService
 
     private async Task EnregistrerModificationInternalAsync(ModificationHistoriqueRequest request)
     {
-        var maintenant = request.DateModification ?? DateTime.UtcNow;
-        var jourUtc = maintenant.Date;
+        var nowUtc = DateTime.UtcNow;
+        var dateModification = request.DateModification ?? nowUtc;
+        var jourUtc = dateModification.Date;
 
         // Cherche une modification existante pour le même jour et le même champ
         var modificationJour = await _context.HistoriquesModifications
@@ -134,12 +143,13 @@ public class HistoriqueModificationService
         if (modificationJour != null)
         {
             // Mise à jour de la ligne existante pour le jour
-            modificationJour.DateModification = maintenant;
-            modificationJour.DateMiseAJour = maintenant;
+            modificationJour.DateModification = dateModification;
+            modificationJour.DateMiseAJour = nowUtc;
             // On conserve l'ancienne valeur, on ne met à jour que la nouvelle
             modificationJour.NouvelleValeur = request.NouvelleValeur != null ? JsonSerializer.Serialize(request.NouvelleValeur) : null;
             modificationJour.Description = request.Description ?? $"Modification de {request.ChampModifie} pour {request.NomEntite}";
             modificationJour.EstImportation = request.EstImportation;
+            modificationJour.Source = request.Source;
 
             _context.HistoriquesModifications.Update(modificationJour);
         }
@@ -152,20 +162,53 @@ public class HistoriqueModificationService
                 EntiteId = request.EntiteId,
                 NomEntite = request.NomEntite,
                 TypeModification = TypeModification.Modification,
-                DateModification = maintenant,
-                DateInsertion = maintenant,
-                DateMiseAJour = maintenant,
+                DateModification = dateModification,
+                DateInsertion = nowUtc,
+                DateMiseAJour = nowUtc,
                 ChampModifie = request.ChampModifie,
                 AncienneValeur = request.AncienneValeur != null ? JsonSerializer.Serialize(request.AncienneValeur) : null,
                 NouvelleValeur = request.NouvelleValeur != null ? JsonSerializer.Serialize(request.NouvelleValeur) : null,
                 Description = request.Description ?? $"Modification de {request.ChampModifie} pour {request.NomEntite}",
-                EstImportation = request.EstImportation
+                EstImportation = request.EstImportation,
+                Source = request.Source
             };
 
             _context.HistoriquesModifications.Add(historique);
         }
 
         await _context.SaveChangesAsync();
+
+        // Après toute modification pertinente, recalculer la vue matérialisée des puissances
+        try
+        {
+            if (_timelineService?.Value != null && IsPowerAffectingChange(request))
+            {
+                var date = request.DateModification ?? DateTime.UtcNow;
+                await _timelineService.Value.RecomputeFromDateAsync(DateOnly.FromDateTime(date));
+            }
+        }
+        catch
+        {
+            // Ne pas bloquer la modification si le recalcul échoue
+        }
+    }
+
+    private static bool IsPowerAffectingChange(ModificationHistoriqueRequest request)
+    {
+        // Personnage power changes or selection changes, and Lucie power fields
+        if (request.TypeEntite == Models.TypeEntite.Personnage)
+        {
+            return request.ChampModifie == Server.Constants.StatisticsConstants.HistoryFields.Puissance
+                || request.ChampModifie == Server.Constants.StatisticsConstants.HistoryFields.Niveau
+                || request.ChampModifie == Server.Constants.StatisticsConstants.HistoryFields.Rang
+                || request.ChampModifie == Server.Constants.StatisticsConstants.HistoryFields.Selectionne;
+        }
+        if (request.TypeEntite == Models.TypeEntite.Piece)
+        {
+            return request.ChampModifie == Server.Constants.StatisticsConstants.HistoryFields.PuissanceLucieSelectionnee
+                || request.ChampModifie == Server.Constants.StatisticsConstants.HistoryFields.PuissanceLucieMax;
+        }
+        return false;
     }
 
     /// <summary>
@@ -178,7 +221,8 @@ public class HistoriqueModificationService
         object? donnees,
         string? description = null,
         DateTime? dateModification = null,
-        bool estImportation = false)
+        bool estImportation = false,
+        SourceModification source = SourceModification.NonSpecifiee)
     {
         var timestamp = dateModification ?? DateTime.UtcNow;
 
@@ -193,7 +237,8 @@ public class HistoriqueModificationService
             DateMiseAJour = timestamp,
             AncienneValeur = donnees != null ? JsonSerializer.Serialize(donnees) : null,
             Description = description ?? $"Suppression de {nomEntite}",
-            EstImportation = estImportation
+            EstImportation = estImportation,
+            Source = source
         };
 
         _context.HistoriquesModifications.Add(historique);
@@ -241,6 +286,26 @@ public class HistoriqueModificationService
             .Where(h => h.TypeEntite == typeEntite && h.EntiteId == entiteId)
             .OrderByDescending(h => h.DateModification)
             .ToListAsync();
+    }
+
+    /// <summary>
+    /// Récupère l'historique des modifications récentes
+    /// </summary>
+    public async Task<List<HistoriqueModification>> GetHistoriqueRecentAsync(int nombre = 50)
+    {
+        return await _context.HistoriquesModifications
+            .OrderByDescending(h => h.DateModification)
+            .Take(nombre)
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// Vide l'historique des modifications
+    /// </summary>
+    public async Task ViderHistoriqueAsync()
+    {
+        _context.HistoriquesModifications.RemoveRange(_context.HistoriquesModifications);
+        await _context.SaveChangesAsync();
     }
 
     /// <summary>
@@ -296,10 +361,15 @@ public class HistoriqueModificationService
             dateDebut: dateDebut,
             dateFin: dateFin);
 
-        return JsonSerializer.Serialize(historique, new JsonSerializerOptions
+        var options = new JsonSerializerOptions
         {
-            WriteIndented = true
-        });
+            WriteIndented = true,
+            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+
+        return JsonSerializer.Serialize(historique, options);
     }
 
     /// <summary>
@@ -311,10 +381,15 @@ public class HistoriqueModificationService
             .OrderByDescending(h => h.DateModification)
             .ToListAsync();
 
-        return JsonSerializer.Serialize(historique, new JsonSerializerOptions
+        var options = new JsonSerializerOptions
         {
-            WriteIndented = true
-        });
+            WriteIndented = true,
+            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+
+        return JsonSerializer.Serialize(historique, options);
     }
 
     /// <summary>
@@ -404,7 +479,7 @@ public class HistoriqueModificationService
         }
         catch (Exception ex)
         {
-            preview.Error = $"{AppConstants.Messages.ErrorXmlParsing}: {ex.Message}";
+            preview.Error = $"{ImportExportConstants.ErrorMessages.ErrorXmlParsing}: {ex.Message}";
             preview.IsSuccess = false;
             preview.Logs = logs;
         }
@@ -496,7 +571,7 @@ public class HistoriqueModificationService
         }
         catch (Exception ex)
         {
-            result.Error = $"{AppConstants.Messages.ErrorXmlParsing}: {ex.Message}";
+            result.Error = $"{ImportExportConstants.ErrorMessages.ErrorXmlParsing}: {ex.Message}";
             result.IsSuccess = false;
             result.Logs = logs;
         }
@@ -632,13 +707,13 @@ public class HistoriqueModificationService
         switch (modification.TypeModification)
         {
             case TypeModification.Creation:
-                await EnregistrerCreationAsync(modification.TypeEntite, entiteId, modification.NomEntite, nouvelle, modification.Description, modification.DateModification, estImportation: true);
+                await EnregistrerCreationAsync(modification.TypeEntite, entiteId, modification.NomEntite, nouvelle, modification.Description, modification.DateModification, estImportation: true, source: modification.Source);
                 break;
             case TypeModification.Modification:
-                await EnregistrerModificationAsync(modification.TypeEntite, entiteId, modification.NomEntite, modification.ChampModifie ?? string.Empty, ancienne, nouvelle, modification.Description, modification.DateModification, estImportation: true);
+                await EnregistrerModificationAsync(modification.TypeEntite, entiteId, modification.NomEntite, modification.ChampModifie ?? string.Empty, ancienne, nouvelle, modification.Description, modification.DateModification, estImportation: true, source: modification.Source);
                 break;
             case TypeModification.Suppression:
-                await EnregistrerSuppressionAsync(modification.TypeEntite, entiteId, modification.NomEntite, ancienne, modification.Description, modification.DateModification, estImportation: true);
+                await EnregistrerSuppressionAsync(modification.TypeEntite, entiteId, modification.NomEntite, ancienne, modification.Description, modification.DateModification, estImportation: true, source: modification.Source);
                 break;
         }
 
@@ -670,5 +745,99 @@ public class HistoriqueModificationService
                 });
             }
         }
+    }
+
+    /// <summary>
+    /// Enregistre ou met à jour la puissance de Lucie pour le jour courant.
+    /// Gère 2 types : puissance sélectionnée (EntiteId=-1) et puissance max (EntiteId=-2).
+    /// Si un enregistrement existe déjà pour le jour, on met à jour la nouvelle valeur.
+    /// Sinon, on crée un nouvel enregistrement en reprenant la dernière puissance des jours précédents comme ancienne valeur.
+    /// </summary>
+    public async Task EnregistrerPuissanceLucieAsync(
+        bool estPuissanceMax,
+        int puissance,
+        DateTime? dateModification = null,
+        bool estImportation = false,
+        int? ancienneValeur = null)
+    {
+        var champModifie = estPuissanceMax 
+            ? StatisticsConstants.HistoryFields.PuissanceLucieMax 
+            : StatisticsConstants.HistoryFields.PuissanceLucieSelectionnee;
+        
+        var entiteId = estPuissanceMax ? -2 : -1;
+        var nomEntite = estPuissanceMax ? "Lucie (Max)" : "Lucie (Sélectionnée)";
+
+        var nowUtc = DateTime.UtcNow;
+        var dateModif = dateModification ?? nowUtc;
+        var jourUtc = dateModif.Date;
+
+        // Cherche une modification existante pour le même jour
+        var modificationJour = await _context.HistoriquesModifications
+            .Where(h => h.TypeEntite == TypeEntite.Piece
+                && h.EntiteId == entiteId
+                && h.TypeModification == TypeModification.Modification
+                && h.ChampModifie == champModifie
+                && h.DateModification.Date == jourUtc)
+            .OrderByDescending(h => h.DateModification)
+            .FirstOrDefaultAsync();
+
+        if (modificationJour != null)
+        {
+            // Mise à jour de la ligne existante pour le jour
+            modificationJour.DateModification = dateModif;
+            modificationJour.DateMiseAJour = nowUtc;
+            modificationJour.NouvelleValeur = puissance.ToString();
+            if (estImportation)
+            {
+                modificationJour.EstImportation = true;
+                modificationJour.Source = SourceModification.ImportClassement;
+            }
+            _context.HistoriquesModifications.Update(modificationJour);
+        }
+        else
+        {
+            // Utiliser ancienneValeur fournie ou chercher la dernière puissance des jours précédents
+            int anciennePuissance = ancienneValeur ?? 0;
+            
+            if (ancienneValeur == null)
+            {
+                // Chercher la dernière modification de Lucie, indépendamment du jour (pour la chaîne historique)
+                var dernierePuissance = await _context.HistoriquesModifications
+                    .Where(h => h.TypeEntite == TypeEntite.Piece
+                        && h.EntiteId == entiteId
+                        && h.ChampModifie == champModifie
+                        && h.DateModification < nowUtc)  // Avant la date actuelle, pas juste avant le jour
+                    .OrderByDescending(h => h.DateModification)
+                    .Select(h => h.NouvelleValeur)
+                    .FirstOrDefaultAsync();
+
+                if (!string.IsNullOrEmpty(dernierePuissance) && int.TryParse(dernierePuissance, out var parsed))
+                {
+                    anciennePuissance = parsed;
+                }
+            }
+
+            // Création d'une nouvelle ligne pour ce jour
+            var historique = new HistoriqueModification
+            {
+                TypeEntite = TypeEntite.Piece,
+                EntiteId = entiteId,
+                NomEntite = nomEntite,
+                TypeModification = TypeModification.Modification,
+                DateModification = dateModif,
+                DateInsertion = nowUtc,
+                DateMiseAJour = nowUtc,
+                ChampModifie = champModifie,
+                AncienneValeur = anciennePuissance.ToString(),
+                NouvelleValeur = puissance.ToString(),
+                Description = $"Puissance {nomEntite}: {anciennePuissance} → {puissance}",
+                EstImportation = estImportation,
+                Source = estImportation ? SourceModification.ImportClassement : SourceModification.NonSpecifiee
+            };
+
+            _context.HistoriquesModifications.Add(historique);
+        }
+
+        await _context.SaveChangesAsync();
     }
 }

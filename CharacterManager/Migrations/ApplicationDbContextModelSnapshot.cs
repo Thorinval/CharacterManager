@@ -188,6 +188,9 @@ namespace CharacterManager.Migrations
                     b.Property<string>("NouvelleValeur")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Source")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("TypeEntite")
                         .HasColumnType("INTEGER");
 
@@ -457,6 +460,31 @@ namespace CharacterManager.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("RoadmapNotes");
+                });
+
+            modelBuilder.Entity("CharacterManager.Server.Models.TeamPowerTimelineRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DateInsertion")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TotalPower")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Date", "Type");
+
+                    b.ToTable("TeamPowerTimelineRecords");
                 });
 
             modelBuilder.Entity("CharacterManager.Server.Models.Template", b =>

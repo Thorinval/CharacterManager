@@ -1,0 +1,37 @@
+=== RAPPORT DÉTAILLÉ ÉVOLUTION PUISSANCE ===
+Généré le 26/01/2026 23:04:10
+
+CLASSEMENTS ENREGISTRÉS: 0
+Premier:  - Puissance: 
+Dernier:  - Puissance: 
+
+MODIFICATIONS HISTORIQUES:
+Première modif personnage: 20/11/2025
+Première modif Lucie Max (entité -2): 
+
+POINTS CALCULÉS:
+Équipe sélectionnée: 0 points
+Meilleure équipe: 0 points
+
+=== COMPARAISON DÉTAILLÉE PAR DATE ===
+
+=== VALEURS ACTUELLES (LIVE) ===
+Équipe sélectionnée actuelle: 39275
+Meilleure équipe actuelle: 40925
+Lucie sélectionnée: 7725
+Lucie Max: 7815
+
+Top 8 Mercenaires:
+  BELLE: 4295 (Niveau 16, Rang 3)
+  KITTY: 4265 (Niveau 16, Rang 3)
+  REGINA: 3805 (Niveau 10, Rang 3)
+  RAVENNA: 3730 (Niveau 19, Rang 3)
+  NAOMI: 3370 (Niveau 17, Rang 3)
+  NATASHA: 3230 (Niveau 19, Rang 3)
+  NYMERIA: 3110 (Niveau 17, Rang 3)
+  OMEGA: 2930 (Niveau 16, Rang 3)
+Top 3 Androïdes:
+  ISABELLA: 870
+  RUBY: 855
+  AUDREY: 855
+Commandant: DRAGANA: 1755 + 40 (rang) = 1795

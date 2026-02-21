@@ -1,3 +1,5 @@
+using CharacterManager.Server.Models.Enums;
+
 namespace CharacterManager.Server.Models;
 
 /// <summary>
@@ -85,4 +87,9 @@ public class HistoriqueModification
     /// Indique si cette modification vient d'une importation (pour l'affichage sans heures/minutes)
     /// </summary>
     public bool EstImportation { get; set; } = false;
+
+    /// <summary>
+    /// Source/origine de la modification (Inventaire, Import PML, Import Classement, etc.)
+    /// </summary>
+    public SourceModification Source { get; set; } = SourceModification.NonSpecifiee;
 }

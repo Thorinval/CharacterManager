@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CharacterManager.Server.Services;
 
-public class ProfileService
+public class ProfileService : IProfileService
 {
     private readonly ApplicationDbContext _db;
     private readonly IConfiguration _config;
@@ -63,10 +63,10 @@ public class ProfileService
         return true;
     }
 
-    public static bool VerifyPassword(Profile profile, string password)
+    public bool VerifyPassword(Profile profile, string password)
         => VerifyPbkdf2(password, profile.PasswordHash, profile.PasswordSalt);
 
-    public static (bool ok, string? error) ValidatePasswordStrength(string password)
+    public (bool ok, string? error) ValidatePasswordStrength(string password)
     {
         if (string.IsNullOrEmpty(password) || password.Length < 8) return (false, "Au moins 8 caractères");
         if (!password.Any(char.IsUpper)) return (false, "Inclure une majuscule");
@@ -163,3 +163,7 @@ public class ProfileService
         return true;
     }
 }
+
+
+
+

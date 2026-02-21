@@ -73,3 +73,5 @@ public partial class MeilleurEscouade
 
     internal static int GetPiecePower(Piece piece) => piece.Puissance;
 }
+
+

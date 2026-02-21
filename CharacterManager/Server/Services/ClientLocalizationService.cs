@@ -8,20 +8,22 @@ using Microsoft.JSInterop;
 /// <summary>
 /// Service client pour fournir les traductions aux composants Blazor
 /// </summary>
-public class ClientLocalizationService
+public class ClientLocalizationService : IClientLocalizationService
 {
     private readonly ILogger<ClientLocalizationService> _logger;
     private readonly IWebHostEnvironment _env;
-    private readonly LanguageContextService _languageContext;
+    private readonly ILanguageContextService _languageContext;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private Dictionary<string, object>? _currentResources;
+    private Dictionary<string, string>? _flatResources;
+    private JsonElement? _currentRoot;
     private string _currentLanguage = "fr";
     private readonly object _lock = new();
 
     public ClientLocalizationService(
         IWebHostEnvironment env, 
         ILogger<ClientLocalizationService> logger,
-        LanguageContextService languageContext,
+        ILanguageContextService languageContext,
         IHttpContextAccessor httpContextAccessor)
     {
         _logger = logger;
@@ -59,6 +61,8 @@ public class ClientLocalizationService
                 json,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
             );
+            _currentRoot = JsonDocument.Parse(json).RootElement.Clone();
+            _flatResources = BuildFlatMap(_currentRoot.Value);
         }
         catch (Exception ex)
         {
@@ -75,6 +79,60 @@ public class ClientLocalizationService
     {
         EnsureResourcesLoaded();
 
+        // Try flat resources first (fastest lookup)
+        if (_flatResources != null && _flatResources.TryGetValue(key, out var flatValue))
+        {
+            return flatValue;
+        }
+
+        // Try JSON root element navigation
+        var rootValue = TryGetFromJsonRoot(key);
+        if (rootValue != null)
+        {
+            return rootValue;
+        }
+
+        // Try direct dictionary lookup
+        if (_currentResources != null && _currentResources.TryGetValue(key, out var directValue))
+        {
+            return ConvertToString(directValue, key);
+        }
+
+        // Try nested navigation in dictionary
+        return TryGetFromNestedDictionary(key);
+    }
+
+    private string? TryGetFromJsonRoot(string key)
+    {
+        if (!_currentRoot.HasValue)
+        {
+            return null;
+        }
+
+        var element = _currentRoot.Value;
+        var keysPath = key.Split('.');
+        
+        foreach (var k in keysPath)
+        {
+            if (element.ValueKind == JsonValueKind.Object && element.TryGetProperty(k, out var child))
+            {
+                element = child;
+                continue;
+            }
+
+            return null;
+        }
+
+        if (element.ValueKind != JsonValueKind.Undefined && element.ValueKind != JsonValueKind.Null)
+        {
+            return ConvertToString(element, key);
+        }
+
+        return null;
+    }
+
+    private string TryGetFromNestedDictionary(string key)
+    {
         var keys = key.Split('.');
         object? current = _currentResources;
 
@@ -89,6 +147,11 @@ public class ClientLocalizationService
 
         return ConvertToString(current, key);
     }
+
+    /// <summary>
+    /// Indexeur pour récupérer une traduction par clé, équivalent à GetKeyValue.
+    /// </summary>
+    public string this[string key] => GetKeyValue(key);
 
     /// <summary>
     /// Récupère une valeur imbriquée depuis un JsonElement ou Dictionary
@@ -135,9 +198,22 @@ public class ClientLocalizationService
     public string GetCurrentLanguage() => _currentLanguage;
 
     /// <summary>
+    /// Obtient la langue actuelle
+    /// </summary>
+    public string CurrentLanguage => _currentLanguage;
+
+    /// <summary>
     /// Change de langue
     /// </summary>
     public async Task SetLanguageAsync(string languageCode)
+    {
+        await InitializeAsync(languageCode);
+    }
+
+    /// <summary>
+    /// Change la langue et recharge les ressources
+    /// </summary>
+    public async Task ChangeLanguageAsync(string languageCode)
     {
         await InitializeAsync(languageCode);
     }
@@ -183,12 +259,47 @@ public class ClientLocalizationService
                     json,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
                 );
+                _currentRoot = JsonDocument.Parse(json).RootElement.Clone();
+                _flatResources = BuildFlatMap(_currentRoot.Value);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erreur lors du chargement lazy des ressources: {Message}", ex.Message);
                 _currentResources = new Dictionary<string, object>();
+                _currentRoot = null;
+                _flatResources = null;
             }
         }
     }
+
+    private static Dictionary<string, string> BuildFlatMap(JsonElement root)
+    {
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        void Walk(JsonElement element, string prefix)
+        {
+            switch (element.ValueKind)
+            {
+                case JsonValueKind.Object:
+                    foreach (var property in element.EnumerateObject())
+                    {
+                        var nextPrefix = string.IsNullOrEmpty(prefix) ? property.Name : $"{prefix}.{property.Name}";
+                        Walk(property.Value, nextPrefix);
+                    }
+                    break;
+                case JsonValueKind.Array:
+                    break;
+                default:
+                    result[prefix] = ConvertToString(element, prefix);
+                    break;
+            }
+        }
+
+        Walk(root, string.Empty);
+        return result;
+    }
 }
+
+
+
+

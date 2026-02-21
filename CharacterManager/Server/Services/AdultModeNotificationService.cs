@@ -3,7 +3,7 @@ namespace CharacterManager.Server.Services;
 /// <summary>
 /// Service singleton pour notifier les composants des changements de mode adulte
 /// </summary>
-public class AdultModeNotificationService
+public class AdultModeNotificationService : IAdultModeNotificationService
 {
     private bool _isAdultModeEnabled = true;
     private readonly List<Action<bool>> _callbacks = new();
@@ -73,5 +73,9 @@ public class AdultModeNotificationService
         }
     }
 }
+
+
+
+
 
 

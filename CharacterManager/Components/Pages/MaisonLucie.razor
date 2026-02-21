@@ -6,7 +6,7 @@
 @using Microsoft.JSInterop
 @rendermode InteractiveServer
 
-@inject PersonnageService PersonnageService
+@inject IPersonnageService PersonnageService
 @inject NavigationManager NavigationManager
 
 <link rel="stylesheet" href="/css/MaisonLucie.css" />
@@ -302,10 +302,10 @@
     private bool savingPiece;
 
     [Inject]
-    public PmlImportService PmlImportService { get; set; } = null!;
+    public IPmlImportService PmlImportService { get; set; } = null!;
 
     [Inject]
-    public PmlExportService PmlExportService { get; set; } = null!;
+    public IPmlExportService PmlExportService { get; set; } = null!;
 
     [Inject]
     public IJSRuntime JSRuntime { get; set; } = null!;

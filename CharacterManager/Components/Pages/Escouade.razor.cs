@@ -116,3 +116,5 @@ public partial class Escouade
 
     internal static int GetPiecePower(Piece piece) => piece.Puissance;
 }
+
+

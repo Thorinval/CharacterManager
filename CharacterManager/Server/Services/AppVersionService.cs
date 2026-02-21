@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace CharacterManager.Server.Services;
 
-public class AppVersionService
+public class AppVersionService : IAppVersionService
 {
     private readonly IConfiguration _configuration;
 
@@ -108,4 +108,21 @@ public class AppVersionService
         
         return $"{appVersion} ({buildVersion}, {commitHash})";
     }
+
+    public string GetFileVersion()
+    {
+        try
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var fileVersionAttr = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
+            return fileVersionAttr?.Version ?? "1.0.0.0";
+        }
+        catch
+        {
+            return "1.0.0.0";
+        }
+    }
 }
+
+
+

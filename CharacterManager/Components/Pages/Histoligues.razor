@@ -4,11 +4,11 @@
 @using CharacterManager.Server.Constants
 @using Microsoft.AspNetCore.Components.Forms
 @using System.Linq
-@inject HistoriqueLigueService HistoriqueLigueService
-@inject PmlExportService PmlExportService
-@inject PmlImportService PmlImportService
+@inject IHistoriqueLigueService HistoriqueLigueService
+@inject IPmlExportService PmlExportService
+@inject IPmlImportService PmlImportService
 @inject IJSRuntime JS
-@inject ClientLocalizationService LocalizationService
+@inject IClientLocalizationService LocalizationService
 
 <link rel="stylesheet" href="/css/Histoligues.css" />
 
@@ -222,7 +222,7 @@ else
 
             var bytes = await PmlExportService.ExportPmlAsync(options);
             var fileName =
-            $"{AppConstants.ExportPrefixes.HistoriqueLigues}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
+            $"{ImportExportConstants.ExportPrefixes.HistoriqueLigues}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
             var base64 = Convert.ToBase64String(bytes);
             await JS.InvokeVoidAsync("downloadFile", fileName, base64);
         }

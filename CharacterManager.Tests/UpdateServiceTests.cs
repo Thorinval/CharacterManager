@@ -10,7 +10,7 @@ namespace CharacterManager.Tests;
 
 public class UpdateServiceTests
 {
-    private IConfiguration CreateConfiguration(string version = "1.0.0", string githubRepo = "owner/repo")
+    private static IConfiguration CreateConfiguration(string version = "1.0.0", string githubRepo = "owner/repo")
     {
         var inMemorySettings = new Dictionary<string, string>
         {

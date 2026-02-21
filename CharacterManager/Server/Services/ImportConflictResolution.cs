@@ -31,3 +31,7 @@ public class ImportResultWithConflicts
     public List<ImportConflict> Conflicts { get; set; } = new();
     public bool CanProceed => Conflicts.Count == 0; // true si pas de conflits, prêt à procéder
 }
+
+
+
+

@@ -21,13 +21,13 @@ else
     public ApplicationDbContext DbContext { get; set; } = null!;
 
     [Inject]
-    public ClientLocalizationService LocalizationService { get; set; } = null!;
+    public IClientLocalizationService LocalizationService { get; set; } = null!;
 
     [Inject]
-    public ProfileService ProfileService { get; set; } = null!;
+    public IProfileService ProfileService { get; set; } = null!;
 
     [Inject]
-    public LanguageContextService LanguageContext { get; set; } = null!;
+    public ILanguageContextService LanguageContext { get; set; } = null!;
 
     [Inject]
     public IHttpContextAccessor HttpContextAccessor { get; set; } = null!;

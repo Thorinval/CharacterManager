@@ -4,9 +4,9 @@
 @using CharacterManager.Server.Services
 @using Microsoft.JSInterop
 @using Microsoft.AspNetCore.Components.Forms
-@inject ProfileService ProfileService
+@inject IProfileService ProfileService
 @inject NavigationManager Nav
-@inject ClientLocalizationService LocalizationService
+@inject IClientLocalizationService LocalizationService
 
 <PageTitle><LocalizedText Key="manageUsers.title" /></PageTitle>
 

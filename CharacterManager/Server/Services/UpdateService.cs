@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace CharacterManager.Server.Services;
 
-public class UpdateService
+public class UpdateService : IUpdateService
 {
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
@@ -204,3 +204,7 @@ public class ReleaseVersion
     public string? DownloadUrl { get; set; }
     public string? ChecksumUrl { get; set; }
 }
+
+
+
+

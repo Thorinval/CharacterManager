@@ -1,0 +1,357 @@
+=== RAPPORT DÉTAILLÉ ÉVOLUTION PUISSANCE ===
+Généré le 14/02/2026 15:53:09
+
+CLASSEMENTS ENREGISTRÉS: 16
+Premier: 20/11/2025 - Puissance: 18365
+Dernier: 08/01/2026 - Puissance: 35580
+
+MODIFICATIONS HISTORIQUES:
+Première modif personnage: 20/11/2025
+Première modif Lucie Max (entité -2): 
+
+POINTS CALCULÉS:
+Équipe sélectionnée: 20 points
+Meilleure équipe: 16 points
+
+=== COMPARAISON DÉTAILLÉE PAR DATE ===
+
+📅 20/11/2025 (jeu.)
+   Sélectionnée:  18365 | Meilleure:  18365 | Écart:      0 =
+   Modifications (36):
+     • Perso HUNTER: Puissance 1295→1295
+     • Perso HUNTER: Niveau 74→74
+     • Perso HUNTER: Rang 1→1
+     • Perso BELLE: Puissance 2675→2675
+     • Perso BELLE: Niveau 14→14
+     • Perso BELLE: Rang 2→2
+     • Perso LUCRETIA: Puissance 2255→2255
+     • Perso LUCRETIA: Niveau 15→15
+     • Perso LUCRETIA: Rang 2→2
+     • Perso ALISHA: Puissance 1885→1885
+     ... et 26 autres
+   📊 Classement enregistré: 18365
+      Commandant: 1295 | Mercenaires: 17070 | Lucie: 0
+
+📅 04/12/2025 (jeu.)
+   Sélectionnée:  24225 | Meilleure:  28845 | Écart:   4620 ✓
+   Modifications (36):
+     • Perso HUNTER: Puissance 1295→1425
+     • Perso HUNTER: Niveau 74→84
+     • Perso HUNTER: Rang 1→1
+     • Perso BELLE: Puissance 2675→2785
+     • Perso BELLE: Niveau 14→8
+     • Perso BELLE: Rang 2→3
+     • Perso REGINA: Puissance 2890→2890
+     • Perso REGINA: Niveau 12→12
+     • Perso REGINA: Rang 2→2
+     • Perso KITTY: Puissance 1855→2340
+     ... et 26 autres
+   📊 Classement enregistré: 24225
+      Commandant: 1425 | Mercenaires: 19975 | Lucie: 2825
+
+📅 06/12/2025 (sam.)
+   Sélectionnée:  25190 | Meilleure:  29085 | Écart:   3895 ✓
+   Modifications (36):
+     • Perso HUNTER: Puissance 1425→1440
+     • Perso HUNTER: Niveau 84→84
+     • Perso HUNTER: Rang 1→1
+     • Perso BELLE: Puissance 2785→2785
+     • Perso BELLE: Niveau 8→8
+     • Perso BELLE: Rang 3→3
+     • Perso REGINA: Puissance 2890→3100
+     • Perso REGINA: Niveau 12→12
+     • Perso REGINA: Rang 2→2
+     • Perso KITTY: Puissance 2340→2340
+     ... et 26 autres
+   📊 Classement enregistré: 25190
+      Commandant: 1440 | Mercenaires: 20535 | Lucie: 3215
+
+📅 07/12/2025 (dim.)
+   Sélectionnée:  25345 | Meilleure:      0 | Écart: -25345 ⚠
+   Modifications (36):
+     • Perso HUNTER: Puissance 1440→1440
+     • Perso HUNTER: Niveau 84→85
+     • Perso HUNTER: Rang 1→1
+     • Perso BELLE: Puissance 2785→2785
+     • Perso BELLE: Niveau 8→8
+     • Perso BELLE: Rang 3→3
+     • Perso REGINA: Puissance 3100→3100
+     • Perso REGINA: Niveau 12→12
+     • Perso REGINA: Rang 2→2
+     • Perso KITTY: Puissance 2340→2340
+     ... et 26 autres
+   📊 Classement enregistré: 25345
+      Commandant: 1440 | Mercenaires: 20645 | Lucie: 3260
+
+📅 12/12/2025 (ven.)
+   Sélectionnée:  26840 | Meilleure:  29570 | Écart:   2730 ✓
+   Modifications (36):
+     • Perso HUNTER: Puissance 1440→1465
+     • Perso HUNTER: Niveau 85→87
+     • Perso HUNTER: Rang 1→1
+     • Perso BELLE: Puissance 2785→3090
+     • Perso BELLE: Niveau 8→8
+     • Perso BELLE: Rang 3→3
+     • Perso REGINA: Puissance 3100→3320
+     • Perso REGINA: Niveau 12→14
+     • Perso REGINA: Rang 2→2
+     • Perso KITTY: Puissance 2340→2620
+     ... et 26 autres
+   📊 Classement enregistré: 26840
+      Commandant: 1465 | Mercenaires: 21890 | Lucie: 3485
+
+📅 13/12/2025 (sam.)
+   Sélectionnée:  26980 | Meilleure:  29600 | Écart:   2620 ✓
+   Modifications (36):
+     • Perso HUNTER: Puissance 1465→1465
+     • Perso HUNTER: Niveau 87→87
+     • Perso HUNTER: Rang 1→1
+     • Perso BELLE: Puissance 3090→3090
+     • Perso BELLE: Niveau 8→8
+     • Perso BELLE: Rang 3→3
+     • Perso REGINA: Puissance 3320→3320
+     • Perso REGINA: Niveau 14→14
+     • Perso REGINA: Rang 2→2
+     • Perso KITTY: Puissance 2620→2620
+     ... et 26 autres
+   📊 Classement enregistré: 26980
+      Commandant: 1465 | Mercenaires: 22030 | Lucie: 3485
+
+📅 16/12/2025 (mar.)
+   Sélectionnée:  28190 | Meilleure:  28555 | Écart:    365 ✓
+   Modifications (36):
+     • Perso HUNTER: Puissance 1465→1480
+     • Perso HUNTER: Niveau 87→88
+     • Perso HUNTER: Rang 1→1
+     • Perso BELLE: Puissance 3090→3160
+     • Perso BELLE: Niveau 8→9
+     • Perso BELLE: Rang 3→3
+     • Perso REGINA: Puissance 3320→3320
+     • Perso REGINA: Niveau 14→14
+     • Perso REGINA: Rang 2→2
+     • Perso KITTY: Puissance 2620→2620
+     ... et 26 autres
+   📊 Classement enregistré: 28190
+      Commandant: 1480 | Mercenaires: 23150 | Lucie: 3560
+
+📅 22/12/2025 (lun.)
+   Sélectionnée:  28610 | Meilleure:  28755 | Écart:    145 ✓
+   Modifications (36):
+     • Perso HUNTER: Puissance 1480→1495
+     • Perso HUNTER: Niveau 88→89
+     • Perso HUNTER: Rang 1→1
+     • Perso BELLE: Puissance 3160→3160
+     • Perso BELLE: Niveau 9→9
+     • Perso BELLE: Rang 3→3
+     • Perso REGINA: Puissance 3320→3320
+     • Perso REGINA: Niveau 14→14
+     • Perso REGINA: Rang 2→2
+     • Perso KITTY: Puissance 2620→2620
+     ... et 26 autres
+   📊 Classement enregistré: 28610
+      Commandant: 1495 | Mercenaires: 23555 | Lucie: 3560
+
+📅 25/12/2025 (jeu.)
+   Sélectionnée:  30390 | Meilleure:  30390 | Écart:      0 =
+   Modifications (36):
+     • Perso HUNTER: Puissance 1495→1505
+     • Perso HUNTER: Niveau 89→90
+     • Perso HUNTER: Rang 1→1
+     • Perso BELLE: Puissance 3160→3370
+     • Perso BELLE: Niveau 9→9
+     • Perso BELLE: Rang 3→3
+     • Perso REGINA: Puissance 3320→3320
+     • Perso REGINA: Niveau 14→14
+     • Perso REGINA: Rang 2→2
+     • Perso KITTY: Puissance 2620→2620
+     ... et 26 autres
+   📊 Classement enregistré: 30390
+      Commandant: 1505 | Mercenaires: 24090 | Lucie: 4795
+
+📅 28/12/2025 (dim.)
+   Sélectionnée:  32205 | Meilleure:  32205 | Écart:      0 =
+   Modifications (36):
+     • Perso HUNTER: Puissance 1505→1520
+     • Perso HUNTER: Niveau 90→91
+     • Perso HUNTER: Rang 1→1
+     • Perso BELLE: Puissance 3370→3440
+     • Perso BELLE: Niveau 9→10
+     • Perso BELLE: Rang 3→3
+     • Perso REGINA: Puissance 3320→3430
+     • Perso REGINA: Niveau 14→15
+     • Perso REGINA: Rang 2→2
+     • Perso KITTY: Puissance 2620→2690
+     ... et 26 autres
+   📊 Classement enregistré: 32205
+      Commandant: 1520 | Mercenaires: 25750 | Lucie: 4935
+
+📅 29/12/2025 (lun.)
+   Sélectionnée:  32500 | Meilleure:  32500 | Écart:      0 =
+   Modifications (36):
+     • Perso HUNTER: Puissance 1520→1520
+     • Perso HUNTER: Niveau 91→91
+     • Perso HUNTER: Rang 1→1
+     • Perso BELLE: Puissance 3440→3440
+     • Perso BELLE: Niveau 10→10
+     • Perso BELLE: Rang 3→3
+     • Perso REGINA: Puissance 3430→3430
+     • Perso REGINA: Niveau 15→15
+     • Perso REGINA: Rang 2→2
+     • Perso KITTY: Puissance 2690→2690
+     ... et 26 autres
+   📊 Classement enregistré: 32500
+      Commandant: 1520 | Mercenaires: 25895 | Lucie: 5085
+
+📅 30/12/2025 (mar.)
+   Sélectionnée:  32575 | Meilleure:      0 | Écart: -32575 ⚠
+   Modifications (36):
+     • Perso HUNTER: Puissance 1520→1520
+     • Perso HUNTER: Niveau 91→91
+     • Perso HUNTER: Rang 1→1
+     • Perso BELLE: Puissance 3440→3440
+     • Perso BELLE: Niveau 10→10
+     • Perso BELLE: Rang 3→3
+     • Perso REGINA: Puissance 3430→3430
+     • Perso REGINA: Niveau 15→15
+     • Perso REGINA: Rang 2→2
+     • Perso KITTY: Puissance 2690→2690
+     ... et 26 autres
+   📊 Classement enregistré: 32575
+      Commandant: 1520 | Mercenaires: 25895 | Lucie: 5160
+
+📅 31/12/2025 (mer.)
+   Sélectionnée:  33775 | Meilleure:  33775 | Écart:      0 =
+   Modifications (36):
+     • Perso HUNTER: Puissance 1520→1555
+     • Perso HUNTER: Niveau 91→92
+     • Perso HUNTER: Rang 1→1
+     • Perso BELLE: Puissance 3440→3440
+     • Perso BELLE: Niveau 10→10
+     • Perso BELLE: Rang 3→3
+     • Perso REGINA: Puissance 3430→3430
+     • Perso REGINA: Niveau 15→15
+     • Perso REGINA: Rang 2→2
+     • Perso KITTY: Puissance 2690→3590
+     ... et 26 autres
+   📊 Classement enregistré: 33775
+      Commandant: 1555 | Mercenaires: 26975 | Lucie: 5245
+
+📅 01/01/2026 (jeu.)
+   Sélectionnée:  33925 | Meilleure:      0 | Écart: -33925 ⚠
+   Modifications (36):
+     • Perso HUNTER: Puissance 1555→1555
+     • Perso HUNTER: Niveau 92→92
+     • Perso HUNTER: Rang 1→1
+     • Perso BELLE: Puissance 3440→3440
+     • Perso BELLE: Niveau 10→10
+     • Perso BELLE: Rang 3→3
+     • Perso REGINA: Puissance 3430→3430
+     • Perso REGINA: Niveau 15→15
+     • Perso REGINA: Rang 2→2
+     • Perso KITTY: Puissance 3590→3590
+     ... et 26 autres
+   📊 Classement enregistré: 33925
+      Commandant: 1555 | Mercenaires: 26975 | Lucie: 5395
+
+📅 07/01/2026 (mer.)
+   Sélectionnée:  35365 | Meilleure:  35365 | Écart:      0 =
+   Modifications (36):
+     • Perso HUNTER: Puissance 1555→1630
+     • Perso HUNTER: Niveau 92→94
+     • Perso HUNTER: Rang 1→1
+     • Perso BELLE: Puissance 3440→3440
+     • Perso BELLE: Niveau 10→10
+     • Perso BELLE: Rang 3→3
+     • Perso REGINA: Puissance 3430→3665
+     • Perso REGINA: Niveau 15→15
+     • Perso REGINA: Rang 2→2
+     • Perso KITTY: Puissance 3590→4030
+     ... et 26 autres
+   📊 Classement enregistré: 35365
+      Commandant: 1630 | Mercenaires: 27650 | Lucie: 6085
+
+📅 08/01/2026 (jeu.)
+   Sélectionnée:  35580 | Meilleure:      0 | Écart: -35580 ⚠
+   Modifications (36):
+     • Perso HUNTER: Puissance 1630→1665
+     • Perso HUNTER: Niveau 94→95
+     • Perso HUNTER: Rang 1→1
+     • Perso BELLE: Puissance 3440→3440
+     • Perso BELLE: Niveau 10→10
+     • Perso BELLE: Rang 3→3
+     • Perso REGINA: Puissance 3665→3665
+     • Perso REGINA: Niveau 15→15
+     • Perso REGINA: Rang 2→2
+     • Perso KITTY: Puissance 4030→4030
+     ... et 26 autres
+   📊 Classement enregistré: 35580
+      Commandant: 1665 | Mercenaires: 27650 | Lucie: 6265
+
+📅 12/01/2026 (lun.)
+   Sélectionnée:  29535 | Meilleure:  31315 | Écart:   1780 ✓
+   Modifications (19):
+     • Perso NAOMI: Puissance 3190→3370
+     • Perso NAOMI: Niveau 16→17
+     • Piece CAFé: PuissanceTactique 1235→1235
+     • Piece CAFé: PuissanceStrategique 2025→2025
+     • Perso VICTORIA: Niveau 13→14
+     • Perso VICTORIA: Puissance 2715→2825
+     • Perso CASEY: Niveau 13→14
+     • Perso CASEY: Puissance 2600→2710
+     • Perso OMEGA: Niveau 13→15
+     • Perso OMEGA: Puissance 2600→2820
+     ... et 9 autres
+
+📅 26/01/2026 (lun.)
+   Sélectionnée:  31530 | Meilleure:  33110 | Écart:   1580 ✓
+   Modifications (39):
+     • Perso HUNTER: Puissance 1665→1755
+     • Perso HUNTER: Niveau 95→98
+     • Perso HUNTER: Rang 1→1
+     • Perso BELLE: Puissance 3440→4295
+     • Perso BELLE: Niveau 10→16
+     • Perso BELLE: Rang 3→3
+     • Perso KITTY: Puissance 4030→4265
+     • Perso KITTY: Niveau 16→16
+     • Perso KITTY: Rang 3→3
+     • Perso REGINA: Puissance 3665→3805
+     ... et 29 autres
+
+📅 27/01/2026 (mar.)
+   Sélectionnée:  39275 | Meilleure:  40925 | Écart:   1650 ✓
+
+📅 14/02/2026 (sam.)
+   Sélectionnée:  40445 | Meilleure:  41965 | Écart:   1520 ✓
+   Modifications (48):
+     • Piece Gymnase: Niveau 42→44
+     • Piece Maison de Lucie: Affection 133→137
+     • Piece Café: Niveau 90→91
+     • Piece Café: AspectsTactiques.Puissance 1655→1685
+     • Piece Café: AspectsStrategiques.Puissance 2865→2925
+     • Piece Gymnase: AspectsTactiques.Puissance 505→525
+     • Piece Gymnase: AspectsStrategiques.Puissance 665→705
+     • Perso RUBY: Niveau 9→10
+     • Perso RUBY: Puissance 855→885
+     • Perso ISABELLA: Niveau 3→4
+     ... et 38 autres
+
+=== VALEURS ACTUELLES (LIVE) ===
+Équipe sélectionnée actuelle: 40445
+Meilleure équipe actuelle: 41965
+Lucie sélectionnée: 8195
+Lucie Max: 8285
+
+Top 8 Mercenaires:
+  KITTY: 4715 (Niveau 17, Rang 3)
+  BELLE: 4295 (Niveau 16, Rang 3)
+  REGINA: 3805 (Niveau 10, Rang 3)
+  RAVENNA: 3730 (Niveau 19, Rang 3)
+  NAOMI: 3370 (Niveau 17, Rang 3)
+  NATASHA: 3230 (Niveau 19, Rang 3)
+  NYMERIA: 3110 (Niveau 17, Rang 3)
+  LUCRETIA: 2940 (Niveau 14, Rang 3)
+Top 3 Androïdes:
+  ISABELLA: 910
+  RUBY: 885
+  AUDREY: 855
+Commandant: DRAGANA: 1795 + 40 (rang) = 1835

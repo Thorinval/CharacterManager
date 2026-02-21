@@ -117,7 +117,7 @@
                 </div>
 
                 <!-- Graphique Evolution des Niveaux -->
-                <div class="stat-card">
+                    <div class="stat-card level-evolution-card">
                     <div class="stat-card-header">
                         <i class="bi bi-graph-up"></i>
                         <h2>
@@ -126,6 +126,32 @@
                     </div>
                     <div class="stat-card-body">
                         <canvas id="chartLevelEvolution"></canvas>
+                    </div>
+                </div>
+
+                <!-- Graphique Evolution de la Puissance de l'Équipe -->
+                <div class="stat-card level-evolution-card">
+                    <div class="stat-card-header">
+                        <i class="bi bi-lightning-fill"></i>
+                        <h2>
+                            <LocalizedText Key="statistics.chartTitleTeamPowerEvolution" />
+                        </h2>
+                    </div>
+                    <div class="stat-card-body">
+                        <canvas id="chartPowerEvolution"></canvas>
+                    </div>
+                </div>
+
+                <!-- Graphique Evolution des Classements -->
+                <div class="stat-card level-evolution-card">
+                    <div class="stat-card-header">
+                        <i class="bi bi-bar-chart-fill"></i>
+                        <h2>
+                            <LocalizedText Key="statistics.chartTitleClassementEvolution" />
+                        </h2>
+                    </div>
+                    <div class="stat-card-body">
+                        <canvas id="chartClassementEvolution"></canvas>
                     </div>
                 </div>
             </div>
@@ -183,12 +209,6 @@
 </div>
 
 @code {
-    [Inject]
-    public PersonnageService PersonnageService { get; set; } = null!;
-
-    [Inject]
-    public ClientLocalizationService LocalizationService { get; set; } = null!;
-
     private IEnumerable<Personnage>? mercenaires;
     private Dictionary<TypeAttaque, int> statsTypeAttaque = new();
     private Dictionary<Faction, int> statsFaction = new();

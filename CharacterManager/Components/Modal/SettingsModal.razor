@@ -4,13 +4,12 @@
 @using CharacterManager.Server.Services
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.EntityFrameworkCore
-@inject ApplicationDbContext DbContext
-@inject AppVersionService AppVersionService
-@inject ClientLocalizationService LocalizationService
-@inject ApplicationDbContext AppDb
+@inject IApplicationDbContext AppDb
+@inject IAppVersionService AppVersionService
+@inject IClientLocalizationService LocalizationService
 @inject IJSRuntime JSRuntime
-@inject ProfileService ProfileService
-@inject AdultModeNotificationService AdultModeNotification
+@inject IProfileService ProfileService
+@inject IAdultModeNotificationService AdultModeNotification
 @inject IModalService ModalService
 
 <link rel="stylesheet" href="/css/Settings.css" />

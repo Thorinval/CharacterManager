@@ -10,19 +10,22 @@ using CharacterManager.Components.Modal;
 public partial class Classements
 {
     [Inject]
-    public HistoriqueClassementService HistoriqueService { get; set; } = null!;
+    public IHistoriqueClassementService HistoriqueService { get; set; } = null!;
 
     [Inject]
-    public PmlImportService PmlImportService { get; set; } = null!;
+    public IPmlImportService PmlImportService { get; set; } = null!;
 
     [Inject]
-    public PmlExportService PmlExportService { get; set; } = null!;
+    public IPmlExportService PmlExportService { get; set; } = null!;
 
     [Inject]
     public IJSRuntime JSRuntime { get; set; } = null!;
 
     [Inject]
     public IModalService ModalService { get; set; } = null!;
+
+    [Inject]
+    public IClientLocalizationService LocalizationService { get; set; } = null!;
 
     private const string Identifier = "alert";
     internal List<HistoriqueClassement>? historiques;
@@ -80,7 +83,8 @@ public partial class Classements
 
     internal async Task ViderHistorique()
     {
-        if (await JSRuntime.InvokeAsync<bool>("confirm", "Êtes-vous CERTAIN de vouloir vider tout l'historique? Cette action est irréversible."))
+        var confirmationMessage = LocalizationService.GetKeyValue("ui.confirmations.confirmClearRankings");
+        if (await JSRuntime.InvokeAsync<bool>("confirm", confirmationMessage))
         {
             await HistoriqueService.ViderHistoriqueAsync();
             await ChargerHistorique();
@@ -113,13 +117,14 @@ public partial class Classements
                 exportLeagueHistory: false);
 
             var bytes = await PmlExportService.ExportPmlAsync(options);
-            var fileName = $"{AppConstants.ExportPrefixes.HistoriqueClassements}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
+            var fileName = $"{ImportExportConstants.ExportPrefixes.HistoriqueClassements}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
             var base64 = Convert.ToBase64String(bytes);
             await JSRuntime.InvokeVoidAsync("downloadFile", fileName, base64);
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync(Identifier, $"Erreur lors de l'export: {ex.Message}");
+            var errorMessage = $"{LocalizationService.GetKeyValue("errors.exportError")}: {ex.Message}";
+            await JSRuntime.InvokeVoidAsync(Identifier, errorMessage);
         }
     }
 
@@ -141,7 +146,7 @@ public partial class Classements
 
         if (!isSupported)
         {
-            await JSRuntime.InvokeVoidAsync(Identifier, "Veuillez sélectionner un fichier PML.");
+            await JSRuntime.InvokeVoidAsync(Identifier, LocalizationService.GetKeyValue("errors.importFormatNotSupported"));
             return;
         }
 
@@ -178,7 +183,8 @@ public partial class Classements
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync(Identifier, $"Erreur lors de l'import: {ex.Message}");
+            var errorMessage = $"{LocalizationService.GetKeyValue("errors.importError")}: {ex.Message}";
+            await JSRuntime.InvokeVoidAsync(Identifier, errorMessage);
         }
         finally
         {
@@ -209,3 +215,5 @@ public partial class Classements
         ModalService.Open<CreerClassementModal>(parameters, ModalSize.XL);
     }
 }
+
+

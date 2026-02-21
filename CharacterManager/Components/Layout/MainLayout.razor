@@ -10,7 +10,7 @@
 
 @inherits LayoutComponentBase
 
-@inject AppVersionService VersionService
+@inject IAppVersionService VersionService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IModalService ModalService
 
@@ -171,7 +171,7 @@
     [Inject] private Microsoft.AspNetCore.Authentication.IAuthenticationService AuthService { get; set; } = default!;
 
     [Inject]
-    public ProfileService ProfileService { get; set; } = null!;
+    public IProfileService ProfileService { get; set; } = null!;
 
     private string userName = "";
     private string userRole = "";

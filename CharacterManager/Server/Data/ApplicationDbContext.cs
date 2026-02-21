@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CharacterManager.Server.Data;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options), IApplicationDbContext
 {
     public DbSet<Personnage> Personnages { get; set; }
     public DbSet<Capacite> Capacites { get; set; }
@@ -21,6 +21,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<HistoriqueLigue> HistoriquesLigue { get; set; }
     public DbSet<HistoriqueModification> HistoriquesModifications { get; set; }
     public DbSet<PersonnageClassement> PersonnagesClassement { get; set; }
+    public DbSet<TeamPowerTimelineRecord> TeamPowerTimelineRecords { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -113,5 +114,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         // HistoriqueModification - Index sur DateModification pour recherches rapides
         modelBuilder.Entity<HistoriqueModification>()
             .HasIndex(h => h.DateModification);
+
+        // TeamPowerTimelineRecord - Index composite Date + Type
+        modelBuilder.Entity<TeamPowerTimelineRecord>()
+            .HasIndex(t => new { t.Date, t.Type });
     }
 }

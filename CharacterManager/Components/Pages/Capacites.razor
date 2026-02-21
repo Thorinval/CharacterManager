@@ -5,11 +5,11 @@
 @using CharacterManager.Server.Services
 @using Microsoft.AspNetCore.Components.Forms
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
-@inject CapaciteService CapaciteService
-@inject PmlExportService PmlExportService
-@inject PmlImportService PmlImportService
+@inject ICapaciteService CapaciteService
+@inject IPmlExportService PmlExportService
+@inject IPmlImportService PmlImportService
 @inject IJSRuntime JSRuntime
-@inject ClientLocalizationService LocalizationService
+@inject IClientLocalizationService LocalizationService
 
 <link rel="stylesheet" href="/css/Capacites.css" />
 

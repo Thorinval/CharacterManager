@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 /// <summary>
 /// Service de localisation pour gérer les traductions multi-langues
 /// </summary>
-public class LocalizationService
+public class LocalizationService : ILocalizationService
 {
     private readonly string _basePath = "i18n";
     private readonly Dictionary<string, Dictionary<string, object>> _cache = new();
@@ -136,3 +136,7 @@ public class LanguageOption
     public string Code { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
 }
+
+
+
+

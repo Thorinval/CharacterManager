@@ -1,10 +1,11 @@
-namespace CharacterManager.Components.Pages;
+﻿namespace CharacterManager.Components.Pages;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using CharacterManager.Server.Models;
+using CharacterManager.Server.Models.Enums;
 using CharacterManager.Server.Services;
 using CharacterManager.Server.Constants;
 using CharacterManager.Components;
@@ -17,7 +18,7 @@ using System.Diagnostics.CodeAnalysis;
 public partial class Inventaire : IAsyncDisposable
 {
     [Inject]
-    public PersonnageService PersonnageService { get; set; } = null!;
+    public IPersonnageService PersonnageService { get; set; } = null!;
 
     [Inject]
     public NavigationManager Navigation { get; set; } = null!;
@@ -26,13 +27,13 @@ public partial class Inventaire : IAsyncDisposable
     public IJSRuntime JSRuntime { get; set; } = null!;
 
     [Inject]
-    public PmlImportService PmlImportService { get; set; } = null!;
+    public IPmlImportService PmlImportService { get; set; } = null!;
 
     [Inject]
-    public PmlExportService PmlExportService { get; set; } = null!;
+    public IPmlExportService PmlExportService { get; set; } = null!;
 
     [Inject]
-    public HistoriqueModificationService HistoriqueModificationService { get; set; } = null!;
+    public IHistoriqueModificationService HistoriqueModificationService { get; set; } = null!;
 
     [Inject]
     public IModalService ModalService { get; set; } = null!;
@@ -53,10 +54,10 @@ public partial class Inventaire : IAsyncDisposable
     private Personnage currentPersonnage = new();
 
     // Tri
-    private string sortColumn = AppConstants.XmlElements.Puissance;
+    private string sortColumn = ImportExportConstants.XmlElements.Puissance;
     private bool sortAscending = false;
 
-    // Sélection multiple
+    // SÃ©lection multiple
     private HashSet<int> selectedPersonnages = [];
     internal bool showBulkEditModal = false;
     private string bulkEditProperty = "";
@@ -139,7 +140,7 @@ public partial class Inventaire : IAsyncDisposable
         await LoadLucieHouseAsync();
 
         ApplyFiltersAndSorting();
-        // Charger un template si présent dans l'URL
+        // Charger un template si prÃ©sent dans l'URL
         var uri = new Uri(Navigation.Uri);
         var query = uri.Query.TrimStart('?');
         if (!string.IsNullOrEmpty(query))
@@ -164,7 +165,7 @@ public partial class Inventaire : IAsyncDisposable
         if (piece != null)
         {
             int newValue = Math.Max(0, piece.Niveau + delta);
-            await UpdatePieceField(pieceId, AppConstants.XmlElements.Niveau, newValue.ToString());
+            await UpdatePieceField(pieceId, ImportExportConstants.XmlElements.Niveau, newValue.ToString());
         }
     }
 
@@ -174,7 +175,7 @@ public partial class Inventaire : IAsyncDisposable
         if (personnage != null)
         {
             int newValue = Math.Max(0, personnage.Puissance + delta);
-            await UpdatePersonnageField(personnageId, AppConstants.XmlElements.Puissance, newValue.ToString());
+            await UpdatePersonnageField(personnageId, ImportExportConstants.XmlElements.Puissance, newValue.ToString());
         }
     }
 
@@ -185,7 +186,7 @@ public partial class Inventaire : IAsyncDisposable
         if (piece != null)
         {
             int newValue = 0;
-            string typepuissance = typeBonus == TypeBonus.Tactique ? AppConstants.XmlElements.PuissanceTactique : AppConstants.XmlElements.PuissanceStrategique;
+            string typepuissance = typeBonus == TypeBonus.Tactique ? ImportExportConstants.XmlElements.PuissanceTactique : ImportExportConstants.XmlElements.PuissanceStrategique;
 
             switch (typeBonus)
             {
@@ -227,25 +228,25 @@ public partial class Inventaire : IAsyncDisposable
         {
             switch (field)
             {
-                case AppConstants.XmlElements.Niveau:
+                case ImportExportConstants.XmlElements.Niveau:
                     if (int.TryParse(value, out int niveau) && niveau >= 1 && niveau <= 200)
                     {
                         personnage.Niveau = niveau;
                     }
                     break;
-                case AppConstants.XmlElements.Rang:
+                case ImportExportConstants.XmlElements.Rang:
                     if (int.TryParse(value, out int rang) && rang >= 0 && rang <= 7)
                     {
                         personnage.Rang = rang;
                     }
                     break;
-                case AppConstants.XmlElements.Puissance:
+                case ImportExportConstants.XmlElements.Puissance:
                     if (int.TryParse(value, out int puissance) && puissance >= 0)
                     {
                         personnage.Puissance = puissance;
                     }
                     break;
-                case AppConstants.XmlElements.Selectionne:
+                case ImportExportConstants.XmlElements.Selectionne:
                     if (bool.TryParse(value, out var selectionne))
                     {
                         personnage.Selectionne = selectionne;
@@ -257,18 +258,18 @@ public partial class Inventaire : IAsyncDisposable
             await InvokeAsync(async () =>
             {
                 await LoadPersonnagesAsync();
-                toastRef?.Show($"{field} mis à jour avec succès", "success");
+                toastRef?.Show(string.Format(LocalizationService.GetKeyValue("ui.personnages.updated"), field), UIMessagesConstants.ToastTypes.Success);
             });
         }
         catch (Exception ex)
         {
-            toastRef?.Show($"Erreur lors de la mise à jour: {ex.Message}", "error");
+            toastRef?.Show($"{LocalizationService.GetKeyValue("errors.updateError")}: {ex.Message}", UIMessagesConstants.ToastTypes.Error);
         }
     }
 
     internal async Task OnSelectionneChanged(int personnageId, bool value)
     {
-        await UpdatePersonnageField(personnageId, AppConstants.XmlElements.Selectionne, value.ToString());
+        await UpdatePersonnageField(personnageId, ImportExportConstants.XmlElements.Selectionne, value.ToString());
     }
 
     internal async Task UpdateRankFromStar(int personnageId, int clickedStar, int currentRank)
@@ -315,7 +316,7 @@ public partial class Inventaire : IAsyncDisposable
         ApplyFiltersAndSorting();
     }
 
-    // 🔢 Compteur dynamique pour les badges
+    // ðŸ”¢ Compteur dynamique pour les badges
     internal int GetCount(InventoryFilter filter)
     {
         return filter switch
@@ -342,9 +343,9 @@ public partial class Inventaire : IAsyncDisposable
         };
 
         if (!list.Any())
-            return "bg-secondary"; // vide → gris
+            return "bg-secondary"; // vide â†’ gris
 
-        // Trouver la rareté dominante
+        // Trouver la raretÃ© dominante
         var dominant = list
             .GroupBy(p => p.Rarete)
             .OrderByDescending(g => g.Count())
@@ -433,12 +434,12 @@ public partial class Inventaire : IAsyncDisposable
 
         return sortColumn switch
         {
-            AppConstants.XmlElements.Puissance => SortByPuissance(source, typeOrder),
-            AppConstants.XmlElements.Nom => SortByName(source, typeOrder),
-            AppConstants.XmlElements.Rarete => SortByRarity(source, typeOrder),
-            AppConstants.XmlElements.Niveau => SortByLevel(source, typeOrder),
-            AppConstants.XmlElements.Type => SortByType(source, typeOrder),
-            AppConstants.XmlElements.Rang => SortByRank(source, typeOrder),
+            ImportExportConstants.XmlElements.Puissance => SortByPuissance(source, typeOrder),
+            ImportExportConstants.XmlElements.Nom => SortByName(source, typeOrder),
+            ImportExportConstants.XmlElements.Rarete => SortByRarity(source, typeOrder),
+            ImportExportConstants.XmlElements.Niveau => SortByLevel(source, typeOrder),
+            ImportExportConstants.XmlElements.Type => SortByType(source, typeOrder),
+            ImportExportConstants.XmlElements.Rang => SortByRank(source, typeOrder),
             _ => SortByName(source, typeOrder)
         };
     }
@@ -499,11 +500,11 @@ public partial class Inventaire : IAsyncDisposable
         ApplyFiltersAndSorting();
     }
 
-    internal void SortByPuissance() => SortBy(AppConstants.XmlElements.Puissance);
-    internal void SortByNom() => SortBy(AppConstants.XmlElements.Nom);
-    internal void SortByRarete() => SortBy(AppConstants.XmlElements.Rarete);
-    internal void SortByNiveau() => SortBy(AppConstants.XmlElements.Niveau);
-    internal void SortByRang() => SortBy(AppConstants.XmlElements.Rang);
+    internal void SortByPuissance() => SortBy(ImportExportConstants.XmlElements.Puissance);
+    internal void SortByNom() => SortBy(ImportExportConstants.XmlElements.Nom);
+    internal void SortByRarete() => SortBy(ImportExportConstants.XmlElements.Rarete);
+    internal void SortByNiveau() => SortBy(ImportExportConstants.XmlElements.Niveau);
+    internal void SortByRang() => SortBy(ImportExportConstants.XmlElements.Rang);
 
     internal void HandleSearchInput(ChangeEventArgs e)
     {
@@ -513,7 +514,7 @@ public partial class Inventaire : IAsyncDisposable
     private void OnSearchChanged(string value)
     {
         searchTerm = value;
-        // Ne filtrer que si au moins 2 caractères sont saisis
+        // Ne filtrer que si au moins 2 caractÃ¨res sont saisis
         if (searchTerm.Length >= 2 || string.IsNullOrWhiteSpace(searchTerm))
         {
             ApplyFiltersAndSorting();
@@ -533,11 +534,11 @@ public partial class Inventaire : IAsyncDisposable
         {
             if (i <= rank)
             {
-                starsBuilder.Append("<span style='color: #FFD700;'>★</span>");
+                starsBuilder.Append("<span style='color: #FFD700;'>â˜…</span>");
             }
             else
             {
-                starsBuilder.Append("<span style='color: #CCCCCC;'>☆</span>");
+                starsBuilder.Append("<span style='color: #CCCCCC;'>â˜†</span>");
             }
         }
         return new MarkupString(starsBuilder.ToString());
@@ -646,7 +647,7 @@ public partial class Inventaire : IAsyncDisposable
 
     internal void EditPersonnage(Personnage personnage)
     {
-        // Ouvrir la modale de détail directement en mode édition
+        // Ouvrir la modale de dÃ©tail directement en mode Ã©dition
         ModalService.Open<CharacterManager.Components.Modal.DetailPersonnageModal>(
             new Dictionary<string, object>
             {
@@ -693,7 +694,8 @@ public partial class Inventaire : IAsyncDisposable
     {
         if (selectedPersonnages.Count != 0)
         {
-            var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Êtes-vous sûr de vouloir supprimer {selectedPersonnages.Count} personnage(s) sélectionné(s) ? Cette action est irréversible.");
+            var confirmation = string.Format(LocalizationService.GetKeyValue("ui.confirmations.confirmDeletePersonnages"), selectedPersonnages.Count);
+            var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", confirmation);
             if (confirmed)
             {
                 foreach (var id in selectedPersonnages)
@@ -708,14 +710,16 @@ public partial class Inventaire : IAsyncDisposable
 
     internal async Task ResetAll()
     {
-        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Un export complet (inventaire + classements + ligue + historique des modifications + capacités) sera téléchargé avant la suppression. Continuer ?");
+        var confirmReset = LocalizationService.GetKeyValue("ui.confirmations.confirmResetInventory");
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", confirmReset);
         if (!confirmed)
         {
             return;
         }
 
         // Option : enregistrer des suppressions dans l'historique avant de purger
-        var logSuppressions = await JSRuntime.InvokeAsync<bool>("confirm", "Ajouter des entrées de suppression dans l'historique des modifications avant le reset ?");
+        var confirmLogSuppressions = LocalizationService.GetKeyValue("ui.confirmations.confirmLogSuppressions");
+        var logSuppressions = await JSRuntime.InvokeAsync<bool>("confirm", confirmLogSuppressions);
 
         await ExportFullBackupForReset();
 
@@ -750,10 +754,11 @@ public partial class Inventaire : IAsyncDisposable
                     p,
                     "Reset inventaire",
                     now,
-                    estImportation: true);
+                    estImportation: true,
+                    source: SourceModification.Inventaire);
             }
 
-            // Pièces Lucie (si présente)
+            // PiÃ¨ces Lucie (si prÃ©sente)
             var house = await DbContext.LucieHouses.Include(l => l.Pieces).AsNoTracking().FirstOrDefaultAsync();
             if (house?.Pieces != null)
             {
@@ -766,13 +771,14 @@ public partial class Inventaire : IAsyncDisposable
                         piece,
                         "Reset inventaire",
                         now,
-                        estImportation: true);
+                        estImportation: true,
+                        source: SourceModification.Inventaire);
                 }
             }
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync(JsAlert, $"Erreur lors de l'ajout des suppressions dans l'historique: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync(JsAlert, $"{LocalizationService.GetKeyValue("errors.historyRecordingDeletionError")}: {ex.Message}");
         }
     }
 
@@ -780,7 +786,7 @@ public partial class Inventaire : IAsyncDisposable
     {
         try
         {
-            // Export PML complet (inventaire + classements + ligues + capacités)
+            // Export PML complet (inventaire + classements + ligues + capacitÃ©s)
             var options = PmlExportOptions.FromBooleans(
                 exportInventory: true,
                 exportTemplates: true,
@@ -801,7 +807,7 @@ public partial class Inventaire : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync(JsAlert, $"Erreur lors de l'export avant réinitialisation: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync(JsAlert, $"{LocalizationService.GetKeyValue("errors.exportError")}: {ex.Message}");
         }
     }
 
@@ -817,20 +823,20 @@ public partial class Inventaire : IAsyncDisposable
     {
         try
         {
-            // Exporter uniquement les personnages sélectionnés s'il y en a, sinon exporter la liste filtrée
+            // Exporter uniquement les personnages sÃ©lectionnÃ©s s'il y en a, sinon exporter la liste filtrÃ©e
             var personnagesAExporter = selectedPersonnages.Count > 0
                 ? personnagesFiltres.Where(p => selectedPersonnages.Contains(p.Id))
                 : personnagesFiltres;
 
             var pmlBytes = await PmlExportService.ExporterInventairePmlAsync(personnagesAExporter);
-            var fileName = $"{AppConstants.ExportPrefixes.Inventaire}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
+            var fileName = $"{ImportExportConstants.ExportPrefixes.Inventaire}_{DateTime.Now.ToString(AppConstants.DateTimeFormats.FileNameDateTime)}{AppConstants.FileExtensions.Pml}";
 
-            // Utiliser JavaScript pour télécharger le fichier
+            // Utiliser JavaScript pour tÃ©lÃ©charger le fichier
             await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pmlBytes));
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync(JsAlert, $"Erreur lors de l'export: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync(JsAlert, $"{LocalizationService.GetKeyValue("errors.exportError")}: {ex.Message}");
         }
     }
 
@@ -847,7 +853,7 @@ public partial class Inventaire : IAsyncDisposable
 
         if (!isSupported)
         {
-            await JSRuntime.InvokeVoidAsync(JsAlert, "Veuillez sélectionner un fichier PML ou XML.");
+            await JSRuntime.InvokeVoidAsync(JsAlert, LocalizationService.GetKeyValue("errors.fileNotSelected"));
             return;
         }
 
@@ -865,8 +871,8 @@ public partial class Inventaire : IAsyncDisposable
                 importLeagueHistory: false);
 
             var importMessage = result.SuccessCount > 0
-                ? $"{result.SuccessCount} personnage(s) importé(s) avec succès."
-                : "Aucun personnage importé.";
+                ? $"{result.SuccessCount} personnage(s) importÃ©(s) avec succÃ¨s."
+                : "Aucun personnage importÃ©.";
 
             if (!string.IsNullOrEmpty(result.Error))
             {
@@ -876,7 +882,7 @@ public partial class Inventaire : IAsyncDisposable
             if (result.Errors.Count > 0)
             {
                 var preview = string.Join("\n", result.Errors.Take(3));
-                importMessage += $"\nDétails (aperçu):\n{preview}";
+                importMessage += $"\nDÃ©tails (aperÃ§u):\n{preview}";
             }
 
             await JSRuntime.InvokeVoidAsync(JsAlert, importMessage);
@@ -884,7 +890,7 @@ public partial class Inventaire : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync(JsAlert, $"Erreur lors de l'import: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync(JsAlert, $"{LocalizationService.GetKeyValue("errors.importError")}: {ex.Message}");
         }
         finally
         {
@@ -970,7 +976,7 @@ public partial class Inventaire : IAsyncDisposable
             // Initialize aspects to safe defaults
             piece.AspectsTactiques.Nom = "Aspects tactiques";
             piece.AspectsTactiques.Puissance = 0;
-            piece.AspectsStrategiques.Nom = "Aspects stratégiques";
+            piece.AspectsStrategiques.Nom = "Aspects stratÃ©giques";
             piece.AspectsStrategiques.Puissance = 0;
             result.Pieces.Add(piece);
         }
@@ -989,7 +995,7 @@ public partial class Inventaire : IAsyncDisposable
             }
 
             const string hydratedTactiques = "{\"Nom\":\"Aspects tactiques\",\"Puissance\":0,\"Bonus\":[]}";
-            const string hydratedStrategiques = "{\"Nom\":\"Aspects stratégiques\",\"Puissance\":0,\"Bonus\":[]}";
+            const string hydratedStrategiques = "{\"Nom\":\"Aspects stratÃ©giques\",\"Puissance\":0,\"Bonus\":[]}";
 
             // Always check if column exists before adding it
             if (!await ColumnExistsAsync("Pieces", "AspectsTactiques"))
@@ -1023,6 +1029,22 @@ public partial class Inventaire : IAsyncDisposable
         try
         {
             var conn = DbContext.Database.GetDbConnection();
+            
+            // Check if using in-memory database
+            if (conn.GetType().Name.Contains("InMemory"))
+            {
+                // For in-memory database, check if the property exists in the entity model
+                var entityType = DbContext.Model.GetEntityTypes()
+                    .FirstOrDefault(e => e.GetTableName()?.Equals(table, StringComparison.OrdinalIgnoreCase) == true);
+                
+                if (entityType != null)
+                {
+                    return entityType.GetProperties()
+                        .Any(p => p.Name.Equals(column, StringComparison.OrdinalIgnoreCase));
+                }
+                return false;
+            }
+
             var shouldClose = conn.State != System.Data.ConnectionState.Open;
 
             if (shouldClose)
@@ -1063,6 +1085,21 @@ public partial class Inventaire : IAsyncDisposable
     {
         try
         {
+            // Check if using a relational database provider before accessing GetDbConnection()
+            if (!DbContext.Database.IsRelational())
+            {
+                // For in-memory, check if the entity type exists in the model
+                var entityType = DbContext.Model.FindEntityType(table);
+                if (entityType != null)
+                {
+                    return true;
+                }
+                
+                // Also check by table name in the model
+                return DbContext.Model.GetEntityTypes().Any(e => 
+                    e.GetTableName()?.Equals(table, StringComparison.OrdinalIgnoreCase) == true);
+            }
+
             var conn = DbContext.Database.GetDbConnection();
             var shouldClose = conn.State != System.Data.ConnectionState.Open;
 
@@ -1139,7 +1176,7 @@ public partial class Inventaire : IAsyncDisposable
         DbContext.Pieces.Update(piece);
         await DbContext.SaveChangesAsync();
         
-        // Historiser la modification si des valeurs ont été changées
+        // Historiser la modification si des valeurs ont Ã©tÃ© changÃ©es
         if (ancienneValeur != null)
         {
             await PersonnageService.UpdatePieceAsync(
@@ -1151,7 +1188,7 @@ public partial class Inventaire : IAsyncDisposable
         }
         
         await InvokeAsync(StateHasChanged);
-        toastRef?.Show($"{piece.Nom} - {field} mis à jour: {value}", "success");
+        toastRef?.Show($"{piece.Nom} - {field} mis Ã  jour: {value}", "success");
     }
 
     internal async Task UpdatePiecePuissance(int pieceId, string value)
@@ -1187,7 +1224,7 @@ public partial class Inventaire : IAsyncDisposable
             }
             else
             {
-                toastRef?.Show($"Maximum {LucieHouse.MaxPiecesSelectionnees} pièces peuvent être sélectionnées", "warning");
+                toastRef?.Show($"Maximum {LucieHouse.MaxPiecesSelectionnees} piÃ¨ces peuvent Ãªtre sÃ©lectionnÃ©es", "warning");
                 return;
             }
         }
@@ -1214,7 +1251,10 @@ public partial class Inventaire : IAsyncDisposable
     }
 
     /// <summary>
-    /// Retourne le style à appliquer à une image personnage
+    /// Retourne le style Ã  appliquer Ã  une image personnage
     /// Si l'URL est vide, affiche un fond lightblue
     /// </summary>
 }
+
+
+

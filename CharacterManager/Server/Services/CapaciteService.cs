@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CharacterManager.Server.Services;
 
-public class CapaciteService
+public class CapaciteService : ICapaciteService
 {
     private readonly ApplicationDbContext _context;
 
@@ -89,3 +89,7 @@ public class CapaciteService
         return _context.Capacites.Count();
     }
 }
+
+
+
+

@@ -15,34 +15,34 @@ using System.Diagnostics.CodeAnalysis;
 public partial class Home : IAsyncDisposable
 {
     [Inject]
-    public PersonnageService PersonnageService { get; set; } = null!;
+    public IPersonnageService PersonnageService { get; set; } = null!;
 
     [Inject]
-    public AdultModeNotificationService AdultModeNotification { get; set; } = null!;
+    public IAdultModeNotificationService AdultModeNotification { get; set; } = null!;
 
     [Inject]
     public ApplicationDbContext DbContext { get; set; } = null!;
 
     [Inject]
-    public ProfileService ProfileService { get; set; } = null!;
+    public IProfileService ProfileService { get; set; } = null!;
 
     [Inject]
     public IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
 
     [Inject]
-    public PmlImportService PmlImportService { get; set; } = null!;
+    public IPmlImportService PmlImportService { get; set; } = null!;
 
     [Inject]
-    public PmlExportService PmlExportService { get; set; } = null!;
+    public IPmlExportService PmlExportService { get; set; } = null!;
 
     [Inject]
-    public HistoriqueLigueService HistoriqueLigueService { get; set; } = null!;
+    public IHistoriqueLigueService HistoriqueLigueService { get; set; } = null!;
 
     [Inject]
-    public HistoriqueClassementService HistoriqueClassementService { get; set; } = null!;
+    public IHistoriqueClassementService HistoriqueClassementService { get; set; } = null!;
 
     [Inject]
-    public CapaciteService CapaciteService { get; set; } = null!;
+    public ICapaciteService CapaciteService { get; set; } = null!;
 
     internal bool isAdultModeEnabled;
     internal bool showPmlImportAlert = false;
@@ -146,19 +146,19 @@ public partial class Home : IAsyncDisposable
                     var result = await PmlImportService.ImportPmlAsync(stream, Path.GetFileName(configFile));
                     if (!result.IsSuccess)
                     {
-                        importError = $"Erreur lors de l'import automatique du fichier de configuration : {result.Error}";
+                        importError = $"{LocalizationService.GetKeyValue("errors.importError")}: {result.Error}";
                         showPmlImportAlert = true;
                     }
                 }
                 catch (Exception ex)
                 {
-                    importError = $"Erreur lors de l'import automatique du fichier de configuration : {ex.Message}";
+                    importError = $"{LocalizationService.GetKeyValue("errors.importError")}: {ex.Message}";
                     showPmlImportAlert = true;
                 }
             }
             else
             {
-                importError = "Aucun fichier de configuration PML/XML trouvé pour initialiser la base de données.";
+                importError = LocalizationService.GetKeyValue("errors.configNotFound");
                 showPmlImportAlert = true;
             }
         }
@@ -166,10 +166,18 @@ public partial class Home : IAsyncDisposable
 
     private void OnAdultModeChanged(bool isAdultModeEnabled)
     {
-
         this.isAdultModeEnabled = isAdultModeEnabled;
-        StateHasChanged();
-
+        
+        // Only call StateHasChanged if the component is initialized (has a render handle)
+        // This allows testing the business logic without Blazor's rendering infrastructure
+        try
+        {
+            StateHasChanged();
+        }
+        catch (InvalidOperationException)
+        {
+            // Render handle not initialized - this is expected in unit tests
+        }
     }
 
     private async Task<bool> GetCurrentAdultModeAsync()
@@ -220,7 +228,7 @@ public partial class Home : IAsyncDisposable
         }
     }
 
-    private string FormatLigueLabel(int? ligue)
+    internal string FormatLigueLabel(int? ligue)
     {
         if (!ligue.HasValue)
         {
@@ -235,14 +243,14 @@ public partial class Home : IAsyncDisposable
         return $"{this.LocalizationService.GetKeyValue("leagueHistory.table.league")} {ligue.Value}";
     }
 
-    private static Dictionary<Faction, int> CalculerMercenairesParFaction(IEnumerable<Personnage> mercenaires)
+    internal static Dictionary<Faction, int> CalculerMercenairesParFaction(IEnumerable<Personnage> mercenaires)
     {
         return mercenaires
             .GroupBy(m => m.Faction)
             .ToDictionary(g => g.Key, g => g.Count());
     }
 
-    private static Dictionary<TypeAttaque, int> CalculerMercenairesParTypeAttaque(IEnumerable<Personnage> mercenaires)
+    internal static Dictionary<TypeAttaque, int> CalculerMercenairesParTypeAttaque(IEnumerable<Personnage> mercenaires)
     {
         return mercenaires
             .GroupBy(m => m.TypeAttaque)
@@ -291,7 +299,7 @@ public partial class Home : IAsyncDisposable
         _ => "bi-question-circle"
     };
 
-    private static Dictionary<Faction, int> CalculerCompositionParFaction(
+    internal static Dictionary<Faction, int> CalculerCompositionParFaction(
         IEnumerable<Personnage> mercenaires,
         IEnumerable<Personnage> androides,
         Personnage? commandant)
@@ -309,7 +317,7 @@ public partial class Home : IAsyncDisposable
             .ToDictionary(static g => g.Key, static g => g.Count());
     }
 
-    private static Dictionary<TypeAttaque, int> CalculerCompositionParTypeAttaque(
+    internal static Dictionary<TypeAttaque, int> CalculerCompositionParTypeAttaque(
         IEnumerable<Personnage> mercenaires,
         IEnumerable<Personnage> androides,
         Personnage? commandant)
@@ -327,7 +335,7 @@ public partial class Home : IAsyncDisposable
             .ToDictionary(static g => g.Key, static g => g.Count());
     }
 
-    private static int GetClassementValeur(HistoriqueClassement historique, TypeClassement type)
+    internal static int GetClassementValeur(HistoriqueClassement historique, TypeClassement type)
     {
         return historique.Classements.FirstOrDefault(c => c.Type == type)?.Valeur ?? 0;
     }
@@ -359,3 +367,5 @@ public partial class Home : IAsyncDisposable
         return ValueTask.CompletedTask;
     }
 }
+
+
