@@ -44,7 +44,7 @@ public class DebugLuciePowerTest
         _output.WriteLine($"Date.Date: {DateTime.Now.Date:dd/MM/yyyy HH:mm:ss}");
 
         // Simuler l'appel avec 26/01/2026 00:00:00
-        var testDate = new DateTime(2026, 1, 26, 0, 0, 0);
+        var testDate = new DateTime(2026, 1, 26, 0, 0, 0, DateTimeKind.Unspecified);
         _output.WriteLine($"\nTest avec date: {testDate:dd/MM/yyyy HH:mm:ss}");
         _output.WriteLine($"testDate.Date: {testDate.Date:dd/MM/yyyy HH:mm:ss}");
         _output.WriteLine($"testDate.Date == DateTime.Now.Date: {testDate.Date == DateTime.Now.Date}");
@@ -67,5 +67,9 @@ public class DebugLuciePowerTest
         {
             _output.WriteLine($"\nAucune modification trouvée <= {testDate:dd/MM/yyyy HH:mm:ss}");
         }
+
+        // Assert that history records exist for Lucie Max
+        Assert.NotEmpty(lucieMaxHistory);
+        Assert.NotNull(historyAtTestDate);
     }
 }
