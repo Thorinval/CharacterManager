@@ -1,4 +1,4 @@
-using CharacterManager.Server.Data;
+﻿using CharacterManager.Server.Data;
 using CharacterManager.Server.Models;
 using CharacterManager.Server.Services;
 using Microsoft.EntityFrameworkCore;
@@ -230,8 +230,8 @@ public class HistoriqueModificationServiceTests : IDisposable
     public async Task GetHistoriqueAsync_WithDateFilter_ShouldReturnFilteredEntries()
     {
         // Arrange
-        var dateDebut = DateTime.Now.AddHours(-1);
-        var dateFin = DateTime.Now.AddHours(1);
+        var dateDebut = DateTime.UtcNow.AddHours(-1);
+        var dateFin = DateTime.UtcNow.AddHours(1);
         await CreateTestHistoriqueData();
 
         // Act

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using CharacterManager.Components;
 using Serilog;
 using System.Text;
+using System.Security.Claims;
 
 // Set console encoding to UTF-8 for proper display of accented characters
 Console.OutputEncoding = Encoding.UTF8;
@@ -37,10 +38,45 @@ using (var scope = app.Services.CreateScope())
     {
         await dbInitService.InitializeAppSettingsAndCheckStateAsync();
     }
+
+    // Bootstrap default admin only outside development/debug mode
+    if (!app.Environment.IsDevelopment())
+    {
+        var authHelper = scope.ServiceProvider.GetRequiredService<IAuthenticationHelper>();
+        var generatedPassword = await authHelper.EnsureDefaultAdminExistsAsync();
+        if (generatedPassword != null)
+        {
+            Console.WriteLine("\n" + new string('=', 80));
+            Console.WriteLine("[SECURITY] No profiles found - created default admin account");
+            Console.WriteLine("[SECURITY] Username: admin");
+            Console.WriteLine($"[SECURITY] Password: {generatedPassword}");
+            Console.WriteLine("[SECURITY] IMPORTANT: Change this password immediately after first login!");
+            Console.WriteLine(new string('=', 80) + "\n");
+        }
+    }
 }
 
 // Security pipeline
 app.UseAuthentication();
+
+if (app.Environment.IsDevelopment())
+{
+    app.Use(async (context, next) =>
+    {
+        if (context.User?.Identity?.IsAuthenticated != true)
+        {
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.Name, "debug"),
+                new(ClaimTypes.Role, "utilisateur")
+            };
+            context.User = new ClaimsPrincipal(new ClaimsIdentity(claims, "Debug"));
+        }
+
+        await next();
+    });
+}
+
 app.UseAuthorization();
 
 // Login endpoint for handling authentication (avoids Blazor Server SignalR conflict)
@@ -56,18 +92,6 @@ app.MapPost("/api/login", async (HttpContext context, IAuthenticationHelper auth
     {
         context.Response.Redirect($"/login?error={errorCode}");
         return;
-    }
-
-    // Bootstrap default admin if no profiles exist
-    var generatedPassword = await authHelper.EnsureDefaultAdminExistsAsync();
-    if (generatedPassword != null)
-    {
-        Console.WriteLine("\n" + new string('=', 80));
-        Console.WriteLine("[SECURITY] No profiles found - created default admin account");
-        Console.WriteLine("[SECURITY] Username: admin");
-        Console.WriteLine($"[SECURITY] Password: {generatedPassword}");
-        Console.WriteLine("[SECURITY] IMPORTANT: Change this password immediately after first login!");
-        Console.WriteLine(new string('=', 80) + "\n");
     }
 
     // Authenticate the user
