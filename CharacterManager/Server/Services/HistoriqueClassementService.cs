@@ -21,6 +21,7 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext) : IHist
             .Include(h => h.Androides)
             .Include(h => h.Pieces)
             .OrderByDescending(h => h.DateEnregistrement)
+            .ThenByDescending(h => h.PuissanceTotale)
             .AsNoTracking()
             .ToListAsync();
     }
@@ -37,6 +38,7 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext) : IHist
             .Include(h => h.Androides)
             .Include(h => h.Pieces)
             .OrderByDescending(h => h.DateEnregistrement)
+            .ThenByDescending(h => h.PuissanceTotale)
             .AsNoTracking()
             .ToListAsync();
     }
@@ -50,6 +52,7 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext) : IHist
             .Include(h => h.Androides)
             .Include(h => h.Pieces)
             .OrderByDescending(h => h.DateEnregistrement)
+            .ThenByDescending(h => h.PuissanceTotale)
             .Take(nombre)
             .AsNoTracking()
             .ToListAsync();
@@ -81,6 +84,13 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext) : IHist
     {
         dbContext.HistoriquesClassement.RemoveRange(dbContext.HistoriquesClassement);
         await dbContext.SaveChangesAsync();
+    }
+
+    public async Task<int> GetMaxScoreAsync()
+    {
+        if (!await dbContext.HistoriquesClassement.AnyAsync())
+            return 0;
+        return await dbContext.HistoriquesClassement.MaxAsync(h => h.Score);
     }
 
     /// <summary>
@@ -477,6 +487,18 @@ public class HistoriqueClassementService(ApplicationDbContext dbContext) : IHist
         return list;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -61,6 +61,7 @@ public partial class Home : IAsyncDisposable
     internal int lucieAffection;
     internal int luciePiecesMaxPower;
     internal (int Nutaku, int Top150, int France)? lastClassementSummary;
+    internal int maxScore;
     internal DateTime? lastImportDate;
     internal DateTime? lastExportDate;
     internal string? lastImportFileName;
@@ -122,6 +123,8 @@ public partial class Home : IAsyncDisposable
                 GetClassementValeur(lastClassement, TypeClassement.France)
             );
         }
+
+        maxScore = await HistoriqueClassementService.GetMaxScoreAsync();
 
         // Charge du nombre de capacités
         capacitesCount = CapaciteService.GetCount();
