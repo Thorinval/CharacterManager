@@ -55,8 +55,8 @@ public class HistoriqueClassementServiceTests : IDisposable
     {
         // Arrange
         await CreateTestHistoriques();
-        var dateDebut = new DateTime(2025, 1, 10, 0, 0, 0, DateTimeKind.Utc);
-        var dateFin = new DateTime(2025, 1, 26, 0, 0, 0, DateTimeKind.Utc); // Include Jan 25
+        var dateDebut = new DateTime(2025, 1, 10);
+        var dateFin = new DateTime(2025, 1, 26); // Include Jan 25
 
         // Act
         var result = await _service.GetHistoriqueAsync(dateDebut, dateFin);
@@ -110,8 +110,7 @@ public class HistoriqueClassementServiceTests : IDisposable
     public async Task SupprimerEnregistrementAsync_ShouldNotThrow_WhenNotFound()
     {
         // Act & Assert - should not throw
-        var exception = await Record.ExceptionAsync(() => _service.SupprimerEnregistrementAsync(999));
-        Assert.Null(exception);
+        await _service.SupprimerEnregistrementAsync(999);
     }
 
     #endregion

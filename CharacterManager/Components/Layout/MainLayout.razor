@@ -6,6 +6,7 @@
 @using CharacterManager.Server.Constants
 @using Microsoft.AspNetCore.Components.Authorization
 @using CharacterManager.Components.Modal
+@using Microsoft.Extensions.Hosting
 
 
 @inherits LayoutComponentBase
@@ -13,6 +14,7 @@
 @inject IAppVersionService VersionService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IModalService ModalService
+@inject IHostEnvironment HostEnvironment
 
 <div class="layout-container @(railExpanded ? "rail-expanded" : "")">
 
@@ -209,9 +211,9 @@
         CheckIfHomePage();
         Navigation.LocationChanged += OnLocationChanged;
 
-        // Load profile if authenticated
+        // Load profile if authenticated (disabled in development/debug mode)
         var authState = await AuthStateTask;
-        if (authState.User.Identity?.IsAuthenticated == true)
+        if (!HostEnvironment.IsDevelopment() && authState.User.Identity?.IsAuthenticated == true)
         {
             var username = authState.User.Identity!.Name ?? "";
             currentProfile = await ProfileService.GetOrCreateAsync(username);

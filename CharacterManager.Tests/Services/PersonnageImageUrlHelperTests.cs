@@ -50,6 +50,20 @@ namespace CharacterManager.Tests.Services
             Assert.EndsWith("/Alexa/alexa_small_select.png", url);
         }
 
+        [Fact]
+        public void GetImageSmallSelectUrl_FallsBack_To_SmallPortrait_When_Select_Image_Is_Missing()
+        {
+            var url = PersonnageImageUrlHelper.GetImageSmallSelectUrl("River");
+            Assert.EndsWith("/River/river_small_portrait.png", url);
+        }
+
+        [Fact]
+        public void GetImageSmallPortraitUrl_Returns_Placeholder_When_No_Image_Exists()
+        {
+            var url = PersonnageImageUrlHelper.GetImageSmallPortraitUrl("Bonita");
+            Assert.StartsWith("data:image/svg+xml", url, StringComparison.Ordinal);
+        }
+
         [Theory]
         [InlineData("Alexa", "", ".png", "/images/personnages/alexa.png")]
         [InlineData("Alexa", "_header", ".png", "/images/personnages/alexa_header.png")]

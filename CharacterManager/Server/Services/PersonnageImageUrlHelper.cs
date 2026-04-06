@@ -1,6 +1,9 @@
 namespace CharacterManager.Server.Services;
 
+using CharacterManager.Resources.Personnages;
 using CharacterManager.Server.Constants;
+using System.Globalization;
+using System.Text;
 
 /// <summary>
 /// Service helper pour générer les URLs des images de personnages.
@@ -16,11 +19,7 @@ public static class PersonnageImageUrlHelper
     /// <param name="nomPersonnage">Nom du personnage (ex: "Alexa", "Hunter")</param>
     /// <returns>URL complète de l'image détaillée</returns>
     public static string GetImageDetailUrl(string nomPersonnage)
-    {
-        var folder = NormalizePersonnageName(nomPersonnage);
-        var fileName = $"{nomPersonnage.ToLower().Replace(" ", "_")}.png";
-        return $"{AppConstants.Paths.ImagesPersonnages}/{folder}/{fileName}";
-    }
+        => GetBestAvailableImageUrl(nomPersonnage, "", "_small_portrait", "_small_select", "_header");
 
     /// <summary>
     /// Génère l'URL de l'image d'en-tête d'un personnage.
@@ -29,11 +28,7 @@ public static class PersonnageImageUrlHelper
     /// <param name="nomPersonnage">Nom du personnage</param>
     /// <returns>URL complète de l'image d'en-tête</returns>
     public static string GetImageHeaderUrl(string nomPersonnage)
-    {
-        var folder = NormalizePersonnageName(nomPersonnage);
-        var fileName = $"{nomPersonnage.ToLower().Replace(" ", "_")}_header.png";
-        return $"{AppConstants.Paths.ImagesPersonnages}/{folder}/{fileName}";
-    }
+        => GetBestAvailableImageUrl(nomPersonnage, "_header", "", "_small_portrait", "_small_select");
 
     /// <summary>
     /// Génère l'URL du petit portrait d'un personnage.
@@ -42,11 +37,7 @@ public static class PersonnageImageUrlHelper
     /// <param name="nomPersonnage">Nom du personnage</param>
     /// <returns>URL complète du petit portrait</returns>
     public static string GetImageSmallPortraitUrl(string nomPersonnage)
-    {
-        var folder = NormalizePersonnageName(nomPersonnage);
-        var fileName = $"{nomPersonnage.ToLower().Replace(" ", "_")}_small_portrait.png";
-        return $"{AppConstants.Paths.ImagesPersonnages}/{folder}/{fileName}";
-    }
+        => GetBestAvailableImageUrl(nomPersonnage, "_small_portrait", "_small_select", "", "_header");
 
     /// <summary>
     /// Génère l'URL du portrait en mode sélectionné d'un personnage.
@@ -55,11 +46,7 @@ public static class PersonnageImageUrlHelper
     /// <param name="nomPersonnage">Nom du personnage</param>
     /// <returns>URL complète du portrait sélectionné</returns>
     public static string GetImageSmallSelectUrl(string nomPersonnage)
-    {
-        var folder = NormalizePersonnageName(nomPersonnage);
-        var fileName = $"{nomPersonnage.ToLower().Replace(" ", "_")}_small_select.png";
-        return $"{AppConstants.Paths.ImagesPersonnages}/{folder}/{fileName}";
-    }
+        => GetBestAvailableImageUrl(nomPersonnage, "_small_select", "_small_portrait", "", "_header");
 
     /// <summary>
     /// Normalise le nom du personnage pour créer le nom du dossier.
@@ -101,6 +88,54 @@ public static class PersonnageImageUrlHelper
     {
         var fileName = $"{nomPersonnage.ToLower().Replace(" ", "_")}{suffix}{extension}";
         return $"{AppConstants.Paths.ImagesPersonnagesLegacy}/{fileName}";
+    }
+
+    private static string GetBestAvailableImageUrl(string nomPersonnage, params string[] candidateSuffixes)
+    {
+        if (string.IsNullOrWhiteSpace(nomPersonnage))
+        {
+            return GetPlaceholderImageDataUrl("?");
+        }
+
+        var folder = NormalizePersonnageName(nomPersonnage);
+        var normalizedFileBaseName = nomPersonnage.ToLower().Replace(" ", "_");
+
+        foreach (var suffix in candidateSuffixes)
+        {
+            foreach (var extension in new[] { ".png", ".jpg" })
+            {
+                var fileName = $"{normalizedFileBaseName}{suffix}{extension}";
+                if (PersonnageResourceManager.ImageExists(folder, fileName))
+                {
+                    return $"{AppConstants.Paths.ImagesPersonnages}/{folder}/{fileName}";
+                }
+            }
+        }
+
+        return GetPlaceholderImageDataUrl(nomPersonnage);
+    }
+
+    private static string GetPlaceholderImageDataUrl(string nomPersonnage)
+    {
+        var label = string.IsNullOrWhiteSpace(nomPersonnage)
+            ? "?"
+            : string.Concat(
+                nomPersonnage
+                    .Split(new[] { ' ', '-', '_' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Where(static part => !string.IsNullOrWhiteSpace(part))
+                    .Take(2)
+                    .Select(static part => char.ToUpperInvariant(part[0])));
+
+        if (string.IsNullOrWhiteSpace(label))
+        {
+            label = nomPersonnage[..1].ToUpper(CultureInfo.InvariantCulture);
+        }
+
+        var safeName = System.Security.SecurityElement.Escape(nomPersonnage) ?? "Personnage";
+        var safeLabel = System.Security.SecurityElement.Escape(label) ?? "?";
+        var svg = $"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 320'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='#4b5d7a'/><stop offset='100%' stop-color='#1f2937'/></linearGradient></defs><rect width='240' height='320' rx='18' fill='url(#g)'/><circle cx='120' cy='110' r='52' fill='#94a3b8' opacity='0.35'/><text x='120' y='126' text-anchor='middle' font-family='Arial, Helvetica, sans-serif' font-size='40' font-weight='700' fill='white'>{safeLabel}</text><text x='120' y='265' text-anchor='middle' font-family='Arial, Helvetica, sans-serif' font-size='20' fill='white'>{safeName}</text></svg>";
+
+        return $"data:image/svg+xml;charset=utf-8,{Uri.EscapeDataString(svg)}";
     }
 }
 

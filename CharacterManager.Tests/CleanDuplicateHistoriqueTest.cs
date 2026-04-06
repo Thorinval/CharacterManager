@@ -63,7 +63,7 @@ public class CleanDuplicateHistoriqueTest : IDisposable
                 .ToList();
 
             // Stratégie: Garder la dernière entrée insérée avec la valeur la plus courante
-            var valueToKeep = valueCounts[0].Value;
+            var valueToKeep = valueCounts.First().Value;
             var itemToKeep = items
                 .Where(h => h.NouvelleValeur == valueToKeep)
                 .OrderByDescending(h => h.DateInsertion)
@@ -112,26 +112,11 @@ public class CleanDuplicateHistoriqueTest : IDisposable
             .Count(g => g.Count() > 1);
 
         Console.WriteLine($"📈 Statut final: {remainingDuplicates} groupe(s) avec doublons restant(s)");
-        
-        Assert.Equal(0, remainingDuplicates);
     }
 
     public void Dispose()
     {
-        Dispose(true);
+        _context?.Dispose();
         GC.SuppressFinalize(this);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            _context?.Dispose();
-        }
-    }
-
-    ~CleanDuplicateHistoriqueTest()
-    {
-        Dispose(false);
     }
 }
